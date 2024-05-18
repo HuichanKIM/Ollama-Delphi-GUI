@@ -18,7 +18,6 @@ uses
   System.Classes,
   System.TypInfo,
   System.JSON,
-  System.JSON.Readers,
   System.ImageList,
   System.Actions,
   System.Types,
@@ -37,6 +36,8 @@ uses
   Vcl.ImgList,
   Vcl.VirtualImageList,
   Vcl.Imaging.pngimage,
+  Vcl.Imaging.jpeg,
+  Vcl.Imaging.GIFImg,
   Vcl.ActnList,
   Vcl.TMSFNCTypes,
   Vcl.TMSFNCUtils,
@@ -45,16 +46,16 @@ uses
   Vcl.TMSFNCCustomControl,
   Vcl.TMSFNCTableView,
   Vcl.TMSFNCChat,
+  Vcl.TMSFNCTreeViewData,
+  Vcl.TMSFNCCustomTreeView,
   Vcl.ExtDlgs,
   Vcl.Menus,
-  Vcl.Imaging.GIFImg,
   Vcl.Skia,
   Vcl.Samples.Gauges,
   System.Skia,
   SVGIconImageCollection,
   SVGIconVirtualImageList,
   OverbyteIcsWSocket,
-  OverbyteIcsIniFiles,
   OverbyteIcsTypes,
   OverbyteIcsUtils,
   OverbyteIcsURL,
@@ -69,7 +70,8 @@ uses
   OverbyteIcsWndControl,
   Grijjy.TextToSpeech,
   Unit_Common,
-  Unit_MRUManager;
+  Unit_MRUManager,
+  Unit_ImageDropDown;
 
 const
   WM_401REPEAT = WM_USER + 758;
@@ -129,12 +131,10 @@ type
     Label_BaseURL: TLabel;
     GroupBox_Username: TGroupBox;
     Edit_Nickname: TEdit;
-    GroupBox_Requests: TGroupBox;
     Panel_RequestButtons: TPanel;
     GroupBox_Llava: TGroupBox;
     Image_Llva: TImage;
     OpenPictureDialog1: TOpenPictureDialog;
-    TreeView_Request: TTreeView;
     PopupMenu_Chat: TPopupMenu;
     pmn_Copy: TMenuItem;
     SaveTextFileDialog1: TSaveTextFileDialog;
@@ -149,8 +149,6 @@ type
     GroupBox_GlobalFontSize: TGroupBox;
     Label_FontSize: TLabel;
     TrackBar_GlobalFontSize: TTrackBar;
-    SpeedButton_DeleteRequest: TSpeedButton;
-    SpeedButton_AddToRequests: TSpeedButton;
     SpeedButton_ScrollTop: TSpeedButton;
     SpeedButton_ScrollBottom: TSpeedButton;
     SpeedButton_DeleteChatMessage: TSpeedButton;
@@ -186,8 +184,8 @@ type
     SpeedButton_Translate: TSpeedButton;
     Action_TransMessage: TAction;
     SpeedButton_Translate2: TSpeedButton;
-    ComboBox_TrnasSource: TComboBox;
-    ComboBox_Target: TComboBox;
+    ComboBox_TtsSource: TComboBox;
+    ComboBox_TtsTarget: TComboBox;
     Label_TransDir: TLabel;
     SkAnimatedImage_Chat: TSkAnimatedImage;
     GroupBox_Memo: TGroupBox;
@@ -200,24 +198,32 @@ type
     Label_Available: TLabel;
     SpeedButton_CPUMemUsage: TSpeedButton;
     Label_Counter: TLabel;
-    SpeedButton_SystemInfo: TSpeedButton;
     Memo_Memo: TMemo;
     Panel_CaptionLog: TPanel;
     SpeedButton_ClearLogBox: TSpeedButton;
     GroupBox_Topics: TGroupBox;
     TreeView_Topics: TTreeView;
-    PopupMenu_Topics: TPopupMenu;
-    pmn_DeleteTopic: TMenuItem;
     SpeedButton_AddToTopics: TSpeedButton;
-    pmn_AddtoRequest: TMenuItem;
     CheckBox_UseTopicSeed: TCheckBox;
-    Label_Seed: TLabel;
+    Label_Seed000: TLabel;
     Edit_TopicSeed: TEdit;
     Action_TransMessagePush: TAction;
     Button_Help: TButton;
     Button_Menu: TButton;
     Action_TransPrompt: TAction;
     Action_TransPromptPush: TAction;
+    Panel1: TPanel;
+    SpeedButton_AddTopic: TSpeedButton;
+    SpeedButton_DeleteTopic: TSpeedButton;
+    SpeedButton_RunRequest: TSpeedButton;
+    Label_NodeSeed: TLabel;
+    SpeedButton_NewRootnode: TSpeedButton;
+    SpeedButton_ExpandFull: TSpeedButton;
+    CheckBox_AutoTranslation: TCheckBox;
+    PopupMenu_Topics: TPopupMenu;
+    pmn_RenameTopic: TMenuItem;
+    SpeedButton_RenameTopic: TSpeedButton;
+    Panel_ImageLlavaBase: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -254,10 +260,6 @@ type
     procedure TrackBar_GlobalFontSizeChange(Sender: TObject);
     procedure ComboBox_ModelChange(Sender: TObject);
     procedure Image_LlvaDblClick(Sender: TObject);
-    procedure TreeView_RequestClick(Sender: TObject);
-    procedure TreeView_RequestDblClick(Sender: TObject);
-    procedure SpeedButton_AddToRequestsClick(Sender: TObject);
-    procedure SpeedButton_DeleteRequestClick(Sender: TObject);
     procedure SpeedButton_ClearChatBoxClick(Sender: TObject);
     procedure SpeedButton_ClearLogBoxClick(Sender: TObject);
     procedure SpeedButton_DefaultSetClick(Sender: TObject);
@@ -274,16 +276,22 @@ type
     procedure Timer_SystemTimer(Sender: TObject);
     procedure Label_DescriptionClick(Sender: TObject);
     procedure SkAnimatedImage_ChatClick(Sender: TObject);
-    procedure SpeedButton_SystemInfoClick(Sender: TObject);
-    procedure pmn_DeleteTopicClick(Sender: TObject);
-    procedure PopupMenu_TopicsPopup(Sender: TObject);
     procedure SpeedButton_AddToTopicsClick(Sender: TObject);
-    procedure pmn_AddtoRequestClick(Sender: TObject);
     procedure TreeView_TopicsClick(Sender: TObject);
-    procedure TreeView_TopicsDblClick(Sender: TObject);
-    procedure Button_HelpClick(Sender: TObject);
     procedure Button_MenuClick(Sender: TObject);
     procedure Label_PassedPromptClick(Sender: TObject);
+    procedure SpeedButton_AddTopicClick(Sender: TObject);
+    procedure SpeedButton_RunRequestClick(Sender: TObject);
+    procedure SpeedButton_DeleteTopicClick(Sender: TObject);
+    procedure SpeedButton_NewRootnodeClick(Sender: TObject);
+    procedure SpeedButton_ExpandFullClick(Sender: TObject);
+    procedure TreeView_TopicsDblClick(Sender: TObject);
+    procedure TreeView_TopicsCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure TreeView_TopicsDragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure TreeView_TopicsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+    procedure pmn_RenameTopicClick(Sender: TObject);
+    procedure PopupMenu_TopicsPopup(Sender: TObject);
+    procedure TreeView_TopicsChange(Sender: TObject; Node: TTreeNode);
   private
     FRequest_Type: TRequest_Type;
     FRequestingFlag: Boolean;
@@ -291,37 +299,43 @@ type
     FCookieFileName: string;
     FInitialized: Boolean;
     FIcsBuffLogStream: TIcsBuffLogStream;
-    FPromptMru: TMRU_Manager;
     FTopicsMRU: TMRU_Manager;
     FTextToSpeech: IgoTextToSpeech;
     FLastRequest: string;
     FAbortingFlag: Boolean;
     FTranlateMode: TTranlateMode;
+    FTopicSeleced: string;
+    FModelSelected: string;
+    FImageDropDown: TImageDropDown<TJPEGImage>;
     function GetBase64Endoeings: string;
     procedure Add_Log (const ALog: string) ;
     procedure CommonRestSettings;
-    procedure Do_StartRequest(const Aflag: Integer);
+    procedure Do_StartRequest(const Aflag: Integer; const APrompt: string='');
     procedure Add_ChattingPrompt(const AFlag, ALocation: Integer; const APrompt: string);
     procedure SetRequestingFlag(const Value: Boolean);
     procedure Do_DisplayJson(const RespStr: string);
     procedure Do_LoadModel(const AIndex: Integer);
-    procedure Do_ListupRequests(const AFlag: Integer; const ARequest: string);
     procedure Do_Abort(const AFlag: Integer = 0);
     procedure SetRequest_Type(const Value: TRequest_Type);
     procedure Do_ListModels(const AIndex: Integer);
     procedure Do_DisplayJson_Models(const RespStr: string);
-    // TTS
+    // TTS ...
     procedure TextToSpeechAvailable(Sender: TObject);
     procedure TextToSpeechStarted(Sender: TObject);
     procedure TextToSpeechFinished(Sender: TObject);
     procedure UpdateControls_TTS;
+    // ... TTS
     procedure Do_TransLate(const AMode: TTranlateMode; const ACodepage: Integer; const ASrc: string);
     procedure Insert_ChattingTranslate(const AIndex: Integer; const ATranslation: string);
-    procedure Do_ListupTopics(const AFlag: Integer; const ARequest: string);
     procedure Do_AddtoRequest(const AFlag: Integer);
+    procedure Do_ListUpTopic(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string);
+    procedure SetTopicSeleced(const Value: string);
+    procedure SetModelSelected(const Value: string);
   public
     property RequestingFlag: Boolean  read FRequestingFlag  write SetRequestingFlag;
     property Request_Type: TRequest_Type  read FRequest_Type  write SetRequest_Type;
+    property TopicSeleced: string  read FTopicSeleced  write SetTopicSeleced;
+    property ModelSelected: string  read FModelSelected write SetModelSelected;
   end;
 
 var
@@ -333,23 +347,21 @@ uses
   SVGInterfaces,
   SkiaSVGFactory,
   System.JSON.Types,
-  System.NetEncoding,
   System.Threading,
   System.RegularExpressions,
   System.Diagnostics,
   System.Math,
-  Winapi.Dwmapi,
+  System.IniFiles,
   Winapi.PsAPI,
   Winapi.ShellAPI,
   Vcl.Themes,
   Vcl.Styles,
   Vcl.StyleAPI,
-  Unit_SysInfo,
-  Vcl.TMSFNCTreeViewData,
   Vcl.Clipbrd,
   Unit_AliveOllama,
   Unit_Translator,
-  Unit_About;
+  Unit_About,
+  Unit_RequestDialog;
 
 {$R *.dfm}
 
@@ -398,33 +410,9 @@ const
   C_ChatLlavaContent    = '{"model": "%model%","messages": [{"role": "user","content": "%content%","images": ["%images%"]}]}';
   C_LlavaPromptContent  = 'Describe this image:'; // 'What is in this picture?';
   C_OllamaAlive: array [Boolean] of string = (' * Ollama is dead.',' * Ollama is running.');
-  C_ModelDesc: array [0 .. 5] of string = (R_Phi3, R_Llama3, R_Gemma, R_Llava, R_Codegemma, R_DolphiMistral);
+  C_ModelDesc:   array [0 .. 5] of string = (R_Phi3, R_Llama3, R_Gemma, R_Llava, R_Codegemma, R_DolphiMistral);
 
-const
-  C_Shrtcuts = '''
-     [ Shortcuts ]
-
-     F1:        (Reserved)
-     F2:        Goto Welcome.
-     F3:        Goto Chatting Room.
-     F4:        Goto Logs.
-     F5:        Translation of Message
-     F6:        Translation of Prompt
-     F7:        Trans, Push Message.
-     F8:        Trans, Push Prompt.
-     F9:        (Reserved)
-     F10:      (Reserved)
-     Alt+A:   Ollama Alive ?
-     Alt+B:   Scroll to Bottom.
-     Alt+C:   Copy the Message.
-     Alt+D:   Delete the Message.
-     Alt+F:    Scroll to Top.
-     Alt+Q:   TextToSpeech on the Message.
-     Alt+S:   Save All Message to Text File.
-     Ctrl+A:  Abort Connection.
-     Ctrl+Z:  Close / Exit.
-
-  ''';
+  C_CaptionFormat       = 'Model in use - %s / Topic - %s';
 
 const
   C_TimestampFontSize = 8;
@@ -453,7 +441,6 @@ var
      function AddMessageEx(AText, ATitle: string; ALocation: TTMSFNCChatMessageLocation): TTMSFNCChatItem;
      function InsertMessageEx(const AIndex: Integer; AText, ATitle: string; ALocation: TTMSFNCChatMessageLocation): TTMSFNCChatItem;
    end;
-
 
 { TTMSFNCCustomChatHelper }
 
@@ -510,6 +497,13 @@ begin
 
   Header.Visible := False;
   Footer.Visible := False;
+
+  MessageTimestamp.Font.Size := 8;
+  MessageTimestamp.Format := 'hh:nn:ss';
+  ChatInteraction.AutoScrollToBottom := False;
+  ChatInteraction.MultiSelect := False;
+  Reload.Enabled := False;
+  Reload.ProgressMode := tvrpmManual;
 end;
 
 { ... }
@@ -518,11 +512,20 @@ end;
 
 procedure TForm_RestOllama.FormCreate(Sender: TObject);
 begin
+  { Version ... }
+  Self.Caption := C_MainCaption;
+
   {$WARNINGS OFF}
   ReportMemoryLeaksOnShutdown := (DebugHook <> 0);
   {$WARNINGS ON}
 
   Randomize;
+
+  CV_AppPath := ExtractFilePath(ParamStr(0));
+  CV_AppPath := IncludeTrailingPathDelimiter(CV_AppPath);
+  CV_TmpPath := CV_AppPath+'temp';
+  if not DirectoryExists(CV_TmpPath) then
+    ForceDirectories(CV_TmpPath);
 
   FIniFileName := ExtractFileName(ChangeFileExt(ParamStr(0), '.ini'));
   FCookieFileName := ChangeFileExt(FIniFileName, '.cookie');
@@ -535,10 +538,8 @@ begin
     Memo_LogWin.Lines.Add('* Cookie File: ' + FCookieFileName);
   Memo_LogWin.Lines.Add('');
 
-  TreeView_Request.Items.Clear;
   TreeView_Topics.Items.Clear;
-  FPromptMRU := TMRU_Manager.Create('mru.txt');
-  FTopicsMRU := TMRU_Manager.Create('topics.txt');
+  FTopicsMRU := TMRU_Manager.Create(TreeView_Topics);
 
   FTextToSpeech := TgoTextToSpeech.Create;
   with FTextToSpeech do
@@ -548,13 +549,15 @@ begin
     OnSpeechFinished := TextToSpeechFinished;
   end;
   Action_TTS.Enabled := False;
+
   // Deprecating ...
   Button_Help.Visible := False;
+  Button_Logs.Visible := False;
 
   Tabsheet_Chatting.TabVisible := False;
   TabSheet_ChatLogs.TabVisible := False;
   TabSheet_Intro.TabVisible :=    False;
-
+  SpeedButton_ExpandFull.Tag := 1;
   FRequest_Type := TRequest_Type.ort_Chat;
   FTranlateMode := TTranlateMode.otm_MessageView;
 
@@ -566,13 +569,12 @@ begin
     GlobalFont.size := 10;
     Font.Size := 10;
     MessageTimestamp.Font.Size := C_TimestampFontSize;
-    MessageTimestamp.Format := 'hh:nn:ss';
-    ChatInteraction.AutoScrollToBottom := False;
-    ChatInteraction.MultiSelect := False;
-    Reload.Enabled := False;
-    Reload.ProgressMode := tvrpmManual;
   end;
 
+  FImageDropDown := TImageDropDown<TJPEGImage>.Create(Image_Llva, Panel_ImageLlavaBase);
+
+  FModelSelected := 'phi3';
+  FTopicSeleced := '';
   Label_Description.Tag := 1;
   Label_Description.Caption := C_ModelDesc[0];
   GroupBox_Description.Height := 45;
@@ -589,8 +591,6 @@ end;
 procedure TForm_RestOllama.FormDestroy(Sender: TObject);
 begin
   OverbyteIcsWSocket.UnLoadSsl;
-  FPromptMRU.Free;
-  FTopicsMRU.free;
 end;
 
 procedure TForm_RestOllama.FormKeyPress(Sender: TObject; var Key: Char);
@@ -598,6 +598,12 @@ begin
   if Key = #27 then
   begin
     Key := #0;
+    if Assigned(FTextToSpeech) and FTextToSpeech.IsSpeaking then
+    begin
+      FTextToSpeech.Stop;
+      Exit;
+    end;
+
     if RequestingFlag then
     Do_Abort(1);
   end;
@@ -614,7 +620,6 @@ begin
     begin
       var _spanelcolor: TColor := StyleServices.GetStyleColor(scPanel);
       TMSFNCChat_Ollama.Fill.Color := _spanelcolor;
-      TreeView_Request.Color :=       _spanelcolor;
       TreeView_Topics.color :=        _spanelcolor;
       Memo_Memo.Color :=              _spanelcolor;
       Memo_LogWin.Color :=            _spanelcolor;
@@ -638,66 +643,68 @@ begin
     HttpRest_Ollama.RestCookies.LoadFromFile(FCookieFileName);
     UpdateControls_TTS;
 
-    if FPromptMRU.MruItems.Count > 0 then
-    begin
-      TreeView_Request.Items.BeginUpdate;
-      for var _i := 0 to FPromptMRU.MruItems.Count-1 do
-        begin
-          var _str := FPromptMRU.MruItems.Strings[_i];
-          var _node: TTreeNode := TreeView_Request.Items.Add(nil, _str);
-        end;
-      TreeView_Request.items.EndUpdate;
-    end;
+    Do_ListUpTopic(0, nil, '');    { TOpic Initilization  }
+    FTopicsMRU.ReadJsonToTreeView;
+    // ShowScrollBar(TreeView_Topics.Handle, SB_HORZ, False);
 
-    if FTopicsMRU.MruItems.Count > 0 then
-    begin
-      TreeView_Topics.Items.BeginUpdate;
-      for var _i := 0 to FTopicsMRU.MruItems.Count-1 do
-        begin
-          var _str := FTopicsMRU.MruItems.Strings[_i];
-          var _node: TTreeNode := TreeView_Topics.Items.Add(nil, _str);
-        end;
-      TreeView_Topics.items.EndUpdate;
-    end;
+    { TTS ... }
+    for var _i := 0 to 10 do
+      ComboBox_TtsSource.Items[_i] := C_LanguageCode[_i];
+    ComboBox_TtsTarget.Items.Assign( ComboBox_TtsSource.Items);
+    ComboBox_TtsSource.ItemIndex := 0;
+    ComboBox_TtsTarget.ItemIndex := 1;
+    var _indexid := ComboBox_TtsTarget.Items.IndexOf(CV_LocaleID);
+    if _indexid >=0 then
+    ComboBox_TtsTarget.ItemIndex := _indexid;
 
     Action_Options.Tag := 1;
-    var _IniFile: TIcsIniFile := TIcsIniFile.Create(FIniFileName);
+    var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
+    with _IniFile do
     try
-      with _IniFile do
-        begin
-          Edit_ReqContent.Text := ReadString(C_SectionData,      'LastRequest',       'Who are you?');
-          V_Username :=           ReadString(C_SectionData,      'Nickname',          'User');
-          V_LoadModelIndex :=     ReadInteger(C_SectionData,     'Loaded_Model',       0);
-          Action_Options.Tag :=   ReadInteger(C_SectionOptions,  'Action_Options_Tag', 1);
+      Edit_ReqContent.Text :=          ReadString(C_SectionData,      'LastRequest',         'Who are you?');
+      V_Username :=                    ReadString(C_SectionData,      'Nickname',            'User');
+      V_LoadModelIndex :=              ReadInteger(C_SectionData,     'Loaded_Model',         0);
+      Action_Options.Tag :=            ReadInteger(C_SectionOptions,  'Action_Options_Tag',   1);
+      ComboBox_TtsSource.ItemHeight := ReadInteger(C_SectionOptions,  'TTS_Source',           0);
+      ComboBox_TtsTarget.ItemIndex :=  ReadInteger(C_SectionOptions,  'TTS_Target',           _indexid);
+      CheckBox_AutoTranslation.Checked :=
+                                       ReadBool(C_SectionOptions,     'Auto_Trans',           False);
 
-          Edit_Nickname.Text := V_Username;
-          ComboBox_Model.ItemIndex := V_LoadModelIndex;
-          ComboBox_ModelChange(Self);
-        end;
+      Edit_Nickname.Text := V_Username;
+      ComboBox_Model.ItemIndex := V_LoadModelIndex;
+      ComboBox_ModelChange(Self);
     finally
-      _IniFile.Free;
+      Free;
     end;
 
     FInitialized := True;
+
+    if TreeView_Topics.items.Count > 0 then
+    begin
+      TopicSeleced := TreeView_Topics.items.GetFirstNode.Text;
+    end;
   end;
 end;
 
 procedure TForm_RestOllama.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  var _IniFile: TIcsIniFile := TIcsIniFile.Create(FIniFileName);
+  FImageDropDown.Free;
+  var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
+  var _temp: string := '';
+  with _IniFile do
   try
-    var _temp: string := '';
-    with _IniFile do
-      begin
-        WriteString(C_SectionData,      'LastRequest',          FLastRequest);
-        WriteString(C_SectionData,      'Nickname',             V_Username);
-        WriteInteger(C_SectionData,     'Loaded_Model',         V_LoadModelIndex);
-        WriteInteger(C_SectionOptions,  'Action_Options_Tag',   Action_Options.Tag);
-      end;
-    _IniFile.UpdateFile;
+    WriteString(C_SectionData,        'LastRequest',          FLastRequest);
+    WriteString(C_SectionData,        'Nickname',             V_Username);
+    WriteInteger(C_SectionData,       'Loaded_Model',         V_LoadModelIndex);
+    WriteInteger(C_SectionOptions,    'Action_Options_Tag',   Action_Options.Tag);
+    WriteInteger(C_SectionOptions,    'TTS_Source',           ComboBox_TtsSource.ItemIndex);
+    WriteInteger(C_SectionOptions,    'TTS_Target',           ComboBox_TtsTarget.ItemIndex);
+    WriteBool(C_SectionOptions,       'Auto_Trans',           CheckBox_AutoTranslation.Checked);
   finally
-    _IniFile.Free;
+    UpdateFile;
+    Free;
   end;
+
   HttpRest_Ollama.RestCookies.SaveToFile(FCookieFileName);
   FreeAndNil(FIcsBuffLogStream);
 end;
@@ -712,6 +719,8 @@ begin
   if Assigned(V_TaskSystem) then
     V_TaskSystem.Cancel;
   Timer_System.Enabled := False;
+
+  FTopicsMRU.free;
 end;
 
 procedure TForm_RestOllama.ActionList_OllmaUpdate(Action: TBasicAction; var Handled: Boolean);
@@ -795,8 +804,12 @@ end;
 
 procedure TForm_RestOllama.Action_InetAliveExecute(Sender: TObject);
 begin
+  var _requests: string := '';
+  var _pos: TPoint := Button_InetAlive.ClientToScreen(Point(0, 0));
   with TForm_AliveOllama.Create(nil) do
   try
+    Left := _pos.X - Width-5;
+    Top := _pos.Y;
     ShowModal;
     if IsCkeckedFlag then
     begin
@@ -811,23 +824,22 @@ end;
 
 procedure TForm_RestOllama.Action_OptionsExecute(Sender: TObject);
 const
-  C_Tag: array [Boolean] of Integer = (0,1);
+  c_Tag: array [Boolean] of Integer = (0,1);
 begin
   Panel_Options.Visible := not Panel_Options.Visible;
-  Action_Options.Tag := C_Tag[Panel_Options.Visible];
+  Action_Options.Tag := c_Tag[Panel_Options.Visible];
 end;
 
 procedure TForm_RestOllama.Action_Pop_CopyTextExecute(Sender: TObject);
 begin
   if TMSFNCChat_Ollama.SelectedItem <> nil then
-    try
+    begin
       var _ItemStr := TMSFNCChat_Ollama.SelectedItem.GetText;
       if _ItemStr <> '' then
       begin
         Clipboard.clear;
         Clipboard.AsText := _ItemStr;
       end;
-    finally
     end;
 end;
 
@@ -890,13 +902,35 @@ end;
 procedure TForm_RestOllama.Action_SendRequestExecute(Sender: TObject);
 begin
   V_RepeatFlag := True;
-  Do_StartRequest(1);
+  Do_StartRequest(0);
 end;
 
 procedure TForm_RestOllama.Action_StartRequestExecute(Sender: TObject);
 begin
+  var _requests: string := '';
+  var _pos: TPoint := Button_StartRequest.ClientToScreen(Point(Button_StartRequest.Width+3, 0));
+  with Form_RequestDialog do
+  begin
+    Left := _pos.x;
+    Top := _pos.Y;
+    PreLoader := Edit_ReqContent.Text;
+    Code_From := ComboBox_TtsSource.Itemindex;
+    Code_to := ComboBox_TtsTarget.ItemIndex;
+    ShowModal;
+    if ModalResult = mrOk then
+      begin
+        _requests := Memo_Request.Lines.Text;
+        _requests := StringReplace(_requests, C_CRLF, ' ', [rfReplaceAll]);
+      end
+    else
+      Exit;
+  end;
+
+  if V_DummyFlag = 0 then
+    Edit_ReqContent.Text := _requests;
+
   V_RepeatFlag := True;
-  Do_StartRequest(0);
+  Do_StartRequest(1, _requests);
 end;
 
 procedure TForm_RestOllama.Add_Log(const ALog: string);
@@ -936,13 +970,20 @@ begin
     ScrollToBottomEx;
   finally
   end;
+
+  if CheckBox_AutoTranslation.Checked and (ALocation = 1) then
+  begin
+    Application.ProcessMessages;
+    var _tmode: TTranlateMode := TTranlateMode(2);
+    Do_TransLate(_tmode, 0, '');
+  end;
 end;
 
 function GetNodeByText(ATree: TTreeView; AValue: string; AVisible: Boolean = False): TTreeNode;
 begin
   Result := nil;
   if ATree.Items.Count > 0 then
-  try
+  begin
     var _Node: TTreeNode := ATree.Items[0];
     while _Node <> nil do
       begin
@@ -955,32 +996,7 @@ begin
         end;
         _Node := _Node.GetNext;
       end;
-  finally
-
   end;
-end;
-
-procedure TForm_RestOllama.Do_ListupRequests(const AFlag: Integer; const ARequest: string);
-begin
-  if (ARequest = '') then Exit;
-
-  with TreeView_Request.Items do
-  begin
-    BeginUpdate;
-    try
-      var _node: TTreeNode := GetNodeByText(TreeView_Request, ARequest);
-      if _node = nil then
-        begin
-          _node := TreeView_Request.Items.AddFirst(nil, ARequest);
-          PostMessage(TreeView_Request.Handle, WM_VSCROLL, SB_TOP, 0);
-        end;
-      _node.Selected := True;
-    finally
-      EndUpdate;
-    end;
-  end;
-
-  FPromptMRU.AddItem(ARequest);
 end;
 
 procedure TForm_RestOllama.Timer_LogTimer(Sender: TObject);
@@ -1046,29 +1062,14 @@ begin
   TrackBar_GlobalFontSize.Hint := 'Size: '+ TrackBar_GlobalFontSize.Position.ToString;
 end;
 
-procedure TForm_RestOllama.TreeView_RequestClick(Sender: TObject);
-begin
-  var _node: TTreeNode := TreeView_Request.Selected;
-  if Assigned(_node) then
-  Edit_ReqContent.Text := _node.Text;
-end;
-
-procedure TForm_RestOllama.TreeView_RequestDblClick(Sender: TObject);
-begin
-  var _node: TTreeNode := TreeView_Request.Selected;
-  if Assigned(_node) then
-  Edit_ReqContent.Text := _node.Text;
-
-  V_RepeatFlag := True;
-  Do_StartRequest(5);
-end;
-
 procedure TForm_RestOllama.Do_Abort(const AFlag: Integer);
 begin
   FAbortingFlag := True;
   if (HttpRest_Ollama.State > httpReady) or HttpRest_Ollama.Connected then
     begin
+      Add_Log('');
       Add_Log('Aborting operation');
+      Add_Log('');
       HttpRest_Ollama.Abort;
       Application.ProcessMessages;
     end;
@@ -1079,9 +1080,15 @@ begin
   FAbortingFlag := False;
 end;
 
+procedure TForm_RestOllama.SetModelSelected(const Value: string);
+begin
+  FModelSelected := Value;
+  Label_Caption.Caption := Format(C_CaptionFormat, [Value, FTopicSeleced]);
+end;
+
 procedure TForm_RestOllama.SetRequestingFlag(const Value: Boolean);
 const
-  C_Cursor: array [Boolean] of TCursor = (crDefault, crAppStart);
+  c_Cursor: array [Boolean] of TCursor = (crDefault, crAppStart);
 begin
   FRequestingFlag := Value;
 
@@ -1092,7 +1099,7 @@ begin
   Panel_ChatMessageBox.Enabled :=    not Value;
   RadioGroup_PromptType.Enabled :=   not Value;
   GroupBox_Model.Enabled :=          not Value;
-  GroupBox_Tranlation.Enabled :=     not Value;
+  //GroupBox_Tranlation.Enabled :=     not Value;
 
   SkAnimatedImage_ChatProcess.Visible := Value;
   SkAnimatedImage_ChatProcess.Animation.Enabled := Value;
@@ -1102,7 +1109,7 @@ begin
     SkAnimatedImage_Chat.Animation.Enabled := False;
   end;
 
-  Screen.Cursor := C_Cursor[Value];
+  Screen.Cursor := c_Cursor[Value];
 
   if (not Value) and (Edit_ReqContent.CanFocus) then
   Edit_ReqContent.Setfocus;
@@ -1125,6 +1132,13 @@ begin
     end;
 end;
 
+procedure TForm_RestOllama.SetTopicSeleced(const Value: string);
+begin
+  FTopicSeleced := Value;
+  if FInitialized then
+  Label_Caption.Caption := Format(C_CaptionFormat, [FModelSelected, Value]);
+end;
+
 procedure TForm_RestOllama.SkAnimatedImage_ChatClick(Sender: TObject);
 begin
   SkAnimatedImage_Chat.Visible := False;
@@ -1134,12 +1148,6 @@ end;
 procedure TForm_RestOllama.SkLabel_IntroClick(Sender: TObject);
 begin
   Action_ChattingExecute(Self);
-end;
-
-procedure TForm_RestOllama.SpeedButton_AddToRequestsClick(Sender: TObject);
-begin
-  if Edit_ReqContent.Text <> '' then
-  Do_ListupRequests(0, Edit_ReqContent.Text);
 end;
 
 procedure TForm_RestOllama.SpeedButton_ClearChatBoxClick(Sender: TObject);
@@ -1171,30 +1179,14 @@ begin
   end;
 end;
 
-procedure TForm_RestOllama.SpeedButton_DeleteRequestClick(Sender: TObject);
-begin
-  var _node: TTreeNode := TreeView_Request.Selected;
-  if not Assigned(_node) then Exit;
-
-  FPromptMRU.RemoveItem(_node.Text);
-  with TreeView_Request.Items do
-  begin
-    BeginUpdate;
-    Delete(_node);
-    EndUpdate;
-  end;
-end;
-
 procedure TForm_RestOllama.ComboBox_ModelChange(Sender: TObject);
 begin
   V_LoadModelIndex := ComboBox_Model.ItemIndex;
   GroupBox_Llava.Enabled := (V_LoadModelIndex = 3);
-  Label_Caption.Caption := 'Model in use - '+ComboBox_Model.items[ComboBox_Model.ItemIndex];
+  ModelSelected := ComboBox_Model.items[ComboBox_Model.ItemIndex];
   Request_Type := TRequest_Type(RadioGroup_PromptType.ItemIndex);
   if V_LoadModelIndex = 3 then
-  begin
     Edit_ReqContent.Text := C_LlavaPromptContent;
-  end;
 
   Label_Description.Caption := C_ModelDesc[ComboBox_Model.ItemIndex];
 end;
@@ -1235,7 +1227,7 @@ begin
   Result := '';
   var _Input  := TMemoryStream.Create;
   try
-    Image_Llva.Picture.Graphic.SaveToStream(_Input);
+    Image_Llva.Picture.SaveToStream(_Input);
     _Input.Position := 0;
     Result := OverbyteIcsUtils.Base64Encode(PAnsiChar(_Input.Memory), _Input.Size);
   finally
@@ -1245,7 +1237,7 @@ end;
 
 // * Start ------------------------------------------------------------------ //
 
-procedure TForm_RestOllama.Do_StartRequest(const Aflag: Integer);
+procedure TForm_RestOllama.Do_StartRequest(const Aflag: Integer; const APrompt: string='');
 begin
   if RequestingFlag then
   begin
@@ -1259,7 +1251,8 @@ begin
     PageControl_ChattingChange(Self);
   end;
 
-  CommonRestSettings;    // optional HTTP parameters, all have defaults so can be ignored if not needed
+  CommonRestSettings; { optional HTTP parameters,
+                        all have defaults so can be ignored if not needed  }
 
   with HttpRest_Ollama do   { Set to Local server }
   begin
@@ -1274,6 +1267,9 @@ begin
   end;
 
   V_MyContentPrompt := Trim(Edit_ReqContent.Text);
+  if (Aflag = 1) and (APrompt <> '') then
+    V_MyContentPrompt := APrompt;
+
   V_MyModel := ComboBox_Model.Text;
   if V_MyContentPrompt = '' then
   begin
@@ -1286,6 +1282,7 @@ begin
     Exit;
   end;
 
+  RequestingFlag := True;
   V_BaseURL := V_BaseURLarray[Request_Type];
   var _MyParams: string := '';
 
@@ -1309,27 +1306,18 @@ begin
     end
   else
     begin
-      var _optionflag_0: Boolean := False;
-      var _optionflag_1: Boolean := False;
-      var _posi: Integer := Pos('@', V_MyContentPrompt);
-      _optionflag_0 := _posi > 1;
+      var _optionflag: Boolean := False;
       var _tseed: string := '';
 
-      if not _optionflag_0 and CheckBox_UseTopicSeed.Checked then
+      if CheckBox_UseTopicSeed.Checked then
         begin
           _tseed := Edit_TopicSeed.Text;
           if _tseed <> '' then
-          _optionflag_1 := True;
+          _optionflag := True;
         end;
 
-      if _optionflag_0 or _optionflag_1 then
+      if _optionflag then
         begin
-          if _optionflag_0 then
-          begin
-            _tseed := Copy(V_MyContentPrompt, _posi+1, Length(V_MyContentPrompt) * SizeOf(Char)-_posi);
-            V_MyContentPrompt := Copy(V_MyContentPrompt, 1, _posi-1);
-          end;
-
           case RadioGroup_PromptType.ItemIndex of
             0: begin
                  _MyParams := StringReplace( C_GeneratePrompt_opt, '%model%',    V_MyModel,         [rfIgnoreCase]);
@@ -1359,7 +1347,7 @@ begin
           end;
     end;
 
-  RequestingFlag := True;
+  Edit_ReqContent.TextHint := V_MyContentPrompt;
   Add_Log('Starting REST request for URL: ' + V_BaseURL);
   Add_Log('With prompt/message : "' + V_MyContentPrompt+'"');
   Timer_LogTimer(Self);
@@ -1386,7 +1374,8 @@ begin
   // ------------------------------------------------------------------------ //
 
   if CheckBox_AutoLoadTopic.Checked then
-    Do_ListupRequests(0, V_MyContentPrompt);
+    Do_ListUpTopic(2, TreeView_Topics.Selected, V_MyContentPrompt);
+
   if ComboBox_Model.ItemIndex <> 3 then
   begin
     Label_PassedPrompt.Caption := V_MyContentPrompt;
@@ -1405,7 +1394,7 @@ end;
 
 procedure TForm_RestOllama.Do_DisplayJson_Models(const RespStr: string);
 begin
-  var _parsingsrc := StringReplace(RespStr, #10, ',',[rfReplaceAll]);
+  var _parsingsrc := StringReplace(RespStr, C_UTF8_LF, ',',[rfReplaceAll]);
   var _index: Integer := 0;
   var _ParseJson: string := Get_DisplayJson_Models(_parsingsrc, _index);
   var _Responses: string := _ParseJson+IcsCRLF+'Models Count : '+ _index.ToString;
@@ -1515,21 +1504,25 @@ begin
     end;
 
   Add_Log('Content Type : ' + HttpRest_Ollama.ContentType);
-  Add_Log('Request : ' + V_MyContentPrompt);
   Add_Log('Request done, StatusCode ' + IntToStr(HttpRest_Ollama.StatusCode));
 
+  if (HttpRest_Ollama.StatusCode = 400) then
+    begin
+      Add_Log('Error Code 400 : '+String(HttpRest_Ollama.ResponseRaw));
+      Exit;
+    end else
   if (HttpRest_Ollama.StatusCode = 401) then
     begin
       Add_Log(String(HttpRest_Ollama.ResponseRaw));
       PostMessage(Handle, WM_401REPEAT, 0, 0);
       Exit;
-    end
-  else if (HttpRest_Ollama.StatusCode = 404) then
-     begin
-       Add_Log(String(HttpRest_Ollama.ResponseRaw));
-       PostMessage(Handle, WM_404REPEAT, 0, 0);
-       Exit;
-     end;
+    end else
+  if (HttpRest_Ollama.StatusCode = 404) then
+    begin
+      Add_Log(String(HttpRest_Ollama.ResponseRaw));
+      PostMessage(Handle, WM_404REPEAT, 0, 0);
+      Exit;
+    end;
 
   V_RepeatFlag := False;
 
@@ -1541,6 +1534,8 @@ begin
         var _elapstr: string := MSecsToSeconds(_elapsed);
         StatusBar1.Panels[1].Text := 'et '+  _elapstr;
         StatusBar1.Panels[2].Text := ' * Stand by ...';
+        Add_Log('Elapsed Time after request : '+_elapstr);
+        Timer_LogTimer(Self);
 
         if V_DummyFlag = 0 then
           begin
@@ -1586,19 +1581,18 @@ end;
 procedure TForm_RestOllama.Image_LlvaDblClick(Sender: TObject);
 begin
   if OpenPictureDialog1.Execute() then
-  try
+  begin
     V_LlavaSource := OpenPictureDialog1.FileName;
     Image_Llva.Picture.LoadFromFile(OpenPictureDialog1.FileName);
-  finally
   end;
 end;
 
 procedure TForm_RestOllama.Label_DescriptionClick(Sender: TObject);
 const
-  C_DescHeight: array [0  .. 1] of Integer = (190, 45);
+  c_DescHeight: array [0  .. 1] of Integer = (190, 45);
 begin
   Label_Description.Tag := (Label_Description.Tag +1 ) mod 2;
-  GroupBox_Description.Height := C_DescHeight[Label_Description.Tag];
+  GroupBox_Description.Height := c_DescHeight[Label_Description.Tag];
 end;
 
 procedure TForm_RestOllama.Label_PassedPromptClick(Sender: TObject);
@@ -1616,6 +1610,7 @@ begin
   Panel_ChatMessageBox.Visible :=  _visflag_2;
   Panel_ChatMessageBox.Enabled :=  _visflag_2;
   Panel_ChattingButtons.Visible := _visflag_0 and not RequestingFlag;
+  ComboBox_ModelChange(Self);
 
   if _visflag_0 and SkAnimatedImage_Chat.Visible then
     SkAnimatedImage_Chat.Animation.Enabled := True;
@@ -1653,9 +1648,7 @@ end;
 procedure TForm_RestOllama.Do_LoadModel(const AIndex: Integer);
 begin
   if RequestingFlag then
-  begin
     Do_Abort(1);
-  end;
 
   CommonRestSettings;
   with HttpRest_Ollama do
@@ -1704,6 +1697,8 @@ begin
   Do_ListModels(0);
 end;
 
+{ Not Chatting Mode / Not Use Ollama Models ... }
+
 procedure TForm_RestOllama.Do_ListModels(const AIndex: Integer);
 begin
   if RequestingFlag then
@@ -1740,78 +1735,10 @@ begin
   Timer_LogTimer(Self); // update log window
 end;
 
-{  TTS ... }
-
-procedure TForm_RestOllama.Action_TTSExecute(Sender: TObject);
-begin
-  if Assigned(FTextToSpeech) then
-  begin
-    if (FTextToSpeech.IsSpeaking) then
-      begin
-        FTextToSpeech.Stop;
-      end
-    else
-      begin
-        var _text: string := '';
-        if TMSFNCChat_Ollama.SelectedItem <> nil then
-          _text := TMSFNCChat_Ollama.SelectedItem.GetText;
-        if (_text = '') then
-          ShowMessage('Unable to speak empty text');
-        if (_text <> '') and (not FTextToSpeech.Speak(_text)) then
-          ShowMessage('Unable to speak text');
-      end;
-  end;
-
-  UpdateControls_TTS;
-end;
-
-procedure TForm_RestOllama.TextToSpeechAvailable(Sender: TObject);
-begin
-  StatusBar1.Panels[2].Text := 'TTS is available';
-  UpdateControls_TTS;
-end;
-
-procedure TForm_RestOllama.TextToSpeechFinished(Sender: TObject);
-begin
-  StatusBar1.Panels[2].Text := 'Speech finished';
-  UpdateControls_TTS;
-end;
-
-procedure TForm_RestOllama.TextToSpeechStarted(Sender: TObject);
-begin
-  StatusBar1.Panels[2].Text := 'Speech started';
-  UpdateControls_TTS;
-end;
-
-procedure TForm_RestOllama.UpdateControls_TTS;
-begin
-  Action_TTS.Enabled := Assigned(FTextToSpeech) and FTextToSpeech.Available;
-end;
-
 { System Info ... }
 
 var
   V_Counter: Integer = 30;
-
-procedure TForm_RestOllama.SpeedButton_SystemInfoClick(Sender: TObject);
-const
-  cProcessors: array [TPJProcessorArchitecture] of string = ('paUnknown', 'paX64', 'paIA64', 'paX86');
-
-begin
-  var _info: string := 'System Information : '+IcsCRLF+IcsCRLF;
-  with TPJComputerInfo do
-    begin
-      _info := _info+'  Computer Name: '+ ComputerName +IcsCRLF;
-      _info := _info+'  User Name: '+ Username +IcsCRLF;
-      _info := _info+'  Processor Name: '+ ProcessorName +IcsCRLF;
-      _info := _info+'  Processor Speed (GHz): '+ Format('%.3f', [ProcessorSpeedMHz / 1024]) +IcsCRLF;
-      _info := _info+'  Processor Count: '+ Integer(ProcessorCount).ToString +IcsCRLF;
-      _info := _info+'  Processor Architecture: '+ cProcessors[Processor] +IcsCRLF;
-      _info := _info+'  Processor Identifier: '+ ProcessorIdentifier +IcsCRLF;
-    end;
-
-  ShowMessage(_info);
-end;
 
 procedure TForm_RestOllama.SpeedButton_CPUMemUsageClick(Sender: TObject);
 begin
@@ -1826,7 +1753,7 @@ begin
     Timer_System.Enabled := False;
   Label_Counter.Caption := IntToStr(V_Counter);
 
-  if Assigned(V_TaskSystem) and (V_TaskSystem.Status = TTaskStatus.Running) then Exit;
+  if Assigned(V_TaskSystem) and ((V_TaskSystem.Status = TTaskStatus.Running) or (V_TaskSystem.Status = TTaskStatus.WaitingToRun)) then Exit;
   if (PageControl_Chatting.ActivePage = Tabsheet_Chatting) and (Panel_Options.Visible) then
   try
     V_TaskSystem := TTask.Run(
@@ -1847,9 +1774,7 @@ begin
   end;
 end;
 
-{ Translation / with Google ... }
-
-{ Google tanslate ... }
+{ Translation - by Google Tanslation Service ... }
 
 const
   C_Regex: String = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä  - Regular expression for Korean language test }
@@ -1920,15 +1845,19 @@ begin
     Exit;
   end;
 
-  var _code: Integer := 1;
+  var _codefrom: Integer := ComboBox_TtsSource.ItemIndex;
+  var _codeto: Integer := ComboBox_TtsTarget.ItemIndex;
   if TRegEx.IsMatch(_ItemStr, C_Regex) then
-    _code := 0;
+  begin
+    _codefrom := 1;
+    _codeto := 0;
+  end;
 
   if _ItemStr <> '' then
   begin
     if AMode = TTranlateMode.otm_MessagePush then
       begin
-        var _transresult := Get_GoogleTranslatorEx(0, _code, _ItemStr);
+        var _transresult := Get_GoogleTranslatorEx(0, _codefrom, _codeto, _ItemStr);
         if _addflag then
           Insert_ChattingTranslate(_insertindex, _transresult)
         else
@@ -1936,20 +1865,23 @@ begin
       end else
     if AMode = TTranlateMode.otm_PromptPush then
       begin
-        var _transresult := Get_GoogleTranslatorEx(0, _code, _ItemStr);
+        var _transresult := Get_GoogleTranslatorEx(0, _codefrom, _codeto, _ItemStr);
         Edit_ReqContent.Text := _transresult;
       end
     else
       with TForm_Translator.Create(Self) do
       try
         Request := _request;
-        PushFlag := _addflag;
-        Get_GoogleTranslator(Ord(AMode), _code, _ItemStr);
+        PushFlag := True;//_addflag;
+        Get_GoogleTranslator(Ord(AMode), _codefrom, _codeto, _ItemStr);
         ShowModal;
         if ModalResult = mrOk then
         begin
           if AMode = TTranlateMode.otm_PromptView  then
-            Edit_ReqContent.Text := TransResult
+            begin
+              if CheckBox_Pushtochatbox.Checked then
+              Edit_ReqContent.Text := TransResult;
+            end
           else
             if _addflag and CheckBox_Pushtochatbox.Checked then
               Insert_ChattingTranslate(_insertindex, TransResult);   // ------ //
@@ -1958,6 +1890,214 @@ begin
         Free;
       end;
   end;
+end;
+
+{ Topics Manager Problem ?
+
+ Not supported for random seed - Ollama Bug ?
+ [ Ollama issues - "Ollama chat API output consistently missing <tool_call>" #4408]
+ - https://github.com/ollama/ollama/issues/4408
+ Fixed seed "123" at Ollama api.md
+
+}
+
+var
+  V_LastInput: string = 'New prompt ?';
+
+procedure TForm_RestOllama.Do_AddtoRequest(const AFlag: Integer);
+begin
+  var _node: TTreeNode := TreeView_Topics.Selected;
+  if Assigned(_node) then
+  begin
+    Edit_ReqContent.Text := _node.Text;
+    var _tseed: string := '';
+    if _node.Data <> nil then
+      begin
+        _tseed := PTopicData(_node.Data)^.td_Seed;
+        Label_NodeSeed.Caption := 's '+_tseed;
+      end;
+    Edit_TopicSeed.Text := _tseed;
+  end;
+
+  if AFlag = 3 then
+  begin
+    V_RepeatFlag := True;
+    Do_StartRequest(7);
+  end;
+end;
+
+procedure TForm_RestOllama.Do_ListUpTopic(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string);
+begin
+  var _seed: string := FTopicsMRU.AddInsertNode(AFlag, ANode, APrompt);
+  Edit_TopicSeed.Text := _seed;
+  if APrompt <> '' then
+    V_LastInput := APrompt;
+end;
+
+procedure TForm_RestOllama.SpeedButton_NewRootnodeClick(Sender: TObject);
+begin
+  if TreeView_Topics.Items.Count < 1 then
+    begin
+      Do_ListUpTopic(0, nil, '');
+    end
+  else
+    begin
+      var _newprompt: string :=  V_LastInput;
+      var _clickedok: Boolean := Vcl.Dialogs.InputQuery('New Topic', 'Prompt', _newprompt);
+      if _clickedok and (_newprompt <> '') then
+        begin
+          Do_ListUpTopic(1, nil, _newprompt);
+        end;
+    end;
+end;
+
+procedure TForm_RestOllama.SpeedButton_AddTopicClick(Sender: TObject);
+begin
+  if TreeView_Topics.Items.Count < 1 then
+    begin
+      Do_ListUpTopic(0, nil, '');
+    end
+  else
+    begin
+      var _newprompt: string := V_LastInput;
+      var _clickedok: Boolean := Vcl.Dialogs.InputQuery('Input Box', 'Prompt', _newprompt);
+      if _clickedok and (_newprompt <> '') then
+        begin
+          Do_ListUpTopic(2, TreeView_Topics.Selected, _newprompt);
+        end;
+    end;
+end;
+
+procedure TForm_RestOllama.PopupMenu_TopicsPopup(Sender: TObject);
+begin
+  pmn_RenameTopic.Enabled := TreeView_Topics.Selected <> nil;
+end;
+
+procedure TForm_RestOllama.pmn_RenameTopicClick(Sender: TObject);
+begin
+  var _node := TreeView_Topics.Selected;
+  if _node <> nil then
+  begin
+    var _text: string := _node.Text;
+    var _newtext: string := _node.Text;
+    var _clickedok: Boolean := Vcl.Dialogs.InputQuery('Rename', 'Topic / Prompt', _newtext);
+    if _clickedok and (_newtext <> '') then
+      begin
+        _node.Text := _newtext;
+        PTopicData(_node.Data).td_Topic := _newtext;
+        //
+        FTopicsMRU.Rename_TopicPrompt(_text, _newtext);
+      end;
+  end;
+end;
+
+procedure TForm_RestOllama.SpeedButton_AddToTopicsClick(Sender: TObject);
+begin
+  var _prompt: string := Trim(Edit_ReqContent.Text);
+  if _prompt = '' then
+  begin
+    ShowMessage('Can not add topics for empty string.');
+    Exit;
+  end;
+
+  Do_ListUpTopic(2, TreeView_Topics.Selected, _prompt);
+end;
+
+procedure TForm_RestOllama.TreeView_TopicsChange(Sender: TObject; Node: TTreeNode);
+begin
+  var _node: TTreeNode := TreeView_Topics.Selected;
+  if (_node <> nil) then
+  begin
+    if (_node.Level = 0) then
+      TopicSeleced := _node.Text
+    else
+      TopicSeleced := _node.Parent.Text
+  end;
+end;
+
+procedure TForm_RestOllama.TreeView_TopicsClick(Sender: TObject);
+begin
+  Do_AddtoRequest(0);
+end;
+
+const
+  C_TVFontColor: array [0 .. 3] of TColor = (gcFloralwhite, clSilver, clSilver, clSilver);
+
+procedure TForm_RestOllama.TreeView_TopicsCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
+begin
+  Sender.Canvas.Font.Color := C_TVFontColor[Node.Level];
+  if not Node.Expanded and (Node.Level = 0) then
+     Sender.Canvas.Font.Color := clLime;
+
+  DefaultDraw := True;
+end;
+
+procedure TForm_RestOllama.TreeView_TopicsDblClick(Sender: TObject);
+begin
+  // var _aIndex := Selected.AbsoluteIndex;
+  var _node: TTreeNode := TreeView_Topics.Selected;
+  if Assigned(_node) and (_node.Level <> 0) then
+  begin
+    var _topic: string := _node.Text;
+    Edit_ReqContent.Text := _topic;
+    var _tseed: string := '';
+    if _node.Data <> nil then
+      _tseed := PTopicData(_node.Data)^.td_Seed;
+    Edit_TopicSeed.Text := _tseed;
+
+    V_RepeatFlag := True;
+    Do_StartRequest(8);
+  end;
+end;
+
+procedure TForm_RestOllama.TreeView_TopicsDragDrop(Sender, Source: TObject; X, Y: Integer);
+begin
+  var _Src: TTreeNode := TreeView_Topics.Selected;
+  var _Dst: TTreeNode := TreeView_Topics.GetNodeAt(X, Y);
+  if (_Src <> nil) and (_Dst <> nil) then
+  begin
+    if _Dst.Level = 0 then
+      _Src.MoveTo(_Dst, naAddChildFirst)
+    else
+      _Src.MoveTo(_Dst, naInsert);
+    PTopicData(_Src.Data)^.td_Seed := PTopicData(_Dst.Data)^.td_Seed;
+  end;
+end;
+
+procedure TForm_RestOllama.TreeView_TopicsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+begin
+  var _Src: TTreeNode := TreeView_Topics.Selected;
+  var _Dst: TTreeNode := TreeView_Topics.GetNodeAt(X, Y);
+  Accept := Assigned(_Dst) and (_Src <> _Dst);
+end;
+
+procedure TForm_RestOllama.SpeedButton_RunRequestClick(Sender: TObject);
+begin
+  Do_AddtoRequest(3);
+end;
+
+procedure TForm_RestOllama.SpeedButton_DeleteTopicClick(Sender: TObject);
+begin
+  FTopicsMRU.DeleteNode(0);
+  {
+  var _node: TTreeNode := TreeView_Topics.Selected;
+  if Assigned(_node) and (_node <> TreeView_Topics.Items.GetFirstNode) then
+  with TreeView_Topics.Items do
+  begin
+    BeginUpdate;
+    Delete(_node);
+    EndUpdate;
+  end;
+  }
+end;
+
+procedure TForm_RestOllama.SpeedButton_ExpandFullClick(Sender: TObject);
+begin
+  SpeedButton_ExpandFull.Tag :=  (SpeedButton_ExpandFull.Tag +1) mod 2;
+  if SpeedButton_ExpandFull.Tag = 1 then
+    TreeView_Topics.FullExpand
+  else
+    TreeView_Topics.FullCollapse;
 end;
 
 { About ... }
@@ -1972,123 +2112,57 @@ begin
   end;
 end;
 
-procedure TForm_RestOllama.Button_HelpClick(Sender: TObject);
-begin
-  ShowMessage(C_Shrtcuts);
-end;
-
 procedure TForm_RestOllama.Button_MenuClick(Sender: TObject);
 begin
-  ShowMessage('Menu');
+  // ShowMessage('Menu');
 end;
 
-{ Topics Manager }
-// Not supported for random seed - Ollama Bug ?
-// [ Ollama issues - "Ollama chat API output consistently missing <tool_call>" #4408]
-// - https://github.com/ollama/ollama/issues/4408
-// Fixed seed "123" at Ollama api.md
+{  TTS ... }
 
-procedure TForm_RestOllama.Do_ListupTopics(const AFlag: Integer; const ARequest: string);
+procedure TForm_RestOllama.Action_TTSExecute(Sender: TObject);
 begin
-  if (ARequest = '') then Exit;
-  var _posi: Integer := Pos('@', ARequest);
-  if _posi > 1 then
+  if Assigned(FTextToSpeech) then
   begin
-    ShowMessage('Can not add topics for given seed.');
-    Exit;
-  end;
-
-  var _topic: string := ARequest;
-  with TreeView_Topics.Items do
-  begin
-    BeginUpdate;
-    try
-      var _node: TTreeNode := GetNodeByText(TreeView_Topics, ARequest);
-      if (_node = nil) then
-        begin
-          var _seed: Integer := RandomRange(1000, 9999);
-          _topic := Format('%s@%d', [ARequest, _seed]);
-          _node := TreeView_Topics.Items.AddFirst(nil, _topic);
-          PostMessage(TreeView_Topics.Handle, WM_VSCROLL, SB_TOP, 0);
-        end;
-      _node.Selected := True;
-    finally
-      EndUpdate;
-    end;
-  end;
-
-  FTopicsMRU.AddItem(_topic);
-end;
-
-procedure TForm_RestOllama.SpeedButton_AddToTopicsClick(Sender: TObject);
-begin
-  var _prompt: string := Trim(Edit_ReqContent.Text);
-  if _prompt = '' then
-  begin
-    ShowMessage('Can not add topics for empty string.');
-    Exit;
-  end;
-  Do_ListupTopics(0, _prompt);
-end;
-
-procedure TForm_RestOllama.TreeView_TopicsClick(Sender: TObject);
-begin
-  Do_AddtoRequest(0);
-end;
-
-procedure TForm_RestOllama.TreeView_TopicsDblClick(Sender: TObject);
-begin
-  Do_AddtoRequest(3);
-end;
-
-procedure TForm_RestOllama.Do_AddtoRequest(const AFlag: Integer);
-begin
-  var _node: TTreeNode := TreeView_Topics.Selected;
-  if Assigned(_node) then
-  begin
-    var _topic: string := _node.Text;
-    Edit_ReqContent.Text := _topic;
-
-    var _posi: Integer := Pos('@', _topic);      // 12345@12345
-    var _tseed: string := IntToStr(RandomRange(1000, 9999));
-    if _posi > 0 then
+    if (FTextToSpeech.IsSpeaking) then
       begin
-        _tseed := Copy(_topic, _posi+1, Length(_topic) * SizeOf(Char)-_posi);
-        _topic := Copy(_topic, 1, _posi-1);
+        FTextToSpeech.Stop;
+      end
+    else
+      begin
+        var _text: string := '';
+        if TMSFNCChat_Ollama.SelectedItem <> nil then
+          _text := TMSFNCChat_Ollama.SelectedItem.GetText;
+        if (_text = '') then
+          ShowMessage('Unable to speak empty text');
+        if (_text <> '') and (not FTextToSpeech.Speak(_text)) then
+          ShowMessage('Unable to speak text');
       end;
-    Edit_TopicSeed.Text := _tseed;
   end;
 
-  if AFlag = 3 then
-  begin
-    V_RepeatFlag := True;
-    Do_StartRequest(7);
-  end;
+  UpdateControls_TTS;
 end;
 
-procedure TForm_RestOllama.pmn_AddtoRequestClick(Sender: TObject);
+procedure TForm_RestOllama.TextToSpeechAvailable(Sender: TObject);
 begin
-  Do_AddtoRequest(1);
+  StatusBar1.Panels[2].Text := 'TTS is available';
+  UpdateControls_TTS;
 end;
 
-procedure TForm_RestOllama.pmn_DeleteTopicClick(Sender: TObject);
+procedure TForm_RestOllama.TextToSpeechFinished(Sender: TObject);
 begin
-  var _node: TTreeNode := TreeView_Topics.Selected;
-  if not Assigned(_node) then Exit;
-
-  FTopicsMRU.RemoveItem(_node.Text);
-  with TreeView_Topics.Items do
-  begin
-    BeginUpdate;
-    Delete(_node);
-    EndUpdate;
-  end;
+  StatusBar1.Panels[2].Text := 'Speech finished';
+  UpdateControls_TTS;
 end;
 
-procedure TForm_RestOllama.PopupMenu_TopicsPopup(Sender: TObject);
+procedure TForm_RestOllama.TextToSpeechStarted(Sender: TObject);
 begin
-  pmn_DeleteTopic.Enabled := (TreeView_Topics.Items.Count >0) and (TreeView_Topics.Selected <> nil);
-  pmn_AddtoRequest.Enabled := pmn_DeleteTopic.Enabled;
+  StatusBar1.Panels[2].Text := 'Speech started';
+  UpdateControls_TTS;
+end;
+
+procedure TForm_RestOllama.UpdateControls_TTS;
+begin
+  Action_TTS.Enabled := Assigned(FTextToSpeech) and FTextToSpeech.Available;
 end;
 
 initialization

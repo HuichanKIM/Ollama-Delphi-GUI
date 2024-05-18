@@ -1,4 +1,4 @@
-unit Unit_About;
+﻿unit Unit_About;
 
 interface
 
@@ -34,23 +34,17 @@ type
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
-    Label9: TLabel;
-    Label10: TLabel;
-    Label6: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    Label8: TLabel;
-    Label11: TLabel;
-    Label1: TLabel;
-    Label12: TLabel;
+    Label_Development: TLabel;
     ListView_Shortcuts: TListView;
+    TabSheet3: TTabSheet;
+    Label_SystemInfo: TLabel;
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure Label_OllamaWebClick(Sender: TObject);
     procedure Label_OllamaGitHubClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure Label_SystemInfoClick(Sender: TObject);
   private
     procedure Update_Shortcuts;
-    { Private declarations }
   public
     { Public declarations }
   end;
@@ -61,28 +55,43 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   Vcl.StyleAPI,
-  Winapi.ShellAPI;
+  Winapi.ShellAPI,
+  Unit_Common;
 
 {$R *.dfm}
 
 const
-  C_Shortcut_Keys: array [0..20] of string = ('F1','F2','F3','F4','F5','F6','F7','F8','F9','F10',
-                                              'Alt+A','Alt+B','Alt+C','Alt+D','Alt+E','Alt+F','Alt+Q','Alt+S',
+  C_Shortcut_Keys: array [0..21] of string = ('F1','F2','F3','F4','F5','F6','F7','F8','F9','F10',
+                                              'Alt+A','Alt+B','Alt+C','Alt+D','Alt+E','Alt+F','Alt+L','Alt+S','Alt+V',
                                               'Ctrl+A','Ctrl+Z','');
-  C_Shortcut_Desc: array [0..20] of string = ('','Goto Welcome.','Goto Chatting Room.','Goto Logs.',
-                                              'Translation of Message','Translation of Prompt','Trans, Push Message.','Trans, Push Prompt.','','',
-                                              'Ollama Alive ?','Scroll to Bottom.','Copy the Message.','Delete the Message.','',
-                                              'Scroll to Top.','TextToSpeech on the Message.','Save All Message to Text File.',
-                                              'Abort Connection.','Close / Exit.','');
+  C_Shortcut_Desc: array [0..21] of string = ('','Goto Welcome.','Goto Chatting Room.','',
+                                              'Translation of Message','Translation of Prompt','Trans, Push Message.',
+                                              'Trans, Push Prompt.','','','Ollama Alive ?','Scroll to Bottom.','Copy the Message.',
+                                              'Delete the Message.','','Scroll to Top.','Show Logs.','Save All Message to Text File.',
+                                              'TextToSpeech on the Message.','Abort Connection.','Close / Exit.','');
+  C_DevelopInfo: string = '''
+
+    Development Tool  (GUI)
+      Embarcadero Delphi 12.1  ( Pascal )
+
+    3rd party Reference Library
+      - Overbytes ICS 9.1 by François Piette
+      - TMS FNC UI Pack v 5.5.0.0 by TMS Software
+      - SVGIconImageList v 4.1.4 by Ethea S.r.l.
+      - Grijjy.TextToSpeech.pas by http://grijjy.com/
+      - FastMM4-AVX by by Maxim Masiutin
+      - Embeded Lib. : SKIA 2D Graphics
+  ''';
 
 procedure TForm_About.FormCreate(Sender: TObject);
 begin
-  Label_Copyright.Caption := '- Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea. All Rights Reserved. -';
+  Label_Title.Caption := C_MainCaption;
+  Label_Copyright.Caption := C_CoptRights;
   if TStyleManager.IsCustomStyleActive then
-  begin
     ListView_Shortcuts.Color := StyleServices.GetStyleColor(scWindow);
-  end;
 
+  Label_Development.Caption := C_DevelopInfo;
+  Label_SystemInfo.Caption := Get_SystemInfo();
   Update_Shortcuts();
   PageControl1.ActivePageIndex := 0;
 end;
@@ -115,6 +124,11 @@ end;
 procedure TForm_About.Label_OllamaWebClick(Sender: TObject);
 begin
   ShellExecute(0, PChar('Open'), PChar(Label_OllamaWeb.Caption), nil, nil, SW_SHOW);
+end;
+
+procedure TForm_About.Label_SystemInfoClick(Sender: TObject);
+begin
+  Label_SystemInfo.Caption := Get_SystemInfo();
 end;
 
 end.

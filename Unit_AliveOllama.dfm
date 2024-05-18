@@ -15,8 +15,7 @@ object Form_AliveOllama: TForm_AliveOllama
   Font.Style = []
   FormStyle = fsStayOnTop
   KeyPreview = True
-  Position = poMainFormCenter
-  RoundedCorners = rcOn
+  Position = poDesigned
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   TextHeight = 15

@@ -94,10 +94,10 @@ object Form_Translator: TForm_Translator
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 40
+      Width = 49
       Height = 15
       Align = alClient
-      Caption = 'Prompt'
+      Caption = 'Prompt   '
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
       Font.Height = -12

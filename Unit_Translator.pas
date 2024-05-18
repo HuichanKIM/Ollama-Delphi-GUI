@@ -33,13 +33,13 @@ type
     procedure SetFRequest(const Value: string);
     procedure SetPushFlag(const Value: Boolean);
   public
-    procedure Get_GoogleTranslator(const AUser, ACode: Integer; const AText: string);
+    procedure Get_GoogleTranslator(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string);
     property TransResult: string  read FTransResult  write FTransResult;
     property Request: string  read FRequest  write SetFRequest;
     property PushFlag: Boolean  read FPushFlag write SetPushFlag;
   end;
 
-function Get_GoogleTranslatorEx(const AUser, ACode: Integer; const AText: string): string;
+function Get_GoogleTranslatorEx(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string): string;
 
 implementation
 
@@ -53,17 +53,18 @@ uses
 
 { Google tanslate ... }
 
-function TranslateByGoogle(const ACode: Integer; const  AText: string): string;
-const
-  C_LangSrc: array [0..1] of string = ('ko','en');
-  C_LangTgt: array [0..1] of string = ('en','ko');
-
+function TranslateByGoogle(const ACodeFrom, ACodeTo: Integer; const  AText: string): string;
 begin
   Result := '';
   if AText.IsEmpty then Exit;
+  if ACodeFrom = ACodeTo then   { Same Language ... }
+  begin
+    Result := AText;
+    Exit;
+  end;
 
-  var _LangSource: string := C_LangSrc[ ACode ];
-  var _LangTarget: string := C_LangTgt[ ACode ];
+  var _LangSource: string := C_LanguageCode[ ACodeFrom ];
+  var _LangTarget: string := C_LanguageCode[ ACodeTo ];
   var _URI := TURI.Create('https://translate.googleapis.com/translate_a/single');
   var _text := Trim(AText);
   with _URI do
@@ -81,9 +82,9 @@ begin
     AddParameter('q', _text);
   end;
 
-  var _HTTP: THTTPClient := THTTPClient.Create;
   var _Responses := TBytesStream.Create();
   var _getflag: Boolean := False;
+  var _HTTP: THTTPClient := THTTPClient.Create;
   try
     _getflag := _HTTP.Get(_URI.Encode, _Responses).StatusCode = 200;
     _getflag := _getflag and (_Responses.Size > 10);
@@ -100,18 +101,16 @@ begin
     _Responses.Position := 0;
     var _rbs: string := TEncoding.UTF8.GetString(_Responses.Bytes, 0, _Responses.Size);
     Result := Get_DisplayJson(2, False, _rbs);
-   finally
+  finally
     _Responses.Free;
   end;
 end;
 
-function Get_GoogleTranslatorEx(const AUser, ACode: Integer; const AText: string): string;
+function Get_GoogleTranslatorEx(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string): string;
 begin
-  var _trans := TranslateByGoogle(ACode, AText);
+  var _trans := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
   if _trans <> '' then
-  begin
-    Result := _trans.Replace(#10, #13#10, [rfReplaceAll]);
-  end;
+    Result := _trans.Replace(C_UTF8_LF, C_CRLF, [rfReplaceAll]);
 end;
 
 { TForm_Translator }
@@ -133,29 +132,44 @@ end;
 
 procedure TForm_Translator.FormShow(Sender: TObject);
 begin
-  // ---------------------------------------------------------------------- //
   if TStyleManager.IsCustomStyleActive then
-  begin
     Memo_Translates.Color := StyleServices.GetStyleColor(scPanel);
-  end;
-  // ---------------------------------------------------------------------- //
+
   CheckBox_Pushtochatbox.Enabled := PushFlag;
 end;
 
-procedure TForm_Translator.Get_GoogleTranslator(const AUser, ACode: Integer; const AText: string);
+procedure TForm_Translator.Get_GoogleTranslator(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string);
 const
-  C_Type: array [0 .. 1 ] of string = ('Request', 'Prompt');
+  c_Type: array [0 .. 1 ] of string = ('Request', 'Prompt');
 
 begin
-  FTransResult := TranslateByGoogle(ACode, AText);
+  FTransResult := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
+  var _reqdisplay: string := FRequest;
+  if ACodeTo = 1 then
+    begin
+      if Length(_reqdisplay) * SizeOf(Char) > 40 then
+      begin
+        SetLength(_reqdisplay, 40);
+        _reqdisplay := _reqdisplay + ' ...';
+      end
+    end
+  else
+    begin
+      if Length(_reqdisplay) > 70 then
+      begin
+        SetLength(_reqdisplay, 70);
+        _reqdisplay := _reqdisplay + ' ...';
+      end
+    end;
   CheckBox_Pushtochatbox.Enabled := (AUser = 0) and PushFlag;
   if FTransResult <> '' then
   begin
-    if FRequest = '' then
-      Label_Prompt.Caption := 'Type: '+C_Type[AUser]
+    if _reqdisplay = '' then
+      Label_Prompt.Caption := 'Type: '+c_Type[AUser]
     else
-      Label_Prompt.Caption := C_Type[AUser] + '  - '+FRequest;
-    var _trans := FTransResult.Replace(#10, #13#10, [rfReplaceAll]);
+      Label_Prompt.Caption := c_Type[AUser] + '  - '+_reqdisplay;
+
+    var _trans := FTransResult.Replace(C_UTF8_LF, C_CRLF, [rfReplaceAll]);
     Memo_Translates.lines.Add(_trans)
   end;
 end;

@@ -11,7 +11,6 @@ uses
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
-  IdHTTP,
   Vcl.Dialogs,
   Vcl.StdCtrls;
 
@@ -40,6 +39,9 @@ function Get_ListModels_Ollama(const ABaseURL: string): string;
 
 implementation
 
+uses
+  IdHTTP;
+
 {$R *.dfm}
 
 const
@@ -64,8 +66,6 @@ begin
 end;
 
 function CheckAlive_Ollama(): Boolean;
-const
-  C_Alive: Array [Boolean] of String = ('not alive','Alive');
 begin
   Result := False;
   V_AliveFlag := False;
@@ -107,8 +107,8 @@ end;
 
 procedure TForm_AliveOllama.Button_AliveClick(Sender: TObject);
 const
-  C_Alive: Array [Boolean] of String = ('not alive','Alive On');
-  C_Warning = 'Check Ollama is installed and running on local computer.';
+  c_Alive: Array [Boolean] of String = ('not alive','Alive On');
+  c_Warning = 'Check Ollama is installed and running on local computer.';
 begin
   Memo1.lines.Clear;
   V_AliveFlag := False;
@@ -121,10 +121,10 @@ begin
       LogReturn(_Buffer);
 
       V_AliveFlag := SameText(_Buffer, Alive_checker);
-      LogReturn(C_Alive[ V_AliveFlag ]);
+      LogReturn(c_Alive[ V_AliveFlag ]);
 
       if not V_AliveFlag then
-      Memo1.lines.Add(C_Warning);
+      Memo1.lines.Add(c_Warning);
     finally
       _HTTP.Free;
     end;

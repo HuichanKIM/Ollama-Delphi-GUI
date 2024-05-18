@@ -3,7 +3,7 @@ object Form_About: TForm_About
   Top = 0
   BorderStyle = bsDialog
   Caption = 'About'
-  ClientHeight = 440
+  ClientHeight = 460
   ClientWidth = 386
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -43,25 +43,24 @@ object Form_About: TForm_About
     Width = 380
     Height = 15
     Align = alTop
-    Caption = 'Ollama GUI  -  Version Beta 0.9  ( Deploy  :  2024.05.13 )'
+    Caption = 'Ollama GUI  -  Version 0.9 - beta  ( Deploy  :  2024.05.13 )'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitWidth = 306
+    ExplicitWidth = 313
   end
   object Panel1: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 401
+    Top = 421
     Width = 380
     Height = 36
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = 396
     object Button1: TButton
       Left = 295
       Top = 3
@@ -77,13 +76,10 @@ object Form_About: TForm_About
     Left = 3
     Top = 50
     Width = 380
-    Height = 345
+    Height = 365
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitLeft = -2
-    ExplicitWidth = 389
-    ExplicitHeight = 286
     object Image1: TImage
       AlignWithMargins = True
       Left = 10
@@ -629,7 +625,7 @@ object Form_About: TForm_About
     end
     object Label2: TLabel
       Left = 10
-      Top = 314
+      Top = 341
       Width = 319
       Height = 15
       Caption = '* Beta version - support bi translation (English / Korean) only'
@@ -713,17 +709,25 @@ object Form_About: TForm_About
       Left = 10
       Top = 76
       Width = 360
-      Height = 225
+      Height = 257
       ActivePage = TabSheet1
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clSilver
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
       Style = tsFlatButtons
       TabOrder = 1
+      StyleElements = [seClient, seBorder]
       object TabSheet1: TTabSheet
         Caption = 'Development'
-        object Label9: TLabel
-          Left = 11
-          Top = 9
-          Width = 129
-          Height = 15
+        object Label_Development: TLabel
+          Left = 0
+          Top = 0
+          Width = 352
+          Height = 224
+          Align = alClient
           Caption = 'Development Tool  (GUI)'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clSilver
@@ -732,118 +736,8 @@ object Form_About: TForm_About
           Font.Style = []
           ParentFont = False
           StyleElements = [seClient, seBorder]
-        end
-        object Label10: TLabel
-          Left = 24
-          Top = 28
-          Width = 184
-          Height = 15
-          Caption = 'Embarcadero Delphi 12.1  ( Pascal )'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clSilver
-          Font.Height = -12
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentFont = False
-          StyleElements = [seClient, seBorder]
-        end
-        object Label6: TLabel
-          Left = 11
-          Top = 51
-          Width = 141
-          Height = 15
-          Caption = '3rd party Reference Library'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clSilver
-          Font.Height = -12
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentFont = False
-          StyleElements = [seClient, seBorder]
-        end
-        object Label4: TLabel
-          Left = 24
-          Top = 71
-          Width = 195
-          Height = 15
-          Caption = '- Overbytes ICS 9.1 by Fran'#231'ois Piette'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clSilver
-          Font.Height = -12
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentFont = False
-          StyleElements = [seClient, seBorder]
-        end
-        object Label5: TLabel
-          Left = 24
-          Top = 89
-          Width = 235
-          Height = 15
-          Caption = '- TMS FNC UI Pack v 5.5.0.0 by TMS Software'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clSilver
-          Font.Height = -12
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentFont = False
-          StyleElements = [seClient, seBorder]
-        end
-        object Label8: TLabel
-          Left = 24
-          Top = 107
-          Width = 212
-          Height = 15
-          Caption = '- SVGIconImageList v 4.1.4 by Ethea S.r.l.'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clSilver
-          Font.Height = -12
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentFont = False
-          StyleElements = [seClient, seBorder]
-        end
-        object Label11: TLabel
-          Left = 24
-          Top = 126
-          Width = 242
-          Height = 15
-          Caption = '- Grijjy.TextToSpeech.pas by http://grijjy.com/'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clSilver
-          Font.Height = -12
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentFont = False
-          StyleElements = [seClient, seBorder]
-        end
-        object Label1: TLabel
-          Left = 24
-          Top = 146
-          Width = 204
-          Height = 15
-          Caption = '- FastMM4-AVX by by Maxim Masiutin'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clSilver
-          Font.Height = -12
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentFont = False
-          StyleElements = [seClient, seBorder]
-        end
-        object Label12: TLabel
-          Left = 24
-          Top = 163
-          Width = 179
-          Height = 15
-          Caption = '- Embeded Lib. : SKIA 2D Graphics'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clSilver
-          Font.Height = -12
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentFont = False
-          StyleElements = [seClient, seBorder]
+          ExplicitWidth = 129
+          ExplicitHeight = 15
         end
       end
       object TabSheet2: TTabSheet
@@ -853,7 +747,7 @@ object Form_About: TForm_About
           Left = 0
           Top = 0
           Width = 352
-          Height = 192
+          Height = 224
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -896,6 +790,34 @@ object Form_About: TForm_About
           ParentFont = False
           TabOrder = 0
           ViewStyle = vsReport
+        end
+      end
+      object TabSheet3: TTabSheet
+        Caption = 'System Info.'
+        ImageIndex = 2
+        object Label_SystemInfo: TLabel
+          Left = 0
+          Top = 0
+          Width = 352
+          Height = 224
+          Hint = 'Click to update'
+          Align = alClient
+          AutoSize = False
+          Caption = '...'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clSilver
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          StyleElements = [seClient, seBorder]
+          OnClick = Label_SystemInfoClick
+          ExplicitLeft = 104
+          ExplicitTop = 72
+          ExplicitWidth = 40
+          ExplicitHeight = 15
         end
       end
     end

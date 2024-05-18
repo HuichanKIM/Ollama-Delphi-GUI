@@ -58,9 +58,9 @@ const
 
 function LoadKernelFunc(const FuncName: string): Pointer;
 const
-  cKernel = 'kernel32.dll';
+  c_Kernel = 'kernel32.dll';
 begin
-  Result := GetProcAddress(GetModuleHandle(cKernel), PChar(FuncName));
+  Result := GetProcAddress(GetModuleHandle(c_Kernel), PChar(FuncName));
 end;
 
 function RegCreate: TRegistry;
