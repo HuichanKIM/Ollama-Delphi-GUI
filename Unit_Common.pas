@@ -293,7 +293,7 @@ function LCIDToLocaleName(Locale: LCID; lpName: LPWSTR; cchName: Integer; dwFlag
 
 function Get_LocaleName():  string;
 var
-  _strNameBuffer: array [0 .. LOCALE_NAME_MAX_LENGTH - 1] of WideChar;
+  _strNameBuffer: array [0 .. LOCALE_NAME_MAX_LENGTH - 1] of Char;
 begin
   Result := '';
   if (LCIDToLocaleName(1033, _strNameBuffer, LOCALE_NAME_MAX_LENGTH, 0) = 0) then
@@ -309,9 +309,9 @@ end;
 
 function Get_LocaleIDString(const AFlag: Integer = 0): string;
 var
-  _strNameBuffer: array [0 .. 255] of WideChar;
+  _strNameBuffer: array [0 .. 255] of Char;
 begin
-  Result := 'en';
+  Result := '';
   if (LCIDToLocaleName(LOCALE_USER_DEFAULT, _strNameBuffer, 255, 0) > 0) then
     for var _i := 0 to 255 do
       begin
@@ -320,7 +320,6 @@ begin
         else
           Result := Result + _strNameBuffer[_i];
       end;
-
   if (Length(Result) = 0) and (LCIDToLocaleName(0, _strNameBuffer, 255, 0) > 0) then
     for var _i := 0 to 255 do
       begin
