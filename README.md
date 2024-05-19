@@ -10,7 +10,7 @@
 
 - Themes (Windows10 SlateGray) according to user preferences of Windows Theme
 
-### Conditions
+### Prerequisites
 
  1. Ollama Install ( https://ollama.com/ )
  2. Pull Models (phi3, llama3, gemma, llava, codegemma, dolphin-mistral)
