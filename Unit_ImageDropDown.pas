@@ -24,7 +24,7 @@ type
     FImage: TImage;
     FPanel: TPanel;
     FFileName: string;
-    FOriginalImageWindowProc: TWndMethod;
+    FOriginalPanelWndProc: TWndMethod;
     procedure ImageDrop(var Msg: TWMDROPFILES);
   public
     constructor Create(AImage: TImage; APanel: TPanel);
@@ -44,7 +44,7 @@ uses
 
 procedure TImageDropDown<T>.LoadIMG(const AImgFileName: string);
 const
-  c_VerifyImgFormat = '...*.jpg...*.jpeg...*.png...*.webp';
+  c_VerifyImgFormat = '...*.jpg...*.jpeg...*.png...*.webp...*.gif';
 begin
   var _ext: string := LowerCase(ExtractFileExt(AImgFileName));
   if Pos(_ext, c_VerifyImgFormat) >= 3 then
@@ -52,18 +52,18 @@ begin
     procedure
     begin
       try
-        if _ext = '.webp' then
+        if (_ext = '.webp') or (_ext = '.gif') then
           begin
-            const _quality = 80;
-            var _BytesStreamJpeg: TBytesStream := nil;
+            var _BytesStreamJpg: TBytesStream := TBytesStream.Create();
             try
               var _skImage: ISkImage := TSkImage.MakeFromEncodedFile(AImgFileName);
-              var _BytesJpeg: System.SysUtils.TBytes := _skImage.Encode(TSkEncodedImageFormat.jpeg, _quality);
-              _BytesStreamJpeg := TBytesStream.Create(_BytesJpeg);
-              _BytesStreamJpeg.Position := 0;
-              FImage.Picture.LoadFromStream(_BytesStreamJpeg);
+              if _skImage.EncodeToStream(_BytesStreamJpg, TSkEncodedImageFormat.jpeg) then
+              begin
+                _BytesStreamJpg.Position := 0;
+                FImage.Picture.LoadFromStream(_BytesStreamJpg);
+              end;
             finally
-              _BytesStreamJpeg.Free;
+              _BytesStreamJpg.Free;
             end
           end
         else
@@ -75,7 +75,7 @@ begin
       end;
     end)
   else
-    ShowMessage('Not Supported Image Format'#13#10'  - supported format - (*.jpg, *.jpeg, *.png, *.webp)');
+    ShowMessage('Not Supported Image Format'#13#10'  - supported format - (*.jpg, *.jpeg, *.png, *.webp,*.gif)');
 end;
 
 constructor TImageDropDown<T>.Create(AImage: TImage; APanel: TPanel);
@@ -84,7 +84,7 @@ begin
   FPanel := APanel;
   FFileName := '';
 
-  FOriginalImageWindowProc := APanel.WindowProc;
+  FOriginalPanelWndProc := APanel.WindowProc;
   APanel.WindowProc := ImageWindowProc;
   DragAcceptFiles(APanel.Handle, True);
 end;
@@ -93,11 +93,11 @@ destructor TImageDropDown<T>.Destroy;
 begin
   if Assigned(FPanel) then
   begin
-    FPanel.WindowProc := FOriginalImageWindowProc;
+    FPanel.WindowProc := FOriginalPanelWndProc;
     DragAcceptFiles(FPanel.Handle, False);
   end;
 
-  Inherited;
+  inherited;
 end;
 
 procedure TImageDropDown<T>.ImageWindowProc(var Msg: TMessage);
@@ -105,12 +105,12 @@ begin
   if Msg.Msg = WM_DROPFILES then
     ImageDrop(TWMDROPFILES(Msg))
   else
-    FOriginalImageWindowProc(Msg);
+    FOriginalPanelWndProc(Msg);
 end;
 
 procedure TImageDropDown<T>.ImageDrop(var Msg: TWMDROPFILES);
 var
-  _buffer: Array [0 .. MAX_PATH] Of Char;
+  _buffer: array [0 .. MAX_PATH] of Char;
 begin
   inherited;
   try

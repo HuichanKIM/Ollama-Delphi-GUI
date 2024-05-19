@@ -61,26 +61,26 @@ uses
 {$R *.dfm}
 
 const
-  C_Shortcut_Keys: array [0..21] of string = ('F1','F2','F3','F4','F5','F6','F7','F8','F9','F10',
-                                              'Alt+A','Alt+B','Alt+C','Alt+D','Alt+E','Alt+F','Alt+L','Alt+S','Alt+V',
-                                              'Ctrl+A','Ctrl+Z','');
-  C_Shortcut_Desc: array [0..21] of string = ('','Goto Welcome.','Goto Chatting Room.','',
-                                              'Translation of Message','Translation of Prompt','Trans, Push Message.',
-                                              'Trans, Push Prompt.','','','Ollama Alive ?','Scroll to Bottom.','Copy the Message.',
-                                              'Delete the Message.','','Scroll to Top.','Show Logs.','Save All Message to Text File.',
-                                              'TextToSpeech on the Message.','Abort Connection.','Close / Exit.','');
+  C_Shortcut_Keys: array [0..22] of string = ('F1','F2','F3','F4','F5','F6','F7','F8','F9','F10',
+                                              'Alt+A','Alt+B','Alt+C','Alt+D','Alt+E','Alt+F','Alt+G','Alt+L','Alt+S','Alt+V',
+                                              'Ctrl+A','Ctrl+R','Ctrl+Z');
+  C_Shortcut_Desc: array [0..22] of string = ('','Goto Welcome.','Goto Chatting Room.','',
+                                              'Translation of Prompt','Translation of Message','','','',
+                                              'Clear Chattings','Ollama Alive ?','Scroll to Bottom.','Copy the Message.',
+                                              'Delete the Message.','','Scroll to Top.','','Show Logs.','Save All Message to Text File.',
+                                              'TextToSpeech on the Message.','Abort Connection.','Default / Refresh','Close / Exit.');
   C_DevelopInfo: string = '''
 
     Development Tool  (GUI)
       Embarcadero Delphi 12.1  ( Pascal )
 
-    3rd party Reference Library
-      - Overbytes ICS 9.1 by François Piette
+    3rd party Reference Library  (* - free)
+      - Overbytes ICS 9.1 by François Piette (*)
       - TMS FNC UI Pack v 5.5.0.0 by TMS Software
-      - SVGIconImageList v 4.1.4 by Ethea S.r.l.
-      - Grijjy.TextToSpeech.pas by http://grijjy.com/
-      - FastMM4-AVX by by Maxim Masiutin
-      - Embeded Lib. : SKIA 2D Graphics
+      - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)
+      - Grijjy.TextToSpeech.pas by http://grijjy.com/ (*)
+      - FastMM4-AVX by by Maxim Masiutin (*)
+      - Embeded Lib. : SKIA 2D Graphics  (*)
   ''';
 
 procedure TForm_About.FormCreate(Sender: TObject);
@@ -99,7 +99,7 @@ end;
 procedure TForm_About.Update_Shortcuts();
 begin
   ListView_Shortcuts.items.Clear;
-  for var _i := 0 to 20 do
+  for var _i := 0 to Length(C_Shortcut_Keys)-1 do
   with ListView_Shortcuts.Items.Add do
     begin
       Caption := C_Shortcut_Keys[_i];

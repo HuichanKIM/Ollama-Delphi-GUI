@@ -152,18 +152,6 @@ object Form_RestOllama: TForm_RestOllama
         StyleElements = [seClient, seBorder]
       end
     end
-    object Panel_CaptionProtocol: TPanel
-      Left = 0
-      Top = 0
-      Width = 241
-      Height = 26
-      Align = alTop
-      Alignment = taRightJustify
-      BevelOuter = bvNone
-      Caption = 'Protocol  '
-      TabOrder = 1
-      StyleElements = [seClient, seBorder]
-    end
     object RadioGroup_PromptType: TRadioGroup
       AlignWithMargins = True
       Left = 3
@@ -177,7 +165,7 @@ object Form_RestOllama: TForm_RestOllama
       Items.Strings = (
         'Generate'
         'Chat (*)')
-      TabOrder = 2
+      TabOrder = 1
       StyleElements = [seClient, seBorder]
       OnClick = RadioGroup_PromptTypeClick
     end
@@ -191,7 +179,7 @@ object Form_RestOllama: TForm_RestOllama
       Margins.Right = 5
       Align = alBottom
       Caption = 'Debug ...'
-      TabOrder = 3
+      TabOrder = 2
       StyleElements = [seClient, seBorder]
       object CheckBox_DebugToLog: TCheckBox
         Left = 17
@@ -211,7 +199,7 @@ object Form_RestOllama: TForm_RestOllama
       Height = 56
       Align = alTop
       Caption = 'User / Nickname'
-      TabOrder = 4
+      TabOrder = 3
       StyleElements = [seClient, seBorder]
       object Edit_Nickname: TEdit
         Left = 17
@@ -231,8 +219,8 @@ object Form_RestOllama: TForm_RestOllama
       Align = alTop
       Alignment = taRightJustify
       BevelOuter = bvNone
-      Caption = 'Setting  '
-      TabOrder = 5
+      Caption = 'Settings   '
+      TabOrder = 4
       StyleElements = [seClient, seBorder]
       object SpeedButton_DefaultSet: TSpeedButton
         AlignWithMargins = True
@@ -240,12 +228,9 @@ object Form_RestOllama: TForm_RestOllama
         Top = 3
         Width = 23
         Height = 19
-        Hint = 'Reset to Default (*)'
+        Action = Action_DefaultRefresh
         Align = alLeft
-        ImageIndex = 24
-        ImageName = 'ic_refresh_48px'
         Images = SVGIconVirtualImageList1
-        OnClick = SpeedButton_DefaultSetClick
         ExplicitLeft = 2
       end
     end
@@ -257,7 +242,7 @@ object Form_RestOllama: TForm_RestOllama
       Height = 53
       Align = alTop
       Caption = 'Chatting Box'
-      TabOrder = 6
+      TabOrder = 5
       StyleElements = [seClient, seBorder]
       object Label_FontSize: TLabel
         Left = 16
@@ -295,7 +280,7 @@ object Form_RestOllama: TForm_RestOllama
       Margins.Bottom = 0
       Align = alBottom
       Caption = 'Topic Option'
-      TabOrder = 7
+      TabOrder = 6
       StyleElements = [seClient, seBorder]
       object Label_Seed000: TLabel
         Left = 126
@@ -332,12 +317,12 @@ object Form_RestOllama: TForm_RestOllama
       Height = 84
       Align = alTop
       Caption = 'Translation (by Google)'
-      TabOrder = 8
+      TabOrder = 7
       StyleElements = [seClient, seBorder]
       object SpeedButton_Translate: TSpeedButton
-        Left = 18
+        Left = 15
         Top = 24
-        Width = 23
+        Width = 30
         Height = 22
         Action = Action_TransMessage
         Images = SVGIconVirtualImageList1
@@ -382,7 +367,7 @@ object Form_RestOllama: TForm_RestOllama
         Top = 53
         Width = 207
         Height = 17
-        Caption = 'Sync Auto Translation of Response'
+        Caption = 'Sync. Auto Translation of Response'
         TabOrder = 2
         StyleElements = [seClient, seBorder]
       end
@@ -397,7 +382,7 @@ object Form_RestOllama: TForm_RestOllama
       Margins.Right = 5
       Align = alClient
       Caption = 'Memo'
-      TabOrder = 9
+      TabOrder = 8
       StyleElements = [seClient, seBorder]
       object Memo_Memo: TMemo
         AlignWithMargins = True
@@ -408,7 +393,6 @@ object Form_RestOllama: TForm_RestOllama
         Align = alClient
         ScrollBars = ssVertical
         TabOrder = 0
-        StyleElements = [seBorder]
       end
     end
     object GroupBox_CPUMem: TGroupBox
@@ -421,7 +405,7 @@ object Form_RestOllama: TForm_RestOllama
       Margins.Right = 5
       Align = alBottom
       Caption = 'CPU/Memory Usage'
-      TabOrder = 10
+      TabOrder = 9
       StyleElements = [seClient, seBorder]
       object Label_MemUsage: TLabel
         Left = 16
@@ -494,6 +478,23 @@ object Form_RestOllama: TForm_RestOllama
         StyleElements = [seClient, seBorder]
       end
     end
+    object Panel_OptionsTop: TPanel
+      AlignWithMargins = True
+      Left = 1
+      Top = 0
+      Width = 240
+      Height = 26
+      Margins.Left = 1
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
+      Align = alTop
+      Alignment = taRightJustify
+      BevelOuter = bvNone
+      Caption = 'Protocol  '
+      TabOrder = 10
+      StyleElements = [seClient, seBorder]
+    end
   end
   object StatusBar1: TStatusBar
     Left = 0
@@ -528,7 +529,7 @@ object Form_RestOllama: TForm_RestOllama
     TabOrder = 0
     object Label_StartRequest: TLabel
       AlignWithMargins = True
-      Left = 135
+      Left = 102
       Top = 3
       Width = 65
       Height = 24
@@ -543,8 +544,8 @@ object Form_RestOllama: TForm_RestOllama
     object Label_Caption: TLabel
       Left = 269
       Top = 0
-      Width = 105
-      Height = 15
+      Width = 716
+      Height = 30
       Align = alClient
       Alignment = taCenter
       Caption = 'Model in use - phi3'
@@ -556,10 +557,12 @@ object Form_RestOllama: TForm_RestOllama
       ParentFont = False
       Layout = tlCenter
       StyleElements = [seClient, seBorder]
+      ExplicitWidth = 105
+      ExplicitHeight = 15
     end
     object Button_StartRequest: TButton
       AlignWithMargins = True
-      Left = 206
+      Left = 173
       Top = 3
       Width = 27
       Height = 24
@@ -572,7 +575,7 @@ object Form_RestOllama: TForm_RestOllama
     end
     object Button_Abort: TButton
       AlignWithMargins = True
-      Left = 239
+      Left = 206
       Top = 3
       Width = 27
       Height = 24
@@ -612,7 +615,7 @@ object Form_RestOllama: TForm_RestOllama
     end
     object Button_Chatting: TButton
       AlignWithMargins = True
-      Left = 69
+      Left = 36
       Top = 3
       Width = 27
       Height = 24
@@ -636,7 +639,7 @@ object Form_RestOllama: TForm_RestOllama
     end
     object Button_Logs: TButton
       AlignWithMargins = True
-      Left = 102
+      Left = 69
       Top = 3
       Width = 27
       Height = 24
@@ -648,7 +651,7 @@ object Form_RestOllama: TForm_RestOllama
     end
     object Button_Home: TButton
       AlignWithMargins = True
-      Left = 36
+      Left = 3
       Top = 3
       Width = 27
       Height = 24
@@ -672,19 +675,17 @@ object Form_RestOllama: TForm_RestOllama
       Images = SVGIconVirtualImageList1
       TabOrder = 8
     end
-    object Button_Menu: TButton
+    object Button_DosCommand: TButton
       AlignWithMargins = True
-      Left = 3
+      Left = 239
       Top = 3
       Width = 27
       Height = 24
+      Action = Action_DosCommand
       Align = alLeft
-      ImageIndex = 8
-      ImageName = 'All\ic_dehaze_48px'
       ImageMargins.Left = 3
       Images = SVGIconVirtualImageList1
       TabOrder = 9
-      OnClick = Button_MenuClick
     end
   end
   object Panel_Models: TPanel
@@ -703,10 +704,15 @@ object Form_RestOllama: TForm_RestOllama
     ShowCaption = False
     TabOrder = 3
     object Panel_CaptionModelTopics: TPanel
+      AlignWithMargins = True
       Left = 0
       Top = 0
-      Width = 217
+      Width = 216
       Height = 26
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 1
+      Margins.Bottom = 0
       Align = alTop
       Alignment = taLeftJustify
       BevelOuter = bvNone
@@ -756,8 +762,8 @@ object Form_RestOllama: TForm_RestOllama
         AlignWithMargins = True
         Left = 5
         Top = 22
-        Width = 197
-        Height = 51
+        Width = 201
+        Height = 18
         Cursor = crHandPoint
         Align = alClient
         Caption = 
@@ -766,6 +772,8 @@ object Form_RestOllama: TForm_RestOllama
         WordWrap = True
         StyleElements = [seClient, seBorder]
         OnClick = Label_DescriptionClick
+        ExplicitWidth = 197
+        ExplicitHeight = 51
       end
     end
     object GroupBox_Model: TGroupBox
@@ -6495,25 +6503,12 @@ object Form_RestOllama: TForm_RestOllama
         RowSelect = True
         ShowHint = False
         TabOrder = 0
-        StyleElements = [seBorder]
         OnChange = TreeView_TopicsChange
         OnClick = TreeView_TopicsClick
         OnCustomDrawItem = TreeView_TopicsCustomDrawItem
         OnDblClick = TreeView_TopicsDblClick
         OnDragDrop = TreeView_TopicsDragDrop
         OnDragOver = TreeView_TopicsDragOver
-        Items.NodeData = {
-          070400000009540054007200650065004E006F00640065002900000000000000
-          00000000FFFFFFFFFFFFFFFF0000000000000000000100000001054B006F0072
-          006500610000002B0000000000000000000000FFFFFFFFFFFFFFFF0000000000
-          0000000000000000010631003200330034003500360000002900000000000000
-          00000000FFFFFFFFFFFFFFFF0000000000000000000200000001054A00610070
-          0061006E000000270000000000000000000000FFFFFFFFFFFFFFFF0000000000
-          0000000000000000010431003000300030000000270000000000000000000000
-          FFFFFFFFFFFFFFFF000000000000000000000000000104320030003000300000
-          00290000000000000000000000FFFFFFFFFFFFFFFF0000000000000000000000
-          000001054300680069006E0061000000250000000000000000000000FFFFFFFF
-          FFFFFFFF000000000000000000000000000103550053004100}
       end
       object Panel1: TPanel
         AlignWithMargins = True
@@ -6568,13 +6563,14 @@ object Form_RestOllama: TForm_RestOllama
           Left = 125
           Top = 0
           Width = 28
-          Height = 17
+          Height = 20
           Margins.Left = 10
           Margins.Top = 0
           Margins.Bottom = 0
           Align = alLeft
           Caption = 'seed'
           StyleElements = [seClient, seBorder]
+          ExplicitHeight = 17
         end
         object SpeedButton_NewRootnode: TSpeedButton
           Left = 23
@@ -6705,10 +6701,14 @@ object Form_RestOllama: TForm_RestOllama
       Top = 0
       Width = 659
       Height = 26
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 1
+      Margins.Bottom = 0
       Align = alTop
       Alignment = taLeftJustify
       BevelOuter = bvNone
-      Caption = 'Chatting Box'
+      Caption = ' Chatting Box'
       TabOrder = 1
       StyleElements = [seClient, seBorder]
       object SpeedButton_ScrollTop: TSpeedButton
@@ -6778,14 +6778,10 @@ object Form_RestOllama: TForm_RestOllama
         Top = 3
         Width = 23
         Height = 20
-        Hint = 'Clear Chatting Box'
+        Action = Action_ClearChatting
         Align = alRight
-        ImageIndex = 33
-        ImageName = 'ic_crop_din_48px'
         Images = SVGIconVirtualImageList1
-        OnClick = SpeedButton_ClearChatBoxClick
-        ExplicitLeft = 240
-        ExplicitTop = 6
+        ExplicitTop = 0
       end
       object SpeedButton_TTS: TSpeedButton
         AlignWithMargins = True
@@ -6806,7 +6802,7 @@ object Form_RestOllama: TForm_RestOllama
       Top = 26
       Width = 659
       Height = 727
-      ActivePage = Tabsheet_Chatting
+      ActivePage = TabSheet_ChatLogs
       Align = alClient
       TabOrder = 2
       OnChange = PageControl_ChattingChange
@@ -6828,6 +6824,7 @@ object Form_RestOllama: TForm_RestOllama
           Ctl3D = False
           ParentCtl3D = False
           ParentDoubleBuffered = False
+          StyleElements = [seBorder]
           Color = clGray
           DoubleBuffered = True
           Font.Charset = DEFAULT_CHARSET
@@ -6844,6 +6841,7 @@ object Form_RestOllama: TForm_RestOllama
           Appearance.TitleFont.Name = 'Segoe UI'
           Appearance.TitleFont.Style = [fsBold]
           Appearance.Spacing = 20.000000000000000000
+          Appearance.MaxEntryBoxHeight = 1000
           AddImagesToBitmapContainer = False
           ChatMessages = <
             item
@@ -7833,10 +7831,11 @@ object Form_RestOllama: TForm_RestOllama
         ImageIndex = 1
         object Memo_LogWin: TMemo
           AlignWithMargins = True
-          Left = 3
-          Top = 23
-          Width = 645
-          Height = 671
+          Left = 1
+          Top = 29
+          Width = 647
+          Height = 665
+          Margins.Left = 1
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -7853,12 +7852,12 @@ object Form_RestOllama: TForm_RestOllama
           ScrollBars = ssBoth
           TabOrder = 0
           WordWrap = False
-          StyleElements = [seBorder]
         end
         object Panel_CaptionLog: TPanel
-          Left = 0
-          Top = 0
-          Width = 651
+          AlignWithMargins = True
+          Left = 3
+          Top = 3
+          Width = 645
           Height = 20
           Align = alTop
           Alignment = taLeftJustify
@@ -7867,7 +7866,7 @@ object Form_RestOllama: TForm_RestOllama
           TabOrder = 1
           StyleElements = [seClient, seBorder]
           object SpeedButton_ClearLogBox: TSpeedButton
-            Left = 628
+            Left = 622
             Top = 0
             Width = 23
             Height = 20
@@ -8070,7 +8069,7 @@ object Form_RestOllama: TForm_RestOllama
     Left = 288
     Top = 136
     object Action_Options: TAction
-      Hint = 'Selection Visable Toggle'
+      Hint = 'Settings Visable / Toggle'
       ImageIndex = 11
       ImageName = 'All\ic_settings_48px'
       OnExecute = Action_OptionsExecute
@@ -8175,7 +8174,7 @@ object Form_RestOllama: TForm_RestOllama
       Hint = 'Translation'
       ImageIndex = 40
       ImageName = 'ic_text_fields_48px'
-      ShortCut = 116
+      ShortCut = 117
       OnExecute = Action_TranslationCommon
     end
     object Action_TransMessagePush: TAction
@@ -8183,7 +8182,6 @@ object Form_RestOllama: TForm_RestOllama
       Caption = 'Trans And Insert'
       ImageIndex = 40
       ImageName = 'ic_text_fields_48px'
-      ShortCut = 117
       OnExecute = Action_TranslationCommon
     end
     object Action_TransPrompt: TAction
@@ -8191,7 +8189,7 @@ object Form_RestOllama: TForm_RestOllama
       Hint = 'TransLation'
       ImageIndex = 39
       ImageName = 'ic_format_size_48px'
-      ShortCut = 118
+      ShortCut = 116
       OnExecute = Action_TranslationCommon
     end
     object Action_TransPromptPush: TAction
@@ -8199,8 +8197,26 @@ object Form_RestOllama: TForm_RestOllama
       Caption = 'Action_TransPromptPush'
       ImageIndex = 39
       ImageName = 'ic_format_size_48px'
-      ShortCut = 119
       OnExecute = Action_TranslationCommon
+    end
+    object Action_DefaultRefresh: TAction
+      ImageIndex = 24
+      ImageName = 'ic_refresh_48px'
+      ShortCut = 16466
+      OnExecute = Action_DefaultRefreshExecute
+    end
+    object Action_DosCommand: TAction
+      Hint = 'Dos Command Mode Request'
+      ImageIndex = 13
+      ImageName = 'All\ic_adjust_48px'
+      OnExecute = Action_DosCommandExecute
+    end
+    object Action_ClearChatting: TAction
+      Hint = 'Clear Chattings'
+      ImageIndex = 33
+      ImageName = 'ic_crop_din_48px'
+      ShortCut = 121
+      OnExecute = Action_ClearChattingExecute
     end
   end
   object SVGIconVirtualImageList1: TSVGIconVirtualImageList
@@ -9230,13 +9246,6 @@ object Form_RestOllama: TForm_RestOllama
       'UTF-7')
     Left = 552
     Top = 552
-  end
-  object Timer_ScrollToBottom: TTimer
-    Enabled = False
-    Interval = 250
-    OnTimer = Timer_ScrollToBottomTimer
-    Left = 382
-    Top = 216
   end
   object Timer_System: TTimer
     Enabled = False

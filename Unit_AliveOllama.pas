@@ -40,7 +40,7 @@ function Get_ListModels_Ollama(const ABaseURL: string): string;
 implementation
 
 uses
-  IdHTTP;
+  IdHTTP, IdURI;  { More Useful for Acessing Local server - http://... }
 
 {$R *.dfm}
 

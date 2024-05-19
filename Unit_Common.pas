@@ -8,7 +8,37 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
-  System.Types;
+  System.Types,
+  Vcl.StdCtrls,
+  DosCommand;
+
+const
+  DOS_MESSAGE = WM_USER + 1;
+    DOS_MESSAGE_START  = DOS_MESSAGE + 1;
+    DOS_MESSAGE_STOP   = DOS_MESSAGE + 2;
+    DOS_MESSAGE_FINISH = DOS_MESSAGE + 3;
+    DOS_MESSAGE_ERROR  = DOS_MESSAGE + 4;
+
+type
+  TG_DosCommand = class
+    FDosCommand: TDosCommand;
+    FDosText: TStrings;
+    FCommand: string;
+  public
+    constructor Create();
+    destructor Destroy; override;
+
+    procedure DosCommandTerminated(Sender: TObject);
+    procedure DosCommandExecuteError(ASender: TObject; AE: Exception; var AHandled: Boolean);
+
+    function Dos_Execute(const Acmd: string): Boolean;
+    function Dos_Exit(): Boolean;
+    procedure Dos_CommandBatch(ACmd: string);
+    function Get_DosResult(AFlag: Integer = 0): string;
+
+    property DosCommand: TDosCommand  read FDosCommand;
+    property Command: string  read FCommand;
+  end;
 
 type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
@@ -29,8 +59,8 @@ const
 
 function GetUsersWindowsLanguage: string;
 function Get_LocaleIDString(const AFlag: Integer = 0): string;
-function IOUtils_ReadAllText(const AFilePath: string=''): string;
-function IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
+function ReadAllText_Unicode(const AFilePath: string=''): string;
+function WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
 function Get_SystemInfo(): string;
 function Get_DisplayJson(const RespType: Integer; const ModelsFlag: Boolean; const RespStr: string): string;
 function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer): string;
@@ -44,11 +74,15 @@ var
   CV_TmpPath: string = 'temp';
   CV_LocaleID: string = 'en';
 
+var
+  GV_DosCommand: TG_DosCommand;
+
 implementation
 
 uses
   System.IOUtils,
   Winapi.PsAPI,
+  WinAPi.ShellAPI,
   System.JSON,
   System.JSON.Readers,
   System.JSON.Writers,
@@ -56,19 +90,48 @@ uses
   Unit_SysInfo,
   Vcl.Styles,
   Vcl.StyleAPI,
-  Vcl.Forms;
+  Vcl.Forms,
+  Unit_Main;
 
 function IOUtils_ReadAllText(const AFilePath: string=''): string;
 begin
   if FileExists( AFilePath ) then
-  Result := System.IOUtils.TFile.ReadAllText( AFilePath );
+  Result := System.IOUtils.TFile.ReadAllText( AFilePath);
 end;
 
 function IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
 begin
   Result := False;
-  System.IOUtils.TFile.WriteAllText( AFilePath, AContents );
+  System.IOUtils.TFile.WriteAllText( AFilePath, AContents);
   Result := FileExists( AFilePath );
+end;
+
+function ReadAllText_Unicode(const AFilePath: string=''): string;
+begin
+  Result := '';
+  if FileExists(AFilePath) then
+  begin
+    var _strings: TStrings := TStringList.Create;
+    try
+      _strings.LoadFromFile(AFilePath);
+      Result := _strings.Text;
+    finally
+      _strings.Free;
+    end;
+  end;
+end;
+
+function WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
+begin
+  Result := False;
+  var _strings: TStrings := TStringList.Create;
+  try
+    _strings.Text := AContents;
+    _strings.SaveToFile(AFilePath);
+  finally
+    _strings.Free;
+  end;
+  Result := FileExists(AFilePath);
 end;
 
 function Get_SystemInfo(): string;
@@ -100,7 +163,7 @@ begin
 
   var _LocaleID: string := Get_LocaleIDString();
   var _WinLangusage := GetUsersWindowsLanguage;
-  Result := Result+'  OS Language: '+_WinLangusage + '  ['+_LocaleID+']';
+  Result := Result+'  OS Language: '+_WinLangusage + '  ISO Code ['+_LocaleID+']';
 end;
 
 function Get_DisplayJson(const RespType: Integer; const ModelsFlag: Boolean; const RespStr: string): string;
@@ -286,56 +349,27 @@ end;
 
 { System for LocaleName / Windows Kernal ... }
 
-const
-  LOCALE_NAME_MAX_LENGTH = 85;
-
-function LCIDToLocaleName(Locale: LCID; lpName: LPWSTR; cchName: Integer; dwFlags: DWORD): Integer; stdcall;external kernel32 name 'LCIDToLocaleName';
-
-function Get_LocaleName():  string;
-var
-  _strNameBuffer: array [0 .. LOCALE_NAME_MAX_LENGTH - 1] of Char;
-begin
-  Result := '';
-  if (LCIDToLocaleName(1033, _strNameBuffer, LOCALE_NAME_MAX_LENGTH, 0) = 0) then
-    RaiseLastOSError
-  else
-    Result := _strNameBuffer;
-
-  if (LCIDToLocaleName(1041, _strNameBuffer, LOCALE_NAME_MAX_LENGTH, 0) = 0) then
-    RaiseLastOSError
-  else
-   Result := Result +'  /  '+_strNameBuffer;
-end;
-
 function Get_LocaleIDString(const AFlag: Integer = 0): string;
-var
-  _strNameBuffer: array [0 .. 255] of Char;
 begin
   Result := '';
-  if (LCIDToLocaleName(LOCALE_USER_DEFAULT, _strNameBuffer, 255, 0) > 0) then
-    for var _i := 0 to 255 do
-      begin
-        if _strNameBuffer[_i] = #0 then
-          Break
-        else
-          Result := Result + _strNameBuffer[_i];
-      end;
-  if (Length(Result) = 0) and (LCIDToLocaleName(0, _strNameBuffer, 255, 0) > 0) then
-    for var _i := 0 to 255 do
-      begin
-        if _strNameBuffer[_i] = #0 then
-          Break
-        else
-          Result := Result + _strNameBuffer[_i];
-      end;
 
-  if Length(Result) = 0 then
-    Result := 'NR-NR' // defaulting to [No Reply - No Reply]
-  else
-    if AFlag = 1 then
-    begin
-       Result := LowerCase(Copy(Result, 1,2));
-    end;
+  var _UserLCID: LCID := GetUserDefaultLCID;
+  var _BufLen: Integer := GetLocaleInfo(_UserLCID, LOCALE_SISO639LANGNAME, nil, 0);
+  var _buffer: PChar := StrAlloc(_BufLen);
+  try
+    if GetLocaleInfo(_UserLCID, LOCALE_SISO639LANGNAME, _buffer, _BufLen) <> 0 then
+      Result := string(_buffer);
+
+    if Length(Result) = 0 then
+      Result := 'NR-NR' // defaulting to [No Reply - No Reply]
+    else
+      if AFlag = 1 then
+      begin
+        Result := LowerCase(Copy(Result, 1,2));   // = Substring(0, 2);
+      end;
+  finally
+    StrDispose(_buffer);
+  end;
 end;
 
 function GetUserDefaultUILanguage: LANGID; stdcall; external 'kernel32';
@@ -348,8 +382,114 @@ begin
   Result := _WinLanguage;
 end;
 
+{ TG_DosCommand ... }
+
+constructor TG_DosCommand.Create;
+begin
+  FDosText := TStringList.Create;
+  FDosCommand :=  TDosCommand.Create(nil);
+  with FDosCommand do
+  begin
+    InputToOutput := False;
+    OutputLines := FDosText;
+    MaxTimeAfterBeginning := 0;
+    MaxTimeAfterLastOutput := 1000;
+    OnExecuteError := DosCommandExecuteError;
+    OnTerminated :=   DosCommandTerminated;
+  end;
+end;
+
+destructor TG_DosCommand.Destroy;
+begin
+  FDosCommand.OnExecuteError := nil;
+  FDosCommand.OnTerminated := nil;
+  if FDosCommand.IsRunning then
+    FDosCommand.Stop;
+  FreeAndNil(FDosCommand);
+  FreeAndNil(FDosText);
+  inherited;
+end;
+
+procedure TG_DosCommand.Dos_CommandBatch(ACmd: string);
+begin
+  var _batchfile: string := CV_AppPath+'ollamarun.bat';
+  var _commands: TStrings := TStringList.Create;
+  var _success: Boolean := False;
+  with _commands do
+  try
+    Add('@echo off');
+    Add('rem Ollama Delphi GUI');
+    Add('cd ' + CV_AppPath);
+    Add('@echo on');
+    Add(Acmd);
+
+    _success := IOUtils_WriteAllText(_batchfile, Text);
+  finally
+    Free;
+  end;
+
+  if _success then
+  begin
+    Sleep(10);
+    ShellExecute(0, PChar('Open'), PChar(_batchfile), nil, PChar(CV_AppPath), SW_SHOW) ;
+  end;
+end;
+
+procedure TG_DosCommand.DosCommandExecuteError(ASender: TObject; AE: Exception; var AHandled: Boolean);
+begin
+  FDosText.Text := 'Error !!!'+C_CRLF+AE.Message;
+  PostMessage(Form_RestOllama.Handle, DOS_MESSAGE, DOS_MESSAGE_ERROR, 0);
+end;
+
+procedure TG_DosCommand.DosCommandTerminated(Sender: TObject);
+begin
+  // Finish ...
+  PostMessage(Form_RestOllama.Handle, DOS_MESSAGE, DOS_MESSAGE_FINISH, 0);
+end;
+
+function TG_DosCommand.Dos_Execute(const Acmd: string): Boolean;
+begin
+  Result := False;
+  FDosCommand.OnTerminated := nil;
+  if FDosCommand.IsRunning then
+    FDosCommand.Stop;
+  FDosCommand.OnTerminated := DosCommandTerminated;
+  FDosText.Clear;
+  FCommand := Acmd;
+  with FDosCommand do
+  try
+    CommandLine := Acmd;
+    CurrentDir :=  CV_AppPath;
+    OutputLines := FDosText;
+
+    Execute;
+  except
+    Abort;
+  end;
+
+  Result := True;
+  PostMessage(Form_RestOllama.Handle, DOS_MESSAGE, DOS_MESSAGE_START, 0);
+end;
+
+function TG_DosCommand.Dos_Exit: Boolean;
+begin
+  Result := False;
+  if FDosCommand.IsRunning then
+    FDosCommand.Stop;
+  Result := not FDosCommand.IsRunning;;
+  PostMessage(Form_RestOllama.Handle, DOS_MESSAGE, DOS_MESSAGE_STOP, 0);
+end;
+
+function TG_DosCommand.Get_DosResult(AFlag: Integer = 0): string;
+begin
+  Result := FDosText.Text;
+end;
+
 initialization
   CV_LocaleID := Get_LocaleIDString(1);
+  GV_DosCommand := TG_DosCommand.Create;
 
+finalization
+  FreeAndNil(GV_DosCommand);
 
 end.

@@ -66,7 +66,7 @@ begin
   var _LangSource: string := C_LanguageCode[ ACodeFrom ];
   var _LangTarget: string := C_LanguageCode[ ACodeTo ];
   var _URI := TURI.Create('https://translate.googleapis.com/translate_a/single');
-  var _text := Trim(AText);
+  var _query := Trim(AText);
   with _URI do
   begin
     AddParameter('client', 'gtx');
@@ -79,7 +79,7 @@ begin
     AddParameter('ie', 'UTF-8');
     AddParameter('source', 'icon');
     AddParameter('tk', '467103.467103');
-    AddParameter('q', _text);
+    AddParameter('q', _query);
   end;
 
   var _Responses := TBytesStream.Create();
@@ -170,7 +170,7 @@ begin
       Label_Prompt.Caption := c_Type[AUser] + '  - '+_reqdisplay;
 
     var _trans := FTransResult.Replace(C_UTF8_LF, C_CRLF, [rfReplaceAll]);
-    Memo_Translates.lines.Add(_trans)
+    Memo_Translates.Lines.Add(_trans)
   end;
 end;
 
