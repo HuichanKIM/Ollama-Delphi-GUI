@@ -2134,8 +2134,22 @@ end;
 procedure TForm_RestOllama.SpeedButton_ExpandFullClick(Sender: TObject);
 begin
   SpeedButton_ExpandFull.Tag :=  (SpeedButton_ExpandFull.Tag +1) mod 2;
+
   if SpeedButton_ExpandFull.Tag = 1 then
-    TreeView_Topics.FullExpand
+    begin
+      var _selnode: TTreeNode := TreeView_Topics.Selected;
+      TreeView_Topics.FullExpand;
+      if TreeView_Topics.items.Count > 0 then
+      begin
+        if _selnode = nil then
+        _selnode := TreeView_Topics.items.GetFirstNode;
+        with _selnode do
+        begin
+          Selected := True;
+          MakeVisible;
+        end;
+      end;
+    end
   else
     TreeView_Topics.FullCollapse;
 end;

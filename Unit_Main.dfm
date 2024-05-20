@@ -35,7 +35,6 @@ object Form_RestOllama: TForm_RestOllama
     ParentCtl3D = False
     ShowCaption = False
     TabOrder = 2
-    ExplicitLeft = 876
     object Image_Logo: TImage
       Left = 200
       Top = 710
@@ -374,7 +373,6 @@ object Form_RestOllama: TForm_RestOllama
       Caption = 'Memo'
       TabOrder = 7
       StyleElements = [seClient, seBorder]
-      ExplicitHeight = 183
       object Memo_Memo: TMemo
         AlignWithMargins = True
         Left = 4
@@ -384,7 +382,6 @@ object Form_RestOllama: TForm_RestOllama
         Align = alClient
         ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitHeight = 160
       end
     end
     object GroupBox_CPUMem: TGroupBox
@@ -399,7 +396,6 @@ object Form_RestOllama: TForm_RestOllama
       Caption = 'CPU/Memory Usage'
       TabOrder = 8
       StyleElements = [seClient, seBorder]
-      ExplicitTop = 567
       object Label_MemUsage: TLabel
         Left = 16
         Top = 23
@@ -510,7 +506,6 @@ object Form_RestOllama: TForm_RestOllama
         Width = 50
       end>
     ParentDoubleBuffered = False
-    ExplicitWidth = 1117
   end
   object Panel_Toolbar: TPanel
     Left = 0
@@ -521,7 +516,6 @@ object Form_RestOllama: TForm_RestOllama
     BevelOuter = bvNone
     ShowCaption = False
     TabOrder = 0
-    ExplicitWidth = 1117
     object Label_StartRequest: TLabel
       AlignWithMargins = True
       Left = 69
@@ -552,7 +546,6 @@ object Form_RestOllama: TForm_RestOllama
       ParentFont = False
       Layout = tlCenter
       StyleElements = [seClient, seBorder]
-      ExplicitLeft = 254
       ExplicitWidth = 105
       ExplicitHeight = 15
     end
@@ -568,7 +561,6 @@ object Form_RestOllama: TForm_RestOllama
       ImageMargins.Left = 3
       Images = SVGIconVirtualImageList1
       TabOrder = 0
-      ExplicitLeft = 158
     end
     object Button_Abort: TButton
       AlignWithMargins = True
@@ -582,7 +574,6 @@ object Form_RestOllama: TForm_RestOllama
       ImageMargins.Left = 3
       Images = SVGIconVirtualImageList1
       TabOrder = 1
-      ExplicitLeft = 191
     end
     object Button_About: TButton
       AlignWithMargins = True
@@ -598,7 +589,6 @@ object Form_RestOllama: TForm_RestOllama
       Images = SVGIconVirtualImageList1
       TabOrder = 2
       OnClick = Button_AboutClick
-      ExplicitLeft = 1087
     end
     object Button_Options: TButton
       AlignWithMargins = True
@@ -611,7 +601,6 @@ object Form_RestOllama: TForm_RestOllama
       ImageMargins.Left = 3
       Images = SVGIconVirtualImageList1
       TabOrder = 3
-      ExplicitLeft = 988
     end
     object Button_Chatting: TButton
       AlignWithMargins = True
@@ -648,7 +637,6 @@ object Form_RestOllama: TForm_RestOllama
       ImageMargins.Left = 3
       Images = SVGIconVirtualImageList1
       TabOrder = 6
-      ExplicitLeft = 224
     end
   end
   object Panel_Models: TPanel
@@ -6513,7 +6501,7 @@ object Form_RestOllama: TForm_RestOllama
           Top = 0
           Width = 23
           Height = 20
-          Hint = 'Delete from Requests'
+          Hint = 'Request node text'
           Align = alRight
           ImageIndex = 12
           ImageName = 'All\ic_send_48px'
@@ -6586,7 +6574,6 @@ object Form_RestOllama: TForm_RestOllama
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 4
-    ExplicitWidth = 659
     object Panel_ChatMessageBox: TPanel
       AlignWithMargins = True
       Left = 0
@@ -6599,7 +6586,6 @@ object Form_RestOllama: TForm_RestOllama
       BevelOuter = bvNone
       ShowCaption = False
       TabOrder = 0
-      ExplicitWidth = 659
       object SpeedButton_AddToTopics: TSpeedButton
         AlignWithMargins = True
         Left = 0
@@ -6654,7 +6640,6 @@ object Form_RestOllama: TForm_RestOllama
         Align = alClient
         TabOrder = 0
         OnKeyPress = Edit_ReqContentKeyPress
-        ExplicitWidth = 541
         ExplicitHeight = 23
       end
       object Button_SendRequest: TButton
@@ -6668,7 +6653,6 @@ object Form_RestOllama: TForm_RestOllama
         ImageMargins.Left = 5
         Images = SVGIconVirtualImageList1
         TabOrder = 1
-        ExplicitLeft = 625
       end
     end
     object Panel_ChattingButtons: TPanel
@@ -6686,7 +6670,6 @@ object Form_RestOllama: TForm_RestOllama
       Caption = ' Chatting Box'
       TabOrder = 1
       StyleElements = [seClient, seBorder]
-      ExplicitWidth = 659
       object SpeedButton_ScrollTop: TSpeedButton
         AlignWithMargins = True
         Left = 521
@@ -6784,7 +6767,6 @@ object Form_RestOllama: TForm_RestOllama
       TabOrder = 2
       OnChange = PageControl_ChattingChange
       OnResize = PageControl_ChattingResize
-      ExplicitWidth = 659
       object Tabsheet_Chatting: TTabSheet
         Caption = 'CHAT'
         DesignSize = (
@@ -7276,7 +7258,7 @@ object Form_RestOllama: TForm_RestOllama
           ShowMessageField = False
           MessageTimestamp.Font.Charset = DEFAULT_CHARSET
           MessageTimestamp.Font.Color = clSilver
-          MessageTimestamp.Font.Height = -11
+          MessageTimestamp.Font.Height = -12
           MessageTimestamp.Font.Name = 'Segoe UI'
           MessageTimestamp.Font.Style = []
           MessageTimestamp.Show = True
@@ -7284,7 +7266,6 @@ object Form_RestOllama: TForm_RestOllama
           VerticalScrollBarVisible = True
           GlobalFont.Size = 9.000000000000000000
           OnAfterDrawMessage = TMSFNCChat_OllamaAfterDrawMessage
-          ExplicitWidth = 651
         end
         object SkAnimatedImage_ChatProcess: TSkAnimatedImage
           Left = 365
@@ -7294,7 +7275,6 @@ object Form_RestOllama: TForm_RestOllama
           Anchors = [akRight, akBottom]
           Opacity = 200
           Animation.Speed = 0.500000000000000000
-          ExplicitLeft = 301
           Data = {
             47494638396146006400841C00040D21E4E8F2E4E8F3E4E8F4E5E8F3E5E8F4E4
             E9F3E4E9F4E5E9F3E5E9F4E6E9F3E5EAF4E6EAF4F9F9F9FAFAFAFAFBFBFBFBFB
@@ -7832,7 +7812,6 @@ object Form_RestOllama: TForm_RestOllama
           ScrollBars = ssBoth
           TabOrder = 0
           WordWrap = False
-          ExplicitWidth = 647
         end
         object Panel_CaptionLog: TPanel
           Left = 0
@@ -7848,7 +7827,6 @@ object Form_RestOllama: TForm_RestOllama
           Caption = '          Logs ...'
           TabOrder = 1
           StyleElements = [seClient, seBorder]
-          ExplicitWidth = 651
           object SpeedButton_ClearLogBox: TSpeedButton
             Left = 692
             Top = 0
@@ -7887,9 +7865,6 @@ object Form_RestOllama: TForm_RestOllama
             Caption = 'Response to Log'
             TabOrder = 0
             StyleElements = [seClient, seBorder]
-            ExplicitLeft = 504
-            ExplicitTop = 0
-            ExplicitHeight = 20
           end
         end
       end
