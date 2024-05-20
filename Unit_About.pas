@@ -64,7 +64,7 @@ const
   C_Shortcut_Keys: array [0..22] of string = ('F1','F2','F3','F4','F5','F6','F7','F8','F9','F10',
                                               'Alt+A','Alt+B','Alt+C','Alt+D','Alt+E','Alt+F','Alt+G','Alt+L','Alt+S','Alt+V',
                                               'Ctrl+A','Ctrl+R','Ctrl+Z');
-  C_Shortcut_Desc: array [0..22] of string = ('','Goto Welcome.','Goto Chatting Room.','',
+  C_Shortcut_Desc: array [0..22] of string = ('Show Request Dialog','Goto Welcome.','Goto Chatting Room.','',
                                               'Translation of Prompt','Translation of Message','','','',
                                               'Clear Chattings','Ollama Alive ?','Scroll to Bottom.','Copy the Message.',
                                               'Delete the Message.','','Scroll to Top.','','Show Logs.','Save All Message to Text File.',

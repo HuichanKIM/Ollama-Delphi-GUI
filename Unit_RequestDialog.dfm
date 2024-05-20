@@ -28,8 +28,8 @@ object Form_RequestDialog: TForm_RequestDialog
     Caption = 'Prompt / Message'
   end
   object Label_Clear: TLabel
-    Left = 311
-    Top = 11
+    Left = 315
+    Top = 9
     Width = 26
     Height = 13
     Cursor = crHandPoint
@@ -44,10 +44,10 @@ object Form_RequestDialog: TForm_RequestDialog
     OnClick = Label_ClearClick
   end
   object SpeedButton_Trans: TSpeedButton
-    Left = 6
-    Top = 180
+    Left = 241
+    Top = 6
     Width = 67
-    Height = 22
+    Height = 17
     Caption = 'Trans.'
     ImageIndex = 39
     ImageName = 'ic_format_size_48px'

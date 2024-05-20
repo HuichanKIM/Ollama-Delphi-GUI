@@ -13,7 +13,7 @@ uses
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.StdCtrls,
-  Vcl.ExtCtrls;
+  Vcl.ExtCtrls, Vcl.Buttons;
 
 type
   TForm_Translator = class(TForm)
@@ -23,9 +23,12 @@ type
     Panel_Tollbar: TPanel;
     CheckBox_Pushtochatbox: TCheckBox;
     Label_Prompt: TLabel;
+    SpeedButton_TTS: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormShow(Sender: TObject);
+    procedure SpeedButton_TTSClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FTransResult: string;
     FRequest: string;
@@ -46,8 +49,10 @@ implementation
 uses
   System.Net.HttpClient,
   System.Net.URLClient,
+  System.RegularExpressions,
   Vcl.Themes,
-  Unit_Common;
+  Unit_Common,
+  Unit_Main;
 
 {$R *.dfm}
 
@@ -115,6 +120,11 @@ end;
 
 { TForm_Translator }
 
+procedure TForm_Translator.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Form_RestOllama.Do_TTS_Speak(0, '');
+end;
+
 procedure TForm_Translator.FormCreate(Sender: TObject);
 begin
   Memo_Translates.Clear;
@@ -133,8 +143,10 @@ end;
 procedure TForm_Translator.FormShow(Sender: TObject);
 begin
   if TStyleManager.IsCustomStyleActive then
+  begin
     Memo_Translates.Color := StyleServices.GetStyleColor(scPanel);
-
+    Memo_Translates.StyleElements := [seBorder];
+  end;
   CheckBox_Pushtochatbox.Enabled := PushFlag;
 end;
 
@@ -145,7 +157,7 @@ const
 begin
   FTransResult := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
   var _reqdisplay: string := FRequest;
-  if ACodeTo = 1 then
+  if TRegEx.IsMatch(_reqdisplay, C_Regex) then
     begin
       if Length(_reqdisplay) * SizeOf(Char) > 40 then
       begin
@@ -161,6 +173,7 @@ begin
         _reqdisplay := _reqdisplay + ' ...';
       end
     end;
+
   CheckBox_Pushtochatbox.Enabled := (AUser = 0) and PushFlag;
   if FTransResult <> '' then
   begin
@@ -183,6 +196,11 @@ procedure TForm_Translator.SetPushFlag(const Value: Boolean);
 begin
   FPushFlag := Value;
   CheckBox_Pushtochatbox.Enabled := Value;
+end;
+
+procedure TForm_Translator.SpeedButton_TTSClick(Sender: TObject);
+begin
+  Form_RestOllama.Do_TTS_Speak(1, Memo_Translates.Lines.Text);
 end;
 
 end.

@@ -40,13 +40,13 @@ function Get_ListModels_Ollama(const ABaseURL: string): string;
 implementation
 
 uses
-  IdHTTP, IdURI;  { More Useful for Acessing Local server - http://... }
+  IdHTTP, IdURI;  { More Useful for Acessing Local server / no SSL - http://... }
 
 {$R *.dfm}
 
 const
-  ServerAddress = 'http://localhost:11434';
-  Alive_checker = 'Ollama is running';
+  C_OllamaAddress = 'http://localhost:11434';
+  C_Alive_checker = 'Ollama is running';
 
 function Get_ListModels_Ollama(const ABaseURL: string): string;
 begin
@@ -73,9 +73,9 @@ begin
   try
     var _HTTP: TIdHTTP := TIdHTTP.Create;
     try
-      var _Query := ServerAddress;
+      var _Query := C_OllamaAddress;
       var _Buffer := _HTTP.Get(_Query);
-      Result := SameText(_Buffer, Alive_checker);
+      Result := SameText(_Buffer, C_Alive_checker);
       V_AliveFlag := Result;
     finally
       _HTTP.Free;
@@ -116,11 +116,11 @@ begin
   try
     var _HTTP: TIdHTTP := TIdHTTP.Create;
     try
-      var _Query := ServerAddress;
+      var _Query := C_OllamaAddress;
       var _Buffer := _HTTP.Get(_Query);
       LogReturn(_Buffer);
 
-      V_AliveFlag := SameText(_Buffer, Alive_checker);
+      V_AliveFlag := SameText(_Buffer, C_Alive_checker);
       LogReturn(c_Alive[ V_AliveFlag ]);
 
       if not V_AliveFlag then

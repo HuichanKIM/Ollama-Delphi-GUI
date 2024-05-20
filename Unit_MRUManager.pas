@@ -15,7 +15,7 @@ uses
   Vcl.ComCtrls;
 
 const
-  MRU_MAX_ROOT = 20;
+  MRU_MAX_ROOT  = 20;
   MRU_MAX_CHILD = 30;
 
 type

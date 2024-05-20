@@ -15,6 +15,7 @@ object Form_Translator: TForm_Translator
   KeyPreview = True
   Position = poMainFormCenter
   RoundedCorners = rcOn
+  OnClose = FormClose
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -31,6 +32,19 @@ object Form_Translator: TForm_Translator
     DesignSize = (
       508
       35)
+    object SpeedButton_TTS: TSpeedButton
+      AlignWithMargins = True
+      Left = 6
+      Top = 9
+      Width = 23
+      Height = 20
+      Hint = 'Text to Speech'
+      Margins.Right = 5
+      ImageIndex = 47
+      ImageName = 'ic_record_voice_over_48px'
+      Images = Form_RestOllama.SVGIconVirtualImageList1
+      OnClick = SpeedButton_TTSClick
+    end
     object Button_OK: TButton
       Left = 419
       Top = 8
@@ -77,7 +91,7 @@ object Form_Translator: TForm_Translator
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 1
-    StyleElements = [seBorder]
+    StyleElements = [seClient, seBorder]
   end
   object Panel_Tollbar: TPanel
     AlignWithMargins = True
@@ -94,8 +108,8 @@ object Form_Translator: TForm_Translator
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 49
-      Height = 15
+      Width = 502
+      Height = 24
       Align = alClient
       Caption = 'Prompt   '
       Font.Charset = DEFAULT_CHARSET
@@ -105,6 +119,8 @@ object Form_Translator: TForm_Translator
       Font.Style = []
       ParentFont = False
       WordWrap = True
+      ExplicitWidth = 49
+      ExplicitHeight = 15
     end
   end
 end

@@ -725,8 +725,8 @@ object Form_About: TForm_About
         object Label_Development: TLabel
           Left = 0
           Top = 0
-          Width = 352
-          Height = 224
+          Width = 129
+          Height = 15
           Align = alClient
           Caption = 'Development Tool  (GUI)'
           Font.Charset = DEFAULT_CHARSET
@@ -736,8 +736,6 @@ object Form_About: TForm_About
           Font.Style = []
           ParentFont = False
           StyleElements = [seClient, seBorder]
-          ExplicitWidth = 129
-          ExplicitHeight = 15
         end
       end
       object TabSheet2: TTabSheet

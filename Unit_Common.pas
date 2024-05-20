@@ -44,7 +44,7 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  C_Version     = 'v 0.9.1 - beta (2024.05.18)';
+  C_Version     = 'v 0.9.2 - beta (2024.05.21)';
   C_MainCaption = 'Ollama Chat CLient '+C_Version;
   C_CoptRights  = '- Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea. All Rights Reserved. -';
 
@@ -56,6 +56,9 @@ const
   C_LanguageCode: array [0 .. 10] of string = ('en','ko','ja','zh','hi','fr','de','it','pt','ru','es');
   C_UTF8_LF = #10;
   C_CRLF = #13#10;
+
+const
+  C_Regex: String = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä  - Regular expression for Korean language test }
 
 function GetUsersWindowsLanguage: string;
 function Get_LocaleIDString(const AFlag: Integer = 0): string;

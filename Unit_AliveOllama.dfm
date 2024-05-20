@@ -4,8 +4,8 @@ object Form_AliveOllama: TForm_AliveOllama
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = '  Ollama Alive Checker'
-  ClientHeight = 246
-  ClientWidth = 306
+  ClientHeight = 232
+  ClientWidth = 224
   Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -20,29 +20,29 @@ object Form_AliveOllama: TForm_AliveOllama
   OnShow = FormShow
   TextHeight = 15
   object Result: TLabel
-    Left = 16
-    Top = 91
+    Left = 3
+    Top = 87
     Width = 32
     Height = 15
     Caption = 'Result'
   end
   object GroupBox1: TGroupBox
-    Left = 16
-    Top = 16
-    Width = 266
+    Left = 3
+    Top = 9
+    Width = 213
     Height = 65
     Caption = 'Ollama IP'
     TabOrder = 0
     object Edit1: TEdit
-      Left = 24
-      Top = 23
-      Width = 169
+      Left = 12
+      Top = 25
+      Width = 129
       Height = 21
       TabOrder = 0
       Text = 'http://localhost:11434'
     end
     object Button_Alive: TButton
-      Left = 204
+      Left = 148
       Top = 21
       Width = 50
       Height = 25
@@ -52,16 +52,16 @@ object Form_AliveOllama: TForm_AliveOllama
     end
   end
   object Memo1: TMemo
-    Left = 16
-    Top = 118
-    Width = 266
+    Left = 15
+    Top = 105
+    Width = 201
     Height = 73
     TabOrder = 1
   end
   object Button_OK: TButton
-    Left = 207
-    Top = 206
-    Width = 75
+    Left = 158
+    Top = 198
+    Width = 58
     Height = 25
     Caption = 'OK'
     ModalResult = 1
