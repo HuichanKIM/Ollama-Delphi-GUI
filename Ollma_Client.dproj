@@ -1103,6 +1103,7 @@
         <DCCReference Include="Unit_SysInfo.pas"/>
         <DCCReference Include="Unit_MRUManager.pas"/>
         <DCCReference Include="Unit_ImageDropDown.pas"/>
+        <DCCReference Include="SpeechLib_TLB.pas"/>
         <DCCReference Include="Unit_Main.pas">
             <Form>Form_RestOllama</Form>
         </DCCReference>

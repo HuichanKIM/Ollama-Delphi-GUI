@@ -3,7 +3,7 @@ object Form_About: TForm_About
   Top = 0
   BorderStyle = bsDialog
   Caption = 'About'
-  ClientHeight = 460
+  ClientHeight = 474
   ClientWidth = 386
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -52,10 +52,40 @@ object Form_About: TForm_About
     ParentFont = False
     ExplicitWidth = 313
   end
+  object Label_GitHub: TLabel
+    Left = 61
+    Top = 41
+    Width = 279
+    Height = 15
+    Cursor = crHandPoint
+    Caption = 'https://github.com/HuichanKIM/Ollama-Delphi-GUI'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clSilver
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsUnderline]
+    ParentFont = False
+    StyleElements = [seClient, seBorder]
+    OnClick = Label_GitHubClick
+  end
+  object Label1: TLabel
+    Left = 9
+    Top = 41
+    Width = 38
+    Height = 15
+    Caption = 'GitHub'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clSilver
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    ParentFont = False
+    StyleElements = [seClient, seBorder]
+  end
   object Panel1: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 421
+    Top = 435
     Width = 380
     Height = 36
     Align = alBottom
@@ -63,7 +93,7 @@ object Form_About: TForm_About
     TabOrder = 0
     object Button1: TButton
       Left = 295
-      Top = 3
+      Top = 6
       Width = 75
       Height = 25
       Caption = 'OK'
@@ -74,9 +104,10 @@ object Form_About: TForm_About
   object Panel3: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 50
+    Top = 62
     Width = 380
-    Height = 365
+    Height = 367
+    Margins.Top = 15
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
@@ -625,7 +656,7 @@ object Form_About: TForm_About
     end
     object Label2: TLabel
       Left = 10
-      Top = 341
+      Top = 350
       Width = 319
       Height = 15
       Caption = '* Beta version - support bi translation (English / Korean) only'
@@ -707,7 +738,7 @@ object Form_About: TForm_About
     end
     object PageControl1: TPageControl
       Left = 10
-      Top = 76
+      Top = 87
       Width = 360
       Height = 257
       ActivePage = TabSheet1
@@ -725,8 +756,8 @@ object Form_About: TForm_About
         object Label_Development: TLabel
           Left = 0
           Top = 0
-          Width = 129
-          Height = 15
+          Width = 352
+          Height = 224
           Align = alClient
           Caption = 'Development Tool  (GUI)'
           Font.Charset = DEFAULT_CHARSET
@@ -736,6 +767,8 @@ object Form_About: TForm_About
           Font.Style = []
           ParentFont = False
           StyleElements = [seClient, seBorder]
+          ExplicitWidth = 129
+          ExplicitHeight = 15
         end
       end
       object TabSheet2: TTabSheet
@@ -782,7 +815,7 @@ object Form_About: TForm_About
             00FFFFFFFFFFFFFFFF00000000FFFFFFFF000000000541006C0074002B004300
             00000000FFFFFFFFFFFFFFFF00000000FFFFFFFF000000000541006C0074002B
             00460000000000FFFFFFFFFFFFFFFF00000000FFFFFFFF0000000000FFFFFFFF}
-          StyleElements = [seBorder]
+          StyleElements = [seClient, seBorder]
           ReadOnly = True
           RowSelect = True
           ParentFont = False

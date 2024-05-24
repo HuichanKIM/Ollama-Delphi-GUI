@@ -38,11 +38,14 @@ type
     ListView_Shortcuts: TListView;
     TabSheet3: TTabSheet;
     Label_SystemInfo: TLabel;
+    Label_GitHub: TLabel;
+    Label1: TLabel;
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure Label_OllamaWebClick(Sender: TObject);
     procedure Label_OllamaGitHubClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Label_SystemInfoClick(Sender: TObject);
+    procedure Label_GitHubClick(Sender: TObject);
   private
     procedure Update_Shortcuts;
   public
@@ -88,7 +91,10 @@ begin
   Label_Title.Caption := C_MainCaption;
   Label_Copyright.Caption := C_CoptRights;
   if TStyleManager.IsCustomStyleActive then
+  begin
+    ListView_Shortcuts.StyleElements := [seBorder];
     ListView_Shortcuts.Color := StyleServices.GetStyleColor(scWindow);
+  end;
 
   Label_Development.Caption := C_DevelopInfo;
   Label_SystemInfo.Caption := Get_SystemInfo();
@@ -114,6 +120,11 @@ begin
       Key := #0;
       ModalResult := mrCancel;
     end;
+end;
+
+procedure TForm_About.Label_GitHubClick(Sender: TObject);
+begin
+  ShellExecute(0, PChar('Open'), PChar(Label_GitHub.Caption), nil, nil, SW_SHOW);
 end;
 
 procedure TForm_About.Label_OllamaGitHubClick(Sender: TObject);

@@ -33,6 +33,7 @@ type
     FCode_to: Integer;
     procedure SetPreLoader(const Value: string);
   public
+    // property ...
     property PreLoader: string  read FPreLoader  write SetPreLoader;
     property Code_From: Integer  read FCode_From  write FCode_From;
     property Code_to: Integer  read FCode_to  write FCode_To;
@@ -46,7 +47,8 @@ implementation
 uses
   System.RegularExpressions,
   Unit_Translator,
-  Unit_Main;
+  Unit_Main,
+  Unit_Common;
 
 {$R *.dfm}
 
@@ -58,10 +60,10 @@ end;
 procedure TForm_RequestDialog.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = #27 then
-    begin
-      Key := #0;
-      ModalResult := mrCancel;
-    end;
+  begin
+    Key := #0;
+    ModalResult := mrCancel;
+  end;
 end;
 
 procedure TForm_RequestDialog.FormShow(Sender: TObject);
@@ -83,8 +85,6 @@ begin
 end;
 
 procedure TForm_RequestDialog.SpeedButton_TransClick(Sender: TObject);
-const
-  c_Regex: String = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*';
 begin
   var _ItemStr: string := Trim(Memo_Request.Lines.Text);
   if _ItemStr = '' then
@@ -95,7 +95,7 @@ begin
 
   var _codefrom: Integer := FCode_From;
   var _codeto: Integer := FCode_to;
-  if TRegEx.IsMatch(_ItemStr, c_Regex) then
+  if Is_Hangul(_ItemStr) then
     begin
       _codefrom := 1;
       _codeto :=   0;

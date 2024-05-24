@@ -37,14 +37,14 @@ type
   public
     constructor Create(ATreeView: TTreeView);
     destructor Destroy; override;
-    { Methods }
+
     function Write_TreeViewToJSON(): Boolean;
     procedure Read_JsonToTreeView();
     function GetSeedRandom(): string;
     function AddInsertNode(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string): string;
     procedure DeleteNode(const AFlag: Integer);
     procedure Rename_TopicPrompt(const AOld, ANew: string);
-    { Property }
+    // Property ...
     property TreeView: TTreeView  read FTreeView  write FTreeView;
   end;
 
@@ -166,18 +166,18 @@ begin
   begin
     var _index :=  FTopicList.IndexOf(_node.Text);
     with FTreeView.Items do
-    begin
-      BeginUpdate;
-      Delete(_node);
-      EndUpdate;
-    end;
+      begin
+        BeginUpdate;
+        Delete(_node);
+        EndUpdate;
+      end;
     if _index >= 0 then
     with FTopicList do
-    begin
-      BeginUpdate;
-      Delete(_index);
-      EndUpdate;
-    end;
+      begin
+        BeginUpdate;
+        Delete(_index);
+        EndUpdate;
+      end;
   end;
 end;
 
@@ -205,7 +205,7 @@ begin
   // Backup previous list file
   var _backupfile: string := CV_TmpPath+ExtractFileName(FMruJsonFile);
   var _success: Boolean := CopyFile(PChar(FMruJsonFile), PChar(_backupfile), False);
-  //
+  // ...
   Write_TreeViewToJSON();
 
   FSeedList.Free;
@@ -250,6 +250,7 @@ var
   end;
 
 LABEL L_Return;
+
 begin
   Result := False;
   if not Assigned(FTreeView)  then  Exit;

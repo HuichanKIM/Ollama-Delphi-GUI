@@ -24,6 +24,7 @@ type
     FDosCommand: TDosCommand;
     FDosText: TStrings;
     FCommand: string;
+  private
   public
     constructor Create();
     destructor Destroy; override;
@@ -44,7 +45,7 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  C_Version     = 'v 0.9.2 - beta (2024.05.21)';
+  C_Version     = 'v 0.9.3 - beta (2024.05.24)';
   C_MainCaption = 'Ollama Chat CLient '+C_Version;
   C_CoptRights  = '- Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea. All Rights Reserved. -';
 
@@ -57,16 +58,14 @@ const
   C_UTF8_LF = #10;
   C_CRLF = #13#10;
 
-const
-  C_Regex: String = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä  - Regular expression for Korean language test }
-
+function Is_Hangul(const AText: string): Boolean;
 function GetUsersWindowsLanguage: string;
 function Get_LocaleIDString(const AFlag: Integer = 0): string;
 function ReadAllText_Unicode(const AFilePath: string=''): string;
 function WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
 function Get_SystemInfo(): string;
 function Get_DisplayJson(const RespType: Integer; const ModelsFlag: Boolean; const RespStr: string): string;
-function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer): string;
+function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer; var AModelsList: TStringList): string;
 function MSecsToTime(const AMSec: Int64): string;
 function MSecsToSeconds(const AMSec: Int64): string;
 procedure Global_TrimAppMemorySizeEx(const AStrategy: Integer);
@@ -84,17 +83,29 @@ implementation
 
 uses
   System.IOUtils,
+  Winapi.TlHelp32,
   Winapi.PsAPI,
   WinAPi.ShellAPI,
   System.JSON,
   System.JSON.Readers,
   System.JSON.Writers,
   System.JSON.Types,
+  System.RegularExpressions,
+  System.Threading,
   Unit_SysInfo,
   Vcl.Styles,
   Vcl.StyleAPI,
   Vcl.Forms,
   Unit_Main;
+
+const
+  C_Regex: String = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä
+                                                 - Regular expression for Korean language test }
+
+function Is_Hangul(const AText: string): Boolean;
+begin
+  Result := System.RegularExpressions.TRegEx.IsMatch(AText, C_Regex);
+end;
 
 function IOUtils_ReadAllText(const AFilePath: string=''): string;
 begin
@@ -172,7 +183,6 @@ end;
 function Get_DisplayJson(const RespType: Integer; const ModelsFlag: Boolean; const RespStr: string): string;
 const
   c_MSGType: array [0 .. 2] of string = ('response', 'content', 'trans');
-
 begin
   Result := '';
   var _parsingsrc_0 := StringReplace(RespStr, C_UTF8_LF, ',',[rfReplaceAll]);
@@ -180,10 +190,10 @@ begin
   var _acceptflag: Boolean := False;
   var _key: String := c_MSGType[RespType];
   if ModelsFlag then
-    begin
-      Result := ' * Model in loaded : ';
-      _key := 'model';
-    end;
+  begin
+    Result := ' * Model in loaded : ';
+    _key := 'model';
+  end;
 
   var _StringReader: TStringReader := TStringReader.Create(_parsingsrc_1);
   var _JsonReader: TJsonTextReader := TJsonTextReader.Create(_StringReader);
@@ -211,7 +221,7 @@ begin
   end;
 end;
 
-function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer): string;
+function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer; var AModelsList: TStringList): string;
 begin
   Result := 'Models List at '+FormatDateTime('yyyy-mm-dd HH:NN:SS', Now) +C_CRLF+C_CRLF;
 
@@ -220,11 +230,13 @@ begin
   var _firstflag: Boolean := True;
   var _childflag: Boolean := False;
   var _sizeflag: Boolean := False;
+  var _modelflag: Boolean := False;
   var _firstname: string := '';
   var _prefix: string := '';
   var _arrayflag: Boolean := False;
   var _key: string := 'name';
   var _fstobject: string := 'models';
+  AModelsList.Clear;
   try
     while _JsonReader.read do
       case _JsonReader.TokenType of
@@ -249,6 +261,7 @@ begin
                 _arrayflag := False;
                 _sizeflag  := False;
                 Result := Result + 'Models ['+Vindex.ToString+'] : ';
+                _modelflag := True;
                 Continue;
               end
             else
@@ -268,16 +281,27 @@ begin
             _sizeflag := SameText(_firstname, 'size');
             Result := Result + _prefix + _JsonReader.Value.ToString+' : ';
           end;
-        TJsonToken.String, TJsonToken.Float, TJsonToken.Boolean:
+        TJsonToken.String:
           if _arrayflag then
              Result := Result + _JsonReader.Value.ToString +', '
-           else
+          else
+            begin
+              if _modelflag then
+                AModelsList.Add(_JsonReader.Value.ToString);
+              _modelflag := False;
+              Result := Result + _JsonReader.Value.ToString+ C_CRLF;
+            end;
+        TJsonToken.Float, TJsonToken.Boolean:
+          if _arrayflag then
+            Result := Result + _JsonReader.Value.ToString +', '
+          else
             Result := Result + _JsonReader.Value.ToString+ C_CRLF;
         TJsonToken.Integer:
           if _sizeflag then
             begin
               var _newvalue: string := Format('%.3f GB', [(_JsonReader.Value.AsInt64 / C_BTdivGB)]);
               Result := Result + _newvalue+ C_CRLF;
+              _sizeflag := False;
             end;
         TJsonToken.Null:
           Result := Result + C_CRLF;
@@ -415,6 +439,8 @@ end;
 
 procedure TG_DosCommand.Dos_CommandBatch(ACmd: string);
 begin
+  if FDosCommand.IsRunning then
+    FDosCommand.Stop;
   var _batchfile: string := CV_AppPath+'ollamarun.bat';
   var _commands: TStrings := TStringList.Create;
   var _success: Boolean := False;
@@ -486,6 +512,54 @@ end;
 function TG_DosCommand.Get_DosResult(AFlag: Integer = 0): string;
 begin
   Result := FDosText.Text;
+end;
+
+{ Edge TTS - PlayBack : MPV ... }
+
+function GetProcessID(AProcess: String): Cardinal;
+begin
+  Result := 0;
+  var _FSnapshotHandle: THandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  var _FProcessEntry32 := Default(TProcessEntry32);
+  _FProcessEntry32.dwSize := SizeOf(TProcessEntry32);
+  var _ContinueLoop: BOOL := Process32First(_FSnapshotHandle, _FProcessEntry32);
+  while Integer(_ContinueLoop) <> 0 do
+    begin
+      if ((UpperCase(ExtractFileName(_FProcessEntry32.szExeFile)) = UpperCase(AProcess)) or
+          (UpperCase(_FProcessEntry32.szExeFile) = UpperCase(AProcess))) then
+        begin
+          Result := _FProcessEntry32.th32ProcessID;;
+          Exit;
+        end
+      else
+        Result := 0;
+      _ContinueLoop := Process32Next(_FSnapshotHandle, _FProcessEntry32);
+    end;
+  CloseHandle(_FSnapshotHandle);
+end;
+
+function Kill_Process_MPV(AProcess: string): Boolean;
+begin
+  Result := False;
+
+  var _ProcessID: Cardinal := GetProcessID('mpv.exe');
+  if _ProcessID <> 0 then
+  try
+    var _Killer: THandle := OpenProcess(PROCESS_TERMINATE, False, _ProcessID);
+    if _Killer <> 0 then
+    Result := TerminateProcess(_Killer, 0);
+
+    Sleep(0);
+  except
+    Abort;
+  end;
+end;
+
+function ISRunning_MPV(AProcess: string): Boolean;
+begin
+  Result := False;
+  var _ProcessID: Cardinal := GetProcessID('mpv.exe');
+  Result := _ProcessID <> 0;
 end;
 
 initialization

@@ -25,55 +25,53 @@ type
     FPanel: TPanel;
     FFileName: string;
     FOriginalPanelWndProc: TWndMethod;
+    FDropFlag: Integer;
     procedure ImageDrop(var Msg: TWMDROPFILES);
+    procedure ImageWindowProc(var Msg: TMessage);
   public
     constructor Create(AImage: TImage; APanel: TPanel);
     destructor Destroy; override;
-
-    procedure ImageWindowProc(var Msg: TMessage);
-    procedure LoadIMG(const AImgFileName: string);
-    { property }
+    procedure LoadIMG(const ADropedFile: string);
+    // property ...
     property FileName: string  read FFileName;
+    property DropFlag: Integer  read FDropFlag write FDropFlag;
   end;
 
 implementation
 
 uses
-  Vcl.Dialogs,
-  System.Threading;
+  Vcl.Dialogs;
 
-procedure TImageDropDown<T>.LoadIMG(const AImgFileName: string);
+procedure TImageDropDown<T>.LoadIMG(const ADropedFile: string);
 const
   c_VerifyImgFormat = '...*.jpg...*.jpeg...*.png...*.webp...*.gif';
 begin
-  var _ext: string := LowerCase(ExtractFileExt(AImgFileName));
+  FDropFlag := -1;
+  var _ext: string := LowerCase(ExtractFileExt(ADropedFile));
   if Pos(_ext, c_VerifyImgFormat) >= 3 then
-    TTask.Run(
-    procedure
-    begin
-      try
-        if (_ext = '.webp') or (_ext = '.gif') then
-          begin
-            var _BytesStreamJpg: TBytesStream := TBytesStream.Create();
-            try
-              var _skImage: ISkImage := TSkImage.MakeFromEncodedFile(AImgFileName);
-              if _skImage.EncodeToStream(_BytesStreamJpg, TSkEncodedImageFormat.jpeg) then
-              begin
-                _BytesStreamJpg.Position := 0;
-                FImage.Picture.LoadFromStream(_BytesStreamJpg);
-              end;
-            finally
-              _BytesStreamJpg.Free;
-            end
+    try
+      if (_ext = '.webp') or (_ext = '.gif') then
+        begin
+          var _BytesStreamJpg: TBytesStream := TBytesStream.Create();
+          try
+            var _skImage: ISkImage := TSkImage.MakeFromEncodedFile(ADropedFile);
+            if _skImage.EncodeToStream(_BytesStreamJpg, TSkEncodedImageFormat.jpeg) then
+            begin
+              _BytesStreamJpg.Position := 0;
+              FImage.Picture.LoadFromStream(_BytesStreamJpg);
+            end;
+          finally
+            _BytesStreamJpg.Free;
           end
-        else
-          FImage.Picture.LoadFromFile(AImgFileName);
+        end
+      else
+        FImage.Picture.LoadFromFile(ADropedFile);
 
-        FFileName := ExtractFileName(AImgFileName);
-      except
-        Raise;
-      end;
-    end)
+      FFileName := ExtractFileName(ADropedFile);
+      FDropFlag := 0;
+    except
+      Raise;
+    end
   else
     ShowMessage('Not Supported Image Format'#13#10'  - supported format - (*.jpg, *.jpeg, *.png, *.webp,*.gif)');
 end;
@@ -83,6 +81,7 @@ begin
   FImage := AImage;
   FPanel := APanel;
   FFileName := '';
+  FDropFlag := 0;
 
   FOriginalPanelWndProc := APanel.WindowProc;
   APanel.WindowProc := ImageWindowProc;
@@ -113,6 +112,7 @@ var
   _buffer: array [0 .. MAX_PATH] of Char;
 begin
   inherited;
+
   try
     var _numFiles: Cardinal := DragQueryFile(Msg.Drop, $FFFFFFFF, NIL, 0);
     if _numFiles >= 1 then
@@ -123,6 +123,7 @@ begin
   finally
     DragFinish(Msg.Drop);
   end;
+
   Msg.Result := 0;
 end;
 

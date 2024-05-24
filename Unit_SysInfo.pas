@@ -42,16 +42,16 @@ uses
   System.Win.Registry;
 
 resourcestring  // Error messages
-  sBadRegType =  'Unsupported registry type';
-  sBadRegIntType = 'Integer value expected in registry';
-  sBadProcHandle = 'Bad process handle';
+  r_BadRegType =  'Unsupported registry type';
+  r_BadRegIntType = 'Integer value expected in registry';
+  r_BadProcHandle = 'Bad process handle';
 
 type
   TGetSystemInfo = procedure(var lpSystemInfo: TSystemInfo); stdcall;
 
 var
-  GetSystemInfoFn: TGetSystemInfo;
-  InternalProcessorArchitecture: Word = 0;
+  V_GetSystemInfoFn: TGetSystemInfo;
+  V_InternalProcessorArchitecture: Word = 0;
 
 const
   KEY_WOW64_64KEY = $0100;
@@ -74,82 +74,77 @@ begin
  end;
 
 function GetRegistryString(const RootKey: HKEY; const SubKey, Name: string): string;
-var
-  Reg: TRegistry;
-  ValueInfo: TRegDataInfo;
 begin
   Result := '';
-  Reg := RegCreate;
+  var _Reg: TRegistry := RegCreate;
   try
-    Reg.RootKey := RootKey;
-    if RegOpenKeyReadOnly(Reg, SubKey) and Reg.ValueExists(Name) then
+    _Reg.RootKey := RootKey;
+    if RegOpenKeyReadOnly(_Reg, SubKey) and _Reg.ValueExists(Name) then
     begin
-      Reg.GetDataInfo(Name, ValueInfo);
-      case ValueInfo.RegData of
+      var _ValueInfo: TRegDataInfo;
+      _Reg.GetDataInfo(Name, _ValueInfo);
+      case _ValueInfo.RegData of
         rdString, rdExpandString:
-          Result := Reg.ReadString(Name);
+          Result := _Reg.ReadString(Name);
         rdInteger:
-          Result := IntToStr(Reg.ReadInteger(Name));
+          Result := IntToStr(_Reg.ReadInteger(Name));
         else
-          raise EPJSysInfo.Create(sBadRegType);
+          raise EPJSysInfo.Create(r_BadRegType);
       end;
     end;
   finally
-    Reg.CloseKey;
-    Reg.Free;
+    _Reg.CloseKey;
+    _Reg.Free;
   end;
 end;
 
 function GetRegistryInt(const RootKey: HKEY; const SubKey, Name: string): Integer;
-var
-  Reg: TRegistry;
-  ValueInfo: TRegDataInfo;
 begin
   Result := 0;
-  Reg := RegCreate;
+  var _Reg: TRegistry := RegCreate;
   try
-    Reg.RootKey := RootKey;
-    if RegOpenKeyReadOnly(Reg, SubKey) and Reg.ValueExists(Name) then
+    _Reg.RootKey := RootKey;
+    if RegOpenKeyReadOnly(_Reg, SubKey) and _Reg.ValueExists(Name) then
     begin
-      Reg.GetDataInfo(Name, ValueInfo);
-      if ValueInfo.RegData <> rdInteger then
-        raise EPJSysInfo.Create(sBadRegIntType);
-      Result := Reg.ReadInteger(Name);
+      var _ValueInfo: TRegDataInfo;
+      _Reg.GetDataInfo(Name, _ValueInfo);
+      if _ValueInfo.RegData <> rdInteger then
+        raise EPJSysInfo.Create(r_BadRegIntType);
+      Result := _Reg.ReadInteger(Name);
     end;
   finally
-    Reg.CloseKey;
-    Reg.Free;
+    _Reg.CloseKey;
+    _Reg.Free;
   end;
 end;
 
 procedure InitPlatformIdEx;
 var
-  SI: TSystemInfo;
+  _SI: TSystemInfo;
 begin
-  GetSystemInfoFn := LoadKernelFunc('GetNativeSystemInfo');
-  if not Assigned(GetSystemInfoFn) then
-    GetSystemInfoFn := GetSystemInfo;
-  GetSystemInfoFn(SI);
-  InternalProcessorArchitecture := SI.wProcessorArchitecture;
+  V_GetSystemInfoFn := LoadKernelFunc('GetNativeSystemInfo');
+  if not Assigned(V_GetSystemInfoFn) then
+    V_GetSystemInfoFn := GetSystemInfo;
+  V_GetSystemInfoFn(_SI);
+  V_InternalProcessorArchitecture := _SI.wProcessorArchitecture;
 end;
 
 { TPJComputerInfo }
 
 class function TPJComputerInfo.ComputerName: string;
 var
-  PComputerName: array[0..MAX_COMPUTERNAME_LENGTH] of Char;
-  Size: DWORD;
+  _PComputerName: array[0..MAX_COMPUTERNAME_LENGTH] of Char;
 begin
-  Size := MAX_COMPUTERNAME_LENGTH;
-  if GetComputerName(PComputerName, Size) then
-    Result := PComputerName
+  var Size: DWORD := MAX_COMPUTERNAME_LENGTH;
+  if GetComputerName(_PComputerName, Size) then
+    Result := _PComputerName
   else
     Result := '';
 end;
 
 class function TPJComputerInfo.Processor: TPJProcessorArchitecture;
 begin
-  case InternalProcessorArchitecture of
+  case V_InternalProcessorArchitecture of
     PROCESSOR_ARCHITECTURE_INTEL: Result := paX86;
     PROCESSOR_ARCHITECTURE_AMD64: Result := paX64;
     PROCESSOR_ARCHITECTURE_IA64:  Result := paIA64;
@@ -159,10 +154,10 @@ end;
 
 class function TPJComputerInfo.ProcessorCount: Cardinal;
 var
-  SI: TSystemInfo;
+  _SI: TSystemInfo;
 begin
-  GetSystemInfoFn(SI);
-  Result := SI.dwNumberOfProcessors;
+  V_GetSystemInfoFn(_SI);
+  Result := _SI.dwNumberOfProcessors;
 end;
 
 class function TPJComputerInfo.ProcessorIdentifier: string;
@@ -196,14 +191,13 @@ end;
 
 class function TPJComputerInfo.UserName: string;
 const
-  UNLEN = 256;
+  c_UNLEN = 256;
 var
-  PUserName: array[0..UNLEN] of Char;
-  Size: DWORD;
+  _PUserName: array[0..c_UNLEN] of Char;
 begin
-  Size := UNLEN;
-  if GetUserName(PUserName, Size) then
-    Result := PUserName
+  var _Size: DWORD := c_UNLEN;
+  if GetUserName(_PUserName, _Size) then
+    Result := _PUserName
   else
     Result := '';
 end;

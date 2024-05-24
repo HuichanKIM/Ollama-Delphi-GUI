@@ -9,6 +9,7 @@ uses
   Unit_SysInfo in 'Unit_SysInfo.pas',
   Unit_MRUManager in 'Unit_MRUManager.pas',
   Unit_ImageDropDown in 'Unit_ImageDropDown.pas',
+  SpeechLib_TLB in 'SpeechLib_TLB.pas',
   Unit_Main in 'Unit_Main.pas' {Form_RestOllama},
   Unit_AliveOllama in 'Unit_AliveOllama.pas' {Form_AliveOllama},
   Unit_Translator in 'Unit_Translator.pas' {Form_Translator},

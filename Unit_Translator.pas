@@ -37,6 +37,7 @@ type
     procedure SetPushFlag(const Value: Boolean);
   public
     procedure Get_GoogleTranslator(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string);
+    // property ...
     property TransResult: string  read FTransResult  write FTransResult;
     property Request: string  read FRequest  write SetFRequest;
     property PushFlag: Boolean  read FPushFlag write SetPushFlag;
@@ -49,7 +50,6 @@ implementation
 uses
   System.Net.HttpClient,
   System.Net.URLClient,
-  System.RegularExpressions,
   Vcl.Themes,
   Unit_Common,
   Unit_Main;
@@ -128,6 +128,7 @@ end;
 procedure TForm_Translator.FormCreate(Sender: TObject);
 begin
   Memo_Translates.Clear;
+  SpeedButton_TTS.Visible := False;
   FRequest := '';
 end;
 
@@ -157,12 +158,11 @@ const
 begin
   FTransResult := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
   var _reqdisplay: string := FRequest;
-  if TRegEx.IsMatch(_reqdisplay, C_Regex) then
+  if Is_Hangul(FRequest) then
     begin
-      if Length(_reqdisplay) * SizeOf(Char) > 40 then
+      if Length(FRequest) * SizeOf(Char) > 40 then
       begin
-        SetLength(_reqdisplay, 40);
-        _reqdisplay := _reqdisplay + ' ...';
+        _reqdisplay := Copy(_reqdisplay, 1, 40) + ' ...';
       end
     end
   else
@@ -200,7 +200,10 @@ end;
 
 procedure TForm_Translator.SpeedButton_TTSClick(Sender: TObject);
 begin
-  Form_RestOllama.Do_TTS_Speak(1, Memo_Translates.Lines.Text);
+  if Form_RestOllama.TTS_Speaking then
+    Form_RestOllama.Do_TTS_Speak(0, '')
+  else
+    Form_RestOllama.Do_TTS_Speak(1, Memo_Translates.Lines.Text);
 end;
 
 end.

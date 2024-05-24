@@ -197,7 +197,7 @@ object Form_RestOllama: TForm_RestOllama
       Align = alTop
       Alignment = taRightJustify
       BevelOuter = bvNone
-      Caption = 'Settings   '
+      Caption = 'Reset / More Settings   '
       TabOrder = 3
       StyleElements = [seClient, seBorder]
       object SpeedButton_DefaultSet: TSpeedButton
@@ -220,6 +220,22 @@ object Form_RestOllama: TForm_RestOllama
         Action = Action_InetAlive
         Align = alLeft
         ExplicitLeft = 35
+        ExplicitHeight = 22
+      end
+      object SpeedButton_SystemInfo: TSpeedButton
+        AlignWithMargins = True
+        Left = 56
+        Top = 3
+        Width = 23
+        Height = 19
+        Hint = 'Show System Info'
+        Align = alLeft
+        ImageIndex = 16
+        ImageName = 'ic_alarm_on_24px'
+        Images = SVGIconVirtualImageList1
+        OnClick = SpeedButton_SystemInfoClick
+        ExplicitLeft = 112
+        ExplicitTop = 0
         ExplicitHeight = 22
       end
     end
@@ -303,7 +319,7 @@ object Form_RestOllama: TForm_RestOllama
       Left = 3
       Top = 288
       Width = 235
-      Height = 84
+      Height = 81
       Align = alTop
       Caption = 'Translation (by Google)'
       TabOrder = 6
@@ -361,27 +377,137 @@ object Form_RestOllama: TForm_RestOllama
         StyleElements = [seClient, seBorder]
       end
     end
-    object GroupBox_Memo: TGroupBox
+    object GroupBox_TTSEngine: TGroupBox
       AlignWithMargins = True
       Left = 5
-      Top = 378
+      Top = 375
       Width = 231
-      Height = 242
+      Height = 132
       Margins.Left = 5
       Margins.Right = 5
-      Align = alClient
-      Caption = 'Memo'
+      Align = alTop
+      Caption = 'TTS Control'
       TabOrder = 7
       StyleElements = [seClient, seBorder]
-      object Memo_Memo: TMemo
-        AlignWithMargins = True
-        Left = 4
-        Top = 19
-        Width = 223
-        Height = 219
-        Align = alClient
-        ScrollBars = ssVertical
+      DesignSize = (
+        231
+        132)
+      object Label4: TLabel
+        Left = 30
+        Top = 76
+        Width = 23
+        Height = 15
+        Caption = 'Rate'
+        FocusControl = TrackBar_Rate
+        StyleElements = [seClient, seBorder]
+      end
+      object Label_Rate: TLabel
+        Left = 200
+        Top = 76
+        Width = 6
+        Height = 15
+        Caption = '0'
+        StyleElements = [seClient, seBorder]
+      end
+      object Label5: TLabel
+        Left = 30
+        Top = 104
+        Width = 19
+        Height = 15
+        Alignment = taCenter
+        Caption = 'Vol.'
+        FocusControl = TrackBar_Volume
+        StyleElements = [seClient, seBorder]
+      end
+      object Label_Volume: TLabel
+        Left = 200
+        Top = 104
+        Width = 6
+        Height = 15
+        Caption = '0'
+        StyleElements = [seClient, seBorder]
+      end
+      object Shape_TTS: TShape
+        Left = 202
+        Top = 50
+        Width = 10
+        Height = 10
+        Brush.Color = clGray
+        Shape = stCircle
+      end
+      object SpeedButton_TTSPlay: TSpeedButton
+        Left = 16
+        Top = 45
+        Width = 23
+        Height = 22
+        ImageIndex = 61
+        ImageName = 'ic_play_circle_outline_24px'
+        Images = SVGIconVirtualImageList1
+        OnClick = SpeedButton_TTSPlayClick
+      end
+      object SpeedButton_TTSPause: TSpeedButton
+        Tag = 1
+        Left = 38
+        Top = 45
+        Width = 23
+        Height = 22
+        ImageIndex = 46
+        ImageName = 'ic_pause_circle_outline_48px'
+        Images = SVGIconVirtualImageList1
+        OnClick = SpeedButton_TTSPlayClick
+      end
+      object SpeedButton_TTSStop: TSpeedButton
+        Tag = 2
+        Left = 60
+        Top = 45
+        Width = 23
+        Height = 22
+        ImageIndex = 1
+        ImageName = 'All\ic_stop_48px'
+        Images = SVGIconVirtualImageList1
+        OnClick = SpeedButton_TTSPlayClick
+      end
+      object ComboBox_TTSEngine: TComboBox
+        Left = 18
+        Top = 18
+        Width = 198
+        Height = 23
         TabOrder = 0
+        Text = 'ComboBox_TTSEngine'
+        StyleElements = [seClient, seBorder]
+        OnChange = ComboBox_TTSEngineChange
+      end
+      object TrackBar_Rate: TTrackBar
+        Left = 60
+        Top = 73
+        Width = 130
+        Height = 20
+        Min = -10
+        TabOrder = 1
+        TickStyle = tsNone
+        StyleElements = [seClient, seBorder]
+        OnChange = TrackBar_RateChange
+      end
+      object TrackBar_Volume: TTrackBar
+        Left = 60
+        Top = 100
+        Width = 130
+        Height = 20
+        Max = 100
+        Position = 100
+        TabOrder = 2
+        TickStyle = tsNone
+        StyleElements = [seClient, seBorder]
+        OnChange = TrackBar_VolumeChange
+      end
+      object ProgressBar: TProgressBar
+        Left = 96
+        Top = 53
+        Width = 92
+        Height = 6
+        Anchors = [akLeft, akTop, akRight]
+        Smooth = True
+        TabOrder = 3
       end
     end
     object GroupBox_CPUMem: TGroupBox
@@ -466,6 +592,14 @@ object Form_RestOllama: TForm_RestOllama
         Caption = '00'
         StyleElements = [seClient, seBorder]
       end
+      object Shape_Memory: TShape
+        Left = 25
+        Top = 97
+        Width = 10
+        Height = 10
+        Brush.Color = clGray
+        Shape = stCircle
+      end
     end
     object Panel_OptionsTop: TPanel
       AlignWithMargins = True
@@ -483,6 +617,27 @@ object Form_RestOllama: TForm_RestOllama
       Caption = 'Protocol  '
       TabOrder = 9
       StyleElements = [seClient, seBorder]
+    end
+    object GroupBox1: TGroupBox
+      AlignWithMargins = True
+      Left = 3
+      Top = 513
+      Width = 235
+      Height = 107
+      Align = alClient
+      Caption = 'Memo'
+      TabOrder = 10
+      StyleElements = [seClient, seBorder]
+      object Memo_Memo: TMemo
+        AlignWithMargins = True
+        Left = 4
+        Top = 19
+        Width = 227
+        Height = 84
+        Align = alClient
+        ScrollBars = ssVertical
+        TabOrder = 0
+      end
     end
   end
   object StatusBar1: TStatusBar
@@ -581,14 +736,11 @@ object Form_RestOllama: TForm_RestOllama
       Top = 3
       Width = 27
       Height = 24
-      Hint = 'About Ollama GUI'
+      Action = Action_About
       Align = alRight
-      ImageIndex = 21
-      ImageName = 'ic_info_outline_48px'
       ImageMargins.Left = 3
       Images = SVGIconVirtualImageList1
       TabOrder = 2
-      OnClick = Button_AboutClick
     end
     object Button_Options: TButton
       AlignWithMargins = True
@@ -759,7 +911,7 @@ object Form_RestOllama: TForm_RestOllama
         Images = SVGIconVirtualImageList1
         OnClick = SpeedButton_ListModelsClick
       end
-      object ComboBox_Model: TComboBox
+      object ComboBox_Models: TComboBox
         Left = 43
         Top = 22
         Width = 129
@@ -769,7 +921,7 @@ object Form_RestOllama: TForm_RestOllama
         ItemIndex = 0
         TabOrder = 0
         Text = 'phi3'
-        OnChange = ComboBox_ModelChange
+        OnChange = ComboBox_ModelsChange
         Items.Strings = (
           'phi3'
           'llama3'
@@ -807,7 +959,7 @@ object Form_RestOllama: TForm_RestOllama
           Top = 3
           Width = 201
           Height = 185
-          Hint = 'DoubleClick for Load / Drop one file (*.jpg,*.jpeg,*.png,*.webp)'
+          Hint = 'Drop Image-file (*.jpg, *.jpeg, *.png, *.webp, *.gif)'
           Align = alClient
           Center = True
           DragMode = dmAutomatic
@@ -6461,7 +6613,7 @@ object Form_RestOllama: TForm_RestOllama
         OnDragDrop = TreeView_TopicsDragDrop
         OnDragOver = TreeView_TopicsDragOver
       end
-      object Panel1: TPanel
+      object Panel_TopicButtons: TPanel
         AlignWithMargins = True
         Left = 5
         Top = 22
@@ -7906,12 +8058,20 @@ object Form_RestOllama: TForm_RestOllama
               Name = 'Item 6'
             end
             item
-              Caption = 
-                #13#10'Ollama web site : https://ollama.com/  E-Mail : hello@ollama.c' +
-                'om'
+              Caption = #13#10'Ollama web site : '
               FontColor = claSilver
               Name = 'Item 5'
               StyledSettings = [Family, Size, Style]
+            end
+            item
+              Caption = ' https://ollama.com/'
+              Decorations.Decorations = [Underline]
+              Name = 'Ollama_WebAddress'
+              OnClick = SkLabel_IntroWords5Click
+            end
+            item
+              Caption = '  E-Mail : hello@ollama.com'
+              Name = 'Item 8'
             end>
           ExplicitLeft = 1
           ExplicitTop = -1
@@ -7994,9 +8154,10 @@ object Form_RestOllama: TForm_RestOllama
     LocalAddr = '0.0.0.0'
     LocalAddr6 = '::'
     ProxyPort = '80'
-    Agent = 'Mozilla/4.0'
-    Accept = 'image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*'
-    Username = 'Ollama'
+    Agent = 'Ollama Client'
+    Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
+    AcceptLanguage = 'utf-8, *;q=0.8'
+    Username = 'user'
     NoCache = False
     ResponseNoException = False
     ContentTypePost = 'application/json'
@@ -8013,7 +8174,7 @@ object Form_RestOllama: TForm_RestOllama
     SocksLevel = '5'
     SocksAuthentication = socksNoAuthentication
     SocketFamily = sfAny
-    SocketErrs = wsErrTech
+    SocketErrs = wsErrFriendly
     RestParams.PContent = PContUrlencoded
     RestParams.RfcStrict = False
     RestParams.FormDataUtf8 = True
@@ -8021,7 +8182,7 @@ object Form_RestOllama: TForm_RestOllama
     DebugLevel = DebugNone
     MaxBodySize = 100000000
     SslCliSecurity = sslCliSecNone
-    SslSessCache = True
+    SslSessCache = False
     CertVerMethod = CertVerNone
     SslRootFile = 'RootCaCertsBundle.pem'
     SslRevocation = False
@@ -8189,6 +8350,7 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_TranslationCommon
     end
     object Action_DefaultRefresh: TAction
+      Hint = 'Reset'
       ImageIndex = 24
       ImageName = 'ic_refresh_48px'
       ShortCut = 16466
@@ -8217,6 +8379,11 @@ object Form_RestOllama: TForm_RestOllama
       Caption = 'Action_RequestDialog'
       ShortCut = 112
       OnExecute = Action_RequestDialogExecute
+    end
+    object Action_About: TAction
+      ImageIndex = 63
+      ImageName = 'ic_apps_48px'
+      OnExecute = Action_AboutExecute
     end
   end
   object SVGIconVirtualImageList1: TSVGIconVirtualImageList
@@ -8526,6 +8693,21 @@ object Form_RestOllama: TForm_RestOllama
         CollectionIndex = 60
         CollectionName = 'ic_insert_photo_48px'
         Name = 'ic_insert_photo_48px'
+      end
+      item
+        CollectionIndex = 61
+        CollectionName = 'ic_play_circle_outline_24px'
+        Name = 'ic_play_circle_outline_24px'
+      end
+      item
+        CollectionIndex = 62
+        CollectionName = 'ic_build_48px'
+        Name = 'ic_build_48px'
+      end
+      item
+        CollectionIndex = 63
+        CollectionName = 'ic_apps_48px'
+        Name = 'ic_apps_48px'
       end>
     ImageCollection = SVGIconImageCollection1
     PreserveItems = True
@@ -9218,6 +9400,37 @@ object Form_RestOllama: TForm_RestOllama
           '7 27l5 6.01L29 24l9 12H10l7-9z"/>'#13#10'    <path d="M0 0h48v48H0z" f' +
           'ill="none"/>'#13#10'</svg>'#13#10
         FixedColor = cl3DLight
+      end
+      item
+        IconName = 'ic_play_circle_outline_24px'
+        SVGText = 
+          '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" v' +
+          'iewBox="0 0 24 24">'#13#10'    <path d="M0 0h24v24H0z" fill="none"/>'#13#10 +
+          '    <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.4' +
+          '8 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3' +
+          '.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>'#13#10'</svg>'#13#10
+        FixedColor = cl3DLight
+      end
+      item
+        IconName = 'ic_build_48px'
+        SVGText = 
+          '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" v' +
+          'iewBox="0 0 48 48">'#13#10'    <path d="M45.4 37.9L27.1 19.6c1.8-4.6.8' +
+          '-10.1-2.9-13.8-4-4-10-4.8-14.8-2.5l8.7 8.7-6.1 6.1-8.7-8.7C1 14.' +
+          '2 1.8 20.2 5.8 24.2c3.7 3.7 9.2 4.7 13.8 2.9l18.3 18.3c.8.8 2.1.' +
+          '8 2.8 0l4.7-4.7c.8-.7.8-2 0-2.8z"/>'#13#10'    <path clip-rule="evenod' +
+          'd" fill="none" d="M0 0h48v48H0z"/>'#13#10'</svg>'#13#10
+        FixedColor = cl3DLight
+      end
+      item
+        IconName = 'ic_apps_48px'
+        SVGText = 
+          '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" v' +
+          'iewBox="0 0 48 48">'#13#10'    <path d="M8 16h8V8H8v8zm12 24h8v-8h-8v8' +
+          'zM8 40h8v-8H8v8zm0-12h8v-8H8v8zm12 0h8v-8h-8v8zM32 8v8h8V8h-8zm-' +
+          '12 8h8V8h-8v8zm12 12h8v-8h-8v8zm0 12h8v-8h-8v8z"/>'#13#10'    <path d=' +
+          '"M0 0h48v48H0z" fill="none"/>'#13#10'</svg>'#13#10
+        FixedColor = cl3DLight
       end>
     Left = 660
     Top = 119
@@ -9231,9 +9444,9 @@ object Form_RestOllama: TForm_RestOllama
   object OpenPictureDialog1: TOpenPictureDialog
     DefaultExt = '.jpg'
     Filter = 
-      'All (*.jpg;*.jpeg;*.png)|*.jpg;*.png|JPEG Image File (*.jpg)|*.j' +
-      'pg|Portable Network Graphics (*.png)|*.png|TIFF Images (*.tif)|*' +
-      '.tif|TIFF Images (*.tiff)|*.tiff'
+      'All (*.jpg;*.jpeg;*.png;*.webp;*.gif)|*.jpg;*.jpeg;*.png;*.webp;' +
+      '*.gif|JPEG Image File (*.jpg)|*.jpg|Portable Network Graphics (*' +
+      '.png)|*.png'
     Left = 645
     Top = 553
   end

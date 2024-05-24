@@ -108,8 +108,8 @@ object Form_Translator: TForm_Translator
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 502
-      Height = 24
+      Width = 49
+      Height = 15
       Align = alClient
       Caption = 'Prompt   '
       Font.Charset = DEFAULT_CHARSET
@@ -119,8 +119,6 @@ object Form_Translator: TForm_Translator
       Font.Style = []
       ParentFont = False
       WordWrap = True
-      ExplicitWidth = 49
-      ExplicitHeight = 15
     end
   end
 end
