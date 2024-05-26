@@ -105,9 +105,10 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <VerInfo_Keys>CompanyName=JNJ Labs. Seoul, Korea;FileDescription=$(MSBuildProjectName);FileVersion=0.9.0.0;InternalName=;LegalCopyright=JNJ Labs. Huichan KIM;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=JNJ Labs. Seoul, Korea;FileDescription=$(MSBuildProjectName);FileVersion=0.9.3.0;InternalName=;LegalCopyright=JNJ Labs. Huichan KIM;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>9</VerInfo_MinorVer>
+        <VerInfo_Release>3</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <Version>7.0</Version>
@@ -1104,6 +1105,10 @@
         <DCCReference Include="Unit_MRUManager.pas"/>
         <DCCReference Include="Unit_ImageDropDown.pas"/>
         <DCCReference Include="SpeechLib_TLB.pas"/>
+        <DCCReference Include="Unit_Welcome.pas">
+            <Form>Frame_Welcome</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
         <DCCReference Include="Unit_Main.pas">
             <Form>Form_RestOllama</Form>
         </DCCReference>

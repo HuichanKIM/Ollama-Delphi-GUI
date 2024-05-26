@@ -46,7 +46,6 @@ uses
 
 const
   C_OllamaAddress = 'http://localhost:11434';
-  C_Alive_checker = 'Ollama is running';
 
 function Get_ListModels_Ollama(const ABaseURL: string): string;
 begin
@@ -75,7 +74,9 @@ begin
     try
       var _Query := C_OllamaAddress;
       var _Buffer := _HTTP.Get(_Query);
-      Result := SameText(_Buffer, C_Alive_checker);
+      _Buffer := LowerCase(_Buffer);
+      Result := (Pos('ollama', _Buffer) > 0) and (Pos('running', _Buffer) > 1);
+
       V_AliveFlag := Result;
     finally
       _HTTP.Free;
@@ -107,7 +108,7 @@ end;
 
 procedure TForm_AliveOllama.Button_AliveClick(Sender: TObject);
 const
-  c_Alive: Array [Boolean] of String = ('not alive','Alive On');
+  c_Alive: Array [Boolean] of String = ('Not Alive','Alive On');
   c_Warning = 'Check Ollama is installed and running on local computer.';
 begin
   Memo1.lines.Clear;
@@ -119,8 +120,8 @@ begin
       var _Query := C_OllamaAddress;
       var _Buffer := _HTTP.Get(_Query);
       LogReturn(_Buffer);
-
-      V_AliveFlag := SameText(_Buffer, C_Alive_checker);
+      _Buffer := LowerCase(_Buffer);
+      V_AliveFlag := (Pos('ollama', _Buffer) > 0) and (Pos('running', _Buffer) > 1);
       LogReturn(c_Alive[ V_AliveFlag ]);
 
       if not V_AliveFlag then

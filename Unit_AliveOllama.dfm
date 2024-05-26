@@ -36,14 +36,15 @@ object Form_AliveOllama: TForm_AliveOllama
     object Edit1: TEdit
       Left = 12
       Top = 25
-      Width = 129
+      Width = 136
       Height = 21
+      ReadOnly = True
       TabOrder = 0
       Text = 'http://localhost:11434'
     end
     object Button_Alive: TButton
-      Left = 148
-      Top = 21
+      Left = 154
+      Top = 23
       Width = 50
       Height = 25
       Caption = 'Check'

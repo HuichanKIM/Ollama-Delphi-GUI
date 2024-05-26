@@ -3,7 +3,7 @@ object Form_About: TForm_About
   Top = 0
   BorderStyle = bsDialog
   Caption = 'About'
-  ClientHeight = 474
+  ClientHeight = 435
   ClientWidth = 386
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -85,7 +85,7 @@ object Form_About: TForm_About
   object Panel1: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 435
+    Top = 396
     Width = 380
     Height = 36
     Align = alBottom
@@ -106,7 +106,7 @@ object Form_About: TForm_About
     Left = 3
     Top = 62
     Width = 380
-    Height = 367
+    Height = 328
     Margins.Top = 15
     Align = alClient
     BevelOuter = bvNone
@@ -654,20 +654,6 @@ object Form_About: TForm_About
       Proportional = True
       Transparent = True
     end
-    object Label2: TLabel
-      Left = 10
-      Top = 350
-      Width = 319
-      Height = 15
-      Caption = '* Beta version - support bi translation (English / Korean) only'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clSilver
-      Font.Height = -12
-      Font.Name = 'Segoe UI'
-      Font.Style = []
-      ParentFont = False
-      StyleElements = [seClient, seBorder]
-    end
     object GroupBox1: TGroupBox
       Left = 78
       Top = 2
@@ -740,8 +726,8 @@ object Form_About: TForm_About
       Left = 10
       Top = 87
       Width = 360
-      Height = 257
-      ActivePage = TabSheet1
+      Height = 234
+      ActivePage = TabSheet3
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
       Font.Height = -12
@@ -757,7 +743,7 @@ object Form_About: TForm_About
           Left = 0
           Top = 0
           Width = 352
-          Height = 224
+          Height = 201
           Align = alClient
           Caption = 'Development Tool  (GUI)'
           Font.Charset = DEFAULT_CHARSET
@@ -771,6 +757,34 @@ object Form_About: TForm_About
           ExplicitHeight = 15
         end
       end
+      object TabSheet3: TTabSheet
+        Caption = 'System Info.'
+        ImageIndex = 2
+        object Label_SystemInfo: TLabel
+          Left = 0
+          Top = 0
+          Width = 352
+          Height = 201
+          Hint = 'Click to update'
+          Align = alClient
+          AutoSize = False
+          Caption = '...'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clSilver
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          StyleElements = [seClient, seBorder]
+          OnClick = Label_SystemInfoClick
+          ExplicitLeft = 104
+          ExplicitTop = 72
+          ExplicitWidth = 40
+          ExplicitHeight = 15
+        end
+      end
       object TabSheet2: TTabSheet
         Caption = 'Shortcuts'
         ImageIndex = 1
@@ -778,7 +792,7 @@ object Form_About: TForm_About
           Left = 0
           Top = 0
           Width = 352
-          Height = 224
+          Height = 201
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -821,34 +835,6 @@ object Form_About: TForm_About
           ParentFont = False
           TabOrder = 0
           ViewStyle = vsReport
-        end
-      end
-      object TabSheet3: TTabSheet
-        Caption = 'System Info.'
-        ImageIndex = 2
-        object Label_SystemInfo: TLabel
-          Left = 0
-          Top = 0
-          Width = 352
-          Height = 224
-          Hint = 'Click to update'
-          Align = alClient
-          AutoSize = False
-          Caption = '...'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clSilver
-          Font.Height = -12
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentFont = False
-          ParentShowHint = False
-          ShowHint = True
-          StyleElements = [seClient, seBorder]
-          OnClick = Label_SystemInfoClick
-          ExplicitLeft = 104
-          ExplicitTop = 72
-          ExplicitWidth = 40
-          ExplicitHeight = 15
         end
       end
     end

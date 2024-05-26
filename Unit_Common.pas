@@ -19,6 +19,12 @@ const
     DOS_MESSAGE_FINISH = DOS_MESSAGE + 3;
     DOS_MESSAGE_ERROR  = DOS_MESSAGE + 4;
 
+  WM_DMM_MESSAGE  = WM_USER + 10;
+    DMM_MESSAGE_START  = WM_DMM_MESSAGE + 1;
+    DMM_MESSAGE_STOP   = WM_DMM_MESSAGE + 2;
+    DMM_MESSAGE_FINISH = WM_DMM_MESSAGE + 3;
+    DMM_MESSAGE_ERROR  = WM_DMM_MESSAGE + 4;
+
 type
   TG_DosCommand = class
     FDosCommand: TDosCommand;
@@ -46,7 +52,7 @@ type
 
 const
   C_Version     = 'v 0.9.3 - beta (2024.05.24)';
-  C_MainCaption = 'Ollama Chat CLient '+C_Version;
+  C_MainCaption = 'Ollama Client GUI '+C_Version;
   C_CoptRights  = '- Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea. All Rights Reserved. -';
 
 const
@@ -74,6 +80,7 @@ function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
 var
   CV_AppPath: string = '';
   CV_TmpPath: string = 'temp';
+  CV_LogPath: string = 'log';
   CV_LocaleID: string = 'en';
 
 var
@@ -156,20 +163,18 @@ begin
   Result := '';//+C_CRLF;
 
   with TPJComputerInfo do
-    begin
-      Result := Result+'  Computer Name: '+ ComputerName +C_CRLF;
-      Result := Result+'  - User Name: '+ Username +C_CRLF;
-      Result := Result+'  - Processor Name: '+ ProcessorName +C_CRLF;
-      Result := Result+'  - Processor Speed (GHz): '+ Format('%.3f', [ProcessorSpeedMHz / 1024]) +C_CRLF;
-      Result := Result+'  - Processor Count: '+ Integer(ProcessorCount).ToString +C_CRLF;
-      Result := Result+'  - Processor Architecture: '+ c_Processors[Processor] +C_CRLF;
-      Result := Result+'  - Processor Identifier: '+ ProcessorIdentifier +C_CRLF;
-    end;
+  begin
+    Result := Result+'  Computer Name: '+ ComputerName +C_CRLF;
+    Result := Result+'  - User Name: '+ Username +C_CRLF;
+    Result := Result+'  - Processor Name: '+ ProcessorName +C_CRLF;
+    Result := Result+'  - Processor Speed (GHz): '+ Format('%.3f', [ProcessorSpeedMHz / 1024]) +C_CRLF;
+    Result := Result+'  - Processor Count: '+ Integer(ProcessorCount).ToString +C_CRLF;
+    Result := Result+'  - Processor Architecture: '+ c_Processors[Processor] +C_CRLF;
+   end;
 
   var _totalmem: string := '';
   var _availmem: string := '';
   var _usagepct: DWord := GetGlobalMemoryUsed2GB(_totalmem, _availmem);
-  Result := Result+C_CRLF;
   Result := Result+'  Memory status at present'+C_CRLF;
   Result := Result+'  _ Total Memory: '+ _totalmem +C_CRLF;
   Result := Result+'  - Available Memory: '+ _availmem +C_CRLF;
@@ -434,6 +439,7 @@ begin
     FDosCommand.Stop;
   FreeAndNil(FDosCommand);
   FreeAndNil(FDosText);
+
   inherited;
 end;
 
@@ -561,6 +567,20 @@ begin
   var _ProcessID: Cardinal := GetProcessID('mpv.exe');
   Result := _ProcessID <> 0;
 end;
+
+{ Help code ...
+
+Result := MyString;
+StartPos := Pos('<', Result);
+if StartPos > 0 then begin
+  SetLength(Result, StartPos - 1);
+  Result := TrimRight(Result);
+end;
+
+to ...
+Result := MyStr.Remove(MyStr.IndexOf('<')).Trim;
+
+}
 
 initialization
   CV_LocaleID := Get_LocaleIDString(1);

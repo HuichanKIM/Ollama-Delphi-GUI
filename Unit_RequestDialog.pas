@@ -22,6 +22,7 @@ type
     Label1: TLabel;
     Label_Clear: TLabel;
     SpeedButton_Trans: TSpeedButton;
+    Label2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure Label_ClearClick(Sender: TObject);
@@ -34,9 +35,9 @@ type
     procedure SetPreLoader(const Value: string);
   public
     // property ...
-    property PreLoader: string  read FPreLoader  write SetPreLoader;
-    property Code_From: Integer  read FCode_From  write FCode_From;
-    property Code_to: Integer  read FCode_to  write FCode_To;
+    property PreLoader: string   read FPreLoader    write SetPreLoader;
+    property Code_From: Integer  read FCode_From    write FCode_From;
+    property Code_to: Integer    read FCode_to      write FCode_To;
   end;
 
 var
@@ -80,7 +81,6 @@ end;
 procedure TForm_RequestDialog.SetPreLoader(const Value: string);
 begin
   FPreLoader := Value;
-  if Memo_Request.Lines.Text = '' then
   Memo_Request.Lines.Text := Value;
 end;
 
@@ -96,10 +96,10 @@ begin
   var _codefrom: Integer := FCode_From;
   var _codeto: Integer := FCode_to;
   if Is_Hangul(_ItemStr) then
-    begin
-      _codefrom := 1;
-      _codeto :=   0;
-    end;
+  begin
+    _codefrom := 1;
+    _codeto :=   0;
+  end;
 
   if _ItemStr <> '' then
     Memo_Request.lines.Text := Get_GoogleTranslatorEx(0, _codefrom, _codeto, _ItemStr);

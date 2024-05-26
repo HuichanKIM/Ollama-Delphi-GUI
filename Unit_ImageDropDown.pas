@@ -27,20 +27,22 @@ type
     FOriginalPanelWndProc: TWndMethod;
     FDropFlag: Integer;
     procedure ImageDrop(var Msg: TWMDROPFILES);
-    procedure ImageWindowProc(var Msg: TMessage);
+    procedure PanelWindowProc(var Msg: TMessage);
   public
     constructor Create(AImage: TImage; APanel: TPanel);
     destructor Destroy; override;
     procedure LoadIMG(const ADropedFile: string);
     // property ...
-    property FileName: string  read FFileName;
-    property DropFlag: Integer  read FDropFlag write FDropFlag;
+    property FileName: string   read FFileName;
+    property DropFlag: Integer  read FDropFlag   write FDropFlag;
   end;
 
 implementation
 
 uses
-  Vcl.Dialogs;
+  Vcl.Dialogs,
+  Unit_Common,
+  Unit_Main;
 
 procedure TImageDropDown<T>.LoadIMG(const ADropedFile: string);
 const
@@ -50,7 +52,7 @@ begin
   var _ext: string := LowerCase(ExtractFileExt(ADropedFile));
   if Pos(_ext, c_VerifyImgFormat) >= 3 then
     try
-      if (_ext = '.webp') or (_ext = '.gif') then
+      if (_ext = '.webp') or (_ext = '.gif') then   { Unsupported Image Format in Llava model }
         begin
           var _BytesStreamJpg: TBytesStream := TBytesStream.Create();
           try
@@ -84,7 +86,7 @@ begin
   FDropFlag := 0;
 
   FOriginalPanelWndProc := APanel.WindowProc;
-  APanel.WindowProc := ImageWindowProc;
+  APanel.WindowProc := PanelWindowProc;
   DragAcceptFiles(APanel.Handle, True);
 end;
 
@@ -99,7 +101,7 @@ begin
   inherited;
 end;
 
-procedure TImageDropDown<T>.ImageWindowProc(var Msg: TMessage);
+procedure TImageDropDown<T>.PanelWindowProc(var Msg: TMessage);
 begin
   if Msg.Msg = WM_DROPFILES then
     ImageDrop(TWMDROPFILES(Msg))

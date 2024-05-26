@@ -30,7 +30,6 @@ type
     Label7: TLabel;
     Label_OllamaGitHub: TLabel;
     Image1: TImage;
-    Label2: TLabel;
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
@@ -81,9 +80,10 @@ const
       - Overbytes ICS 9.1 by François Piette (*)
       - TMS FNC UI Pack v 5.5.0.0 by TMS Software
       - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)
-      - Grijjy.TextToSpeech.pas by http://grijjy.com/ (*)
       - FastMM4-AVX by by Maxim Masiutin (*)
       - Embeded Lib. : SKIA 2D Graphics  (*)
+
+    * Support Multilingual Translation  / Voice
   ''';
 
 procedure TForm_About.FormCreate(Sender: TObject);

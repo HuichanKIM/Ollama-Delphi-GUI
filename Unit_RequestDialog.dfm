@@ -54,6 +54,20 @@ object Form_RequestDialog: TForm_RequestDialog
     Images = Form_RestOllama.SVGIconVirtualImageList1
     OnClick = SpeedButton_TransClick
   end
+  object Label2: TLabel
+    Left = 8
+    Top = 184
+    Width = 170
+    Height = 15
+    Caption = '* Invalid characters:  ",  {, },  [,  ]'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
+    StyleElements = [seClient, seBorder]
+  end
   object Button_OK: TButton
     Left = 256
     Top = 192
@@ -68,8 +82,8 @@ object Form_RequestDialog: TForm_RequestDialog
   end
   object Memo_Request: TMemo
     AlignWithMargins = True
-    Left = 0
-    Top = 30
+    Left = -4
+    Top = 29
     Width = 345
     Height = 144
     Lines.Strings = (

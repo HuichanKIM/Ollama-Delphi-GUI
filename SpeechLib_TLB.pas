@@ -45,12 +45,8 @@ const
   IID_ISpeechObjectToken: TGUID = '{C74A3ADC-B727-4500-A84A-B526721C8B8C}';
   IID_ISpeechObjectTokenCategory: TGUID = '{CA7EAC50-2D01-4145-86D4-5AE7D70F4469}';
   IID_ISpeechObjectTokens: TGUID = '{9285B776-2E7B-4BC0-B53E-580EB6FA967F}';
-  IID_ISpeechAudioBufferInfo: TGUID = '{11B103D8-1142-4EDF-A093-82FB3915F8CC}';
-  IID_ISpeechAudioStatus: TGUID = '{C62D9C91-7458-47F6-862D-1EF86FB0B278}';
-  IID_ISpeechAudioFormat: TGUID = '{E6E9C590-3E18-40E3-8299-061F98BDE7C7}';
   IID_ISpeechWaveFormatEx: TGUID = '{7A1EF0D5-1581-4741-88E4-209A49F11A10}';
   IID_ISpeechBaseStream: TGUID = '{6450336F-7D49-4CED-8097-49D6DEE37294}';
-  IID_ISpeechAudio: TGUID = '{CFF8E175-019E-11D3-A08E-00C04F8EF9B5}';
   IID_ISpeechVoice: TGUID = '{269316D8-57BD-11D2-9EEE-00C04F797396}';
   IID_ISpeechVoiceStatus: TGUID = '{8BE47B07-57F6-11D2-9EEE-00C04F797396}';
   DIID__ISpeechVoiceEvents: TGUID = '{A372ACD1-3BEF-4BBD-8FFB-CB3E2B416AF8}';
@@ -297,27 +293,6 @@ const
   SVP_21 = $00000015;
 
 
-  // Constants for enum SpeechFormatType
-type
-  SpeechFormatType = TOleEnum;
-const
-  SFTInput    = $00000000;
-  SFTSREngine = $00000001;
-
-  // Constants for enum SpeechPartOfSpeech
-type
-  SpeechPartOfSpeech = TOleEnum;
-const
-  SPSNotOverriden = $FFFFFFFF;
-  SPSUnknown      = $00000000;
-  SPSNoun         = $00001000;
-  SPSVerb         = $00002000;
-  SPSModifier     = $00003000;
-  SPSFunction     = $00004000;
-  SPSInterjection = $00005000;
-  SPSLMA          = $00007000;
-  SPSSuppressWord = $0000F000;
-
   // Constants for enum DISPID_SpeechDataKey
 type
   DISPID_SpeechDataKey = TOleEnum;
@@ -371,76 +346,6 @@ const
   DISPID_SOTCGetDataKey      = $00000004;
   DISPID_SOTCEnumerateTokens = $00000005;
 
-  // Constants for enum DISPID_SpeechVoice
-type
-  DISPID_SpeechVoice = TOleEnum;
-const
-  DISPID_SVStatus            = $00000001;
-  DISPID_SVVoice             = $00000002;
-  DISPID_SVAudioOutput       = $00000003;
-  DISPID_SVAudioOutputStream = $00000004;
-  DISPID_SVRate              = $00000005;
-  DISPID_SVVolume            = $00000006;
-  DISPID_SVAllowAudioOuputFormatChangesOnNextSet = $00000007;
-  DISPID_SVEventInterests         = $00000008;
-  DISPID_SVPriority               = $00000009;
-  DISPID_SVAlertBoundary          = $0000000A;
-  DISPID_SVSyncronousSpeakTimeout = $0000000B;
-  DISPID_SVSpeak                  = $0000000C;
-  DISPID_SVSpeakStream            = $0000000D;
-  DISPID_SVPause                  = $0000000E;
-  DISPID_SVResume                 = $0000000F;
-  DISPID_SVSkip                   = $00000010;
-  DISPID_SVGetVoices              = $00000011;
-  DISPID_SVGetAudioOutputs        = $00000012;
-  DISPID_SVWaitUntilDone          = $00000013;
-  DISPID_SVSpeakCompleteEvent     = $00000014;
-  DISPID_SVIsUISupported          = $00000015;
-  DISPID_SVDisplayUI              = $00000016;
-
-
-  // Constants for enum DISPID_SpeechVoiceStatus
-type
-  DISPID_SpeechVoiceStatus = TOleEnum;
-const
-  DISPID_SVSCurrentStreamNumber    = $00000001;
-  DISPID_SVSLastStreamNumberQueued = $00000002;
-  DISPID_SVSLastResult             = $00000003;
-  DISPID_SVSRunningState           = $00000004;
-  DISPID_SVSInputWordPosition      = $00000005;
-  DISPID_SVSInputWordLength        = $00000006;
-  DISPID_SVSInputSentencePosition  = $00000007;
-  DISPID_SVSInputSentenceLength    = $00000008;
-  DISPID_SVSLastBookmark           = $00000009;
-  DISPID_SVSLastBookmarkId         = $0000000A;
-  DISPID_SVSPhonemeId              = $0000000B;
-  DISPID_SVSVisemeId               = $0000000C;
-
-  // Constants for enum DISPID_SpeechVoiceEvent
-type
-  DISPID_SpeechVoiceEvent = TOleEnum;
-const
-  DISPID_SVEStreamStart      = $00000001;
-  DISPID_SVEStreamEnd        = $00000002;
-  DISPID_SVEVoiceChange      = $00000003;
-  DISPID_SVEBookmark         = $00000004;
-  DISPID_SVEWord             = $00000005;
-  DISPID_SVEPhoneme          = $00000006;
-  DISPID_SVESentenceBoundary = $00000007;
-  DISPID_SVEViseme           = $00000008;
-  DISPID_SVEAudioLevel       = $00000009;
-  DISPID_SVEEnginePrivate    = $0000000A;
-
-  // Constants for enum DISPIDSPTSI
-type
-  DISPIDSPTSI = TOleEnum;
-const
-  DISPIDSPTSI_ActiveOffset    = $00000001;
-  DISPIDSPTSI_ActiveLength    = $00000002;
-  DISPIDSPTSI_SelectionOffset = $00000003;
-  DISPIDSPTSI_SelectionLength = $00000004;
-
-
   // Constants for enum SPDATAKEYLOCATION
 type
   SPDATAKEYLOCATION = TOleEnum;
@@ -449,15 +354,6 @@ const
   SPDKL_CurrentUser     = $00000001;
   SPDKL_LocalMachine    = $00000002;
   SPDKL_CurrentConfig   = $00000005;
-
-  // Constants for enum _SPAUDIOSTATE
-type
-  _SPAUDIOSTATE = TOleEnum;
-const
-  SPAS_CLOSED = $00000000;
-  SPAS_STOP   = $00000001;
-  SPAS_PAUSE  = $00000002;
-  SPAS_RUN    = $00000003;
 
   // Constants for enum SPFILEMODE
 type
@@ -549,140 +445,6 @@ const
   SPEI_RESERVED2               = $00000021;
   SPEI_RESERVED3               = $0000003F;
 
-  // Constants for enum SPWAVEFORMATTYPE
-type
-  SPWAVEFORMATTYPE = TOleEnum;
-const
-  SPWF_INPUT    = $00000000;
-  SPWF_SRENGINE = $00000001;
-
-  // Constants for enum SPSEMANTICFORMAT
-type
-  SPSEMANTICFORMAT = TOleEnum;
-const
-  SPSMF_SAPI_PROPERTIES                 = $00000000;
-  SPSMF_SRGS_SEMANTICINTERPRETATION_MS  = $00000001;
-  SPSMF_SRGS_SAPIPROPERTIES             = $00000002;
-  SPSMF_UPS                             = $00000004;
-  SPSMF_SRGS_SEMANTICINTERPRETATION_W3C = $00000008;
-
-  // Constants for enum SPRULESTATE
-type
-  SPRULESTATE = TOleEnum;
-const
-  SPRS_INACTIVE               = $00000000;
-  SPRS_ACTIVE                 = $00000001;
-  SPRS_ACTIVE_WITH_AUTO_PAUSE = $00000003;
-  SPRS_ACTIVE_USER_DELIMITED  = $00000004;
-
-  // Constants for enum SPWORDPRONOUNCEABLE
-type
-  SPWORDPRONOUNCEABLE = TOleEnum;
-const
-  SPWP_UNKNOWN_WORD_UNPRONOUNCEABLE = $00000000;
-  SPWP_UNKNOWN_WORD_PRONOUNCEABLE   = $00000001;
-  SPWP_KNOWN_WORD_PRONOUNCEABLE     = $00000002;
-
-  // Constants for enum SPGRAMMARSTATE
-type
-  SPGRAMMARSTATE = TOleEnum;
-const
-  SPGS_DISABLED  = $00000000;
-  SPGS_ENABLED   = $00000001;
-  SPGS_EXCLUSIVE = $00000003;
-
-  // Constants for enum SPINTERFERENCE
-type
-  SPINTERFERENCE = TOleEnum;
-const
-  SPINTERFERENCE_NONE                   = $00000000;
-  SPINTERFERENCE_NOISE                  = $00000001;
-  SPINTERFERENCE_NOSIGNAL               = $00000002;
-  SPINTERFERENCE_TOOLOUD                = $00000003;
-  SPINTERFERENCE_TOOQUIET               = $00000004;
-  SPINTERFERENCE_TOOFAST                = $00000005;
-  SPINTERFERENCE_TOOSLOW                = $00000006;
-  SPINTERFERENCE_LATENCY_WARNING        = $00000007;
-  SPINTERFERENCE_LATENCY_TRUNCATE_BEGIN = $00000008;
-  SPINTERFERENCE_LATENCY_TRUNCATE_END   = $00000009;
-
-  // Constants for enum SPAUDIOOPTIONS
-type
-  SPAUDIOOPTIONS = TOleEnum;
-const
-  SPAO_NONE         = $00000000;
-  SPAO_RETAIN_AUDIO = $00000001;
-
-  // Constants for enum SPBOOKMARKOPTIONS
-type
-  SPBOOKMARKOPTIONS = TOleEnum;
-const
-  SPBO_NONE       = $00000000;
-  SPBO_PAUSE      = $00000001;
-  SPBO_AHEAD      = $00000002;
-  SPBO_TIME_UNITS = $00000004;
-
-  // Constants for enum SPCONTEXTSTATE
-type
-  SPCONTEXTSTATE = TOleEnum;
-const
-  SPCS_DISABLED = $00000000;
-  SPCS_ENABLED  = $00000001;
-
-  // Constants for enum SPADAPTATIONRELEVANCE
-type
-  SPADAPTATIONRELEVANCE = TOleEnum;
-const
-  SPAR_Unknown = $00000000;
-  SPAR_Low     = $00000001;
-  SPAR_Medium  = $00000002;
-  SPAR_High    = $00000003;
-
-  // Constants for enum SPCATEGORYTYPE
-type
-  SPCATEGORYTYPE = TOleEnum;
-const
-  SPCT_COMMAND       = $00000000;
-  SPCT_DICTATION     = $00000001;
-  SPCT_SLEEP         = $00000002;
-  SPCT_SUB_COMMAND   = $00000003;
-  SPCT_SUB_DICTATION = $00000004;
-
-// Constants for enum SPPARTOFSPEECH
-type
-  SPPARTOFSPEECH = TOleEnum;
-const
-  SPPS_NotOverriden = $FFFFFFFF;
-  SPPS_Unknown      = $00000000;
-  SPPS_Noun         = $00001000;
-  SPPS_Verb         = $00002000;
-  SPPS_Modifier     = $00003000;
-  SPPS_Function     = $00004000;
-  SPPS_Interjection = $00005000;
-  SPPS_Noncontent   = $00006000;
-  SPPS_LMA          = $00007000;
-  SPPS_SuppressWord = $0000F000;
-
-  // Constants for enum SPWORDTYPE
-type
-  SPWORDTYPE = TOleEnum;
-const
-  eWORDTYPE_ADDED   = $00000001;
-  eWORDTYPE_DELETED = $00000002;
-
-  // Constants for enum SPSHORTCUTTYPE
-type
-  SPSHORTCUTTYPE = TOleEnum;
-const
-  SPSHT_NotOverriden = $FFFFFFFF;
-  SPSHT_Unknown      = $00000000;
-  SPSHT_EMAIL        = $00001000;
-  SPSHT_OTHER        = $00002000;
-  SPPS_RESERVED1     = $00003000;
-  SPPS_RESERVED2     = $00004000;
-  SPPS_RESERVED3     = $00005000;
-  SPPS_RESERVED4     = $0000F000;
-
 type
 
 // *********************************************************************//
@@ -696,16 +458,8 @@ type
   ISpeechObjectTokenCategoryDisp = dispinterface;
   ISpeechObjectTokens = interface;
   ISpeechObjectTokensDisp = dispinterface;
-  ISpeechAudioBufferInfo = interface;
-  ISpeechAudioBufferInfoDisp = dispinterface;
-  ISpeechAudioStatus = interface;
-  ISpeechAudioStatusDisp = dispinterface;
-  ISpeechAudioFormatDisp = dispinterface;
   ISpeechWaveFormatEx = interface;
-  ISpeechWaveFormatExDisp = dispinterface;
   ISpeechBaseStream = interface;
-  ISpeechAudio = interface;
-  ISpeechAudioDisp = dispinterface;
   ISpeechVoice = interface;
   ISpeechVoiceDisp = dispinterface;
   ISpeechVoiceStatus = interface;
@@ -717,7 +471,6 @@ type
   ISpObjectTokenCategory = interface;
   IEnumSpObjectTokens = interface;
   ISpObjectToken = interface;
-  IServiceProvider = interface;
   IStream = interface;
   ISpStreamFormat = interface;
   ISpStreamFormatConverter = interface;
@@ -742,24 +495,8 @@ type
 // Declaration of structures, unions and aliases.
 // *********************************************************************//
   wireHWND = ^_RemotableHandle;
-  PUserType10 = ^SPPHRASEPROPERTY; {*}
-  PUserType16 = ^SPSHORTCUTPAIR; {*}
-  POleVariant1 = ^OleVariant; {*}
   PPPrivateAlias1 = ^Pointer; {*}
-  PByte1 = ^Byte; {*}
-  PUINT1 = ^LongWord; {*}
-  PUserType1 = ^TGUID; {*}
   PUserType2 = ^WAVEFORMATEX; {*}
-  PUserType3 = ^SPEVENT; {*}
-  PUserType4 = ^SPAUDIOBUFFERINFO; {*}
-  PUserType5 = ^SPAUDIOOPTIONS; {*}
-  PUserType6 = ^SPSERIALIZEDRESULT; {*}
-  PUserType8 = ^SPSERIALIZEDPHRASE; {*}
-  PUserType11 = ^SPBINARYGRAMMAR; {*}
-  PWord1 = ^Word; {*}
-  PUserType12 = ^SPTEXTSELECTIONINFO; {*}
-  PUserType13 = ^SPPROPERTYINFO; {*}
-  PUserType17 = ^SPRULE; {*}
 
   __MIDL_IWinTypes_0009 = record
     case Integer of
@@ -832,25 +569,7 @@ type
     ulCount: LongWord;
   end;
 
-  SPAUDIOSTATE = _SPAUDIOSTATE;
-
-  SPAUDIOSTATUS = record
-    cbFreeBuffSpace: Integer;
-    cbNonBlockingIO: LongWord;
-    State: SPAUDIOSTATE;
-    CurSeekPos: Largeuint;
-    CurDevicePos: Largeuint;
-    dwAudioLevel: LongWord;
-    dwReserved2: LongWord;
-  end;
-
 {$ALIGN 4}
-  SPAUDIOBUFFERINFO = record
-    ulMsMinNotification: LongWord;
-    ulMsBufferSize: LongWord;
-    ulMsEventBias: LongWord;
-  end;
-
   SPVOICESTATUS = record
     ulCurrentStream: LongWord;
     ulLastStreamQueued: LongWord;
@@ -867,20 +586,6 @@ type
     dwReserved2: LongWord;
   end;
 
-{$ALIGN 8}
-  SPRECOGNIZERSTATUS = record
-    AudioStatus: SPAUDIOSTATUS;
-    ullRecognitionStreamPos: Largeuint;
-    ulStreamNumber: LongWord;
-    ulNumActive: LongWord;
-    ClsidEngine: TGUID;
-    cLangIDs: LongWord;
-    aLangID: array[0..19] of Word;
-    ullRecognitionStreamTime: Largeuint;
-  end;
-
-  SPSTREAMFORMATTYPE = SPWAVEFORMATTYPE;
-
 {$ALIGN 2}
   __MIDL___MIDL_itf_sapi_0000_0020_0002 = record
     bType: Byte;
@@ -893,124 +598,6 @@ type
     case Integer of
       0: (ulId: LongWord);
       1: (__MIDL____MIDL_itf_sapi_0000_00200000: __MIDL___MIDL_itf_sapi_0000_0020_0002);
-  end;
-
-
-  SPPHRASEELEMENT = record
-    ulAudioTimeOffset: LongWord;
-    ulAudioSizeTime: LongWord;
-    ulAudioStreamOffset: LongWord;
-    ulAudioSizeBytes: LongWord;
-    ulRetainedStreamOffset: LongWord;
-    ulRetainedSizeBytes: LongWord;
-    pszDisplayText: PWideChar;
-    pszLexicalForm: PWideChar;
-    pszPronunciation: ^Word;
-    bDisplayAttributes: Byte;
-    RequiredConfidence: Shortint;
-    ActualConfidence: Shortint;
-    reserved: Byte;
-    SREngineConfidence: Single;
-  end;
-
-  SPPHRASEREPLACEMENT = record
-    bDisplayAttributes: Byte;
-    pszReplacementText: PWideChar;
-    ulFirstElement: LongWord;
-    ulCountOfElements: LongWord;
-  end;
-
-  SPSEMANTICERRORINFO = record
-    ulLineNumber: LongWord;
-    pszScriptLine: PWideChar;
-    pszSource: PWideChar;
-    pszDescription: PWideChar;
-    hrResultCode: HResult;
-  end;
-
-  SPSERIALIZEDPHRASE = record
-    ulSerializedSize: LongWord;
-  end;
-
-{$ALIGN 8}
-  tagSPPROPERTYINFO = record
-    pszName: PWideChar;
-    ulId: LongWord;
-    pszValue: PWideChar;
-    vValue: OleVariant;
-  end;
-
-  SPPROPERTYINFO = tagSPPROPERTYINFO;
-
-{$ALIGN 4}
-  SPBINARYGRAMMAR = record
-    ulTotalSerializedSize: LongWord;
-  end;
-
-  tagSPTEXTSELECTIONINFO = record
-    ulStartActiveOffset: LongWord;
-    cchActiveChars: LongWord;
-    ulStartSelection: LongWord;
-    cchSelection: LongWord;
-  end;
-
-  SPTEXTSELECTIONINFO = tagSPTEXTSELECTIONINFO;
-
-  SPRECOCONTEXTSTATUS = record
-    eInterference: SPINTERFERENCE;
-    szRequestTypeOfUI: array[0..254] of Word;
-    dwReserved1: LongWord;
-    dwReserved2: LongWord;
-  end;
-
-  SPSERIALIZEDRESULT = record
-    ulSerializedSize: LongWord;
-  end;
-
-{$ALIGN 8}
-  SPRECORESULTTIMES = record
-    ftStreamTime: _FILETIME;
-    ullLength: Largeuint;
-    dwTickCount: LongWord;
-    ullStart: Largeuint;
-  end;
-
-{$ALIGN 4}
-  SPSHORTCUTPAIR = record
-    pNextSHORTCUTPAIR: PUserType16;
-    LangId: Word;
-    shType: SPSHORTCUTTYPE;
-    pszDisplay: PWideChar;
-    pszSpoken: PWideChar;
-  end;
-
-  SPRULE = record
-    pszRuleName: PWideChar;
-    ulRuleId: LongWord;
-    dwAttributes: LongWord;
-  end;
-
-  ULONG_PTR = LongWord;
-
-{$ALIGN 8}
-  SPPHRASEPROPERTY = record
-    pszName: PWideChar;
-    __MIDL____MIDL_itf_sapi_0000_00200001: __MIDL___MIDL_itf_sapi_0000_0020_0001;
-    pszValue: PWideChar;
-    vValue: OleVariant;
-    ulFirstElement: LongWord;
-    ulCountOfElements: LongWord;
-    pNextSibling: PUserType10;
-    pFirstChild: PUserType10;
-    SREngineConfidence: Single;
-    Confidence: Shortint;
-  end;
-
-{$ALIGN 4}
-  SPSHORTCUTPAIRLIST = record
-    ulSize: LongWord;
-    pvBuffer: ^Byte;
-    pFirstShortcutPair: ^SPSHORTCUTPAIR;
   end;
 
 // *********************************************************************//
@@ -1160,69 +747,6 @@ type
   end;
 
 // *********************************************************************//
-// Interface: ISpeechAudioBufferInfo
-// Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {11B103D8-1142-4EDF-A093-82FB3915F8CC}
-// *********************************************************************//
-  ISpeechAudioBufferInfo = interface(IDispatch)
-    ['{11B103D8-1142-4EDF-A093-82FB3915F8CC}']
-    function Get_MinNotification: Integer; safecall;
-    procedure Set_MinNotification(MinNotification: Integer); safecall;
-    function Get_BufferSize: Integer; safecall;
-    procedure Set_BufferSize(BufferSize: Integer); safecall;
-    function Get_EventBias: Integer; safecall;
-    procedure Set_EventBias(EventBias: Integer); safecall;
-    property MinNotification: Integer read Get_MinNotification write Set_MinNotification;
-    property BufferSize: Integer read Get_BufferSize write Set_BufferSize;
-    property EventBias: Integer read Get_EventBias write Set_EventBias;
-  end;
-
-// *********************************************************************//
-// DispIntf:  ISpeechAudioBufferInfoDisp
-// Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {11B103D8-1142-4EDF-A093-82FB3915F8CC}
-// *********************************************************************//
-  ISpeechAudioBufferInfoDisp = dispinterface
-    ['{11B103D8-1142-4EDF-A093-82FB3915F8CC}']
-    property MinNotification: Integer dispid 1;
-    property BufferSize: Integer dispid 2;
-    property EventBias: Integer dispid 3;
-  end;
-
-// *********************************************************************//
-// Interface: ISpeechAudioStatus
-// Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {C62D9C91-7458-47F6-862D-1EF86FB0B278}
-// *********************************************************************//
-  ISpeechAudioStatus = interface(IDispatch)
-    ['{C62D9C91-7458-47F6-862D-1EF86FB0B278}']
-    function Get_FreeBufferSpace: Integer; safecall;
-    function Get_NonBlockingIO: Integer; safecall;
-    function Get_State: SpeechAudioState; safecall;
-    function Get_CurrentSeekPosition: OleVariant; safecall;
-    function Get_CurrentDevicePosition: OleVariant; safecall;
-    property FreeBufferSpace: Integer read Get_FreeBufferSpace;
-    property NonBlockingIO: Integer read Get_NonBlockingIO;
-    property State: SpeechAudioState read Get_State;
-    property CurrentSeekPosition: OleVariant read Get_CurrentSeekPosition;
-    property CurrentDevicePosition: OleVariant read Get_CurrentDevicePosition;
-  end;
-
-// *********************************************************************//
-// DispIntf:  ISpeechAudioStatusDisp
-// Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {C62D9C91-7458-47F6-862D-1EF86FB0B278}
-// *********************************************************************//
-  ISpeechAudioStatusDisp = dispinterface
-    ['{C62D9C91-7458-47F6-862D-1EF86FB0B278}']
-    property FreeBufferSpace: Integer readonly dispid 1;
-    property NonBlockingIO: Integer readonly dispid 2;
-    property State: SpeechAudioState readonly dispid 3;
-    property CurrentSeekPosition: OleVariant readonly dispid 4;
-    property CurrentDevicePosition: OleVariant readonly dispid 5;
-  end;
-
-// *********************************************************************//
 // Interface: ISpeechAudioFormat
 // Flags:     (4416) Dual OleAutomation Dispatchable
 // GUID:      {E6E9C590-3E18-40E3-8299-061F98BDE7C7}
@@ -1237,19 +761,6 @@ type
     procedure SetWaveFormatEx(const SpeechWaveFormatEx: ISpeechWaveFormatEx); safecall;
     property type_: SpeechAudioFormatType read Get_type_ write Set_type_;
     property Guid: WideString read Get_Guid write Set_Guid;
-  end;
-
-// *********************************************************************//
-// DispIntf:  ISpeechAudioFormatDisp
-// Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {E6E9C590-3E18-40E3-8299-061F98BDE7C7}
-// *********************************************************************//
-  ISpeechAudioFormatDisp = dispinterface
-    ['{E6E9C590-3E18-40E3-8299-061F98BDE7C7}']
-    property type_: SpeechAudioFormatType dispid 1;
-    property Guid: WideString dispid 2;
-    function GetWaveFormatEx: ISpeechWaveFormatEx; dispid 3;
-    procedure SetWaveFormatEx(const SpeechWaveFormatEx: ISpeechWaveFormatEx); dispid 4;
   end;
 
 // *********************************************************************//
@@ -1283,22 +794,6 @@ type
   end;
 
 // *********************************************************************//
-// DispIntf:  ISpeechWaveFormatExDisp
-// Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {7A1EF0D5-1581-4741-88E4-209A49F11A10}
-// *********************************************************************//
-  ISpeechWaveFormatExDisp = dispinterface
-    ['{7A1EF0D5-1581-4741-88E4-209A49F11A10}']
-    property FormatTag: Smallint dispid 1;
-    property Channels: Smallint dispid 2;
-    property SamplesPerSec: Integer dispid 3;
-    property AvgBytesPerSec: Integer dispid 4;
-    property BlockAlign: Smallint dispid 5;
-    property BitsPerSample: Smallint dispid 6;
-    property ExtraData: OleVariant dispid 7;
-  end;
-
-// *********************************************************************//
 // Interface: ISpeechBaseStream
 // Flags:     (4416) Dual OleAutomation Dispatchable
 // GUID:      {6450336F-7D49-4CED-8097-49D6DEE37294}
@@ -1311,50 +806,6 @@ type
     function Write(Buffer: OleVariant): Integer; safecall;
     function Seek(Position: OleVariant; Origin: SpeechStreamSeekPositionType): OleVariant; safecall;
     property Format: ISpeechAudioFormat read Get_Format write _Set_Format;
-  end;
-
-// *********************************************************************//
-// Interface: ISpeechAudio
-// Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {CFF8E175-019E-11D3-A08E-00C04F8EF9B5}
-// *********************************************************************//
-  ISpeechAudio = interface(ISpeechBaseStream)
-    ['{CFF8E175-019E-11D3-A08E-00C04F8EF9B5}']
-    function Get_Status: ISpeechAudioStatus; safecall;
-    function Get_BufferInfo: ISpeechAudioBufferInfo; safecall;
-    function Get_DefaultFormat: ISpeechAudioFormat; safecall;
-    function Get_Volume: Integer; safecall;
-    procedure Set_Volume(Volume: Integer); safecall;
-    function Get_BufferNotifySize: Integer; safecall;
-    procedure Set_BufferNotifySize(BufferNotifySize: Integer); safecall;
-    function Get_EventHandle: Integer; safecall;
-    procedure SetState(State: SpeechAudioState); safecall;
-    property Status: ISpeechAudioStatus read Get_Status;
-    property BufferInfo: ISpeechAudioBufferInfo read Get_BufferInfo;
-    property DefaultFormat: ISpeechAudioFormat read Get_DefaultFormat;
-    property Volume: Integer read Get_Volume write Set_Volume;
-    property BufferNotifySize: Integer read Get_BufferNotifySize write Set_BufferNotifySize;
-    property EventHandle: Integer read Get_EventHandle;
-  end;
-
-// *********************************************************************//
-// DispIntf:  ISpeechAudioDisp
-// Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {CFF8E175-019E-11D3-A08E-00C04F8EF9B5}
-// *********************************************************************//
-  ISpeechAudioDisp = dispinterface
-    ['{CFF8E175-019E-11D3-A08E-00C04F8EF9B5}']
-    property Status: ISpeechAudioStatus readonly dispid 200;
-    property BufferInfo: ISpeechAudioBufferInfo readonly dispid 201;
-    property DefaultFormat: ISpeechAudioFormat readonly dispid 202;
-    property Volume: Integer dispid 203;
-    property BufferNotifySize: Integer dispid 204;
-    property EventHandle: Integer readonly dispid 205;
-    procedure SetState(State: SpeechAudioState); dispid 206;
-    property Format: ISpeechAudioFormat dispid 1;
-    function Read(out Buffer: OleVariant; NumberOfBytes: Integer): Integer; dispid 2;
-    function Write(Buffer: OleVariant): Integer; dispid 3;
-    function Seek(Position: OleVariant; Origin: SpeechStreamSeekPositionType): OleVariant; dispid 4;
   end;
 
 // *********************************************************************//
@@ -1594,27 +1045,6 @@ type
   end;
 
 // *********************************************************************//
-// Interface: IServiceProvider
-// Flags:     (0)
-// GUID:      {6D5140C1-7436-11CE-8034-00AA006009FA}
-// *********************************************************************//
-  IServiceProvider = interface(IUnknown)
-    ['{6D5140C1-7436-11CE-8034-00AA006009FA}']
-    function RemoteQueryService(var guidService: TGUID; var riid: TGUID; out ppvObject: IUnknown): HResult; stdcall;
-  end;
-
-// *********************************************************************//
-// Interface: ISpResourceManager
-// Flags:     (512) Restricted
-// GUID:      {93384E18-5014-43D5-ADBB-A78E055926BD}
-// *********************************************************************//
-  ISpResourceManager = interface(IServiceProvider)
-    ['{93384E18-5014-43D5-ADBB-A78E055926BD}']
-    function SetObject(var guidServiceId: TGUID; const punkObject: IUnknown): HResult; stdcall;
-    function GetObject(var guidServiceId: TGUID; var ObjectCLSID: TGUID; var ObjectIID: TGUID; fReleaseWhenLastExternalRefReleased: Integer; out ppObject: Pointer): HResult; stdcall;
-  end;
-
-// *********************************************************************//
 // Interface: ISequentialStream
 // Flags:     (0)
 // GUID:      {0C733A30-2A1C-11CE-ADE5-00AA0044773D}
@@ -1763,16 +1193,6 @@ type
     function SpeakCompleteEvent: Pointer; stdcall;
     function IsUISupported(pszTypeOfUI: PWideChar; pvExtraData: Pointer; cbExtraData: LongWord; out pfSupported: Integer): HResult; stdcall;
     function DisplayUI(var hWndParent: _RemotableHandle; pszTitle: PWideChar; pszTypeOfUI: PWideChar; pvExtraData: Pointer; cbExtraData: LongWord): HResult; stdcall;
-  end;
-
-// *********************************************************************//
-// Interface: ISpRecoCategory
-// Flags:     (512) Restricted
-// GUID:      {DA0CD0F9-14A2-4F09-8C2A-85CC48979345}
-// *********************************************************************//
-  ISpRecoCategory = interface(IUnknown)
-    ['{DA0CD0F9-14A2-4F09-8C2A-85CC48979345}']
-    function GetType(out peCategoryType: SPCATEGORYTYPE): HResult; stdcall;
   end;
 
 // *********************************************************************//

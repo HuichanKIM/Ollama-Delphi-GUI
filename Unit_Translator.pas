@@ -13,7 +13,8 @@ uses
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.StdCtrls,
-  Vcl.ExtCtrls, Vcl.Buttons;
+  Vcl.ExtCtrls,
+  Vcl.Buttons;
 
 type
   TForm_Translator = class(TForm)
