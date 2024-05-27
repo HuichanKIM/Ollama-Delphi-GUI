@@ -1,8 +1,8 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.2 - 05.21.2024**
+**Latest Version 0.9.3 - 05.25.2024**
 
-- Beta version - support bi translation (English / Korean) only
+- Support Multilingual Translation (by MS SAPI)
 
 ### Features
 
