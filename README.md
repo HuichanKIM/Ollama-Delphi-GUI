@@ -1,6 +1,6 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.3 - 05.25.2024**
+**Latest Version 0.9.4 - 05.29.2024**
 
 - Support Multilingual Translation (by MS SAPI)
 
