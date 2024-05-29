@@ -1,5 +1,9 @@
 program Ollma_Client;
 
+
+
+{$R *.dres}
+
 uses
   FastMM4,
   System.SysUtils,
@@ -50,8 +54,8 @@ begin
     TStyleManager.TrySetStyle('Windows10 SlateGray');
     Application.Title := 'Ollama Client GUI';
     Application.CreateForm(TForm_RestOllama, Form_RestOllama);
-    Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);
-    Application.Run;
+  Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);
+  Application.Run;
   finally
     CloseHandle(_mxHandle);
   end;

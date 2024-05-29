@@ -50,7 +50,7 @@ const
 begin
   FDropFlag := -1;
   var _ext: string := LowerCase(ExtractFileExt(ADropedFile));
-  if Pos(_ext, c_VerifyImgFormat) >= 3 then
+  if Pos(_ext, c_VerifyImgFormat) > 3 then
     try
       if (_ext = '.webp') or (_ext = '.gif') then   { Unsupported Image Format in Llava model }
         begin
@@ -70,12 +70,13 @@ begin
         FImage.Picture.LoadFromFile(ADropedFile);
 
       FFileName := ExtractFileName(ADropedFile);
-      FDropFlag := 0;
     except
       Raise;
     end
   else
     ShowMessage('Not Supported Image Format'#13#10'  - supported format - (*.jpg, *.jpeg, *.png, *.webp,*.gif)');
+
+  FDropFlag := 0;
 end;
 
 constructor TImageDropDown<T>.Create(AImage: TImage; APanel: TPanel);

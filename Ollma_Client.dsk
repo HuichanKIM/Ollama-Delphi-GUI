@@ -1,70 +1,74 @@
 ﻿[Closed Files]
-File_0=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.StdCtrls.pas',0,1,5104,9,5089,0,0,{{1775,4},{1793,15},{'TScrollWindow'}},
-File_1=TSourceModule,'E:\OllamaCkent\Grijjy.TextToSpeech.pas',0,1,90,99,69,0,0,{{15,4}
-File_2=TSourceModule,'E:\OllamaCkent\Grijjy.TextToSpeech.Base.pas',0,1,1,1,14,0,0,,
-File_3=TSourceModule,'E:\OllamaCkent\Grijjy.TextToSpeech.Windows.pas',0,1,304,1,1,0,0,{{222,2}
-File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.Classes.pas',0,1,3193,1,3202,0,0,,
-File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.JSON.Readers.pas',0,1,269,93,298,0,0,,
-File_6=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.IOUtils.pas',0,1,2945,99,2950,0,0,,
-File_7=TSourceModule,'E:\2024_DelphiLibs12\DevopperPascal\librairies\src\Olf.RTL.Language.pas',0,1,37,23,16,0,0,,
-File_8=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\RTL\SYS\System.SysUtils.pas',0,1,6233,1,6251,0,0,,
-File_9=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\Indy10\Protocols\IdURI.pas',0,1,463,81,466,0,0,,
-File_10=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\Indy10\Protocols\IdHTTP.pas',0,1,16,88,8,0,0,,
-File_11=TSourceModule,'E:\2024_DelphiLibs12\TurboPack\DOSCommand\Source\DosCommand.pas',0,1,101,64,127,0,0,,
-File_12=TSourceModule,'E:\2024_DelphiLibs12\Overbytes_icsv91\Source\OverbyteIcsUtils.pas',0,1,7700,93,7457,0,0,,
-File_13=TSourceModule,'E:\2024_DelphiLibs12\Overbytes_icsv91\Source\Include\OverbyteIcsDefs.inc',0,1,404,45,498,0,0,,
-File_14=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.Themes.pas',0,1,1091,55,1106,0,0,,
+File_0=TSourceModule,'E:\OllamaCkent\Ollma_ClientResource.rc',0,1,1,1,1,0,0,,
+File_1=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.Classes.pas',0,1,837,35,876,0,0,,
+File_2=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.ComCtrls.pas',0,1,9065,50,9077,0,0,{{18511,0}
+File_3=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.Controls.pas',0,1,5858,14,5876,0,0,,
+File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.StdCtrls.pas',0,1,12150,17,12166,0,0,{{1775,4}
+File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.Themes.pas',0,1,7337,1,7346,0,0,,
+File_6=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\win\Winapi.MMSystem.pas',0,1,4535,1,4566,0,0,,
+File_7=TSourceModule,'E:\OllamaCkent\Lib\SpeechLib_TLB.pas',0,1,78,1,72,0,0,,
+File_8=TSourceModule,'E:\2024_DelphiLibs12\skia4delphi\Source\VCL\Vcl.Skia.pas',0,1,802,68,633,0,0,,
+File_9=TSourceModule,'E:\2024_DelphiLibs12\skia4delphi\Source\System.Skia.pas',0,1,12388,1,1,0,0,{{62,0}
+File_10=TSourceModule,'E:\2024_DelphiLibs12\SVGIconImageList2\Source\SkiaSVGFactory.pas',0,1,8,46,10,0,0,,
+File_11=TSourceModule,'E:\OllamaCkent\Lib\AboutDialog-Delphi-Component\src\Olf.VCL.AboutDialogForm.pas',0,1,213,77,101,0,0,,
+File_12=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.Dialogs.pas',0,1,1276,1,1312,0,0,,
+File_13=TSourceModule,'E:\OllamaCkent\Lib\RESTUpload\Client\MainForm.pas',0,1,59,66,82,0,0,,
+File_14=TSourceModule,'E:\2024_DelphiLibs12\Overbytes_icsv91\Source\OverbyteIcsSslHttpRest.pas',0,1,882,30,887,0,0,,
 
 [Modules]
 Module0=E:\OllamaCkent\Unit_Main.pas
-Module1=E:\OllamaCkent\Unit_Frame.pas
-Module2=E:\OllamaCkent\Unit_Common.pas
-Module3=E:\OllamaCkent\Unit_RequestDialog.pas
-Module4=E:\OllamaCkent\Unit_About.pas
-Module5=E:\OllamaCkent\Unit_Translator.pas
-Module6=E:\OllamaCkent\Ollma_Client.dproj
-Module7=E:\OllamaCkent\Unit_AliveOllama.pas
-Module8=E:\OllamaCkent\Unit_MRUManager.pas
-Module9=E:\OllamaCkent\Unit_SysInfo.pas
-Module10=E:\OllamaCkent\Unit_ImageDropDown.pas
-Count=11
+Module1=E:\OllamaCkent\Ollma_Client.dproj
+Module2=E:\OllamaCkent\Unit_ImageDropDown.pas
+Module3=E:\OllamaCkent\Unit_Welcome.pas
+Module4=E:\OllamaCkent\Unit_Common.pas
+Module5=E:\OllamaCkent\SpeechLib_TLB.pas
+Module6=E:\OllamaCkent\Unit_MRUManager.pas
+Module7=E:\OllamaCkent\Unit_RequestDialog.pas
+Module8=E:\OllamaCkent\Unit_AliveOllama.pas
+Module9=E:\OllamaCkent\Unit_About.pas
+Module10=E:\OllamaCkent\Unit_SysInfo.pas
+Module11=E:\OllamaCkent\Unit_Translator.pas
+Count=12
 EditWindowCount=1
 
 [E:\OllamaCkent\Unit_Main.pas]
 ModuleType=TSourceModule
 
-[E:\OllamaCkent\Unit_Frame.pas]
+[E:\OllamaCkent\Ollma_Client.dproj]
+ModuleType=TBaseProject
+
+[E:\OllamaCkent\Unit_ImageDropDown.pas]
+ModuleType=TSourceModule
+
+[E:\OllamaCkent\Unit_Welcome.pas]
 ModuleType=TSourceModule
 
 [E:\OllamaCkent\Unit_Common.pas]
 ModuleType=TSourceModule
 
-[E:\OllamaCkent\Unit_RequestDialog.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Unit_About.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Unit_Translator.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Ollma_Client.dproj]
-ModuleType=TBaseProject
-
-[E:\OllamaCkent\Unit_AliveOllama.pas]
+[E:\OllamaCkent\SpeechLib_TLB.pas]
 ModuleType=TSourceModule
 
 [E:\OllamaCkent\Unit_MRUManager.pas]
 ModuleType=TSourceModule
 
+[E:\OllamaCkent\Unit_RequestDialog.pas]
+ModuleType=TSourceModule
+
+[E:\OllamaCkent\Unit_AliveOllama.pas]
+ModuleType=TSourceModule
+
+[E:\OllamaCkent\Unit_About.pas]
+ModuleType=TSourceModule
+
 [E:\OllamaCkent\Unit_SysInfo.pas]
 ModuleType=TSourceModule
 
-[E:\OllamaCkent\Unit_ImageDropDown.pas]
+[E:\OllamaCkent\Unit_Translator.pas]
 ModuleType=TSourceModule
 
 [EditWindow0]
-ViewCount=11
+ViewCount=12
 CurrentEditView=E:\OllamaCkent\Unit_Main.pas
 View0=0
 View1=1
@@ -77,6 +81,7 @@ View7=7
 View8=8
 View9=9
 View10=10
+View11=11
 PercentageSizes=1
 Create=1
 Visible=1
@@ -113,9 +118,9 @@ BottomMiddelPanelData=0000080001020200000009000000446F636B5369746530100000004772
 [View0]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Ollma_Client.dpr
-CursorX=52
-CursorY=9
-TopLine=4
+CursorX=50
+CursorY=10
+TopLine=13
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -124,9 +129,9 @@ EditViewName=E:\OllamaCkent\Ollma_Client.dpr
 [View1]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_Main.pas
-CursorX=85
-CursorY=802
-TopLine=778
+CursorX=110
+CursorY=1674
+TopLine=1603
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -134,32 +139,32 @@ EditViewName=E:\OllamaCkent\Unit_Main.pas
 
 [View2]
 CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_Frame.pas
-CursorX=1
-CursorY=20
-TopLine=13
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_Frame.pas
-
-[View3]
-CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_ImageDropDown.pas
-CursorX=75
-CursorY=42
+Module=E:\OllamaCkent\Unit_Welcome.pas
+CursorX=78
+CursorY=23
 TopLine=1
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_ImageDropDown.pas
+EditViewName=E:\OllamaCkent\Unit_Welcome.pas
+
+[View3]
+CustomEditViewType=TEditView
+Module=E:\OllamaCkent\SpeechLib_TLB.pas
+CursorX=54
+CursorY=236
+TopLine=154
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=E:\OllamaCkent\SpeechLib_TLB.pas
 
 [View4]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_Common.pas
-CursorX=75
-CursorY=29
-TopLine=22
+CursorX=102
+CursorY=196
+TopLine=594
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -168,9 +173,9 @@ EditViewName=E:\OllamaCkent\Unit_Common.pas
 [View5]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_SysInfo.pas
-CursorX=67
-CursorY=10
-TopLine=61
+CursorX=57
+CursorY=9
+TopLine=181
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -178,21 +183,21 @@ EditViewName=E:\OllamaCkent\Unit_SysInfo.pas
 
 [View6]
 CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_RequestDialog.pas
-CursorX=67
-CursorY=97
-TopLine=25
+Module=E:\OllamaCkent\Unit_ImageDropDown.pas
+CursorX=63
+CursorY=19
+TopLine=22
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_RequestDialog.pas
+EditViewName=E:\OllamaCkent\Unit_ImageDropDown.pas
 
 [View7]
 CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_Translator.pas
-CursorX=1
-CursorY=44
-TopLine=155
+Module=E:\OllamaCkent\Unit_RequestDialog.pas
+CursorX=50
+CursorY=97
+TopLine=79
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -200,32 +205,43 @@ EditViewName=Borland.FormDesignerView
 
 [View8]
 CustomEditViewType=TEditView
+Module=E:\OllamaCkent\Unit_Translator.pas
+CursorX=99
+CursorY=2
+TopLine=1
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=E:\OllamaCkent\Unit_Translator.pas
+
+[View9]
+CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_About.pas
-CursorX=67
-CursorY=80
-TopLine=61
+CursorX=1
+CursorY=3
+TopLine=94
 LeftCol=1
 Elisions=
 Bookmarks=
 EditViewName=E:\OllamaCkent\Unit_About.pas
 
-[View9]
+[View10]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_AliveOllama.pas
-CursorX=81
-CursorY=53
-TopLine=111
+CursorX=85
+CursorY=115
+TopLine=88
 LeftCol=1
 Elisions=
 Bookmarks=
 EditViewName=E:\OllamaCkent\Unit_AliveOllama.pas
 
-[View10]
+[View11]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_MRUManager.pas
-CursorX=85
-CursorY=362
-TopLine=217
+CursorX=70
+CursorY=51
+TopLine=10
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -378,11 +394,6 @@ LRDockWidth=1562
 Dockable=1
 StayOnTop=0
 SplitPos=143
-
-[PropInspDesignerSelection]
-ArrangeBy=Name
-SelectedItem=AdaptToStyle,OnMouseEnter
-ExpandedItems=Action=0,Anchors=0,Constraints=0,Font=0,Images=0,LiveBindings=0,"LiveBindings Designer=0",Margins=1,StyleElements=0,Touch=0,BevelEdges=0,ImageCollection=0,ImageMargins=0,Padding=0,HeaderFont=0,ActiveControl=0,BorderIcons=0,CustomTitleBar=0,GlassFrame=0,HorzScrollBar=0,VertScrollBar=0,Appearance=0,ChatInteraction=0
 
 [frmDesignPreview]
 PercentageSizes=1

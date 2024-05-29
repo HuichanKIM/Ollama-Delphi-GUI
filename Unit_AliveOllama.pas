@@ -32,7 +32,7 @@ type
   end;
 
 var
-  V_AliveFlag: Boolean = False;
+  V_AliveOllamaFlag: Boolean = False;
 
 function CheckAlive_Ollama(): Boolean;
 function Get_ListModels_Ollama(const ABaseURL: string): string;
@@ -40,6 +40,7 @@ function Get_ListModels_Ollama(const ABaseURL: string): string;
 implementation
 
 uses
+  Unit_Common,
   IdHTTP, IdURI;  { More Useful for Acessing Local server / no SSL - http://... }
 
 {$R *.dfm}
@@ -67,7 +68,7 @@ end;
 function CheckAlive_Ollama(): Boolean;
 begin
   Result := False;
-  V_AliveFlag := False;
+  V_AliveOllamaFlag := False;
 
   try
     var _HTTP: TIdHTTP := TIdHTTP.Create;
@@ -77,13 +78,13 @@ begin
       _Buffer := LowerCase(_Buffer);
       Result := (Pos('ollama', _Buffer) > 0) and (Pos('running', _Buffer) > 1);
 
-      V_AliveFlag := Result;
+      V_AliveOllamaFlag := Result;
     finally
       _HTTP.Free;
     end;
   except
     on E: Exception do
-      ShowMessage(E.ClassName+ ': '+ E.Message);
+      ShowMessage('Ollama connection error. '+C_CRLF+ E.ClassName+ ': '+ E.Message);
   end;
 end;
 
@@ -112,7 +113,7 @@ const
   c_Warning = 'Check Ollama is installed and running on local computer.';
 begin
   Memo1.lines.Clear;
-  V_AliveFlag := False;
+  V_AliveOllamaFlag := False;
 
   try
     var _HTTP: TIdHTTP := TIdHTTP.Create;
@@ -121,10 +122,10 @@ begin
       var _Buffer := _HTTP.Get(_Query);
       LogReturn(_Buffer);
       _Buffer := LowerCase(_Buffer);
-      V_AliveFlag := (Pos('ollama', _Buffer) > 0) and (Pos('running', _Buffer) > 1);
-      LogReturn(c_Alive[ V_AliveFlag ]);
+      V_AliveOllamaFlag := (Pos('ollama', _Buffer) > 0) and (Pos('running', _Buffer) > 1);
+      LogReturn(c_Alive[ V_AliveOllamaFlag ]);
 
-      if not V_AliveFlag then
+      if not V_AliveOllamaFlag then
       Memo1.lines.Add(c_Warning);
     finally
       _HTTP.Free;

@@ -236,10 +236,12 @@ type
     Action_About: TAction;
     Shape_Memory: TShape;
     CheckBox_SaveOnCLose: TCheckBox;
-    PopupMenu_Llava: TPopupMenu;
-    OpenImageFile1: TMenuItem;
     Panel_ChattingBase: TPanel;
     Label_Font_Size: TLabel;
+    CheckBox_Beep: TCheckBox;
+    SpeedButton_Llava: TSpeedButton;
+    pmn_ClearAll1: TMenuItem;
+    N2: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -280,7 +282,6 @@ type
     procedure Edit_NicknameChange(Sender: TObject);
     procedure TrackBar_GlobalFontSizeChange(Sender: TObject);
     procedure ComboBox_ModelsChange(Sender: TObject);
-    procedure Image_LlvaDblClick(Sender: TObject);
     procedure SpeedButton_ClearLogBoxClick(Sender: TObject);
     procedure SpeedButton_LoadModelClick(Sender: TObject);
     procedure SpeedButton_CPUMemUsageClick(Sender: TObject);
@@ -312,7 +313,9 @@ type
     procedure TrackBar_VolumeChange(Sender: TObject);
     procedure SpeedButton_TTSPlayClick(Sender: TObject);
     procedure SpeedButton_SystemInfoClick(Sender: TObject);
-    procedure OpenImageFile1Click(Sender: TObject);
+    procedure CheckBox_BeepClick(Sender: TObject);
+    procedure SpeedButton_LlavaClick(Sender: TObject);
+    procedure pmn_ClearAll1Click(Sender: TObject);
   private
     FFrameWelcome: TFrame_Welcome;
     FModelsList: TStringList;
@@ -333,6 +336,7 @@ type
     FTTS_Speaking: Boolean;
     FTTS_EngineName: string;
     FMemMonitoringFlag: Boolean;
+    FDoneSoundFlag: Boolean;
     procedure Load_ConfigIni(const AFlag: Integer = 0);
     procedure Save_ConfigIni(const AFlag: Integer = 0);
     procedure Common_RestSettings(const Aflag: Integer = 0);
@@ -408,6 +412,10 @@ uses
 {$R *.dfm}
 
 resourcestring
+  R_Aya = '''
+      Aya 23, released by Cohere, is a new family of state-of-the-art, multilingual,
+      generative large language research model (LLM) covering 23 different languages.
+      ''';
   R_Phi3 = '''
       Phi-3 Mini is a 3.8B parameters, lightweight, state-of-the-art open model by Microsoft.
       Trained with the Phi-3 datasets that includes both synthetic data and the filtered publicly available websites data
@@ -463,7 +471,7 @@ const
   C_LlavaPromptContent  = 'Describe this image:'; // 'What is in this picture?';
 
   C_OllamaAlive: array [Boolean] of string = (' * Ollama is dead.',' * Ollama is running.');
-  C_ModelDesc:   array [0 .. 7] of string = (R_Phi3, R_Llama3, R_Llama2, R_Gemma, R_Llava, R_Codegemma, R_DolphiMistral, R_Mistral);
+  C_ModelDesc:   array [0 .. 8] of string = (R_Aya, R_Phi3, R_Llama3, R_Llama2, R_Gemma, R_Llava, R_Codegemma, R_DolphiMistral, R_Mistral);
 
 const
   C_TimestampFontSize = 8;
@@ -734,10 +742,8 @@ begin
     end;
     // ---------------------------------------------------------------------- //
     Panel_CaptionLog.Caption := '      LOGs from '+FormatDateTime('yyyy.mm.dd HH:NN:SS', Now);
-    Panel_ChatMessageBox.Enabled := V_AliveFlag;
-    Action_StartRequest.Enabled :=  V_AliveFlag;
-    StatusBar1.Panels[0].Text :=    C_OllamaAlive[V_AliveFlag];
-    StatusBar1.Panels[1].Text :=   'Elapsed time';
+    Panel_ChatMessageBox.Enabled := V_AliveOllamaFlag;
+    Action_StartRequest.Enabled :=  V_AliveOllamaFlag;
     SetRequestingFlag(False);
 
     StatusBar1.Panels[0].Width := Self.Width div 2;
@@ -770,10 +776,18 @@ begin
     if FileExists(_fmemo) then
       Memo_Memo.Lines.LoadFromFile(_fmemo);
 
+    SkAnimatedImage_Chat.Left := (TMSFNCChat_Ollama.Width -  SkAnimatedImage_Chat.Width) div 2;
+    SkAnimatedImage_Chat.Top :=  (TMSFNCChat_Ollama.Height - SkAnimatedImage_Chat.Height) div 2;
+
     FInitialized := True;
 
     if TreeView_Topics.items.Count > 0 then
       Topic_Seleced := TreeView_Topics.items.GetFirstNode.Text;
+
+    StatusBar1.Panels[0].Text :=    C_OllamaAlive[V_AliveOllamaFlag];
+    StatusBar1.Panels[1].Text :=   'Elapsed time';
+    if not V_AliveOllamaFlag  then
+    ShowMessage('Ollama is not connected. Check Ollama is running ...');
   end;
 end;
 
@@ -811,17 +825,10 @@ begin
     FTTS_EngineName :=               ReadString(C_SectionOptions,   'TTS_Engine',           '');
     TrackBar_Volume.Position :=      ReadInteger(C_SectionOptions,  'TTS_Volume',           80);
     CheckBox_SaveOnCLose.Checked :=  ReadBool(C_SectionOptions,     'Save_Logs',            False);
+    FDoneSoundFlag :=                ReadBool(C_SectionOptions,     'Done_Beep',            False);
+    CheckBox_Beep.Checked := FDoneSoundFlag;
   finally
     Free;
-  end;
-end;
-
-procedure TForm_RestOllama.OpenImageFile1Click(Sender: TObject);
-begin
-  if OpenPictureDialog1.Execute() then
-  begin
-    V_LlavaSource := OpenPictureDialog1.FileName;
-    FImage_DropDown.LoadIMG(OpenPictureDialog1.FileName);
   end;
 end;
 
@@ -840,6 +847,7 @@ begin
     WriteString(C_SectionOptions,     'TTS_Engine',           FTTS_EngineName);
     WriteInteger(C_SectionOptions,    'TTS_Volume',           TrackBar_Volume.Position);
     WriteBool(C_SectionOptions,       'Save_Logs',            CheckBox_SaveOnCLose.Checked);
+    WriteBool(C_SectionOptions,       'Done_Beep',            FDoneSoundFlag);
   finally
     UpdateFile;
     Free;
@@ -888,7 +896,7 @@ begin
   var _visflag_2: Boolean := _visflag_0 or _visflag_1;
   var _visflag_3: Boolean := _visflag_0 and not RequestingFlag;
   var _visflag_4: Boolean := _visflag_2 and not RequestingFlag;
-  var _visflag_5: Boolean := _visflag_2 and not RequestingFlag and V_AliveFlag;
+  var _visflag_5: Boolean := _visflag_2 and not RequestingFlag and V_AliveOllamaFlag;
 
 
   Action_Pop_CopyText.Enabled :=        _visflag_0;
@@ -898,7 +906,7 @@ begin
   Action_Pop_SaveAllText.Enabled :=     _visflag_0;
   Action_TTS.Enabled :=                 _visflag_0;
   Action_Options.Enabled :=             _visflag_2;
-  Action_Abort.Enabled :=               _visflag_2 and V_AliveFlag;
+  Action_Abort.Enabled :=               _visflag_2 and V_AliveOllamaFlag;
   Action_TransMessagePush.Enabled :=    _visflag_3;
   Action_TransMessage.Enabled :=        _visflag_3;
   Action_TransPromptPush.Enabled :=     _visflag_3;
@@ -974,7 +982,7 @@ end;
 
 procedure TForm_RestOllama.Action_LoadImageLlavaExecute(Sender: TObject);
 begin
-  if OpenPictureDialog1.Execute() then
+  if (FImage_DropDown.DropFlag = 0) and OpenPictureDialog1.Execute() then
   begin
     V_LlavaSource := OpenPictureDialog1.FileName;
     FImage_DropDown.LoadIMG(OpenPictureDialog1.FileName);
@@ -1028,9 +1036,9 @@ begin
     ShowModal;
     if IsCkeckedFlag then
     begin
-      Form_RestOllama.Panel_ChatMessageBox.Enabled := V_AliveFlag;
-      Form_RestOllama.Action_StartRequest.Enabled := V_AliveFlag;
-      Form_RestOllama.StatusBar1.Panels[2].Text := C_OllamaAlive[V_AliveFlag];
+      Form_RestOllama.Panel_ChatMessageBox.Enabled := V_AliveOllamaFlag;
+      Form_RestOllama.Action_StartRequest.Enabled := V_AliveOllamaFlag;
+      Form_RestOllama.StatusBar1.Panels[2].Text := C_OllamaAlive[V_AliveOllamaFlag];
     end;
   finally
     Free;
@@ -1167,7 +1175,7 @@ end;
 
 procedure TForm_RestOllama.Add_ChattingMessage(const AFlag, ALocation: Integer; const APrompt: string);
 begin
-  var _text: string := APrompt + IcsCRLF;
+  var _text: string := APrompt + C_CRLF;
   var _user: string := V_Username;
   if AFlag = 1 then _user := 'Ollama [ ' + V_MyModel+' ]' else
   if AFlag = 2 then _user := 'Ollama - System' else
@@ -1218,10 +1226,10 @@ begin
   if AFlag > 0 then
   begin
     if AFlag = 2 then
-      V_BuffLogLines := V_BuffLogLines + IcsCRLF;
+      V_BuffLogLines := V_BuffLogLines + C_CRLF;
     if ALog <> '' then
       V_BuffLogLines := V_BuffLogLines + FormatDateTime('hh:nn:ss', Time) + '  ';
-    V_BuffLogLines := V_BuffLogLines + ALog + IcsCRLF;
+    V_BuffLogLines := V_BuffLogLines + ALog + C_CRLF;
   end;
 
   var _displen := Length(V_BuffLogLines);
@@ -1238,7 +1246,7 @@ end;
 procedure TForm_RestOllama.Add_LogWin(const ALog: string);
 begin
   V_BuffLogLines := V_BuffLogLines + FormatDateTime('hh:nn:ss', Time) + '  ';
-  V_BuffLogLines := V_BuffLogLines + ALog + IcsCRLF;
+  V_BuffLogLines := V_BuffLogLines + ALog + C_CRLF;
 end;
 
 procedure TForm_RestOllama.TMSFNCChat_OllamaAfterDrawMessage(Sender: TObject; AGraphics: TTMSFNCGraphics; ARect: TRectF; AItem: TTMSFNCChatItem);
@@ -1402,6 +1410,8 @@ function Get_ModelDesc(const AModelName: string): string;
 begin
   Result := 'N/A';
   var _modelname: string := LowerCase(AModelName);
+  if Pos('aya', _modelname) = 1 then
+    Result := R_Aya else
   if Pos('phi3', _modelname) = 1 then
     Result := R_Phi3 else
   if Pos('llama3', _modelname) = 1 then
@@ -1418,6 +1428,13 @@ begin
     Result := R_DolphiMistral else
   if Pos('mistral', _modelname) = 1 then
     Result := R_Mistral;
+end;
+
+procedure TForm_RestOllama.CheckBox_BeepClick(Sender: TObject);
+begin
+  FDoneSoundFlag := CheckBox_Beep.Checked;
+  if FInitialized then
+  SimpleSound_Common(True, Ord(FDoneSoundFlag));
 end;
 
 procedure TForm_RestOllama.ComboBox_ModelsChange(Sender: TObject);
@@ -1651,7 +1668,7 @@ begin
   var _index: Integer := 0;
   var _modelname: string := ComboBox_Models.Items[ComboBox_Models.ItemIndex];
   var _ParseJson: string := Get_DisplayJson_Models(_parsingsrc, _index, FModelsList);
-  var _Responses: string := _ParseJson+IcsCRLF+'Models Count : '+ _index.ToString;
+  var _Responses: string := _ParseJson+C_CRLF+'Models Count : '+ _index.ToString;
   // ------------------------------------------------------------------------ //
   Add_ChattingMessage(2, 1, _Responses);
   // ------------------------------------------------------------------------ //
@@ -1682,7 +1699,7 @@ begin
   Timer_Repeater.Enabled := False;
   V_RepeatFlag := False;
   StatusBar1.Panels[0].Text := 'Restart ...';
-  Push_LogWin(1, '* Repeat once cause of 401, 404 error ...'+IcsCRLF);
+  Push_LogWin(1, '* Repeat once cause of 401, 404 error ...'+C_CRLF);
   if V_LoadModelFlag then
     begin
       V_LoadModelFlag := False;
@@ -1696,6 +1713,7 @@ procedure TForm_RestOllama.WM401404REPEAT(var Msg: TMessage);
 begin
   if V_RepeatFlag then
   begin
+    SimpleSound_Common(FDoneSoundFlag, 0);
     V_RepeatFlag := False;
     Do_Abort(1);
     Sleep(1);
@@ -1713,7 +1731,8 @@ procedure TForm_RestOllama.HttpRest_OllamaHttpRestProg(Sender: TObject; LogOptio
   function CheckCompleted(const AMsg: string): Boolean;
   begin
     Result := False;
-    Result := (Pos('completed,', AMsg) > 0) or (Pos('Size', AMsg) > 1);
+    var _msg: string := LowerCase(AMsg);
+    Result := (Pos('completed,', _msg) > 0) or (Pos('size', _msg) > 1);
   end;
 
 begin
@@ -1736,7 +1755,7 @@ begin
     end;
 
   if CheckCompleted(Msg) then
-    Push_LogWin(1, MSg);
+    Push_LogWin(1, Msg);
 end;
 
 { Non Thread Safe ? }
@@ -1807,7 +1826,8 @@ begin
         { look for Json response --------------------------------------------------- }
         if ((Pos('{', HttpRest_Ollama.ResponseRaw) > 0) or (Pos('json', HttpRest_Ollama.ContentType) > 0)) then
           begin
-            Do_DisplayJson(String(HttpRest_Ollama.ResponseRaw));
+            Do_DisplayJson(string(HttpRest_Ollama.ResponseRaw));
+            SimpleSound_Common(FDoneSoundFlag, 1);
             Inc(V_DummyFlag);
           end
         else
@@ -1834,16 +1854,6 @@ begin
     Key := #0;
     V_RepeatFlag := True;
     Do_StartRequest(2);
-  end;
-end;
-
-procedure TForm_RestOllama.Image_LlvaDblClick(Sender: TObject);
-begin
-  ShowMessage('ImageLlava ...');
-  if (FImage_DropDown.DropFlag = 0) and OpenPictureDialog1.Execute() then
-  begin
-    V_LlavaSource := OpenPictureDialog1.FileName;
-    Image_Llva.Picture.LoadFromFile(OpenPictureDialog1.FileName);
   end;
 end;
 
@@ -1928,6 +1938,15 @@ end;
 procedure TForm_RestOllama.SpeedButton_ListModelsClick(Sender: TObject);
 begin
   Do_ListModels(0);
+end;
+
+procedure TForm_RestOllama.SpeedButton_LlavaClick(Sender: TObject);
+begin
+  if (FImage_DropDown.DropFlag = 0) and OpenPictureDialog1.Execute() then
+  begin
+    V_LlavaSource := OpenPictureDialog1.FileName;
+;   FImage_DropDown.LoadIMG(V_LlavaSource);
+  end;
 end;
 
 { Not Chatting Mode / Not Use Ollama Models ... }
@@ -2017,7 +2036,7 @@ end;
 
 procedure TForm_RestOllama.Insert_ChattingTranslate(const AIndex: Integer; const ATranslation: string);
 begin
-  var _text: string := ATranslation + IcsCRLF;
+  var _text: string := ATranslation + C_CRLF;
   var _user: string := 'Ollama [ ' + V_MyModel+' ] ( Translated )';
 
   with TMSFNCChat_Ollama do
@@ -2199,6 +2218,12 @@ end;
 procedure TForm_RestOllama.PopupMenu_TopicsPopup(Sender: TObject);
 begin
   pmn_RenameTopic.Enabled := TreeView_Topics.Selected <> nil;
+end;
+
+procedure TForm_RestOllama.pmn_ClearAll1Click(Sender: TObject);
+begin
+  if MessageDlg('All topics and prompts will be erased. Continue ?', mtConfirmation, [mbOK, mbCancel], 0) = mrOk then
+  FTopicsMRU.Clear_All();
 end;
 
 procedure TForm_RestOllama.pmn_RenameTopicClick(Sender: TObject);
@@ -2480,6 +2505,7 @@ var
 procedure TForm_RestOllama.Action_DosCommandExecute(Sender: TObject);
 const
   c_UnCommands: array[0..6] of String = ('serve', 'create', 'run', 'pull', 'push', 'cp', 'rm');
+  c_OllamaClear = 'ollama run/clear';
 
   function VerifyCmd(const ACommand: string): Boolean;
   begin
@@ -2500,7 +2526,10 @@ begin
     if VerifyCmd(_command) then
       begin
         if not GV_DosCommand.Dos_Execute(_command) then
-        ShowMessage('Failed to Command : '+_command);
+        begin
+          SimpleSound_Common(FDoneSoundFlag, 0);
+          ShowMessage('Failed to Command : '+_command);
+        end;
       end
     else
       GV_DosCommand.Dos_CommandBatch(_command);
@@ -2561,11 +2590,13 @@ begin
       end;
     DOS_MESSAGE_FINISH:
       begin
+        SimpleSound_Common(FDoneSoundFlag, 1);
         DM_DosCommandProc(2);
         StatusBar1.Panels[0].Text := 'Dos command finish ...';
       end;
     DOS_MESSAGE_ERROR:
       begin
+        SimpleSound_Common(FDoneSoundFlag, 0);
         DM_DosCommandProc(2);
         StatusBar1.Panels[0].Text := GV_DosCommand.Get_DosResult;
       end;

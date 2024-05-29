@@ -54,13 +54,14 @@ object Frame_Welcome: TFrame_Welcome
       '-8.7-6-2.7 0-4.1.7-6.2 3.2"/></g></svg>'
   end
   object SkLabel_Clicktohome: TSkLabel
-    AlignWithMargins = True
-    Left = 3
-    Top = 605
-    Width = 906
-    Height = 12
-    Margins.Bottom = 20
+    Left = 0
+    Top = 597
+    Width = 912
+    Height = 40
+    Margins.Top = 0
+    Margins.Bottom = 0
     Align = alBottom
+    AutoSize = False
     TextSettings.Font.Size = 9.000000000000000000
     TextSettings.FontColor = claSilver
     TextSettings.HorzAlign = Center
@@ -68,15 +69,14 @@ object Frame_Welcome: TFrame_Welcome
       item
         Caption = '* click to chatting room'
       end>
-    ExplicitTop = 625
-    ExplicitWidth = 645
+    ExplicitTop = 607
   end
   object SkLabel_Intro: TSkLabel
     Left = 0
     Top = 0
     Width = 912
-    Height = 602
-    Margins.Bottom = 20
+    Height = 597
+    Margins.Bottom = 0
     Align = alClient
     TextSettings.FontColor = claSilver
     TextSettings.HorzAlign = Center

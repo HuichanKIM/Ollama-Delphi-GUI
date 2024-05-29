@@ -82,9 +82,9 @@ object Form_RequestDialog: TForm_RequestDialog
   end
   object Memo_Request: TMemo
     AlignWithMargins = True
-    Left = -4
+    Left = 5
     Top = 29
-    Width = 345
+    Width = 335
     Height = 144
     Lines.Strings = (
       'Memo_Request')

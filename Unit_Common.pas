@@ -76,6 +76,7 @@ function MSecsToTime(const AMSec: Int64): string;
 function MSecsToSeconds(const AMSec: Int64): string;
 procedure Global_TrimAppMemorySizeEx(const AStrategy: Integer);
 function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
+procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
 
 var
   CV_AppPath: string = '';
@@ -93,6 +94,7 @@ uses
   Winapi.TlHelp32,
   Winapi.PsAPI,
   WinAPi.ShellAPI,
+  Winapi.MMSystem,
   System.JSON,
   System.JSON.Readers,
   System.JSON.Writers,
@@ -155,12 +157,43 @@ begin
   Result := FileExists(AFilePath);
 end;
 
+function LoadResource(const AIndex: Integer): TBytes;
+const
+  C_Wave: array [0 .. 1] of string = ('BEEP0', 'BEEP1');
+begin
+  var _stream: TStream := TResourceStream.Create(HInstance, C_Wave[AIndex], RT_RCDATA);
+  try
+    var _sz: Int64 := _stream.Size;
+    SetLength(Result, _sz);
+    _stream.Read(Result, 0, _sz)
+  finally
+    FreeAndNIL(_stream)
+  end;
+end;
+
+procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
+begin
+  if AIndex < 0 then
+  begin
+    PlaySound(nil, 0, SND_NODEFAULT or SND_ASYNC);
+    Exit;
+  end;
+
+  if AFlag then
+  TTask.Run(
+  procedure
+  begin
+    var _wdata: TBytes := LoadResource(AIndex);
+    PlaySound(PChar(_wdata), 0, SND_NODEFAULT or SND_ASYNC or SND_MEMORY);
+  end);
+end;
+
 function Get_SystemInfo(): string;
 const
   c_Processors: array [TPJProcessorArchitecture] of string = ('paUnknown', 'paX64', 'paIA64', 'paX86');
 
 begin
-  Result := '';//+C_CRLF;
+  Result := '';
 
   with TPJComputerInfo do
   begin
