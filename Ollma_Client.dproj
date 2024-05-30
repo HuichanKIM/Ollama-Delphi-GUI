@@ -1136,6 +1136,11 @@
         <DCCReference Include="Unit_RequestDialog.pas">
             <Form>Form_RequestDialog</Form>
         </DCCReference>
+        <DCCReference Include="Unit_ChattingBoxClass.pas">
+            <Form>Frame_ChattingBoxClass</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
         <RcItem Include="beep0.wav">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>

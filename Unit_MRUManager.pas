@@ -261,7 +261,6 @@ end;
 procedure TMRU_Manager.Clear_All(const AFalg: Integer);
 begin
   Write_TreeViewToJSON();
-  // Backup previous list file
   var _backupfile: string := CV_TmpPath+ExtractFileName(FMruJsonFile);
   var _success: Boolean := CopyFile(PChar(FMruJsonFile), PChar(_backupfile), False);
 

@@ -28,7 +28,7 @@ const
 type
   TG_DosCommand = class
     FDosCommand: TDosCommand;
-    FDosText: TStrings;
+    FDosTexts: TStrings;
     FCommand: string;
   private
   public
@@ -51,7 +51,7 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  C_Version     = 'v 0.9.3 - beta (2024.05.24)';
+  C_Version     = 'v 0.9.5 - beta (2024.05.30)';
   C_MainCaption = 'Ollama Client GUI '+C_Version;
   C_CoptRights  = '- Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea. All Rights Reserved. -';
 
@@ -451,12 +451,12 @@ end;
 
 constructor TG_DosCommand.Create;
 begin
-  FDosText := TStringList.Create;
+  FDosTexts := TStringList.Create;
   FDosCommand :=  TDosCommand.Create(nil);
   with FDosCommand do
   begin
     InputToOutput := False;
-    OutputLines := FDosText;
+    OutputLines := FDosTexts;
     MaxTimeAfterBeginning := 0;
     MaxTimeAfterLastOutput := 1000;
     OnExecuteError := DosCommandExecuteError;
@@ -471,7 +471,7 @@ begin
   if FDosCommand.IsRunning then
     FDosCommand.Stop;
   FreeAndNil(FDosCommand);
-  FreeAndNil(FDosText);
+  FreeAndNil(FDosTexts);
 
   inherited;
 end;
@@ -505,7 +505,7 @@ end;
 
 procedure TG_DosCommand.DosCommandExecuteError(ASender: TObject; AE: Exception; var AHandled: Boolean);
 begin
-  FDosText.Text := 'Error !!!'+C_CRLF+AE.Message;
+  FDosTexts.Text := 'Error !!!'+C_CRLF+AE.Message;
   PostMessage(Form_RestOllama.Handle, DOS_MESSAGE, DOS_MESSAGE_ERROR, 0);
 end;
 
@@ -522,13 +522,13 @@ begin
   if FDosCommand.IsRunning then
     FDosCommand.Stop;
   FDosCommand.OnTerminated := DosCommandTerminated;
-  FDosText.Clear;
+  FDosTexts.Clear;
   FCommand := Acmd;
   with FDosCommand do
   try
     CommandLine := Acmd;
     CurrentDir :=  CV_AppPath;
-    OutputLines := FDosText;
+    OutputLines := FDosTexts;
 
     Execute;
   except
@@ -550,7 +550,7 @@ end;
 
 function TG_DosCommand.Get_DosResult(AFlag: Integer = 0): string;
 begin
-  Result := FDosText.Text;
+  Result := FDosTexts.Text;
 end;
 
 { Edge TTS - PlayBack : MPV ... }

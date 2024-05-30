@@ -74,13 +74,14 @@ const
   C_DevelopInfo: string = '''
 
     Development Tool  (GUI)
-      Embarcadero Delphi 12.1  ( Pascal )
+      Embarcadero Delphi 12.1  ( Object Pascal )
 
     3rd party Reference Library  (* - free)
       - Overbytes ICS 9.1 by François Piette (*)
-      - TMS FNC UI Pack v 5.5.0.0 by TMS Software
+      - Virtual-TreeView by JAM-Software (*)
       - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)
-      - FastMM4-AVX by by Maxim Masiutin (*)
+      - SpeechLibrary by MS SAPI (*)
+      - FastMM4-AVX by Maxim Masiutin (*)
       - Embeded Lib. : SKIA 2D Graphics  (*)
 
     * Support Multilingual Translation  / Voice

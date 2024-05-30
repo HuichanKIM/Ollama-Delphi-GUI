@@ -21,7 +21,8 @@ uses
   Unit_AliveOllama in 'Unit_AliveOllama.pas' {Form_AliveOllama},
   Unit_Translator in 'Unit_Translator.pas' {Form_Translator},
   Unit_About in 'Unit_About.pas' {Form_About},
-  Unit_RequestDialog in 'Unit_RequestDialog.pas' {Form_RequestDialog};
+  Unit_RequestDialog in 'Unit_RequestDialog.pas' {Form_RequestDialog},
+  Unit_ChattingBoxClass in 'Unit_ChattingBoxClass.pas' {Frame_ChattingBoxClass: TFrame};
 
 {$R *.res}
 
