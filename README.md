@@ -1,7 +1,8 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.4 - 05.29.2024**
+**Latest Version 0.9.5 - 05.31.2024**
 
+- Replace Commercial Library to Free Component for ChattingBox
 - Support Multilingual Translation (by MS SAPI)
 
 ### Features
@@ -23,7 +24,7 @@
 
 - Overbytes ICS <https://wiki.overbyte.eu/wiki/index.php/ICS_Download>
 
-- TMS FNC Core / TMS FNC UI Pack <https://www.tmssoftware.com/site/fnc-products.asp>
+- Virtual-TreeView by JAM-Software <https://github.com/JAM-Software/Virtual-TreeView>
 
 
 ### About (Screenshot)
