@@ -1,7 +1,15 @@
 ﻿unit VirtualTrees.BaseTree;
 
 // Modified by ichin 2024-05-30 목 오후 2:56:19
-{ Partial modification - PrepareCell }
+{
+  Partial modification - PrepareCell (ln 14264)
+  Add FSelectedBrushColor: TColor;
+  Add FSelectedBrushColor := clWebDarkSlateBlue;  - OnCreate
+  Add procedure SetSelectedBrushColor(const Value: TColor);
+  Add property SelectedBrushColor: TColor  read FSelectedBrushColor  write SetSelectedBrushColor;
+  Deprecating ...
+  ln: 2869 - Unified by Selected Color
+}
 
 interface
 
@@ -727,6 +735,8 @@ type
 
     FVclStyleEnabled: Boolean;
     FSelectionCount: Integer;
+    // Modified by ichin 2024-05-30 목 오후 9:04:55
+    FSelectedBrushColor: TColor;
 
     procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
     procedure CMParentDoubleBufferedChange(var Message: TMessage); message CM_PARENTDOUBLEBUFFEREDCHANGED;
@@ -901,6 +911,8 @@ type
     function IsStored_Indent: Boolean;
     function IsStored_Margin: Boolean;
     function IsStored_TextMargin: Boolean;
+    // Modified by ichin 2024-05-30 목 오후 9:07:26
+    procedure SetSelectedBrushColor(const Value: TColor);
   protected
     FFontChanged: Boolean;                       // flag for keeping informed about font changes in the off screen buffer   // [IPK] - private to protected
     procedure AutoScale(); virtual;
@@ -1628,6 +1640,8 @@ type
     property VisiblePath[Node: PVirtualNode]: Boolean read GetVisiblePath write SetVisiblePath;
     property UpdateCount: Cardinal read FUpdateCount;
     property DoubleBuffered: Boolean read GetDoubleBuffered write SetDoubleBuffered default True;
+    // Modified by ichin 2024-05-30 목 오후 9:06:24
+    property SelectedBrushColor: TColor  read FSelectedBrushColor  write SetSelectedBrushColor;
   end;
 
   TVTDrawNodeEvent = procedure(Sender: TBaseVirtualTree; const PaintInfo: TVTPaintInfo) of object;
@@ -2050,6 +2064,8 @@ begin
   FSelectionBlendFactor := 128;
 
   FIndent := 18;
+  // Modified by ichin 2024-05-31 금 오전 12:02:05
+  FSelectedBrushColor := clWebDarkSlateBlue;
 
   FPlusBM := TBitmap.Create;
   FHotPlusBM := TBitmap.Create;
@@ -2850,16 +2866,18 @@ begin
               FillRect(Rect(R.Left, R.Bottom - 1, R.Right, R.Bottom));
               Dec(R.Bottom);
             end;
-            if Focused or (toPopupMode in FOptions.PaintOptions) then
-            begin
-              Brush.Color := FColors.FocusedSelectionColor;
-              Pen.Color := FColors.FocusedSelectionBorderColor;
-            end
-            else
-            begin
-              Brush.Color := FColors.UnfocusedSelectionColor;
+            // Modified by ichin 2024-05-30 목 오전 8:14:25
+            // Unified by Selected Color ...
+            //if Focused or (toPopupMode in FOptions.PaintOptions) then
+            //begin
+            //  Brush.Color := FColors.FocusedSelectionColor;
+            //  Pen.Color := FColors.FocusedSelectionBorderColor;
+            //end
+            //else
+            //begin
+              Brush.Color := FSelectedBrushColor;// FColors.UnfocusedSelectionColor;
               Pen.Color := FColors.UnfocusedSelectionBorderColor;
-            end;
+            //end;
 
             RoundRect(R.Left, R.Top, R.Right, R.Bottom, FSelectionCurveRadius, FSelectionCurveRadius);
           end
@@ -5229,6 +5247,15 @@ begin
       if FSelectionCount = 0 then
         ResetRangeAnchor;
     end;
+  end;
+end;
+
+procedure TBaseVirtualTree.SetSelectedBrushColor(const Value: TColor);
+begin
+  if FSelectedBrushColor <> Value then
+  begin
+    FSelectedBrushColor := Value;
+    Invalidate;
   end;
 end;
 
@@ -14374,7 +14401,7 @@ begin
           if vsSelected in Node.States then
           begin
             // Modified by ichin 2024-05-30 목 오전 8:14:25
-            // Unified Selected Color ...
+            // Unified by Selected Color ...
             //if Focused or (toPopupMode in FOptions.PaintOptions) then
             // begin
             //  Brush.Color := FColors.FocusedSelectionColor;
@@ -14382,7 +14409,7 @@ begin
             // end
             //else
             //begin
-              Brush.Color := clWebDarkSlateBlue;// .UnfocusedSelectionColor;
+              Brush.Color := SelectedBrushColor;//clWebDarkSlateBlue;// .UnfocusedSelectionColor;
               Pen.Color := FColors.UnfocusedSelectionBorderColor;
             //end;
             if (toGridExtensions in FOptions.MiscOptions) or (toFullRowSelect in FOptions.SelectionOptions) then
@@ -21535,7 +21562,6 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TBaseVirtualTree.SaveToStream(Stream: TStream; Node: PVirtualNode = nil);
-
 // Saves Node and all its children to Stream. If Node is nil then all top level nodes will be stored.
 // Note: You should be careful about assuming what is actually saved. The problem here is that we are dealing with
 //       virtual data. The tree can so not know what it has to save. The only fact we reliably know is the tree's
@@ -21545,10 +21571,8 @@ procedure TBaseVirtualTree.SaveToStream(Stream: TStream; Node: PVirtualNode = ni
 //
 // The base tree class saves only the structure of the tree along with application provided data. descendants may
 // optionally add their own chunks to store additional information. See: WriteChunks.
-
 var
   Count: Cardinal;
-
 begin
   Stream.Write(MagicID, SizeOf(MagicID));
   if Node = nil then
