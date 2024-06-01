@@ -348,7 +348,6 @@ type
     property Text[Node: PVirtualNode; Column: TColumnIndex]: string read GetText write SetText;
     // Modified by ichin 2024-05-30 목 오전 4:59:53
     property OffsetWRMagin: Integer read FOffsetWRMagin write FOffsetWRMagin;
-    // Modified by ichin 2024-05-30 목 오전 6:07:12
     property OnDrawTitle: TVTDrawTitleEvent read FOnDrawTitle write FOnDrawTitle;
     property NodeHeightOffSet: Integer read FNodeHeightOffSet write FNodeHeightOffSet;
   end;
@@ -844,7 +843,9 @@ var
   Height: TDimension;
   lNewNodeWidth: TDimension;
 begin
-  InitializeTextProperties(PaintInfo);
+  // Modified by ichin 2024-06-01 토 오전 7:36:56
+  // InitializeTextProperties(PaintInfo);
+
   with PaintInfo do
   begin
     R := ContentRect;
@@ -1391,16 +1392,17 @@ begin
   var _Title: string := '';
   var _Tag: Integer := 0;
   var _TimeStamp: string := '';
-  if Assigned(FOnDrawText) then
-    FOnDrawText(Self, PaintInfo.Canvas, PaintInfo.Node, PaintInfo.Column, Text, CellRect, DefaultDraw);
+  // Modified by ichin 2024-06-01 토 오전 7:56:22
+  //if Assigned(FOnDrawText) then
+  //  FOnDrawText(Self, PaintInfo.Canvas, PaintInfo.Node, PaintInfo.Column, Text, CellRect, DefaultDraw);
+
   // Modified by ichin 2024-05-30 목 오전 6:07:45
   if Assigned(FOnDrawTitle) then
     FOnDrawTitle(Self, PaintInfo.Node,  _Title, _TimeStamp, _Tag);
 
-  if _Tag = 0 then
-    PaintInfo.Canvas.Font.Color := clBtnFace
-  else
-    PaintInfo.Canvas.Font.Color := clWhite;
+  // ------------------------------------------------------------------------- //
+  PaintInfo.Canvas.Font.Color := clBtnFace;
+  // ------------------------------------------------------------------------- //
 
   if ((DrawFormat and DT_RIGHT) > 0) and (TFontStyle.fsItalic in PaintInfo.Canvas.Font.Style) then
     lText := Text + ' '
@@ -1411,9 +1413,9 @@ begin
   if DefaultDraw then
     begin
       { Icon }
-      Images.Draw(PaintInfo.Canvas, CellRect.Left-10, 6, _Tag);  // Image Size = 16 x 16
+      Images.Draw(PaintInfo.Canvas, CellRect.Left-13, 6, _Tag);  // Image Size = 16 x 16
       { Header - Title / User / Ollama }
-      var _headrect: TRect := Rect(CellRect.Left+15, 5, CellRect.Right, 25);  // fs 10  ht 13   NodeHeightOffSet 50
+      var _headrect: TRect := Rect(CellRect.Left+12, 5, CellRect.Right, 25);
       PaintInfo.Canvas.Font.Size := 10;  { Fix ... }
       PaintInfo.Canvas.Font.Style := [TFontStyle.fsBold];
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(_Title), Length(_Title), _headrect, DrawFormat);
@@ -1423,7 +1425,7 @@ begin
       PaintInfo.Canvas.Font.Style := [];
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(lText), Length(lText), _bodyrect, DrawFormat);
       { Footer - TimeStamp }
-      var _footrect: TRect := Rect(CellRect.Left, _bodyrect.Bottom+5, CellRect.Right+10, _bodyrect.Bottom+15);
+      var _footrect: TRect := Rect(CellRect.Right - 50, _bodyrect.Bottom+5, CellRect.Right+12, _bodyrect.Bottom+17);
       PaintInfo.Canvas.Font.Size := 7;   { Fix ... }
       PaintInfo.Canvas.Font.Color := clSilver;
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(_TimeStamp), Length(_TimeStamp), _footrect, DrawFormat or DT_RIGHT);
@@ -1668,11 +1670,11 @@ begin
   if Column > NoColumn then
   begin
     // Modified by ichin 2024-05-30 목 오전 3:11:23
-    PaintInfo.CellRect.Right := Header.Columns[Column].Width - 2 * TextMargin -FOffsetWRMagin;
+    PaintInfo.CellRect.Right := Header.Columns[Column].Width - 2 * TextMargin - FOffsetWRMagin;
     PaintInfo.CellRect.Left := lOffsets[TVTElement.ofsLabel];
   end
   else
-    PaintInfo.CellRect.Right := ClientWidth -FOffsetWRMagin;
+    PaintInfo.CellRect.Right := ClientWidth - FOffsetWRMagin;
   AdjustPaintCellRect(PaintInfo, Dummy);
 
   if BidiMode <> bdLeftToRight then
