@@ -21,7 +21,8 @@ uses
   Vcl.ImageCollection,
   System.ImageList,
   Vcl.ImgList,
-  Vcl.VirtualImageList;
+  Vcl.VirtualImageList,
+  Vcl.Menus;
 
 type
   PMessageRec = ^TMessageRec;
@@ -37,6 +38,10 @@ type
     VST_ChattingBox: TVirtualStringTree;
     VirtualImageList1: TVirtualImageList;
     ImageCollection1: TImageCollection;
+    PopupMenu1: TPopupMenu;
+    pmn_SelectedColor: TMenuItem;
+    N1: TMenuItem;
+    pmn_Delete: TMenuItem;
     procedure VST_ChattingBoxGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
     procedure VST_ChattingBoxBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
     procedure VST_ChattingBoxEditing(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean);
@@ -45,22 +50,38 @@ type
     procedure VST_ChattingBoxMeasureItem(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: TDimension);
     procedure VST_DrawTitle(Sender: TBaseVirtualTree; Node: PVirtualNode; var Title, TimeStamp: string; var Tag: Integer);
     procedure VST_ChattingBoxResize(Sender: TObject);
+    procedure VST_ChattingBoxKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure VST_ChattingBoxDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
+    procedure PopupMenu1Popup(Sender: TObject);
+    procedure pmn_DeleteClick(Sender: TObject);
+    procedure pmn_SelectedColorClick(Sender: TObject);
   private
     FNewFontSize: Integer;
+    FSelectedDefColor: TColor;
+    FSelectedColor: TColor;
+    FColumnOffset: Integer;
+    FSecondIndent: Integer;
     procedure SetNewFontSize(const Value: Integer);
+    function GetSelectedColor: TColor;
+    procedure SetSelectedColor(const Value: TColor);
   public
     procedure InitializeEx(const AFlag: Integer = 0);
+    procedure FinalizeEx(const AFlag: Integer);
+    //
     procedure Add_ChattingMessage(const AUser: string; const AFlag, ALocation: Integer; const APrompt: string);
     procedure Insert_ChattingMessage(const AIndex: Integer; const AUser: string; const AFlag, ALocation: Integer; const APrompt: string);
     //
     function Get_NodeText(): string;
     function Get_NodeRequest(): string;
+    function Get_SelectedColor(): TColor;
     procedure Do_ScrollToTop(const AFlag: Integer = 0);
     procedure Do_ScrollToBottom(const AFlag: Integer = 0);
     function Do_SaveAllText(const AFile: string): Boolean;
     function Do_DeleteNode(): Boolean;
+    procedure Do_RestoreDefaultColor();
     //
-    property NewFontSize: Integer  read FNewFontSize  write SetNewFontSize;
+    property NewFontSize: Integer   read FNewFontSize      write SetNewFontSize;
+    property SelectedColor: TColor  read GetSelectedColor  write SetSelectedColor;
   end;
 
 implementation
@@ -69,14 +90,30 @@ implementation
 
 procedure TFrame_ChattingBoxClass.InitializeEx(const AFlag: Integer);
 begin
+  FSelectedDefColor := clWebDarkSlateBlue;
+  FColumnOffset := 15;
+  FSecondIndent := 35;    // Reference of Indent for Ollama Response ...
   with VST_ChattingBox do
   begin
     NodeDataSize := SizeOf(TMessageRec);
+    Header.Columns[0].Width := ClientWidth - FColumnOffset;
+    Images := VirtualImageList1;
     TreeOptions.MiscOptions := TreeOptions.MiscOptions + [TVTMiscOption.toVariablenodeHeight];
     TextMargin := 20;
-    OffsetMagin := 30;
-    NodeHeightOffSet := 50;
+    SelectionCurveRadius := 20;
+    {  Custom ... }
+    OffsetWRMagin := 35;
+    NodeHeightOffSet := 52;
+    SelectedBrushColor := FSelectedDefColor;
     OnDrawTitle := VST_DrawTitle;
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.FinalizeEx(const AFlag: Integer);
+begin
+  with VST_ChattingBox do
+  begin
+    Clear;
   end;
 end;
 
@@ -95,9 +132,9 @@ begin
     FocusedNode := _Node;
     Selected[_Node] := True;
     InvalidateToBottom(_Node);
-  end;
 
-  SendMessage(VST_ChattingBox.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+    Perform(WM_VSCROLL, SB_BOTTOM, 0);
+  end;
 end;
 
 procedure TFrame_ChattingBoxClass.Insert_ChattingMessage(const AIndex: Integer; const AUser: string; const AFlag, ALocation: Integer; const APrompt: string);
@@ -110,16 +147,18 @@ begin
       begin
         var _next: PVirtualNode := _Node.NextSibling;
         if _next <> nil then
-          _Node := InsertNode(_next, amInsertBefore)
+          begin
+            _Node := InsertNode(_next, amInsertBefore);
+          end
         else
           begin
-             _bottomflag := True;
+            _bottomflag := True;
             _Node := AddChild(nil);
           end;
       end
     else
       begin
-         _bottomflag := True;
+        _bottomflag := True;
         _Node := AddChild(nil);
       end;
 
@@ -132,10 +171,33 @@ begin
 
     FocusedNode := _Node;
     Selected[_Node] := True;
+    if _bottomflag then
+    Perform(WM_VSCROLL, SB_BOTTOM, 0);
   end;
+end;
 
-  if _bottomflag then
-    SendMessage(VST_ChattingBox.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+procedure TFrame_ChattingBoxClass.pmn_DeleteClick(Sender: TObject);
+begin
+  Do_DeleteNode();
+end;
+
+procedure TFrame_ChattingBoxClass.pmn_SelectedColorClick(Sender: TObject);
+begin
+  with TColorDialog.Create(Self) do
+  try
+    Color := VST_ChattingBox.SelectedBrushColor;
+    if Execute() then
+    begin
+      Self.SelectedColor := Color;
+    end;
+  finally
+    Free;
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.PopupMenu1Popup(Sender: TObject);
+begin
+  pmn_Delete.Enabled := VST_ChattingBox.SelectedCount > 0;
 end;
 
 procedure TFrame_ChattingBoxClass.SetNewFontSize(const Value: Integer);
@@ -145,13 +207,30 @@ begin
   VST_ChattingBox.Invalidate;
 end;
 
+function TFrame_ChattingBoxClass.GetSelectedColor: TColor;
+begin
+  Result := VST_ChattingBox.SelectedBrushColor;
+end;
+
+procedure TFrame_ChattingBoxClass.SetSelectedColor(const Value: TColor);
+begin
+  if FSelectedColor <> Value then
+  begin
+    FSelectedColor := Value;
+    VST_ChattingBox.SelectedBrushColor := Value;
+  end;
+end;
+
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 begin
   var _Data: PMessageRec := Sender.GetNodeData(Node);
-  if _Data^.FTag = 0 then
-    ContentRect.Right := TargetCanvas.ClipRect.Right  - VST_ChattingBox.OffsetMagin
-  else
-    ContentRect.Left := TargetCanvas.ClipRect.Left + VST_ChattingBox.OffsetMagin;
+  if _Data^.FTag = 1 then
+    ContentRect.Left := TargetCanvas.ClipRect.Left + FSecondIndent;
+end;
+
+procedure TFrame_ChattingBoxClass.VST_ChattingBoxDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
+begin
+  Accept := False;
 end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxEditing(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean);
@@ -174,17 +253,28 @@ end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxInitNode(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
 begin
+  VST_ChattingBox.Header.Columns[0].Width := VST_ChattingBox.ClientWidth - FColumnOffset;
   Include(InitialStates, ivsMultiline);
   Node.States := Node.States + [vsMultiline, vsHeightMeasured];
 end;
 
+procedure TFrame_ChattingBoxClass.VST_ChattingBoxKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_DELETE then
+  begin
+    Key := 0;
+    Do_DeleteNode();
+  end;
+end;
+
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxMeasureItem(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: TDimension);
 begin
+  VST_ChattingBox.Header.Columns[0].Width := VST_ChattingBox.ClientWidth - FColumnOffset;
   if Sender.MultiLine[Node] then
   begin
     TargetCanvas.Font := Sender.Font;
-    var _s: string := PMessageRec(VST_ChattingBox.GetNodeData(Node))^.FCaption;
-    NodeHeight := VST_ChattingBox.ComputeNodeHeight(TargetCanvas, Node, 0, _s) + 50;   // Title + TimeStamp
+    var _text: string := PMessageRec(VST_ChattingBox.GetNodeData(Node))^.FCaption;
+    NodeHeight := VST_ChattingBox.ComputeNodeHeight(TargetCanvas, Node, 0, _text) + VST_ChattingBox.NodeHeightOffSet;  // Title + TimeStamp
   end;
 end;
 
@@ -192,7 +282,7 @@ procedure TFrame_ChattingBoxClass.VST_ChattingBoxResize(Sender: TObject);
 begin
   with VST_ChattingBox do
   begin
-    Header.Columns[0].Width := ClientWidth - 20;
+    Header.Columns[0].Width := ClientWidth - FColumnOffset;
     var _node := GetFirstSelected();
     if Assigned(_node) then
     IsVisible[_node] := True;
@@ -246,6 +336,11 @@ begin
   end;
 end;
 
+function TFrame_ChattingBoxClass.Get_SelectedColor: TColor;
+begin
+  Result := VST_ChattingBox.SelectedBrushColor;
+end;
+
 function TFrame_ChattingBoxClass.Do_DeleteNode: Boolean;
 begin
   Result := False;
@@ -260,6 +355,11 @@ begin
   end;
 end;
 
+procedure TFrame_ChattingBoxClass.Do_RestoreDefaultColor;
+begin
+  VST_ChattingBox.SelectedBrushColor := FSelectedDefColor;
+end;
+
 function TFrame_ChattingBoxClass.Do_SaveAllText(const AFile: string): Boolean;
 begin
   Result := VST_ChattingBox.SaveToCSVFile(AFile, False);
@@ -269,7 +369,6 @@ procedure TFrame_ChattingBoxClass.Do_ScrollToTop(const AFlag: Integer);
 begin
   with VST_ChattingBox do
   begin
-    Header.Columns[0].Width := VST_ChattingBox.ClientWidth - 20;
     var _node := GetFirst();
     if Assigned(_node) then
     begin
@@ -277,17 +376,17 @@ begin
       IsVisible[_node] := True;
       Selected[_node] := True;
     end;
-    Invalidate;
     UpdateScrollBars(True);
+    Invalidate;
+
+    Perform(WM_VSCROLL, SB_TOP, 0);
   end;
-  SendMessage(VST_ChattingBox.Handle, WM_VSCROLL, SB_TOP, 0);
 end;
 
 procedure TFrame_ChattingBoxClass.Do_ScrollToBottom(const AFlag: Integer);
 begin
   with VST_ChattingBox do
   begin
-    Header.Columns[0].Width := ClientWidth - 20;
     var _node := GetLast();
     if Assigned(_node) then
     begin
@@ -295,11 +394,11 @@ begin
       IsVisible[_node] := True;
       Selected[_node] := True;
     end;
-    Invalidate;
     UpdateScrollBars(True);
-  end;
+    Invalidate;
 
-  SendMessage(VST_ChattingBox.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+    Perform(WM_VSCROLL, SB_BOTTOM, 0);
+  end;
 end;
 
 end.

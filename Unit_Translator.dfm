@@ -32,19 +32,6 @@ object Form_Translator: TForm_Translator
     DesignSize = (
       508
       35)
-    object SpeedButton_TTS: TSpeedButton
-      AlignWithMargins = True
-      Left = 6
-      Top = 9
-      Width = 23
-      Height = 20
-      Hint = 'Text to Speech'
-      Margins.Right = 5
-      ImageIndex = 47
-      ImageName = 'ic_record_voice_over_48px'
-      Images = Form_RestOllama.SVGIconVirtualImageList1
-      OnClick = SpeedButton_TTSClick
-    end
     object Button_OK: TButton
       Left = 419
       Top = 8
@@ -118,7 +105,6 @@ object Form_Translator: TForm_Translator
       Font.Name = 'Segoe UI'
       Font.Style = []
       ParentFont = False
-      WordWrap = True
     end
   end
 end

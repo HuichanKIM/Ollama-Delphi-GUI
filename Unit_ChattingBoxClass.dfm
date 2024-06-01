@@ -3,11 +3,13 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
   Top = 0
   Width = 640
   Height = 480
+  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -13
   Font.Name = 'Segoe UI'
   Font.Style = []
+  ParentCtl3D = False
   ParentFont = False
   TabOrder = 0
   object VST_ChattingBox: TVirtualStringTree
@@ -36,7 +38,9 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     IncrementalSearch = isAll
     ParentBiDiMode = False
     ParentCtl3D = False
+    PopupMenu = PopupMenu1
     ScrollBarOptions.ScrollBars = ssVertical
+    SelectionCurveRadius = 20
     TabOrder = 0
     TreeOptions.AnimationOptions = [toAnimatedToggle]
     TreeOptions.AutoOptions = [toAutoScroll, toAutoScrollOnExpand, toAutoTristateTracking, toAutoHideButtons, toAutoDeleteMovedNodes, toAutoChangeScale]
@@ -46,10 +50,12 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     TreeOptions.StringOptions = [toSaveCaptions]
     WantTabs = True
     OnBeforeCellPaint = VST_ChattingBoxBeforeCellPaint
+    OnDragOver = VST_ChattingBoxDragOver
     OnEditing = VST_ChattingBoxEditing
     OnFreeNode = VST_ChattingBoxFreeNode
     OnGetText = VST_ChattingBoxGetText
     OnInitNode = VST_ChattingBoxInitNode
+    OnKeyDown = VST_ChattingBoxKeyDown
     OnMeasureItem = VST_ChattingBoxMeasureItem
     OnResize = VST_ChattingBoxResize
     Touch.InteractiveGestures = [igPan, igPressAndTap]
@@ -406,5 +412,22 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
       end>
     Left = 176
     Top = 88
+  end
+  object PopupMenu1: TPopupMenu
+    OnPopup = PopupMenu1Popup
+    Left = 328
+    Top = 288
+    object pmn_SelectedColor: TMenuItem
+      Caption = 'Selected Color'
+      OnClick = pmn_SelectedColorClick
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object pmn_Delete: TMenuItem
+      Caption = 'Delete'
+      ShortCut = 46
+      OnClick = pmn_DeleteClick
+    end
   end
 end

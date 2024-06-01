@@ -1,7 +1,5 @@
 program Ollma_Client;
 
-
-
 {$R *.dres}
 
 uses
@@ -52,11 +50,17 @@ begin
   if _mxHandle <> 0 then
   try
     Application.Initialize;
-    TStyleManager.TrySetStyle('Windows10 SlateGray');
+      //TStyleManager.TrySetStyle('Windows11 Impressive Dark');
+      var _skinfile := CV_AppPath+'skincfg.txt';
+      if FileExists(_skinfile) then
+      begin
+        var _skinname := IOUtils_ReadAllText(_skinfile);
+        TStyleManager.TrySetStyle(_skinname);
+      end;
     Application.Title := 'Ollama Client GUI';
     Application.CreateForm(TForm_RestOllama, Form_RestOllama);
-  Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);
-  Application.Run;
+    Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);
+    Application.Run;
   finally
     CloseHandle(_mxHandle);
   end;

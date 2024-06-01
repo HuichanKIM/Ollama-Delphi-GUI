@@ -24,11 +24,9 @@ type
     Panel_Tollbar: TPanel;
     CheckBox_Pushtochatbox: TCheckBox;
     Label_Prompt: TLabel;
-    SpeedButton_TTS: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormShow(Sender: TObject);
-    procedure SpeedButton_TTSClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FTransResult: string;
@@ -76,16 +74,16 @@ begin
   with _URI do
   begin
     AddParameter('client', 'gtx');
-    AddParameter('sl', _LangSource);
-    AddParameter('tl', _LangTarget);
-    AddParameter('hl', _LangTarget);
-    AddParameter('dt', 't');
-    AddParameter('dt', 'bd');
-    AddParameter('dj', '1');
-    AddParameter('ie', 'UTF-8');
+    AddParameter('sl',     _LangSource);
+    AddParameter('tl',     _LangTarget);
+    AddParameter('hl',     _LangTarget);
+    AddParameter('dt',     't');
+    AddParameter('dt',     'bd');
+    AddParameter('dj',     '1');
+    AddParameter('ie',     'UTF-8');
     AddParameter('source', 'icon');
-    AddParameter('tk', '467103.467103');
-    AddParameter('q', _query);
+    AddParameter('tk',     '467103.467103');
+    AddParameter('q',      _query);
   end;
 
   var _Responses := TBytesStream.Create();
@@ -123,13 +121,12 @@ end;
 
 procedure TForm_Translator.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Form_RestOllama.Do_TTS_Speak(0, '');
+  //
 end;
 
 procedure TForm_Translator.FormCreate(Sender: TObject);
 begin
   Memo_Translates.Clear;
-  SpeedButton_TTS.Visible := False;
   FRequest := '';
 end;
 
@@ -146,10 +143,37 @@ procedure TForm_Translator.FormShow(Sender: TObject);
 begin
   if TStyleManager.IsCustomStyleActive then
   begin
-    Memo_Translates.Color := StyleServices.GetStyleColor(scPanel);
     Memo_Translates.StyleElements := [seBorder];
+    Memo_Translates.Color := StyleServices.GetStyleColor(scPanel);
   end;
   CheckBox_Pushtochatbox.Enabled := PushFlag;
+end;
+
+function Get_TextWithMiddleEllipsis(ACanvas: TCanvas; AText: string): string;
+begin
+  Result := AText;
+  var _Ss := AText;
+  var _Sz: TSize;
+  var _DrawRect: TRect := Rect(0,0,430,30);
+  if GetTextExtentPoint32W(ACanvas.Handle, _Ss, Length(_Ss), _Sz) then
+  begin
+    var _RectWidth := _DrawRect.Right - _DrawRect.Left;
+    if _Sz.cx > _RectWidth then
+    begin
+      _Ss := '...';
+      var _LastS: string := AText;
+      for var _i := 1 to Length(AText) div 2 do
+      begin
+        _LastS := _Ss;
+        _Ss := Copy(AText, 1, _i) + ' ... ' + Copy(AText, Length(AText) - _i + 1, _i);
+        GetTextExtentPoint32W(ACanvas.Handle, _Ss, Length(_Ss), _Sz);
+        if _Sz.cx > _RectWidth then
+          Break;
+      end;
+
+      Result := _LastS;
+    end;
+  end;
 end;
 
 procedure TForm_Translator.Get_GoogleTranslator(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string);
@@ -159,21 +183,8 @@ const
 begin
   FTransResult := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
   var _reqdisplay: string := FRequest;
-  if Is_Hangul(FRequest) then
-    begin
-      if Length(FRequest) * SizeOf(Char) > 40 then
-      begin
-        _reqdisplay := Copy(_reqdisplay, 1, 40) + ' ...';
-      end
-    end
-  else
-    begin
-      if Length(_reqdisplay) > 70 then
-      begin
-        SetLength(_reqdisplay, 70);
-        _reqdisplay := _reqdisplay + ' ...';
-      end
-    end;
+  if _reqdisplay <> '' then
+  _reqdisplay := Get_TextWithMiddleEllipsis(Self.Canvas, FRequest);
 
   CheckBox_Pushtochatbox.Enabled := (AUser = 0) and PushFlag;
   if FTransResult <> '' then
@@ -197,14 +208,6 @@ procedure TForm_Translator.SetPushFlag(const Value: Boolean);
 begin
   FPushFlag := Value;
   CheckBox_Pushtochatbox.Enabled := Value;
-end;
-
-procedure TForm_Translator.SpeedButton_TTSClick(Sender: TObject);
-begin
-  if Form_RestOllama.TTS_Speaking then
-    Form_RestOllama.Do_TTS_Speak(0, '')
-  else
-    Form_RestOllama.Do_TTS_Speak(1, Memo_Translates.Lines.Text);
 end;
 
 end.

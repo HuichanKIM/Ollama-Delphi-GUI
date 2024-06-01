@@ -19,11 +19,13 @@ const
     DOS_MESSAGE_FINISH = DOS_MESSAGE + 3;
     DOS_MESSAGE_ERROR  = DOS_MESSAGE + 4;
 
-  WM_DMM_MESSAGE  = WM_USER + 10;
-    DMM_MESSAGE_START  = WM_DMM_MESSAGE + 1;
-    DMM_MESSAGE_STOP   = WM_DMM_MESSAGE + 2;
-    DMM_MESSAGE_FINISH = WM_DMM_MESSAGE + 3;
-    DMM_MESSAGE_ERROR  = WM_DMM_MESSAGE + 4;
+const
+  DM_SERVERPORT = 17233;
+  WF_DM_MESSAGE  = DM_SERVERPORT + 1;
+    WF_DM_MESSAGE_CONNECT     = WF_DM_MESSAGE + 1;
+    WF_DM_MESSAGE_DISCONNECT  = WF_DM_MESSAGE + 2;
+    WF_DM_MESSAGE_RECEIVE     = WF_DM_MESSAGE + 3;
+    WF_DM_MESSAGE_SEND        = WF_DM_MESSAGE + 4;
 
 type
   TG_DosCommand = class
@@ -69,6 +71,8 @@ function GetUsersWindowsLanguage: string;
 function Get_LocaleIDString(const AFlag: Integer = 0): string;
 function ReadAllText_Unicode(const AFilePath: string=''): string;
 function WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
+function IOUtils_ReadAllText(const AFilePath: string=''): string;
+function IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
 function Get_SystemInfo(): string;
 function Get_DisplayJson(const RespType: Integer; const ModelsFlag: Boolean; const RespStr: string): string;
 function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer; var AModelsList: TStringList): string;
@@ -95,6 +99,7 @@ uses
   Winapi.PsAPI,
   WinAPi.ShellAPI,
   Winapi.MMSystem,
+  System.Math,
   System.JSON,
   System.JSON.Readers,
   System.JSON.Writers,
@@ -113,7 +118,8 @@ const
 
 function Is_Hangul(const AText: string): Boolean;
 begin
-  Result := System.RegularExpressions.TRegEx.IsMatch(AText, C_Regex);
+  var _prestr: string := Copy(AText, 1, Min(128, Length(AText)));
+  Result := System.RegularExpressions.TRegEx.IsMatch(_prestr, C_Regex);
 end;
 
 function IOUtils_ReadAllText(const AFilePath: string=''): string;
@@ -226,10 +232,11 @@ begin
   var _parsingsrc_0 := StringReplace(RespStr, C_UTF8_LF, ',',[rfReplaceAll]);
   var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';
   var _acceptflag: Boolean := False;
+  var _firstflag: Boolean := True;
   var _key: String := c_MSGType[RespType];
   if ModelsFlag then
   begin
-    Result := ' * Model in loaded : ';
+    Result := '* Model in loaded : ';
     _key := 'model';
   end;
 
@@ -249,7 +256,13 @@ begin
             if _acceptflag then
             begin
               _acceptflag := False;
-              Result := Result + _JsonReader.Value.ToString;
+              if _firstflag then
+                begin
+                  _firstflag := False;
+                  Result := _JsonReader.Value.ToString.TrimLeft;
+                end
+              else
+                Result := Result + _JsonReader.Value.ToString;
             end;
           end;
       end;
@@ -601,7 +614,7 @@ begin
   Result := _ProcessID <> 0;
 end;
 
-{ Help code ...
+{ Help codes ...
 
 Result := MyString;
 StartPos := Pos('<', Result);
@@ -612,6 +625,21 @@ end;
 
 to ...
 Result := MyStr.Remove(MyStr.IndexOf('<')).Trim;
+
+* ellipsis character
+ex 1.
+function StrMaxLen(const S: string; MaxLen: integer): string;
+var
+  i: Integer;
+begin
+  result := S;
+  if Length(result) <= MaxLen then Exit;
+  SetLength(result, MaxLen);
+  result[MaxLen] := '¡¦';
+end;
+
+ex 2. from TVirtualTrees.pas
+procedure TCustomVirtualStringTree.WMSetFont(var Msg: TWMSetFont);
 
 }
 

@@ -5813,6 +5813,7 @@ object Form_RestOllama: TForm_RestOllama
               EEFAFF0119AF52C9C59E1C370000000049454E44AE426082}
             Proportional = True
             Stretch = True
+            OnDblClick = SpeedButton_LlavaClick
             ExplicitLeft = 5
             ExplicitTop = 8
           end
@@ -6061,7 +6062,7 @@ object Form_RestOllama: TForm_RestOllama
         Align = alTop
         Alignment = taRightJustify
         BevelOuter = bvNone
-        Caption = 'More Settings   '
+        Caption = 'Tools ...'
         TabOrder = 3
         StyleElements = [seClient, seBorder]
         object SpeedButton_DefaultSet: TSpeedButton
@@ -6077,7 +6078,7 @@ object Form_RestOllama: TForm_RestOllama
         end
         object SpeedButton_OllamaAlive: TSpeedButton
           AlignWithMargins = True
-          Left = 30
+          Left = 56
           Top = 3
           Width = 20
           Height = 19
@@ -6088,7 +6089,7 @@ object Form_RestOllama: TForm_RestOllama
         end
         object SpeedButton_SystemInfo: TSpeedButton
           AlignWithMargins = True
-          Left = 56
+          Left = 82
           Top = 3
           Width = 23
           Height = 19
@@ -6102,17 +6103,31 @@ object Form_RestOllama: TForm_RestOllama
           ExplicitTop = 0
           ExplicitHeight = 22
         end
-        object CheckBox_Beep: TCheckBox
-          Left = 82
-          Top = 0
-          Width = 55
-          Height = 25
-          Hint = 'Beep on Finish Response'
+        object SpeedButton_SelectionColor: TSpeedButton
+          AlignWithMargins = True
+          Left = 30
+          Top = 3
+          Width = 20
+          Height = 19
+          Action = Action_SelectionColor
           Align = alLeft
-          Caption = 'Beep'
-          TabOrder = 0
-          StyleElements = [seClient, seBorder]
-          OnClick = CheckBox_BeepClick
+          Images = SVGIconVirtualImageList1
+          ExplicitLeft = 35
+          ExplicitHeight = 22
+        end
+        object SpeedButton_Beep: TSpeedButton
+          AlignWithMargins = True
+          Left = 111
+          Top = 3
+          Width = 23
+          Height = 19
+          Hint = 'Set Sound off'
+          Align = alLeft
+          ImageIndex = 30
+          ImageName = 'ic_surround_sound_48px'
+          Images = SVGIconVirtualImageList1
+          OnClick = SpeedButton_BeepClick
+          ExplicitLeft = 130
         end
       end
       object GroupBox_GlobalFontSize: TGroupBox
@@ -6324,7 +6339,7 @@ object Form_RestOllama: TForm_RestOllama
         end
         object SpeedButton_TTSPlay: TSpeedButton
           Left = 16
-          Top = 45
+          Top = 47
           Width = 23
           Height = 22
           ImageIndex = 61
@@ -6335,7 +6350,7 @@ object Form_RestOllama: TForm_RestOllama
         object SpeedButton_TTSPause: TSpeedButton
           Tag = 1
           Left = 38
-          Top = 45
+          Top = 47
           Width = 23
           Height = 22
           ImageIndex = 46
@@ -6346,11 +6361,11 @@ object Form_RestOllama: TForm_RestOllama
         object SpeedButton_TTSStop: TSpeedButton
           Tag = 2
           Left = 60
-          Top = 45
+          Top = 47
           Width = 23
           Height = 22
-          ImageIndex = 1
-          ImageName = 'All\ic_stop_48px'
+          ImageIndex = 66
+          ImageName = 'stop-button'
           Images = SVGIconVirtualImageList1
           OnClick = SpeedButton_TTSPlayClick
         end
@@ -6523,6 +6538,9 @@ object Form_RestOllama: TForm_RestOllama
           Width = 227
           Height = 84
           Align = alClient
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = bsNone
           ScrollBars = ssVertical
           TabOrder = 0
         end
@@ -6535,6 +6553,8 @@ object Form_RestOllama: TForm_RestOllama
       Height = 798
       Align = alClient
       BevelOuter = bvNone
+      Ctl3D = False
+      ParentCtl3D = False
       TabOrder = 2
       object Panel_ChattingButtons: TPanel
         Left = 0
@@ -6609,7 +6629,6 @@ object Form_RestOllama: TForm_RestOllama
           Action = Action_Pop_SaveAllText
           Align = alRight
           Images = SVGIconVirtualImageList1
-          ExplicitLeft = 373
           ExplicitTop = 0
         end
         object SpeedButton_ClearChatBox: TSpeedButton
@@ -6653,17 +6672,19 @@ object Form_RestOllama: TForm_RestOllama
           DesignSize = (
             715
             710)
-          inline Frame_ChattingBoxClass1: TFrame_ChattingBoxClass
+          inline Frame_ChattingBox: TFrame_ChattingBoxClass
             Left = 0
             Top = 0
             Width = 715
             Height = 710
             Align = alClient
+            Ctl3D = False
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -13
             Font.Name = 'Segoe UI'
             Font.Style = []
+            ParentCtl3D = False
             ParentFont = False
             TabOrder = 2
             ExplicitWidth = 715
@@ -7262,11 +7283,25 @@ object Form_RestOllama: TForm_RestOllama
               Images = SVGIconVirtualImageList1
               OnClick = Action_ChattingExecute
             end
+            object SpeedButton_SaveAllLoges: TSpeedButton
+              AlignWithMargins = True
+              Left = 666
+              Top = 3
+              Width = 23
+              Height = 14
+              Hint = 'Save All Logs'
+              Align = alRight
+              ImageIndex = 26
+              ImageName = 'ic_save_48px'
+              Images = SVGIconVirtualImageList1
+              OnClick = SpeedButton_SaveAllLogesClick
+              ExplicitLeft = 675
+            end
             object CheckBox_DebugToLog: TCheckBox
               AlignWithMargins = True
-              Left = 423
+              Left = 412
               Top = 3
-              Width = 124
+              Width = 110
               Height = 14
               Margins.Right = 10
               Align = alRight
@@ -7276,9 +7311,9 @@ object Form_RestOllama: TForm_RestOllama
             end
             object CheckBox_SaveOnCLose: TCheckBox
               AlignWithMargins = True
-              Left = 560
+              Left = 535
               Top = 3
-              Width = 129
+              Width = 125
               Height = 14
               Align = alRight
               Caption = 'Save logs on close'
@@ -7354,7 +7389,7 @@ object Form_RestOllama: TForm_RestOllama
           Align = alClient
           TabOrder = 0
           OnKeyPress = Edit_ReqContentKeyPress
-          ExplicitHeight = 23
+          ExplicitHeight = 21
         end
         object Button_SendRequest: TButton
           AlignWithMargins = True
@@ -7392,6 +7427,9 @@ object Form_RestOllama: TForm_RestOllama
         Width = 50
       end>
     ParentDoubleBuffered = False
+    ParentFont = True
+    UseSystemFont = False
+    StyleElements = [seClient, seBorder]
   end
   object Panel_Toolbar: TPanel
     Left = 0
@@ -7541,7 +7579,7 @@ object Form_RestOllama: TForm_RestOllama
     ProxyAuth = httpAuthNone
     BandwidthLimit = 10000
     BandwidthSampling = 1000
-    Options = [httpoEnableContentCoding]
+    Options = [httpoNoBasicAuth, httpoNoNTLMAuth, httpoEnableContentCoding, httpoNoDigestAuth]
     Timeout = 300
     SocksLevel = '5'
     SocksAuthentication = socksNoAuthentication
@@ -7552,7 +7590,7 @@ object Form_RestOllama: TForm_RestOllama
     RestParams.FormDataUtf8 = True
     RestParams = <>
     DebugLevel = DebugNone
-    MaxBodySize = 100000000
+    MaxBodySize = 1024000
     SslCliSecurity = sslCliSecNone
     SslSessCache = False
     CertVerMethod = CertVerNone
@@ -7563,7 +7601,7 @@ object Form_RestOllama: TForm_RestOllama
     HttpMemStrategy = HttpStratMem
     HttpDownReplace = False
     ResumeMinSize = 65535
-    ProgIntSecs = 2
+    ProgIntSecs = 1
     ShowProgress = True
     HttpUploadStrat = HttpUploadNone
     SharedSslCtx = False
@@ -7571,20 +7609,14 @@ object Form_RestOllama: TForm_RestOllama
     MaxLogParams = 4096
     OnHttpRestProg = HttpRest_OllamaHttpRestProg
     OnRestRequestDone = HttpRest_OllamaRestRequestDone
-    Left = 356
-    Top = 200
-  end
-  object OpenDirDiag: TOpenDialog
-    Options = [ofHideReadOnly, ofNoValidate, ofPathMustExist, ofNoTestFileCreate, ofEnableSizing]
-    Title = 'Select Directory'
-    Left = 471
-    Top = 550
+    Left = 284
+    Top = 136
   end
   object ActionList_Ollma: TActionList
     Images = SVGIconVirtualImageList1
     OnUpdate = ActionList_OllmaUpdate
-    Left = 288
-    Top = 136
+    Left = 280
+    Top = 216
     object Action_Options: TAction
       Hint = 'Settings Visable / Toggle'
       ImageIndex = 11
@@ -7606,16 +7638,16 @@ object Form_RestOllama: TForm_RestOllama
     end
     object Action_Home: TAction
       Hint = 'Got o Welcome'
-      ImageIndex = 2
-      ImageName = 'All\ic_home_48px'
-      ShortCut = 113
+      ImageIndex = 44
+      ImageName = 'ic_border_all_24px'
+      ShortCut = 114
       OnExecute = Action_HomeExecute
     end
     object Action_Chatting: TAction
       Hint = 'Chatting Window'
-      ImageIndex = 52
-      ImageName = 'bubble_chart_black_24dp'
-      ShortCut = 114
+      ImageIndex = 65
+      ImageName = 'llama-svgrepo-com'
+      ShortCut = 115
       OnExecute = Action_ChattingExecute
     end
     object Action_Logs: TAction
@@ -7636,6 +7668,7 @@ object Form_RestOllama: TForm_RestOllama
       Hint = 'Sen Request'
       ImageIndex = 12
       ImageName = 'All\ic_send_48px'
+      ShortCut = 113
       OnExecute = Action_SendRequestExecute
     end
     object Action_Abort: TAction
@@ -7725,8 +7758,8 @@ object Form_RestOllama: TForm_RestOllama
     end
     object Action_DosCommand: TAction
       Hint = 'Dos Command Mode Request'
-      ImageIndex = 13
-      ImageName = 'All\ic_adjust_48px'
+      ImageIndex = 67
+      ImageName = 'DosIcon_48'
       OnExecute = Action_DosCommandExecute
     end
     object Action_ClearChatting: TAction
@@ -7748,9 +7781,17 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_RequestDialogExecute
     end
     object Action_About: TAction
+      Hint = 'About'
+      ImageIndex = 45
+      ImageName = 'ic_more_horiz_48px'
+      OnExecute = Action_AboutExecute
+    end
+    object Action_SelectionColor: TAction
+      Hint = 'Selection Color'
       ImageIndex = 63
       ImageName = 'ic_apps_48px'
-      OnExecute = Action_AboutExecute
+      ShortCut = 32855
+      OnExecute = Action_SelectionColorExecute
     end
   end
   object SVGIconVirtualImageList1: TSVGIconVirtualImageList
@@ -8075,6 +8116,26 @@ object Form_RestOllama: TForm_RestOllama
         CollectionIndex = 63
         CollectionName = 'ic_apps_48px'
         Name = 'ic_apps_48px'
+      end
+      item
+        CollectionIndex = 64
+        CollectionName = 'grade_black_24dp'
+        Name = 'grade_black_24dp'
+      end
+      item
+        CollectionIndex = 65
+        CollectionName = 'llama-svgrepo-com'
+        Name = 'llama-svgrepo-com'
+      end
+      item
+        CollectionIndex = 66
+        CollectionName = 'stop-button'
+        Name = 'stop-button'
+      end
+      item
+        CollectionIndex = 67
+        CollectionName = 'DosIcon_48'
+        Name = 'DosIcon_48'
       end>
     ImageCollection = SVGIconImageCollection1
     PreserveItems = True
@@ -8798,6 +8859,125 @@ object Form_RestOllama: TForm_RestOllama
           '12 8h8V8h-8v8zm12 12h8v-8h-8v8zm0 12h8v-8h-8v8z"/>'#13#10'    <path d=' +
           '"M0 0h48v48H0z" fill="none"/>'#13#10'</svg>'#13#10
         FixedColor = cl3DLight
+      end
+      item
+        IconName = 'grade_black_24dp'
+        SVGText = 
+          '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0' +
+          ' 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" ' +
+          'fill="none"/><path d="M12 7.13l.97 2.29.47 1.11 1.2.1 2.47.21-1.' +
+          '88 1.63-.91.79.27 1.18.56 2.41-2.12-1.28-1.03-.64-1.03.62-2.12 1' +
+          '.28.56-2.41.27-1.18-.91-.79-1.88-1.63 2.47-.21 1.2-.1.47-1.11.97' +
+          '-2.27M12 2L9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l' +
+          '-1.64-7.03L22 9.24l-7.19-.61L12 2z"/></svg>'
+        FixedColor = cl3DLight
+      end
+      item
+        IconName = 'llama-svgrepo-com'
+        SVGText = 
+          '<?xml version="1.0" encoding="iso-8859-1"?>'#13#10'<!-- Uploaded to: S' +
+          'VG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->'#13#10'<' +
+          'svg fill="#000000" height="800px" width="800px" version="1.1" id' +
+          '="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http:' +
+          '//www.w3.org/1999/xlink" '#13#10#9' viewBox="0 0 512 512" xml:space="pr' +
+          'eserve">'#13#10'<g>'#13#10#9'<g>'#13#10#9#9'<path d="M451.616,165.935c19.927-17.358,3' +
+          '2.558-42.887,32.558-71.326C484.174,42.441,441.732,0,389.565,0H37' +
+          '2.87v49.641'#13#10#9#9#9'c-4.068-1.719-8.208-3.094-12.158-4.403c-5.339-1.' +
+          '769-10.384-3.439-14.346-5.621c-3.071-1.691-6.736-4.993-10.616-8.' +
+          '49'#13#10#9#9#9'c-7.811-7.041-17.534-15.803-30.946-18.904c-3.131-0.724-6.' +
+          '467-1.092-9.916-1.092c-8.123,0-15.657,1.94-22.944,3.818'#13#10#9#9#9'c-5.' +
+          '862,1.509-11.4,2.936-15.944,2.936c-4.545,0-10.081-1.426-15.943-2' +
+          '.936c-7.286-1.878-14.821-3.818-22.945-3.818'#13#10#9#9#9'c-3.448,0-6.784,' +
+          '0.367-9.915,1.092c-13.417,3.102-23.138,11.865-30.95,18.906c-3.87' +
+          '9,3.498-7.543,6.8-10.614,8.49'#13#10#9#9#9'c-3.961,2.182-9.006,3.852-14.3' +
+          '45,5.621c-3.95,1.309-8.09,2.685-12.157,4.402V0h-16.696C70.268,0,' +
+          '27.826,42.441,27.826,94.609'#13#10#9#9#9'c0,28.439,12.631,53.968,32.558,7' +
+          '1.326c-26.002,14.159-43.688,41.737-43.688,73.37c0,46.03,37.448,8' +
+          '3.478,83.478,83.478'#13#10#9#9#9'c0.467,0,0.927-0.028,1.392-0.034c9.055,5' +
+          '2.429,26.66,97.313,51.314,130.543C180.966,491.15,217.589,512,256' +
+          ',512'#13#10#9#9#9's75.032-20.85,103.12-58.709c24.653-33.23,42.258-78.115,' +
+          '51.312-130.543c0.465,0.007,0.926,0.034,1.394,0.034'#13#10#9#9#9'c46.03,0,' +
+          '83.478-37.448,83.478-83.478C495.304,207.672,477.618,180.094,451.' +
+          '616,165.935z M406.261,35.705'#13#10#9#9#9'c25.667,7.285,44.522,30.933,44.' +
+          '522,58.903s-18.855,51.619-44.522,58.903V35.705z M146.014,84.12'#13#10 +
+          #9#9#9'c2.038-2.636,9.334-5.052,15.771-7.184c6.234-2.064,13.3-4.404,' +
+          '19.953-8.067c6.453-3.553,11.746-8.324,16.865-12.938'#13#10#9#9#9'c5.717-5' +
+          '.153,11.117-10.021,16.117-11.177c0.668-0.155,1.471-0.233,2.391-0' +
+          '.233c3.893,0,9.102,1.341,14.618,2.761'#13#10#9#9#9'c7.264,1.871,15.497,3.' +
+          '991,24.272,3.991c8.775,0,17.008-2.12,24.272-3.991c5.515-1.42,10.' +
+          '724-2.761,14.615-2.761'#13#10#9#9#9'c0.919,0,1.724,0.078,2.393,0.233c4.99' +
+          '8,1.155,10.397,6.022,16.114,11.174c5.12,4.615,10.414,9.387,16.86' +
+          '7,12.939'#13#10#9#9#9'c6.653,3.663,13.718,6.004,19.952,8.067c6.438,2.133,' +
+          '13.734,4.549,15.772,7.185c3.213,4.154,2.587,12.611,1.923,21.563'#13 +
+          #10#9#9#9'c-0.297,4.011-0.604,8.161-0.604,12.375s0.307,8.363,0.604,12.' +
+          '375c0.663,8.951,1.291,17.408-1.923,21.563'#13#10#9#9#9'c-2.037,2.635-9.33' +
+          '3,5.051-15.77,7.182c-6.234,2.064-13.301,4.404-19.954,8.067c-6.45' +
+          '5,3.553-11.748,8.326-16.867,12.94'#13#10#9#9#9'c-5.717,5.152-11.115,10.02' +
+          '-16.114,11.175c-0.668,0.155-1.471,0.233-2.39,0.233h-0.001c-3.892' +
+          ',0-9.102-1.342-14.618-2.761'#13#10#9#9#9'c-7.264-1.871-15.497-3.991-24.27' +
+          '2-3.991c-8.775,0-17.008,2.12-24.272,3.991c-5.515,1.42-10.724,2.7' +
+          '61-14.615,2.761'#13#10#9#9#9'c-0.919,0-1.724-0.078-2.393-0.233c-4.998-1.1' +
+          '55-10.397-6.023-16.114-11.175c-5.119-4.614-10.413-9.385-16.865-1' +
+          '2.938'#13#10#9#9#9'c-6.654-3.664-13.72-6.005-19.956-8.068c-6.437-2.131-13' +
+          '.733-4.548-15.771-7.184c-3.213-4.154-2.587-12.611-1.923-21.563'#13#10 +
+          #9#9#9'c0.297-4.011,0.605-8.161,0.605-12.375c-0.002-4.214-0.309-8.36' +
+          '2-0.608-12.375C143.427,96.731,142.799,88.274,146.014,84.12z'#13#10#9#9#9 +
+          ' M105.739,35.705v117.807c-25.668-7.285-44.522-30.933-44.522-58.9' +
+          '03S80.071,42.99,105.739,35.705z M100.174,189.217'#13#10#9#9#9'c21.766,0,4' +
+          '0.322,13.959,47.215,33.391H52.959C59.851,203.176,78.408,189.217,' +
+          '100.174,189.217z M100.174,289.391'#13#10#9#9#9'c-21.766,0-40.323-13.959-4' +
+          '7.215-33.391h32.539c3.922,3.453,9.05,5.565,14.674,5.565h0.002c5.' +
+          '624,0,10.752-2.113,14.675-5.565'#13#10#9#9#9'h32.54C140.497,275.433,121.9' +
+          '4,289.391,100.174,289.391z M332.302,433.396c-8.775,11.828-20.964' +
+          ',24.952-36.425,34.002'#13#10#9#9#9'c-10.735-0.539-22.742-4.748-23.159-37.' +
+          '148c8.212-7.4,15.358-18.806,18.899-29.555c2.703-9.071-4.282-16.5' +
+          '77-15.583-16.696'#13#10#9#9#9'c-13.357,0-26.713,0-40.07,0c-11.3,0.119-18.' +
+          '285,7.625-15.583,16.696c3.542,10.747,10.686,22.154,18.898,29.555' +
+          #13#10#9#9#9'c-0.416,32.401-12.424,36.609-23.159,37.148c-15.461-9.05-27.' +
+          '65-22.174-36.425-34.002c-21.799-29.383-37.414-69.941-45.49-117.8' +
+          '95'#13#10#9#9#9'c29.108-13.054,49.446-42.286,49.446-76.197c0-12.232-2.667' +
+          '-23.847-7.414-34.326c0.003,0.004,0.008,0.008,0.011,0.011'#13#10#9#9#9'c7.' +
+          '811,7.04,17.534,15.803,30.947,18.904c3.131,0.724,6.467,1.091,9.9' +
+          '16,1.091c8.123,0,15.657-1.94,22.944-3.818'#13#10#9#9#9'c5.862-1.509,11.4-' +
+          '2.936,15.944-2.936c4.543,0,10.082,1.426,15.944,2.936c7.286,1.877' +
+          ',14.821,3.818,22.944,3.818'#13#10#9#9#9'c0.001,0,0.001,0,0.001,0c3.448,0,' +
+          '6.784-0.367,9.915-1.091c13.416-3.102,23.137-11.865,30.947-18.905' +
+          #13#10#9#9#9'c0.003-0.003,0.007-0.006,0.009-0.009c-4.748,10.478-7.414,22' +
+          '.093-7.414,34.325c0,33.911,20.336,63.143,49.444,76.196'#13#10#9#9#9'C369.' +
+          '716,363.454,354.103,404.013,332.302,433.396z M411.826,289.391c-2' +
+          '1.766,0-40.323-13.959-47.215-33.391h32.539'#13#10#9#9#9'c3.922,3.453,9.05' +
+          ',5.565,14.674,5.565h0.002c5.624,0,10.752-2.113,14.675-5.565h32.5' +
+          '4'#13#10#9#9#9'C452.149,275.433,433.592,289.391,411.826,289.391z M364.611' +
+          ',222.609c6.892-19.433,25.45-33.391,47.215-33.391'#13#10#9#9#9'c21.766,0,4' +
+          '0.323,13.959,47.215,33.391H364.611z"/>'#13#10#9'</g>'#13#10'</g>'#13#10'</svg>'
+        FixedColor = cl3DLight
+      end
+      item
+        IconName = 'stop-button'
+        SVGText = 
+          '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" v' +
+          'iewBox="0 0 48 48">'#13#10'    <path d="M0 0h48v48H0z" fill="none"/>'#13#10 +
+          '    <path d="M18 32h4V16h-4v16zm6-28C12.95 4 4 12.95 4 24s8.95 2' +
+          '0 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S1' +
+          '5.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm2-8h4V16h-4v16z"/>'#13#10'   ' +
+          ' <path d="M16 16h16v16H16z"/>'#13#10'</svg>'
+        FixedColor = cl3DLight
+      end
+      item
+        IconName = 'DosIcon_48'
+        SVGText = 
+          '<svg version="1.0" xmlns="http://www.w3.org/2000/svg"'#10' width="48' +
+          '.000000pt" height="48.000000pt" viewBox="0 0 48.000000 48.000000' +
+          '"'#10' preserveAspectRatio="xMidYMid meet">'#10#10'<g transform="translate' +
+          '(0.000000,48.000000) scale(0.100000,-0.100000)"'#10'fill="#000000" s' +
+          'troke="none">'#10'<path d="M5 467 c-3 -7 -4 -114 -3 -237 l3 -225 235' +
+          ' 0 235 0 0 235 0 235 -233'#10'3 c-183 2 -234 0 -237 -11z m453 -224 l' +
+          '-3 -218 -215 0 -215 0 -3 218 -2 217'#10'220 0 220 0 -2 -217z"/>'#10'<pat' +
+          'h d="M100 240 l0 -130 91 0 c101 0 134 13 163 60 19 33 21 106 2 1' +
+          '38 -26'#10'48 -64 62 -163 62 l-93 0 0 -130z m168 34 c43 -30 14 -84 -' +
+          '45 -84 l-33 0 0 50'#10'c0 48 1 50 28 50 15 0 38 -7 50 -16z"/>'#10'</g>'#10'<' +
+          '/svg>'#10
+        FixedColor = cl3DLight
       end>
     Left = 660
     Top = 119
@@ -8805,8 +8985,8 @@ object Form_RestOllama: TForm_RestOllama
   object Timer_Repeater: TTimer
     Enabled = False
     OnTimer = Timer_RepeaterTimer
-    Left = 292
-    Top = 280
+    Left = 284
+    Top = 288
   end
   object OpenPictureDialog1: TOpenPictureDialog
     DefaultExt = '.jpg'
@@ -8814,35 +8994,8 @@ object Form_RestOllama: TForm_RestOllama
       'All (*.jpg;*.jpeg;*.png;*.webp;*.gif)|*.jpg;*.jpeg;*.png;*.webp;' +
       '*.gif|JPEG Image File (*.jpg)|*.jpg|Portable Network Graphics (*' +
       '.png)|*.png'
-    Left = 645
+    Left = 277
     Top = 553
-  end
-  object PopupMenu_Chat: TPopupMenu
-    Left = 376
-    Top = 552
-    object pmn_Copy: TMenuItem
-      Caption = 'Copy Message'
-      ShortCut = 32835
-    end
-    object pmn_Delete: TMenuItem
-      Caption = 'Delete Message'
-      ShortCut = 32836
-    end
-    object pmn_ScrolltoTop: TMenuItem
-      Caption = 'Scroll to Top'
-      ShortCut = 32838
-    end
-    object pmn_ScrolltoBottom: TMenuItem
-      Caption = 'Scroll to Bottom'
-      ShortCut = 32834
-    end
-    object N1: TMenuItem
-      Caption = '-'
-    end
-    object pmn_SaveAll: TMenuItem
-      Caption = 'Save All (Only Text)'
-      ShortCut = 32851
-    end
   end
   object SaveTextFileDialog1: TSaveTextFileDialog
     DefaultExt = '.txt'
@@ -8855,19 +9008,19 @@ object Form_RestOllama: TForm_RestOllama
       'ASCII'
       'Big Endian Unicode'
       'UTF-7')
-    Left = 552
-    Top = 552
+    Left = 280
+    Top = 480
   end
   object Timer_System: TTimer
     Enabled = False
     OnTimer = Timer_SystemTimer
     Left = 381
-    Top = 280
+    Top = 288
   end
   object PopupMenu_Topics: TPopupMenu
     OnPopup = PopupMenu_TopicsPopup
     Left = 280
-    Top = 552
+    Top = 400
     object pmn_RenameTopic: TMenuItem
       Caption = 'Rename Topic'
       OnClick = pmn_RenameTopicClick

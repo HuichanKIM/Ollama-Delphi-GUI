@@ -91,7 +91,7 @@ object Form_About: TForm_About
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    object Button1: TButton
+    object Button_OK: TButton
       Left = 295
       Top = 6
       Width = 75
@@ -727,7 +727,7 @@ object Form_About: TForm_About
       Top = 87
       Width = 360
       Height = 234
-      ActivePage = TabSheet3
+      ActivePage = TabSheet_Style
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
       Font.Height = -12
@@ -742,8 +742,8 @@ object Form_About: TForm_About
         object Label_Development: TLabel
           Left = 0
           Top = 0
-          Width = 129
-          Height = 15
+          Width = 352
+          Height = 201
           Align = alClient
           Caption = 'Development Tool  (GUI)'
           Font.Charset = DEFAULT_CHARSET
@@ -753,6 +753,8 @@ object Form_About: TForm_About
           Font.Style = []
           ParentFont = False
           StyleElements = [seClient, seBorder]
+          ExplicitWidth = 129
+          ExplicitHeight = 15
         end
       end
       object TabSheet3: TTabSheet
@@ -833,6 +835,40 @@ object Form_About: TForm_About
           ParentFont = False
           TabOrder = 0
           ViewStyle = vsReport
+        end
+      end
+      object TabSheet_Style: TTabSheet
+        Caption = 'Skin - Style'
+        ImageIndex = 3
+        object Label2: TLabel
+          Left = 8
+          Top = 15
+          Width = 59
+          Height = 15
+          Caption = 'Select Style'
+          StyleElements = [seClient, seBorder]
+        end
+        object SpeedButton_ChangeStyle: TSpeedButton
+          Left = 288
+          Top = 12
+          Width = 58
+          Height = 22
+          Caption = 'Change'
+          OnClick = SpeedButton_ChangeStyleClick
+        end
+        object ComboBox_VclStyles: TComboBox
+          Left = 76
+          Top = 12
+          Width = 206
+          Height = 23
+          Style = csDropDownList
+          ItemIndex = 0
+          TabOrder = 0
+          Text = 'Windows10 SlateGray'
+          Items.Strings = (
+            'Windows10 SlateGray'
+            'Windows11 Impressive Dark'
+            'Windows11 Modern Dark')
         end
       end
     end
