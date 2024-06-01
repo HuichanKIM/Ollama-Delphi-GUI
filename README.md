@@ -42,3 +42,6 @@
 ![Chattings 4: Preview page](./Images/O_chattings4.png)
 
 ![Chattings 5: Preview page](./Images/O_chattings5.png)
+
+(Skin - Windows10 SlateGray, Windows11 Impressive Dark, Windows11 Modern Dark  )
+![Chattings 6: Preview page](./Images/O_chattings6.png)
