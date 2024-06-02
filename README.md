@@ -4,6 +4,8 @@
 
 - Replace Commercial Library to Free Component for ChattingBox
 - Support Multilingual Translation (by MS SAPI)
+- Support 3 Dark style Skin for UI
+- (Windows10 SlateGray, Windows11 Impressive Dark, Windows11 Modern Dark)
 
 ### Features
 
