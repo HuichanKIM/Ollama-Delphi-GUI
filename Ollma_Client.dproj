@@ -1125,13 +1125,13 @@
             <Form>Form_RestOllama</Form>
         </DCCReference>
         <DCCReference Include="Unit_AliveOllama.pas">
-            <Form>Form_AliveOllama</Form>
+            <Form>TForm_AliveOllama</Form>
         </DCCReference>
         <DCCReference Include="Unit_Translator.pas">
-            <Form>Form_Translator</Form>
+            <Form>TForm_Translator</Form>
         </DCCReference>
         <DCCReference Include="Unit_About.pas">
-            <Form>Form_About</Form>
+            <Form>TForm_About</Form>
         </DCCReference>
         <DCCReference Include="Unit_RequestDialog.pas">
             <Form>Form_RequestDialog</Form>

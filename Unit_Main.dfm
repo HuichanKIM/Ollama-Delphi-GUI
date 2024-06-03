@@ -41,7 +41,7 @@ object Form_RestOllama: TForm_RestOllama
       BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
-      Font.Height = -13
+      Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = []
       ParentFont = False
@@ -105,9 +105,9 @@ object Form_RestOllama: TForm_RestOllama
         object Label_Description: TLabel
           AlignWithMargins = True
           Left = 5
-          Top = 22
+          Top = 20
           Width = 201
-          Height = 18
+          Height = 20
           Cursor = crHandPoint
           Align = alClient
           Caption = 
@@ -116,8 +116,9 @@ object Form_RestOllama: TForm_RestOllama
           WordWrap = True
           StyleElements = [seClient, seBorder]
           OnClick = Label_DescriptionClick
-          ExplicitWidth = 197
-          ExplicitHeight = 51
+          ExplicitTop = 22
+          ExplicitWidth = 181
+          ExplicitHeight = 45
         end
       end
       object GroupBox_Model: TGroupBox
@@ -156,7 +157,7 @@ object Form_RestOllama: TForm_RestOllama
           Left = 30
           Top = 22
           Width = 145
-          Height = 25
+          Height = 23
           Style = csDropDownList
           DragMode = dmAutomatic
           DropDownCount = 10
@@ -186,21 +187,23 @@ object Form_RestOllama: TForm_RestOllama
         StyleElements = [seClient, seBorder]
         object Panel_ImageLlavaBase: TPanel
           Left = 2
-          Top = 19
+          Top = 17
           Width = 207
-          Height = 191
+          Height = 193
           Align = alClient
           BevelOuter = bvNone
           Ctl3D = True
           ParentCtl3D = False
           ShowCaption = False
           TabOrder = 0
+          ExplicitTop = 19
+          ExplicitHeight = 191
           object Image_Llva: TImage
             AlignWithMargins = True
             Left = 3
             Top = 3
             Width = 201
-            Height = 185
+            Height = 187
             Hint = 'Drop Image-file (*.jpg, *.jpeg, *.png, *.webp, *.gif)'
             Align = alClient
             Center = True
@@ -5816,6 +5819,7 @@ object Form_RestOllama: TForm_RestOllama
             OnDblClick = SpeedButton_LlavaClick
             ExplicitLeft = 5
             ExplicitTop = 8
+            ExplicitHeight = 185
           end
           object SpeedButton_Llava: TSpeedButton
             Left = 0
@@ -5842,15 +5846,16 @@ object Form_RestOllama: TForm_RestOllama
         object TreeView_Topics: TTreeView
           AlignWithMargins = True
           Left = 5
-          Top = 48
+          Top = 46
           Width = 201
-          Height = 355
+          Height = 357
           Align = alClient
           BorderStyle = bsNone
           Ctl3D = False
           DragMode = dmAutomatic
           HideSelection = False
           Indent = 10
+          MultiSelectStyle = []
           ParentCtl3D = False
           ParentShowHint = False
           PopupMenu = PopupMenu_Topics
@@ -5864,16 +5869,19 @@ object Form_RestOllama: TForm_RestOllama
           OnDblClick = TreeView_TopicsDblClick
           OnDragDrop = TreeView_TopicsDragDrop
           OnDragOver = TreeView_TopicsDragOver
+          ExplicitTop = 48
+          ExplicitHeight = 355
         end
         object Panel_TopicButtons: TPanel
           AlignWithMargins = True
           Left = 5
-          Top = 22
+          Top = 20
           Width = 201
           Height = 20
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 1
+          ExplicitTop = 22
           object SpeedButton_AddTopic: TSpeedButton
             Left = 69
             Top = 0
@@ -5917,7 +5925,7 @@ object Form_RestOllama: TForm_RestOllama
             AlignWithMargins = True
             Left = 125
             Top = 0
-            Width = 28
+            Width = 24
             Height = 20
             Margins.Left = 10
             Margins.Top = 0
@@ -5925,7 +5933,7 @@ object Form_RestOllama: TForm_RestOllama
             Align = alLeft
             Caption = 'seed'
             StyleElements = [seClient, seBorder]
-            ExplicitHeight = 17
+            ExplicitHeight = 15
           end
           object SpeedButton_NewRootnode: TSpeedButton
             Left = 23
@@ -5994,7 +6002,7 @@ object Form_RestOllama: TForm_RestOllama
       object GroupBox_BaseURL: TGroupBox
         AlignWithMargins = True
         Left = 3
-        Top = 29
+        Top = 85
         Width = 235
         Height = 51
         Align = alTop
@@ -6020,11 +6028,11 @@ object Form_RestOllama: TForm_RestOllama
       object RadioGroup_PromptType: TRadioGroup
         AlignWithMargins = True
         Left = 3
-        Top = 148
+        Top = 29
         Width = 235
         Height = 50
         Align = alTop
-        Caption = 'Request Type'
+        Caption = 'Request Mode'
         Columns = 2
         ItemIndex = 1
         Items.Strings = (
@@ -6037,7 +6045,7 @@ object Form_RestOllama: TForm_RestOllama
       object GroupBox_Username: TGroupBox
         AlignWithMargins = True
         Left = 3
-        Top = 86
+        Top = 142
         Width = 235
         Height = 56
         Align = alTop
@@ -6062,7 +6070,7 @@ object Form_RestOllama: TForm_RestOllama
         Align = alTop
         Alignment = taRightJustify
         BevelOuter = bvNone
-        Caption = 'Tools ...'
+        Caption = 'Tools ...  '
         TabOrder = 3
         StyleElements = [seClient, seBorder]
         object SpeedButton_DefaultSet: TSpeedButton
@@ -6121,12 +6129,10 @@ object Form_RestOllama: TForm_RestOllama
           Top = 3
           Width = 23
           Height = 19
-          Hint = 'Set Sound off'
+          Hint = 'Set Sound on'
+          Action = Action_BeepEffect
           Align = alLeft
-          ImageIndex = 30
-          ImageName = 'ic_surround_sound_48px'
           Images = SVGIconVirtualImageList1
-          OnClick = SpeedButton_BeepClick
           ExplicitLeft = 130
         end
       end
@@ -6218,7 +6224,7 @@ object Form_RestOllama: TForm_RestOllama
         Left = 3
         Top = 288
         Width = 235
-        Height = 81
+        Height = 56
         Align = alTop
         Caption = 'Translation (by Google)'
         TabOrder = 6
@@ -6270,11 +6276,11 @@ object Form_RestOllama: TForm_RestOllama
             'en')
         end
         object CheckBox_AutoTranslation: TCheckBox
-          Left = 18
-          Top = 53
-          Width = 207
+          Left = 204
+          Top = 26
+          Width = 17
           Height = 17
-          Caption = 'Sync. Auto Translation of Response'
+          Hint = 'Sync. Auto Translation of Response'
           TabOrder = 2
           StyleElements = [seClient, seBorder]
         end
@@ -6282,7 +6288,7 @@ object Form_RestOllama: TForm_RestOllama
       object GroupBox_TTSEngine: TGroupBox
         AlignWithMargins = True
         Left = 5
-        Top = 375
+        Top = 350
         Width = 231
         Height = 132
         Margins.Left = 5
@@ -6524,9 +6530,9 @@ object Form_RestOllama: TForm_RestOllama
       object GroupBox1: TGroupBox
         AlignWithMargins = True
         Left = 3
-        Top = 513
+        Top = 488
         Width = 235
-        Height = 107
+        Height = 132
         Align = alClient
         Caption = 'Memo'
         TabOrder = 10
@@ -6536,7 +6542,7 @@ object Form_RestOllama: TForm_RestOllama
           Left = 4
           Top = 19
           Width = 227
-          Height = 84
+          Height = 109
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -7619,8 +7625,9 @@ object Form_RestOllama: TForm_RestOllama
     Top = 216
     object Action_Options: TAction
       Hint = 'Settings Visable / Toggle'
-      ImageIndex = 11
-      ImageName = 'All\ic_settings_48px'
+      ImageIndex = 45
+      ImageName = 'ic_more_horiz_48px'
+      ShortCut = 32848
       OnExecute = Action_OptionsExecute
     end
     object Action_Exit: TAction
@@ -7696,7 +7703,7 @@ object Form_RestOllama: TForm_RestOllama
       Hint = 'Scroll to Top'
       ImageIndex = 35
       ImageName = 'ic_file_upload_48px'
-      ShortCut = 32838
+      ShortCut = 32852
       OnExecute = Action_Pop_ScrollToTopExecute
     end
     object Action_Pop_ScrollToBottom: TAction
@@ -7781,17 +7788,28 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_RequestDialogExecute
     end
     object Action_About: TAction
-      Hint = 'About'
-      ImageIndex = 45
-      ImageName = 'ic_more_horiz_48px'
+      Hint = 'About / Skin / Colors'
+      ImageIndex = 11
+      ImageName = 'All\ic_settings_48px'
       OnExecute = Action_AboutExecute
     end
     object Action_SelectionColor: TAction
       Hint = 'Selection Color'
       ImageIndex = 63
       ImageName = 'ic_apps_48px'
-      ShortCut = 32855
+      ShortCut = 32837
       OnExecute = Action_SelectionColorExecute
+    end
+    object Action_CustomFontColor: TAction
+      Hint = 'Custon Font Color'
+      ImageIndex = 58
+      ImageName = 'ic_title_48px'
+    end
+    object Action_BeepEffect: TAction
+      ImageIndex = 30
+      ImageName = 'ic_surround_sound_48px'
+      ShortCut = 32849
+      OnExecute = Action_BeepEffectExecute
     end
   end
   object SVGIconVirtualImageList1: TSVGIconVirtualImageList

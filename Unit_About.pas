@@ -24,7 +24,6 @@ type
     Button_OK: TButton;
     Panel3: TPanel;
     Label_Title: TLabel;
-    Label_Copyright: TLabel;
     GroupBox1: TGroupBox;
     Label3: TLabel;
     Label_OllamaWeb: TLabel;
@@ -43,19 +42,44 @@ type
     TabSheet_Style: TTabSheet;
     Label2: TLabel;
     ComboBox_VclStyles: TComboBox;
-    SpeedButton_ChangeStyle: TSpeedButton;
+    GroupBox2: TGroupBox;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    ColorDialog_Skin: TColorDialog;
+    Shape_Header: TShape;
+    Shape_Body: TShape;
+    Shape_Footer: TShape;
+    SpeedButton_Header: TSpeedButton;
+    SpeedButton_Body: TSpeedButton;
+    SpeedButton_Footer: TSpeedButton;
+    Label8: TLabel;
+    Shape_Selection: TShape;
+    SpeedButton_Selection: TSpeedButton;
+    Button_ApplyStyle: TButton;
+    Button_ApplyColors: TButton;
+    Label_Header: TLabel;
+    Label_Body: TLabel;
+    Label_Footer: TLabel;
+    Button_CancelColors: TButton;
+    Label9: TLabel;
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure Label_OllamaWebClick(Sender: TObject);
     procedure Label_OllamaGitHubClick(Sender: TObject);
     procedure Label_SystemInfoClick(Sender: TObject);
     procedure Label_GitHubClick(Sender: TObject);
-    procedure SpeedButton_ChangeStyleClick(Sender: TObject);
+    procedure SpeedButton_HeaderClick(Sender: TObject);
+    procedure Button_ApplyStyleClick(Sender: TObject);
+    procedure Button_ApplyColorsClick(Sender: TObject);
+    procedure Button_CancelColorsClick(Sender: TObject);
   private
+    FShow_Flag: Integer;
     procedure Update_Shortcuts;
     procedure StylesList_Refresh;
   public
-    { Public declarations }
+    property Show_Flag: Integer  read FShow_Flag  write FShow_Flag;
   end;
 
 implementation
@@ -71,36 +95,37 @@ uses
 {$R *.dfm}
 
 const
-  C_Shortcut_Keys: array [0..23] of string = ('F1','F2','F3','F4','F5',
+  C_Shortcut_Keys: array [0..25] of string = ('F1','F2','F3','F4','F5',
                                               'F6','F7','F8','F9','F10',
                                               'Alt+A','Alt+B','Alt+C','Alt+D','Alt+E',
-                                              'Alt+F','Alt+G','Alt+L','Alt+S','Alt+V','Alt+W',
+                                              'Alt+G','Alt+L','Alt+P','Alt+Q','Alt+S','Alt+T','Alt+V','Alt+W',
                                               'Ctrl+A','Ctrl+R','Ctrl+Z');
-  C_Shortcut_Desc: array [0..23] of string = ('Show Request Dialog','Send Request','Goto Welcome.','Goto Chatting Room.','Translation of Prompt',
+  C_Shortcut_Desc: array [0..25] of string = ('Show Request Dialog','Send Request','Goto Welcome.','Goto Chatting Room','Translation of Prompt',
                                               'Translation of Message','(Reserved)','(Reserved)','Reserved','Clear Chattings',
-                                              'Ollama Alive ?','Scroll to Bottom.','Copy the Message.','Delete the Message.','(Reserved)',
-                                              'Scroll to Top.','(Reserved)','Show Logs.','Save All Message to Text File.','TextToSpeech on the Message.','Selection Color',
+                                              'Ollama Alive ?','Scroll to Bottom','Copy the Message.','Delete the Message.','Skin / Colors',
+                                              '(Reserved)','Show Logs.','Show/Hide Option Panel','Beep Effect','Save All Message to Text File','Scroll to Top','TextToSpeech on the Message','(Reserved)',
                                               'Abort Connection.','Default / Refresh','Close / Exit.');
-  C_DevelopInfo: string = '''
-    Development Tool  (GUI)
-      Embarcadero Delphi 12.1  ( Object Pascal )
 
-    3rd party Reference Library  (* free)
-      - Overbytes ICS 9.1 by François Piette (*)
-      - Virtual-TreeView by JAM-Software (*)
-      - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)
-      - SpeechLibrary by MS SAPI (*)
-      - FastMM4-AVX by Maxim Masiutin (*)
-      - Embeded Lib. : SKIA 2D Graphics  (*)
-
-    * Support Multilingual Translation  / Voice
-  ''';
+  // When use ''' (multi line strings), raise Error with International Char ? - Code Insight Error ? ...
+  C_DevelopInfo: string =
+        'Development Tool  (GUI)'+#13#10+
+        'Embarcadero Delphi 12.1  ( Object Pascal )'+#13#10#13#10+
+        ' 3rd party Reference Library  (* open source)'+#13#10+
+        ' - Overbytes ICS 9.1 by François Piette (*)'+#13#10+
+        ' - Virtual-TreeView by JAM-Software (*)'+#13#10+
+        ' - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)'+#13#10+
+        ' - FastMM4-AVX by Maxim Masiutin (*)'+#13#10+
+        ' - Embeded Lib. : SKIA 2D Graphics'+ #13#10#13#10+
+        ' - SpeechLibrary by MS SAPI'+#13#10+
+        'Support Multilingual Translation  / Voice'+#13#10#13#10+
+        'Copyright (c) 2024 - JNJ Labs. Seoul, Korea.';
 
 procedure TForm_About.FormCreate(Sender: TObject);
 begin
+  FShow_Flag := 0;
   StylesList_Refresh;
+
   Label_Title.Caption := C_MainCaption;
-  Label_Copyright.Caption := C_CoptRights;
   if TStyleManager.IsCustomStyleActive then
   begin
     ListView_Shortcuts.StyleElements := [seBorder];
@@ -110,7 +135,23 @@ begin
   Label_Development.Caption := C_DevelopInfo;
   Label_SystemInfo.Caption := Get_SystemInfo();
   Update_Shortcuts();
-  PageControl1.ActivePageIndex := 0;
+end;
+
+procedure TForm_About.FormShow(Sender: TObject);
+begin
+  var _color0, _color1, _color2, _color3: TColor;
+  _color0 := Form_RestOllama.Frame_ChattingBox.Get_CustomColor(_color1, _color2, _color3);
+
+  Shape_Selection.Brush.Color := _color0;
+  Shape_Header.Brush.Color :=    _color1;
+  Shape_Body.Brush.Color :=      _color2;
+  Shape_Footer.Brush.Color :=    _color3;
+
+  Label_Header.Font.Color :=     _color1;
+  Label_Body.Font.Color :=       _color2;
+  Label_Footer.Font.Color :=     _color3;
+
+  PageControl1.ActivePageIndex := FShow_Flag;   // 0 or 3
 end;
 
 procedure TForm_About.Update_Shortcuts();
@@ -169,20 +210,57 @@ begin
     ComboBox_VclStyles.ItemIndex := _index;
 end;
 
-procedure TForm_About.SpeedButton_ChangeStyleClick(Sender: TObject);
+procedure TForm_About.Button_ApplyStyleClick(Sender: TObject);
 begin
   var _style: string := ComboBox_VclStyles.Items[ComboBox_VclStyles.ItemIndex];
   if not SameText(_style, TStyleManager.ActiveStyle.Name) then
   begin
-    try
-      TStyleManager.TrySetStyle(_style);
-      Form_RestOllama.Do_ChangeStyleCustom(1);
-    finally
-    end;
+    TStyleManager.TrySetStyle(_style);
+    Form_RestOllama.Do_ChangeStyleCustom(1);
   end;
 
   if Button_OK.CanFocus then
     Button_OK.Setfocus;
+end;
+
+procedure TForm_About.Button_ApplyColorsClick(Sender: TObject);
+begin
+  Form_RestOllama.Frame_ChattingBox.Do_SetCustomColor(1,
+    Shape_Selection.Brush.Color,
+    Shape_Header.Brush.Color,
+    Shape_Body.Brush.Color,
+    Shape_Footer.Brush.Color);
+
+  Button_CancelColors.Enabled := True;
+end;
+
+procedure TForm_About.Button_CancelColorsClick(Sender: TObject);
+begin
+  Form_RestOllama.Frame_ChattingBox.Do_SetCustomColor(2,
+    VC_ReservedColor[0],
+    VC_ReservedColor[1],
+    VC_ReservedColor[2],
+    VC_ReservedColor[3]);
+
+  Shape_Selection.Brush.Color := VC_ReservedColor[0];
+  Shape_Header.Brush.Color :=    VC_ReservedColor[1];  Label_Header.Font.Color := VC_ReservedColor[1];
+  Shape_Body.Brush.Color :=      VC_ReservedColor[2];  Label_Body.Font.Color :=   VC_ReservedColor[2];
+  Shape_Footer.Brush.Color :=    VC_ReservedColor[3];  Label_Footer.Font.Color := VC_ReservedColor[3];
+end;
+
+procedure TForm_About.SpeedButton_HeaderClick(Sender: TObject);
+begin
+  with ColorDialog_Skin do
+  begin
+    Color := VC_ReservedColor[TSpeedButton(Sender).Tag];
+    if Execute() then
+      case TSpeedButton(Sender).Tag of
+        0: begin Shape_Selection.Brush.Color := Color;  end;
+        1: begin Shape_Header.Brush.Color :=    Color;  Label_Header.Font.Color := Color; end;
+        2: begin Shape_Body.Brush.Color :=      Color;  Label_Body.Font.Color :=   Color; end;
+        3: begin Shape_Footer.Brush.Color :=    Color;  Label_Footer.Font.Color := Color; end;
+      end;
+  end;
 end;
 
 end.

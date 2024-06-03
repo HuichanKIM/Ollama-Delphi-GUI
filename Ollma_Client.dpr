@@ -16,9 +16,9 @@ uses
   SpeechLib_TLB in 'SpeechLib_TLB.pas',
   Unit_Welcome in 'Unit_Welcome.pas' {Frame_Welcome: TFrame},
   Unit_Main in 'Unit_Main.pas' {Form_RestOllama},
-  Unit_AliveOllama in 'Unit_AliveOllama.pas' {Form_AliveOllama},
-  Unit_Translator in 'Unit_Translator.pas' {Form_Translator},
-  Unit_About in 'Unit_About.pas' {Form_About},
+  Unit_AliveOllama in 'Unit_AliveOllama.pas' {TForm_AliveOllama},
+  Unit_Translator in 'Unit_Translator.pas' {TForm_Translator},
+  Unit_About in 'Unit_About.pas' {TForm_About},
   Unit_RequestDialog in 'Unit_RequestDialog.pas' {Form_RequestDialog},
   Unit_ChattingBoxClass in 'Unit_ChattingBoxClass.pas' {Frame_ChattingBoxClass: TFrame};
 
@@ -50,13 +50,15 @@ begin
   if _mxHandle <> 0 then
   try
     Application.Initialize;
-      //TStyleManager.TrySetStyle('Windows11 Impressive Dark');
+    {
       var _skinfile := CV_AppPath+'skincfg.txt';
       if FileExists(_skinfile) then
       begin
         var _skinname := IOUtils_ReadAllText(_skinfile);
         TStyleManager.TrySetStyle(_skinname);
       end;
+    }
+    TStyleManager.TrySetStyle('Windows10 SlateGray');
     Application.Title := 'Ollama Client GUI';
     Application.CreateForm(TForm_RestOllama, Form_RestOllama);
     Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);

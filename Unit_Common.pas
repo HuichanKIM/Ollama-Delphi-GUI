@@ -10,6 +10,7 @@ uses
   System.Classes,
   System.Types,
   Vcl.StdCtrls,
+  Vcl.Graphics,
   DosCommand;
 
 const
@@ -55,7 +56,7 @@ type
 const
   C_Version     = 'v 0.9.5 - beta (2024.05.30)';
   C_MainCaption = 'Ollama Client GUI '+C_Version;
-  C_CoptRights  = '- Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea. All Rights Reserved. -';
+  C_CoptRights  = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
 
 const
   C_BTdivGB = 1073741824;
@@ -67,6 +68,8 @@ const
   C_CRLF = #13#10;
 
 function Is_Hangul(const AText: string): Boolean;
+function Get_ReplaceSpecialChar(const AText: string): string;
+function Get_ReplaceSpecialChar2(const AText: string): string;
 function GetUsersWindowsLanguage: string;
 function Get_LocaleIDString(const AFlag: Integer = 0): string;
 function ReadAllText_Unicode(const AFilePath: string=''): string;
@@ -87,6 +90,9 @@ var
   CV_TmpPath: string = 'temp';
   CV_LogPath: string = 'log';
   CV_LocaleID: string = 'en';
+
+var
+  VC_ReservedColor: array [0..3] of TColor;
 
 var
   GV_DosCommand: TG_DosCommand;
@@ -113,13 +119,25 @@ uses
   Unit_Main;
 
 const
-  C_Regex: String = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä
+  C_RegRep1: string = '[#$%&]';
+  C_RegRep2: string = '["\{\}:;\[\]]';  // - json reserved only / all special char - '[^\w]';
+  C_RegHan: string  = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä
                                                  - Regular expression for Korean language test }
 
 function Is_Hangul(const AText: string): Boolean;
 begin
-  var _prestr: string := Copy(AText, 1, Min(128, Length(AText)));
-  Result := System.RegularExpressions.TRegEx.IsMatch(_prestr, C_Regex);
+  var _prestr: string := Copy(AText, 1, Min(64, Length(AText)));
+  Result := System.RegularExpressions.TRegEx.IsMatch(_prestr, C_RegHan);
+end;
+
+function Get_ReplaceSpecialChar(const AText: string): string;
+begin
+  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegRep1, ' ');
+end;
+
+function Get_ReplaceSpecialChar2(const AText: string): string;
+begin
+  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegRep2, ' ');
 end;
 
 function IOUtils_ReadAllText(const AFilePath: string=''): string;

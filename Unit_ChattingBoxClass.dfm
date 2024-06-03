@@ -36,6 +36,7 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     Header.Height = 21
     Images = VirtualImageList1
     IncrementalSearch = isAll
+    NodeAlignment = naFromTop
     ParentBiDiMode = False
     ParentCtl3D = False
     PopupMenu = PopupMenu1
@@ -43,10 +44,10 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     SelectionCurveRadius = 20
     TabOrder = 0
     TreeOptions.AnimationOptions = [toAnimatedToggle]
-    TreeOptions.AutoOptions = [toAutoScroll, toAutoScrollOnExpand, toAutoTristateTracking, toAutoHideButtons, toAutoDeleteMovedNodes, toAutoChangeScale]
+    TreeOptions.AutoOptions = [toAutoScroll, toAutoScrollOnExpand, toAutoSpanColumns, toAutoTristateTracking, toAutoHideButtons, toAutoDeleteMovedNodes, toAutoChangeScale]
     TreeOptions.MiscOptions = [toReportMode, toWheelPanning, toVariableNodeHeight]
     TreeOptions.PaintOptions = [toShowRoot, toThemeAware, toUseBlendedImages]
-    TreeOptions.SelectionOptions = [toRightClickSelect]
+    TreeOptions.SelectionOptions = [toRightClickSelect, toSelectNextNodeOnRemoval]
     TreeOptions.StringOptions = [toSaveCaptions]
     WantTabs = True
     OnBeforeCellPaint = VST_ChattingBoxBeforeCellPaint

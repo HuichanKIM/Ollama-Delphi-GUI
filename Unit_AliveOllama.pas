@@ -12,19 +12,18 @@ uses
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
-  Vcl.StdCtrls;
+  Vcl.StdCtrls, Vcl.Buttons;
 
 type
   TForm_AliveOllama = class(TForm)
-    Button_Alive: TButton;
     GroupBox1: TGroupBox;
     Edit1: TEdit;
-    Memo1: TMemo;
+    Memo_Alive: TMemo;
     Button_OK: TButton;
-    Result: TLabel;
-    procedure Button_AliveClick(Sender: TObject);
+    SpeedButton_Check: TSpeedButton;
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure SpeedButton_CheckClick(Sender: TObject);
   private
     procedure LogReturn(const S: String);
   public
@@ -40,6 +39,7 @@ function Get_ListModels_Ollama(const ABaseURL: string): string;
 implementation
 
 uses
+  Vcl.Themes,
   Unit_Common,
   IdHTTP, IdURI;  { More Useful for Acessing Local server / no SSL - http://... }
 
@@ -98,21 +98,27 @@ end;
 
 procedure TForm_AliveOllama.FormShow(Sender: TObject);
 begin
+  if TStyleManager.IsCustomStyleActive then
+  begin
+    Memo_Alive.StyleElements := [seBorder];
+    Memo_Alive.Color := StyleServices.GetStyleColor(scWindow);
+  end;
+
   IsCkeckedFlag := False;
-  Memo1.Clear;
+  Memo_Alive.Clear;
 end;
 
 procedure TForm_AliveOllama.LogReturn(const S: String);
 begin
-  Memo1.lines.Add(S);
+  Memo_Alive.lines.Add(S);
 end;
 
-procedure TForm_AliveOllama.Button_AliveClick(Sender: TObject);
+procedure TForm_AliveOllama.SpeedButton_CheckClick(Sender: TObject);
 const
   c_Alive: Array [Boolean] of String = ('Not Alive','Alive On');
   c_Warning = 'Check Ollama is installed and running on local computer.';
 begin
-  Memo1.lines.Clear;
+  Memo_Alive.lines.Clear;
   V_AliveOllamaFlag := False;
 
   try
@@ -126,7 +132,7 @@ begin
       LogReturn(c_Alive[ V_AliveOllamaFlag ]);
 
       if not V_AliveOllamaFlag then
-      Memo1.lines.Add(c_Warning);
+      Memo_Alive.lines.Add(c_Warning);
     finally
       _HTTP.Free;
     end;
@@ -134,7 +140,8 @@ begin
     on E: Exception do
       LogReturn(E.ClassName+ ': '+ E.Message);
   end;
-
+  if Button_OK.CanFocus then
+    Button_OK.SetFocus;
   IsCkeckedFlag := True;
 end;
 

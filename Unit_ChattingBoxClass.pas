@@ -56,22 +56,28 @@ type
     procedure pmn_DeleteClick(Sender: TObject);
     procedure pmn_SelectedColorClick(Sender: TObject);
   private
-    FNewFontSize: Integer;
-    FSelectedDefColor: TColor;
-    FSelectedColor: TColor;
-    FColumnOffset: Integer;
-    FSecondIndent: Integer;
-    procedure SetNewFontSize(const Value: Integer);
-    function GetSelectedColor: TColor;
-    procedure SetSelectedColor(const Value: TColor);
+    FVST_NBodyFontSize: Integer;
+    FVST_NHeaderColor: TColor;
+    FVST_NBodyColor: TColor;
+    FVST_NFooterColor: TColor;
+    FVST_NSelectionColor: TColor;
+    FVST_ColumnOffset: Integer;
+    FVST_SecondIndent: Integer;
+    function GetSelectionColor: TColor;
+    procedure SetVST_NBodyFontSize(const Value: Integer);
+    procedure SetVST_NSelectionColor(const Value: TColor);
+    procedure SetVST_NBodyColor(const Value: TColor);
+    procedure SetVST_NFooterColor(const Value: TColor);
+    procedure SetVST_NHeaderColor(const Value: TColor);
   public
-    procedure InitializeEx(const AFlag: Integer = 0);
+    procedure InitializeEx(const AHeaderColor, ABodyColor, AFooterColor: TColor);
     procedure FinalizeEx(const AFlag: Integer);
     //
-    procedure Add_ChattingMessage(const AUser: string; const AFlag, ALocation: Integer; const APrompt: string);
-    procedure Insert_ChattingMessage(const AIndex: Integer; const AUser: string; const AFlag, ALocation: Integer; const APrompt: string);
+    procedure Add_ChattingMessage(const AUser: string; const ALocation: Integer; const APrompt: string);
+    procedure Insert_ChattingMessage(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
     //
     function Get_NodeText(): string;
+    function Get_NodeTextLocation(var AIndex, ALocation: Integer): string;
     function Get_NodeRequest(): string;
     function Get_SelectedColor(): TColor;
     procedure Do_ScrollToTop(const AFlag: Integer = 0);
@@ -79,32 +85,52 @@ type
     function Do_SaveAllText(const AFile: string): Boolean;
     function Do_DeleteNode(): Boolean;
     procedure Do_RestoreDefaultColor();
+    procedure Do_SetCustomColor(const AFlag: Integer; const ASelColor, AHeaderColor, ABodyColor, AFooterColor: TColor);
+    function Get_CustomColor(var AHeaderColor, ABodyColor, AFooterColor: TColor): TColor;
     //
-    property NewFontSize: Integer   read FNewFontSize      write SetNewFontSize;
-    property SelectedColor: TColor  read GetSelectedColor  write SetSelectedColor;
+    property VST_NBodyFontSize: Integer   read FVST_NBodyFontSize     write SetVST_NBodyFontSize;
+    property VST_NSelectionColor: TColor  read FVST_NSelectionColor   write SetVST_NSelectionColor;
+    property VST_NHeaderColor: TColor     read FVST_NHeaderColor      write SetVST_NHeaderColor;
+    property VST_NBodyColor: TColor       read FVST_NBodyColor        write SetVST_NBodyColor;
+    property VST_NFooterColor: TColor     read FVST_NFooterColor      write SetVST_NFooterColor;
   end;
 
 implementation
 
+uses
+  Unit_Common;
+
 {$R *.dfm}
 
-procedure TFrame_ChattingBoxClass.InitializeEx(const AFlag: Integer);
+procedure TFrame_ChattingBoxClass.InitializeEx(const AHeaderColor, ABodyColor, AFooterColor: TColor);
 begin
-  FSelectedDefColor := clWebDarkSlateBlue;
-  FColumnOffset := 15;
-  FSecondIndent := 35;    // Reference of Indent for Ollama Response ...
+  FVST_NHeaderColor :=    AHeaderColor;
+  FVST_NBodyColor :=      ABodyColor;
+  FVST_NFooterColor :=    AFooterColor;
+  FVST_NSelectionColor := clWebDarkSlateBlue;
+  FVST_NBodyFontSize :=   10;
+  FVST_ColumnOffset :=    15;
+  FVST_SecondIndent :=    35;    // Reference of Indent for Ollama Response ...
+
   with VST_ChattingBox do
   begin
     NodeDataSize := SizeOf(TMessageRec);
-    Header.Columns[0].Width := ClientWidth - FColumnOffset;
-    Images := VirtualImageList1;
+    NodeAlignment := TVTNodeAlignment.naFromTop;
+    Header.Columns[0].Width := ClientWidth - FVST_ColumnOffset;
     TreeOptions.MiscOptions := TreeOptions.MiscOptions + [TVTMiscOption.toVariablenodeHeight];
+    TreeOptions.AutoOptions := TreeOptions.AutoOptions + [TVTAutoOption.toAutoSpanColumns];
+    TreeOptions.SelectionOptions := TreeOptions.SelectionOptions + [TVTSelectionOption.toSelectNextNodeOnRemoval]-[TVTSelectionOption.toMultiSelect];
     TextMargin := 20;
     SelectionCurveRadius := 20;
     {  Custom ... }
     OffsetWRMagin := 35;
     NodeHeightOffSet := 52;
-    SelectedBrushColor := FSelectedDefColor;
+    Images := VirtualImageList1;
+    SelectedBrushColor := FVST_NSelectionColor;  // in TBaseVirtualTree ...
+    Node_HeaderColor :=   FVST_NHeaderColor;
+    Node_BodyColor :=     FVST_NBodyColor;
+    Node_FooterColor :=   FVST_NFooterColor;
+
     OnDrawTitle := VST_DrawTitle;
   end;
 end;
@@ -117,7 +143,7 @@ begin
   end;
 end;
 
-procedure TFrame_ChattingBoxClass.Add_ChattingMessage(const AUser: string; const AFlag, ALocation: Integer; const APrompt: string);
+procedure TFrame_ChattingBoxClass.Add_ChattingMessage(const AUser: string; const ALocation: Integer; const APrompt: string);
 begin
   with VST_ChattingBox do
   begin
@@ -137,7 +163,7 @@ begin
   end;
 end;
 
-procedure TFrame_ChattingBoxClass.Insert_ChattingMessage(const AIndex: Integer; const AUser: string; const AFlag, ALocation: Integer; const APrompt: string);
+procedure TFrame_ChattingBoxClass.Insert_ChattingMessage(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
 begin
   var _bottomflag: Boolean := False;
   with VST_ChattingBox do
@@ -188,7 +214,7 @@ begin
     Color := VST_ChattingBox.SelectedBrushColor;
     if Execute() then
     begin
-      Self.SelectedColor := Color;
+      Self.VST_NSelectionColor := Color;
     end;
   finally
     Free;
@@ -200,24 +226,54 @@ begin
   pmn_Delete.Enabled := VST_ChattingBox.SelectedCount > 0;
 end;
 
-procedure TFrame_ChattingBoxClass.SetNewFontSize(const Value: Integer);
+procedure TFrame_ChattingBoxClass.SetVST_NBodyFontSize(const Value: Integer);
 begin
-  FNewFontSize := Value;
-  VST_ChattingBox.Font.Size := Value;
-  VST_ChattingBox.Invalidate;
+  if FVST_NBodyFontSize <> Value then
+  begin
+    FVST_NBodyFontSize := Value;
+    VST_ChattingBox.Font.Size := Value;
+    VST_ChattingBox.Invalidate;
+  end;
 end;
 
-function TFrame_ChattingBoxClass.GetSelectedColor: TColor;
+function TFrame_ChattingBoxClass.GetSelectionColor: TColor;
 begin
   Result := VST_ChattingBox.SelectedBrushColor;
 end;
 
-procedure TFrame_ChattingBoxClass.SetSelectedColor(const Value: TColor);
+procedure TFrame_ChattingBoxClass.SetVST_NSelectionColor(const Value: TColor);
 begin
-  if FSelectedColor <> Value then
+  if FVST_NSelectionColor <> Value then
   begin
-    FSelectedColor := Value;
+    FVST_NSelectionColor := Value;
     VST_ChattingBox.SelectedBrushColor := Value;
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.SetVST_NBodyColor(const Value: TColor);
+begin
+  if FVST_NBodyColor <> Value then
+  begin
+    FVST_NBodyColor := Value;
+    VST_ChattingBox.Node_BodyColor := Value;
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.SetVST_NFooterColor(const Value: TColor);
+begin
+  if FVST_NFooterColor <> Value then
+  begin
+    FVST_NFooterColor := Value;
+    VST_ChattingBox.Node_FooterColor := Value;
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.SetVST_NHeaderColor(const Value: TColor);
+begin
+  if FVST_NHeaderColor <> Value then
+  begin
+    FVST_NHeaderColor := Value;
+    VST_ChattingBox.Node_HeaderColor := Value;
   end;
 end;
 
@@ -225,7 +281,7 @@ procedure TFrame_ChattingBoxClass.VST_ChattingBoxBeforeCellPaint(Sender: TBaseVi
 begin
   var _Data: PMessageRec := Sender.GetNodeData(Node);
   if _Data^.FTag = 1 then
-    ContentRect.Left := TargetCanvas.ClipRect.Left + FSecondIndent;
+    ContentRect.Left := TargetCanvas.ClipRect.Left + FVST_SecondIndent;
 end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
@@ -253,7 +309,7 @@ end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxInitNode(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
 begin
-  VST_ChattingBox.Header.Columns[0].Width := VST_ChattingBox.ClientWidth - FColumnOffset;
+  VST_ChattingBox.Header.Columns[0].Width := VST_ChattingBox.ClientWidth - FVST_ColumnOffset;
   Include(InitialStates, ivsMultiline);
   Node.States := Node.States + [vsMultiline, vsHeightMeasured];
 end;
@@ -269,7 +325,7 @@ end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxMeasureItem(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: TDimension);
 begin
-  VST_ChattingBox.Header.Columns[0].Width := VST_ChattingBox.ClientWidth - FColumnOffset;
+  VST_ChattingBox.Header.Columns[0].Width := VST_ChattingBox.ClientWidth - FVST_ColumnOffset;
   if Sender.MultiLine[Node] then
   begin
     TargetCanvas.Font := Sender.Font;
@@ -282,7 +338,7 @@ procedure TFrame_ChattingBoxClass.VST_ChattingBoxResize(Sender: TObject);
 begin
   with VST_ChattingBox do
   begin
-    Header.Columns[0].Width := ClientWidth - FColumnOffset;
+    Header.Columns[0].Width := ClientWidth - FVST_ColumnOffset;
     var _node := GetFirstSelected();
     if Assigned(_node) then
     IsVisible[_node] := True;
@@ -300,6 +356,14 @@ begin
     TimeStamp := FormatDateTime('( hh:nn:ss )', _Data^.FTime);
     Tag := _Data^.FTag;
   end;
+end;
+
+function TFrame_ChattingBoxClass.Get_CustomColor(var AHeaderColor, ABodyColor, AFooterColor: TColor): TColor;
+begin
+  Result :=       FVST_NSelectionColor;
+  AHeaderColor := FVST_NHeaderColor;
+  ABodyColor :=   FVST_NBodyColor;
+  AFooterColor := FVST_NFooterColor;
 end;
 
 function TFrame_ChattingBoxClass.Get_NodeRequest: string;
@@ -336,6 +400,25 @@ begin
   end;
 end;
 
+function TFrame_ChattingBoxClass.Get_NodeTextLocation(var AIndex, ALocation: Integer): string;
+begin
+  Result := '';
+  with VST_ChattingBox do
+  begin
+    var _node := GetFirstSelected();
+    if Assigned(_node) then
+    begin
+      AIndex := _node.Index;
+      var _Data: PMessageRec := GetNodeData(_node);
+      if (_Data <> nil) then
+      begin
+        ALocation := _Data^.FTag;
+        Result := _Data^.FCaption;
+      end;
+    end;
+  end;
+end;
+
 function TFrame_ChattingBoxClass.Get_SelectedColor: TColor;
 begin
   Result := VST_ChattingBox.SelectedBrushColor;
@@ -357,8 +440,63 @@ end;
 
 procedure TFrame_ChattingBoxClass.Do_RestoreDefaultColor;
 begin
-  VST_ChattingBox.SelectedBrushColor := FSelectedDefColor;
+  FVST_NSelectionColor := clWebDarkSlateBlue;
+  FVST_NHeaderColor :=    clBtnFace;
+  FVST_NBodyColor :=      clBtnFace;
+  FVST_NFooterColor :=    clSilver;
+  FVST_NBodyFontSize :=   10;
+
+  VC_ReservedColor[0] := FVST_NSelectionColor;
+  VC_ReservedColor[1] := FVST_NHeaderColor;
+  VC_ReservedColor[2] := FVST_NBodyColor;
+  VC_ReservedColor[3] := FVST_NFooterColor;
+
+  with  VST_ChattingBox do
+  begin
+    BeginUpdate;
+    Node_HeaderColor :=   FVST_NHeaderColor;
+    Node_BodyColor :=     FVST_NBodyColor;
+    Node_FooterColor :=   FVST_NFooterColor;
+    Font.Size :=          FVST_NBodyFontSize;
+    SelectedBrushColor := FVST_NSelectionColor;  { > Include Invalidation ... }
+    EndUpdate;
+  end;
 end;
+
+procedure TFrame_ChattingBoxClass.Do_SetCustomColor(const AFlag: Integer; const ASelColor, AHeaderColor, ABodyColor, AFooterColor: TColor);
+begin
+  if AFlag = 1 then
+  begin
+    VC_ReservedColor[0] := FVST_NSelectionColor;
+    VC_ReservedColor[1] := FVST_NHeaderColor;
+    VC_ReservedColor[2] := FVST_NBodyColor;
+    VC_ReservedColor[3] := FVST_NFooterColor;
+  end;
+
+  FVST_NSelectionColor := ASelColor;
+  FVST_NHeaderColor :=    AHeaderColor;
+  FVST_NBodyColor :=      ABodyColor;
+  FVST_NFooterColor :=    AFooterColor;
+
+  if AFlag = 0 then      // for Restore Colors ...
+  begin
+    VC_ReservedColor[0] := FVST_NSelectionColor;
+    VC_ReservedColor[1] := FVST_NHeaderColor;
+    VC_ReservedColor[2] := FVST_NBodyColor;
+    VC_ReservedColor[3] := FVST_NFooterColor;
+  end;
+
+  with  VST_ChattingBox do
+  begin
+    BeginUpdate;
+    Node_HeaderColor :=   FVST_NHeaderColor;
+    Node_BodyColor :=     FVST_NBodyColor;
+    Node_FooterColor :=   FVST_NFooterColor;
+    SelectedBrushColor := FVST_NSelectionColor;  { > Include Invalidation ... }
+    EndUpdate;
+  end;
+end;
+
 
 function TFrame_ChattingBoxClass.Do_SaveAllText(const AFile: string): Boolean;
 begin

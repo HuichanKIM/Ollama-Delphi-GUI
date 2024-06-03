@@ -229,6 +229,8 @@ type
     Action_SelectionColor: TAction;
     SpeedButton_Beep: TSpeedButton;
     SpeedButton_SaveAllLoges: TSpeedButton;
+    Action_CustomFontColor: TAction;
+    Action_BeepEffect: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -303,6 +305,7 @@ type
     procedure pmn_ClearAll1Click(Sender: TObject);
     procedure SpeedButton_BeepClick(Sender: TObject);
     procedure SpeedButton_SaveAllLogesClick(Sender: TObject);
+    procedure Action_BeepEffectExecute(Sender: TObject);
   private
     FFrameWelcome: TFrame_Welcome;
     FModelsList: TStringList;
@@ -338,7 +341,7 @@ type
     procedure Do_AddtoRequest(const AFlag: Integer);
     procedure Do_ListUpTopic(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string);
     procedure Add_ChattingMessage(const AFlag, ALocation: Integer; const APrompt: string);
-    procedure Insert_ChattingTranslate(const AIndex: Integer; const ATranslation: string);
+    procedure Insert_ChattingTranslate(const AIndex, ALocation: Integer; const ATranslation: string);
     procedure SetRequestingFlag(const Value: Boolean);
     procedure SetRequest_Type(const Value: TRequest_Type);
     procedure SetTopicSeleced(const Value: string);
@@ -361,6 +364,7 @@ type
     function GetTTS_Speaking: Boolean;
     function Get_TTSText(): string;
     procedure SetDoneSoundFlag(const Value: Boolean);
+    procedure Return_FocusToVST(const AFlag: Integer = 0);
   public
     procedure Do_ChangeStyleCustom(const AFlag: Integer = 0);
     procedure Do_TTS_Speak(const AFlag: Integer; const ASource: string);
@@ -401,47 +405,38 @@ uses
 {$R *.dfm}
 
 resourcestring
-  R_Aya = '''
-      Aya 23, released by Cohere, is a new family of state-of-the-art, multilingual,
-      generative large language research model (LLM) covering 23 different languages.
-      ''';
-  R_Phi3 = '''
-      Phi-3 Mini is a 3.8B parameters, lightweight, state-of-the-art open model by Microsoft.
-      Trained with the Phi-3 datasets that includes both synthetic data and the filtered publicly available websites data
-      with a focus on high-quality and reasoning dense properties.
-      ''';
-  R_Llama3 = '''
-      Meta Llama 3, a family of models developed by Meta Inc. are new state-of-the-art.
-      Llama 3 instruction-tuned models are fine-tuned and optimized for dialogue/chat use cases and
-      outperform many of the available open-source chat models on common benchmarks.
-      ''';
-  R_Llama2 = '''
-      Llama 2 is released by Meta Platforms, Inc. This model is trained on 2 trillion tokens, and by default supports a context length of 4096.
-      Llama 2 Chat models are fine-tuned on over 1 million human annotations, and are made for chat.
-      ''';
-  R_Gemma = '''
-      Gemma is a family of lightweight, state-of-the-art open models built by Google DeepMind.
-      Updated to version 1.1. It¡¯s inspired by Gemini models at Google.
-      ''';
-  R_Llava = '''
-      LLaVA is a novel end-to-end trained large multimodal model that combines a vision encoder
-      and Vicuna for general-purpose visual and language understanding. Updated to version 1.6.
-      ''';
-  R_Codegemma = '''
-      CodeGemma is a collection of powerful, lightweight models that can perform a variety of coding tasks like fill-in-the-middle code completion,
-      code generation, natural language understanding, mathematical reasoning, and instruction following.
-      ''';
-  R_DolphiMistral = '''
-      The uncensored Dolphin model based on Mistral that excels at coding tasks. Updated to version 2.8.
-      The Dolphin model by Eric Hartford, based on Mistral version 0.2 released in March 2024.
-      ''';
-  R_Mistral = '''
-      Mistral is a 7B parameter model, distributed with the Apache license.
-      It is available in both instruct (instruction following) and text completion.
-      ''';
+  R_Aya =
+      'Aya 23, released by Cohere, is a new family of state-of-the-art, multilingual, '+
+      'generative large language research model (LLM) covering 23 different languages.';
+  R_Phi3 =
+      'Phi-3 Mini is a 3.8B parameters, lightweight, state-of-the-art open model by Microsoft. '+
+      'Trained with the Phi-3 datasets that includes both synthetic data and the filtered publicly available websites data '+
+      'with a focus on high-quality and reasoning dense properties.';
+  R_Llama3 =
+      'Meta Llama 3, a family of models developed by Meta Inc. are new state-of-the-art. '+
+      'Llama 3 instruction-tuned models are fine-tuned and optimized for dialogue/chat use cases and '+
+      'outperform many of the available open-source chat models on common benchmarks.';
+  R_Llama2 =
+      'Llama 2 is released by Meta Platforms, Inc. This model is trained on 2 trillion tokens, and by default supports a context length of 4096. '+
+      'Llama 2 Chat models are fine-tuned on over 1 million human annotations, and are made for chat.';
+  R_Gemma =
+      'Gemma is a family of lightweight, state-of-the-art open models built by Google DeepMind. '+
+      'Updated to version 1.1. It¡¯s inspired by Gemini models at Google.';
+  R_Llava =
+      'LLaVA is a novel end-to-end trained large multimodal model that combines a vision encoder '+
+      'and Vicuna for general-purpose visual and language understanding. Updated to version 1.6.';
+  R_Codegemma =
+      'CodeGemma is a collection of powerful, lightweight models that can perform a variety of coding tasks like fill-in-the-middle code completion, '+
+      'code generation, natural language understanding, mathematical reasoning, and instruction following.';
+  R_DolphiMistral =
+      'The uncensored Dolphin model based on Mistral that excels at coding tasks. Updated to version 2.8. '+
+      'The Dolphin model by Eric Hartford, based on Mistral version 0.2 released in March 2024.';
+  R_Mistral =
+      'Mistral is a 7B parameter model, distributed with the Apache license. '+
+      'It is available in both instruct (instruction following) and text completion.';
 
 const
-  C_CaptionFormat       = 'Model in use - %s / Topic - %s';
+  C_CaptionFormat       = 'Model - %s / Topic - %s';
   C_SectionData         = 'Data';
   C_SectionOptions      = 'Options';
   C_BaseURL_Generate    = 'http://localhost:11434/api/generate';
@@ -528,6 +523,13 @@ begin
   FIniFileName := ExtractFileName(ChangeFileExt(ParamStr(0), '.ini'));
   FCookieFileName := ChangeFileExt(FIniFileName, '.cookie');
 
+      var _skinfile := CV_AppPath+'skincfg.txt';
+      if FileExists(_skinfile) then
+      begin
+        var _skinname := IOUtils_ReadAllText(_skinfile);
+        TStyleManager.TrySetStyle(_skinname);
+      end;
+
   Memo_LogWin.Lines.Clear;
   Memo_LogWin.Lines.Add('* Welcome to Ollama GUI 2024 ');
   Memo_LogWin.Lines.Add('* Start at : '+ FormatDateTime('YYYY.MM.DD HH:NN:SS', Now));
@@ -594,9 +596,14 @@ begin
   FRequest_Type := TRequest_Type.ort_Chat;
   FTranlateMode := TTranlateMode.otm_MessageView;
   Gauge_MemUsage.Progress := 0;
-  // ------------------------------------------------------------------------ //
-  Frame_ChattingBox.InitializeEx();
-  // ------------------------------------------------------------------------ //
+
+  VC_ReservedColor[0] := clWebDarkSlateBlue;
+  VC_ReservedColor[1] := clBtnFace;
+  VC_ReservedColor[2] := clBtnFace;
+  VC_ReservedColor[3] := clSilver;
+  // ----------------------------------------------------------------------------- //
+  Frame_ChattingBox.InitializeEx(VC_ReservedColor[1], VC_ReservedColor[2] , VC_ReservedColor[3] );
+  // ----------------------------------------------------------------------------- //
   FImage_DropDown := TImageDropDown<TJPEGImage>.Create(Image_Llva, Panel_ImageLlavaBase);
 
   FModel_Selected := 'phi3';
@@ -744,22 +751,25 @@ begin
   var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
   with _IniFile do
   try
-    FLastRequest :=                  ReadString(C_SectionData,      'LastRequest',         'Who are you?');
-    V_Username :=                    ReadString(C_SectionData,      'Nickname',            'User');
-    V_LoadModelIndex :=              ReadInteger(C_SectionData,     'Loaded_Model',         0);
-    Action_Options.Tag :=            ReadInteger(C_SectionOptions,  'Action_Options_Tag',   1);
-    ComboBox_TtsSource.ItemIndex :=  ReadInteger(C_SectionOptions,  'TTS_Source',           0);
-    ComboBox_TtsTarget.ItemIndex :=  ReadInteger(C_SectionOptions,  'TTS_Target',           _indexid);
+    FLastRequest :=                  ReadString(C_SectionData,      'LastRequest',            'Who are you?');
+    V_Username :=                    ReadString(C_SectionData,      'Nickname',               'User');
+    V_LoadModelIndex :=              ReadInteger(C_SectionData,     'Loaded_Model',            0);
+    Action_Options.Tag :=            ReadInteger(C_SectionOptions,  'Action_Options_Tag',      1);
+    ComboBox_TtsSource.ItemIndex :=  ReadInteger(C_SectionOptions,  'TTS_Source',              0);
+    ComboBox_TtsTarget.ItemIndex :=  ReadInteger(C_SectionOptions,  'TTS_Target',              _indexid);
     CheckBox_AutoTranslation.Checked :=
-                                     ReadBool(C_SectionOptions,     'Auto_Trans',           False);
-    FTTS_EngineName :=               ReadString(C_SectionOptions,   'TTS_Engine',           '');
-    TrackBar_Volume.Position :=      ReadInteger(C_SectionOptions,  'TTS_Volume',           80);
-    CheckBox_SaveOnCLose.Checked :=  ReadBool(C_SectionOptions,     'Save_Logs',            False);
-    DoneSoundFlag :=                 ReadBool(C_SectionOptions,     'Done_Beep',            False);
-    var _color: Integer :=           ReadInteger(C_SectionOptions,  'Selected_Color',       clWebDarkSlateBlue);
+                                     ReadBool(C_SectionOptions,     'Auto_Trans',              False);
+    FTTS_EngineName :=               ReadString(C_SectionOptions,   'TTS_Engine',              '');
+    TrackBar_Volume.Position :=      ReadInteger(C_SectionOptions,  'TTS_Volume',              80);
+    CheckBox_SaveOnCLose.Checked :=  ReadBool(C_SectionOptions,     'Save_Logs',               False);
+    DoneSoundFlag :=                 ReadBool(C_SectionOptions,     'Done_Beep',               True);
+    var _color0: Integer :=          ReadInteger(C_SectionOptions,  'Node_Selected_Color',     clWebDarkSlateBlue);
+    var _color1: Integer :=          ReadInteger(C_SectionOptions,  'Node_HeaderFont_Color',   clBtnFace);
+    var _color2: Integer :=          ReadInteger(C_SectionOptions,  'Node_BodyFont_Color',     clBtnFace);
+    var _color3: Integer :=          ReadInteger(C_SectionOptions,  'Node_FooterFont_Color',   clSilver);
 
     Panel_Options.Visible := Action_Options.Tag = 1;
-    Frame_ChattingBox.SelectedColor := TColor(_color);
+    Frame_ChattingBox.Do_SetCustomColor(0, _color0, _color1, _color2, _color3);
   finally
     Free;
   end;
@@ -774,18 +784,21 @@ begin
   var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
   with _IniFile do
   try
-    WriteString(C_SectionData,        'LastRequest',          FLastRequest);
-    WriteString(C_SectionData,        'Nickname',             V_Username);
-    WriteInteger(C_SectionData,       'Loaded_Model',         V_LoadModelIndex);
-    WriteInteger(C_SectionOptions,    'Action_Options_Tag',   Action_Options.Tag);
-    WriteInteger(C_SectionOptions,    'TTS_Source',           ComboBox_TtsSource.ItemIndex);
-    WriteInteger(C_SectionOptions,    'TTS_Target',           ComboBox_TtsTarget.ItemIndex);
-    WriteBool(C_SectionOptions,       'Auto_Trans',           CheckBox_AutoTranslation.Checked);
-    WriteString(C_SectionOptions,     'TTS_Engine',           FTTS_EngineName);
-    WriteInteger(C_SectionOptions,    'TTS_Volume',           TrackBar_Volume.Position);
-    WriteBool(C_SectionOptions,       'Save_Logs',            CheckBox_SaveOnCLose.Checked);
-    WriteBool(C_SectionOptions,       'Done_Beep',            FDoneSoundFlag);
-    WriteInteger(C_SectionOptions,    'Selected_Color',       Frame_ChattingBox.SelectedColor);
+    WriteString(C_SectionData,        'LastRequest',             FLastRequest);
+    WriteString(C_SectionData,        'Nickname',                V_Username);
+    WriteInteger(C_SectionData,       'Loaded_Model',            V_LoadModelIndex);
+    WriteInteger(C_SectionOptions,    'Action_Options_Tag',      Action_Options.Tag);
+    WriteInteger(C_SectionOptions,    'TTS_Source',              ComboBox_TtsSource.ItemIndex);
+    WriteInteger(C_SectionOptions,    'TTS_Target',              ComboBox_TtsTarget.ItemIndex);
+    WriteBool(C_SectionOptions,       'Auto_Trans',              CheckBox_AutoTranslation.Checked);
+    WriteString(C_SectionOptions,     'TTS_Engine',              FTTS_EngineName);
+    WriteInteger(C_SectionOptions,    'TTS_Volume',              TrackBar_Volume.Position);
+    WriteBool(C_SectionOptions,       'Save_Logs',               CheckBox_SaveOnCLose.Checked);
+    WriteBool(C_SectionOptions,       'Done_Beep',               FDoneSoundFlag);
+    WriteInteger(C_SectionOptions,    'Node_Selected_Color',     Frame_ChattingBox.VST_NSelectionColor);
+    WriteInteger(C_SectionOptions,    'Node_HeaderFont_Color',   Frame_ChattingBox.VST_NHeaderColor);
+    WriteInteger(C_SectionOptions,    'Node_BodyFont_Color',     Frame_ChattingBox.VST_NBodyColor);
+    WriteInteger(C_SectionOptions,    'Node_FooterFont_Color',   Frame_ChattingBox.VST_NFooterColor);
   finally
     UpdateFile;
     Free;
@@ -843,14 +856,15 @@ begin
   Action_Pop_SaveAllText.Enabled :=     _visflag_0;
   Action_TTS.Enabled :=                 _visflag_0 and (Frame_ChattingBox.VST_ChattingBox.SelectedCount > 0);
   Action_Options.Enabled :=             _visflag_2;
-  Action_SelectionColor.Enabled :=      _visflag_2;
+  Action_CustomFontColor.Enabled :=     _visflag_2;
   Action_Abort.Enabled :=               _visflag_2 and V_AliveOllamaFlag;
+  Action_SelectionColor.Enabled :=      _visflag_3;
   Action_TransMessagePush.Enabled :=    _visflag_3;
   Action_TransMessage.Enabled :=        _visflag_3;
   Action_TransPromptPush.Enabled :=     _visflag_3;
   Action_ClearChatting.Enabled :=       _visflag_3;
   Panel_ChattingButtons.Enabled :=      _visflag_3;
-  Action_DefaultRefresh.Enabled :=      _visflag_4;
+  Action_DefaultRefresh.Enabled :=      _visflag_3;
   Action_TransPrompt.Enabled :=         _visflag_4;
   Action_StartRequest.Enabled :=        _visflag_5;
   Action_SendRequest.Enabled :=         _visflag_5;
@@ -874,6 +888,11 @@ begin
   end;
 end;
 
+procedure TForm_RestOllama.Action_BeepEffectExecute(Sender: TObject);
+begin
+  DoneSoundFlag := not FDoneSoundFlag;
+end;
+
 procedure TForm_RestOllama.Action_ChattingExecute(Sender: TObject);
 begin
   try
@@ -881,8 +900,7 @@ begin
     PageControl_Chatting.ActivePage := Tabsheet_Chatting;
     PageControl_ChattingChange(Self);
 
-    if Frame_ChattingBox.VST_ChattingBox.CanFocus then
-      Frame_ChattingBox.VST_ChattingBox.SetFocus;
+    Return_FocusToVST();
   finally
   end;
 end;
@@ -902,7 +920,10 @@ begin
   if not RequestingFlag then
     Common_RestSettings();
 
+  TrackBar_GlobalFontSize.OnChange := nil;
   TrackBar_GlobalFontSize.Position := 10;
+  Label_Font_Size.Caption := '10';
+  TrackBar_GlobalFontSize.OnChange := TrackBar_GlobalFontSizeChange;
   Frame_ChattingBox.Do_RestoreDefaultColor;
   Frame_ChattingBox.VST_ChattingBox.Update;
 end;
@@ -951,17 +972,17 @@ end;
 procedure TForm_RestOllama.Action_InetAliveExecute(Sender: TObject);
 begin
   var _requests: string := '';
-  var _pos: TPoint := Panel_Setting.ClientToScreen(Point(0, Panel_Setting.Height));
+  var _pos: TPoint := Panel_Setting.ClientToScreen(Point(0, 0));
   with TForm_AliveOllama.Create(nil) do
   try
-    Left := _pos.X;
+    Left := _pos.X - Width;
     Top :=  _pos.Y;
     ShowModal;
     if IsCkeckedFlag then
     begin
       Form_RestOllama.Panel_ChatMessageBox.Enabled := V_AliveOllamaFlag;
-      Form_RestOllama.Action_StartRequest.Enabled := V_AliveOllamaFlag;
-      Form_RestOllama.StatusBar1.Panels[2].Text := C_OllamaAlive[V_AliveOllamaFlag];
+      Form_RestOllama.Action_StartRequest.Enabled :=  V_AliveOllamaFlag;
+      Form_RestOllama.StatusBar1.Panels[2].Text :=    C_OllamaAlive[V_AliveOllamaFlag];
     end;
   finally
     Free;
@@ -1013,16 +1034,24 @@ end;
 
 procedure TForm_RestOllama.Action_SelectionColorExecute(Sender: TObject);
 begin
-  with TColorDialog.Create(Self) do
+  with TForm_About.Create(Self) do
+  try
+    Show_Flag := 3;
+    ShowModal;
+  finally
+    Free;
+  end;
+  {
+  with ColorDialog_Chat do
   try
     Color := Frame_ChattingBox.VST_ChattingBox.SelectedBrushColor;
     if Execute() then
     begin
-      Frame_ChattingBox.SelectedColor := Color;
+      Frame_ChattingBox.VST_NSelectionColor := Color;
     end;
   finally
-    Free;
   end;
+  }
 end;
 
 procedure TForm_RestOllama.Action_SendRequestExecute(Sender: TObject);
@@ -1063,6 +1092,7 @@ begin
       begin
         _requests := Memo_Request.Lines.Text;
         _requests := StringReplace(_requests, C_CRLF, ' ', [rfReplaceAll]);
+        _requests := Get_ReplaceSpecialChar2(_requests);
       end
     else
       Exit;
@@ -1080,11 +1110,17 @@ end;
 procedure TForm_RestOllama.Add_ChattingMessage(const AFlag, ALocation: Integer; const APrompt: string);
 begin
   var _user: string := V_Username;
-  if AFlag = 1 then _user := 'Ollama [ ' + V_MyModel+' ]' else
-  if AFlag = 2 then _user := 'Ollama - System' else
-  if AFlag = 3 then _user := 'Ollama [ ' + V_MyModel+' ] ( Translated )';
+  case AFlag of
+    0: _user := V_Username + '  > Ollama';                     // user
+    1: _user := V_Username + '  > '+V_MyModel;                 // user
+    2:; // reserved ...                                        // user
+    3: _user := 'Ollama [ ' + V_MyModel+' ]';                  // ollama
+    4: _user := 'Ollama - System';                             // ollama
+    5: _user := 'Ollama [ ' + V_MyModel+' ] ( Translated )';   // ollama
+    6:; // reserved ...                                        // ollama
+  end;
 
-  Frame_ChattingBox.Add_ChattingMessage(_user, AFlag, ALocation, APrompt);
+  Frame_ChattingBox.Add_ChattingMessage(_user, ALocation, APrompt);
 
   if CheckBox_AutoTranslation.Checked and (ALocation = 1) then
   begin
@@ -1146,7 +1182,7 @@ procedure TForm_RestOllama.TrackBar_GlobalFontSizeChange(Sender: TObject);
 begin
   with Frame_ChattingBox do
   begin
-    NewFontSize := TrackBar_GlobalFontSize.Position;
+    VST_NBodyFontSize := TrackBar_GlobalFontSize.Position;
   end;
   Label_Font_Size.Caption := TrackBar_GlobalFontSize.Position.ToString;
 end;
@@ -1324,6 +1360,14 @@ begin
     Edit_ReqContent.Text := FLastRequest;
 
   Label_Description.Caption := Get_ModelDesc(Model_Selected);
+  Return_FocusToVST();
+end;
+
+procedure TForm_RestOllama.Return_FocusToVST(const AFlag: Integer);
+begin
+  if FInitialized and (PageControl_Chatting.ActivePage = Tabsheet_Chatting) and
+    Frame_ChattingBox.VST_ChattingBox.CanFocus then
+  Frame_ChattingBox.VST_ChattingBox.SetFocus;
 end;
 
 procedure TForm_RestOllama.Common_RestSettings(const Aflag: Integer);
@@ -1402,6 +1446,7 @@ begin
   Common_RestSettings(V_DummyFlag);
 
   V_MyContentPrompt := Trim(Edit_ReqContent.Text);
+
   if (Aflag = 1) and (APrompt <> '') then
     V_MyContentPrompt := APrompt;
 
@@ -1416,6 +1461,8 @@ begin
     ShowMessage('Empty "Model" is not allowed.');
     Exit;
   end;
+
+  V_MyContentPrompt := Get_ReplaceSpecialChar2(V_MyContentPrompt);
 
   RequestingFlag := True;
   V_BaseURL := V_BaseURLarray[Request_Type];
@@ -1493,7 +1540,7 @@ begin
   var _StatCode := HttpRest_Ollama.RestRequest(THttpRequest.httpPOST, V_BaseURL, True, _RawParams);
   // ------------------------------------------------------------------------------------------ //
   if V_DummyFlag > 0 then
-    Add_ChattingMessage(0, 0, V_MyContentPrompt);
+    Add_ChattingMessage(1, 0, V_MyContentPrompt);
 
   Push_LogWin(1, 'Async REST request started');
 end;
@@ -1501,9 +1548,9 @@ end;
 procedure TForm_RestOllama.Do_DisplayJson(const RespStr: string);
 begin
   var _Responses: String := Get_DisplayJson(RadioGroup_PromptType.ItemIndex, V_LoadModelFlag, RespStr);
-  var _jsonflag: Integer := 1;
+  var _jsonflag: Integer := 3;
   if V_LoadModelFlag then
-    _jsonflag := 2;
+    _jsonflag := 4;
   // ------------------------------------------------------------------------ //
   Add_ChattingMessage(_jsonflag, 1, _Responses);
   // ------------------------------------------------------------------------ //
@@ -1533,7 +1580,7 @@ begin
   var _ParseJson: string := Get_DisplayJson_Models(_parsingsrc, _index, FModelsList);
   var _Responses: string := _ParseJson+C_CRLF+'Models Count : '+ _index.ToString;
   // ------------------------------------------------------------------------ //
-  Add_ChattingMessage(2, 1, _Responses);
+  Add_ChattingMessage(4, 1, _Responses);
   // ------------------------------------------------------------------------ //
 
   if FModelsList.Count > 0 then
@@ -1684,7 +1731,7 @@ begin
           if V_LoadModelFlag then
             Add_ChattingMessage(0, 0, 'Request to load model : [ '+V_MyModel + ' ]')
           else
-            Add_ChattingMessage(0, 0, V_MyContentPrompt);
+            Add_ChattingMessage(1, 0, V_MyContentPrompt);
         end;
         { look for Json response --------------------------------------------------- }
         if ((Pos('{', HttpRest_Ollama.ResponseRaw) > 0) or (Pos('json', HttpRest_Ollama.ContentType) > 0)) then
@@ -1740,7 +1787,8 @@ end;
 
 procedure TForm_RestOllama.PageControl_ChattingResize(Sender: TObject);
 begin
-  SkAnimatedImage_ChatProcess.Left := (PageControl_Chatting.Width - SkAnimatedImage_ChatProcess.Width) div 2;
+  SkAnimatedImage_ChatProcess.Left := (Tabsheet_Chatting.Width -  SkAnimatedImage_ChatProcess.Width) div 2;
+  SkAnimatedImage_ChatProcess.Top  := (Tabsheet_Chatting.Height - SkAnimatedImage_ChatProcess.Height);
   if SkAnimatedImage_Chat.Visible then
   begin
     SkAnimatedImage_Chat.Left := (PageControl_Chatting.Width -  SkAnimatedImage_Chat.Width) div 2;
@@ -1897,10 +1945,10 @@ begin
   Do_TransLate(_tmode, 0, '');
 end;
 
-procedure TForm_RestOllama.Insert_ChattingTranslate(const AIndex: Integer; const ATranslation: string);
+procedure TForm_RestOllama.Insert_ChattingTranslate(const AIndex, ALocation: Integer; const ATranslation: string);
 begin
-  var _user: string := 'Ollama [ ' + V_MyModel+' ] ( Translated )';
-  Frame_ChattingBox.Insert_ChattingMessage(AIndex, _user, 1, 1, ATranslation) ;
+  var _user: string := '* Translated (Google)';
+  Frame_ChattingBox.Insert_ChattingMessage(AIndex, _user, ALocation, ATranslation) ;
 end;
 
 procedure TForm_RestOllama.Do_TransLate(const AMode: TTranlateMode; const ACodepage: Integer; const ASrc: string);
@@ -1908,6 +1956,7 @@ begin
   var _ItemStr: string := '';
   var _request: string := '';
   var _insertindex: Integer := -1;
+  var _location: Integer := 1;
   var _addflag: Boolean := False;
   if (AMode = TTranlateMode.otm_PromptView) or (AMode = TTranlateMode.otm_PromptPush) then
     begin
@@ -1916,7 +1965,7 @@ begin
     end
   else
     begin
-      _ItemStr := Frame_ChattingBox.Get_NodeText;
+      _ItemStr := Frame_ChattingBox.Get_NodeTextLocation(_insertindex, _location);
       if _ItemStr <> '' then
       begin
         _request := Frame_ChattingBox.Get_NodeRequest;
@@ -1940,15 +1989,16 @@ begin
 
   if _ItemStr <> '' then
   begin
-    if AMode = TTranlateMode.otm_MessagePush then
+    _ItemStr := Get_ReplaceSpecialChar(_ItemStr);
+    if AMode = TTranlateMode.otm_MessagePush then    // Deprecating ...
       begin
         var _transresult := Get_GoogleTranslatorEx(0, _codefrom, _codeto, _ItemStr);
         if _addflag then
-          Insert_ChattingTranslate(_insertindex, _transresult)
+          Insert_ChattingTranslate(_insertindex, _location, _transresult)   // ???
         else
           ShowMessage(_transresult);
       end else
-    if AMode = TTranlateMode.otm_PromptPush then
+    if AMode = TTranlateMode.otm_PromptPush then     // Deprecating ...
       begin
         var _transresult := Get_GoogleTranslatorEx(0, _codefrom, _codeto, _ItemStr);
         Edit_ReqContent.Text := _transresult;
@@ -1957,7 +2007,7 @@ begin
       with TForm_Translator.Create(Self) do
       try
         Request := _request;
-        PushFlag := True;
+        PushFlag := _addflag;//  Allowed to response node ...
         Get_GoogleTranslator(Ord(AMode), _codefrom, _codeto, _ItemStr);
         ShowModal;
         if ModalResult = mrOk then
@@ -1969,7 +2019,9 @@ begin
             end
           else
             if _addflag and CheckBox_Pushtochatbox.Checked then
-              Insert_ChattingTranslate(_insertindex, TransResult);   // ------ //
+            begin
+              Insert_ChattingTranslate(_insertindex, _location, TransResult);   // ------ //
+            end;
         end;
       finally
         Free;
@@ -2247,15 +2299,17 @@ end;
 procedure TForm_RestOllama.ComboBox_TTSEngineChange(Sender: TObject);
 begin
   if TTS_Speaking then
-  Exit;
+  begin
+    Return_FocusToVST();
+    Exit;
+  end;
 
   var _index: Integer := ComboBox_TTSEngine.ItemIndex;
   var _SOToken: ISpeechObjectToken := ISpeechObjectToken(Pointer(ComboBox_TTSEngine.Items.Objects[_index]));
   FSpVoice.Voice := _SOToken;
   FTTS_EngineName := ComboBox_TTSEngine.Items.Strings[_index];
-  if FInitialized and (PageControl_Chatting.ActivePage = Tabsheet_Chatting) and
-     Frame_ChattingBox.VST_ChattingBox.CanFocus then
-  Frame_ChattingBox.VST_ChattingBox.SetFocus;
+
+  Return_FocusToVST();
 end;
 
 procedure TForm_RestOllama.Do_TTS_Speak(const AFlag: Integer; const ASource: string);
@@ -2431,7 +2485,7 @@ begin
       StatusBar1.Panels[1].Text := 'et '+  _elapstr;
       StatusBar1.Panels[2].Text := ' * Stand by ...';
       // -------------------------------------------------------------------- //
-      Add_ChattingMessage(2, 1, _responses);
+      Add_ChattingMessage(4, 1, _responses);
       // -------------------------------------------------------------------- //
       RequestingFlag := False;
       Push_LogWin(1);

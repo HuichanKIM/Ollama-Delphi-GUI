@@ -1,20 +1,20 @@
-object Form_About: TForm_About
+object Form_About2: TForm_About2
   Left = 0
   Top = 0
+  ActiveControl = Button_OK
   BorderStyle = bsDialog
-  Caption = 'About / Color Setting'
+  Caption = 'About / Skin / Colors'
   ClientHeight = 435
   ClientWidth = 386
-  Color = clBtnFace
+  Color = clWindow
+  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  FormStyle = fsStayOnTop
   KeyPreview = True
   Position = poMainFormCenter
-  RoundedCorners = rcOn
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -33,23 +33,8 @@ object Form_About: TForm_About
     Font.Name = 'Segoe UI'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitLeft = -20
     ExplicitWidth = 313
-  end
-  object Label_GitHub: TLabel
-    Left = 70
-    Top = 25
-    Width = 279
-    Height = 15
-    Cursor = crHandPoint
-    Caption = 'https://github.com/HuichanKIM/Ollama-Delphi-GUI'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clSilver
-    Font.Height = -12
-    Font.Name = 'Segoe UI'
-    Font.Style = [fsUnderline]
-    ParentFont = False
-    StyleElements = [seClient, seBorder]
-    OnClick = Label_GitHubClick
   end
   object Label1: TLabel
     Left = 17
@@ -65,25 +50,20 @@ object Form_About: TForm_About
     ParentFont = False
     StyleElements = [seClient, seBorder]
   end
-  object Panel1: TPanel
-    AlignWithMargins = True
-    Left = 3
-    Top = 396
-    Width = 380
-    Height = 36
-    Align = alBottom
-    BevelOuter = bvNone
-    TabOrder = 0
-    ExplicitLeft = -2
-    object Button_OK: TButton
-      Left = 301
-      Top = 6
-      Width = 59
-      Height = 25
-      Caption = 'Close'
-      ModalResult = 1
-      TabOrder = 0
-    end
+  object Label_GitHub: TLabel
+    Left = 70
+    Top = 25
+    Width = 279
+    Height = 15
+    Cursor = crHandPoint
+    Caption = 'https://github.com/HuichanKIM/Ollama-Delphi-GUI'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clSilver
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsUnderline]
+    ParentFont = False
+    StyleElements = [seClient, seBorder]
   end
   object Panel3: TPanel
     AlignWithMargins = True
@@ -94,7 +74,7 @@ object Form_About: TForm_About
     Margins.Top = 30
     Align = alClient
     BevelOuter = bvNone
-    TabOrder = 1
+    TabOrder = 0
     ExplicitTop = 62
     ExplicitHeight = 328
     object Image1: TImage
@@ -675,7 +655,6 @@ object Form_About: TForm_About
         Font.Style = [fsUnderline]
         ParentFont = False
         StyleElements = [seClient, seBorder]
-        OnClick = Label_OllamaWebClick
       end
       object Label7: TLabel
         Left = 13
@@ -705,7 +684,6 @@ object Form_About: TForm_About
         Font.Style = [fsUnderline]
         ParentFont = False
         StyleElements = [seClient, seBorder]
-        OnClick = Label_OllamaGitHubClick
       end
     end
     object PageControl1: TPageControl
@@ -713,7 +691,7 @@ object Form_About: TForm_About
       Top = 87
       Width = 360
       Height = 250
-      ActivePage = TabSheet1
+      ActivePage = TabSheet_Style
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
       Font.Height = -12
@@ -764,7 +742,6 @@ object Form_About: TForm_About
           ParentShowHint = False
           ShowHint = True
           StyleElements = [seClient, seBorder]
-          OnClick = Label_SystemInfoClick
           ExplicitLeft = 104
           ExplicitTop = 72
           ExplicitWidth = 40
@@ -821,7 +798,6 @@ object Form_About: TForm_About
           ParentFont = False
           TabOrder = 0
           ViewStyle = vsReport
-          ExplicitHeight = 207
         end
       end
       object TabSheet_Style: TTabSheet
@@ -897,7 +873,6 @@ object Form_About: TForm_About
             Height = 22
             Caption = 'Set Color'
             Flat = True
-            OnClick = SpeedButton_HeaderClick
           end
           object SpeedButton_Body: TSpeedButton
             Tag = 2
@@ -907,7 +882,6 @@ object Form_About: TForm_About
             Height = 22
             Caption = 'Set Color'
             Flat = True
-            OnClick = SpeedButton_HeaderClick
           end
           object SpeedButton_Footer: TSpeedButton
             Tag = 3
@@ -917,7 +891,6 @@ object Form_About: TForm_About
             Height = 22
             Caption = 'Set Color'
             Flat = True
-            OnClick = SpeedButton_HeaderClick
           end
           object Label8: TLabel
             Left = 16
@@ -940,7 +913,6 @@ object Form_About: TForm_About
             Height = 22
             Caption = 'Set Color'
             Flat = True
-            OnClick = SpeedButton_HeaderClick
           end
           object Shape_Header: TShape
             Left = 163
@@ -1006,7 +978,6 @@ object Form_About: TForm_About
           Height = 23
           Caption = 'Apply'
           TabOrder = 2
-          OnClick = Button_ApplyStyleClick
         end
         object Button_ApplyColors: TButton
           Left = 287
@@ -1015,7 +986,6 @@ object Form_About: TForm_About
           Height = 25
           Caption = 'Apply'
           TabOrder = 3
-          OnClick = Button_ApplyColorsClick
         end
         object Button_CancelColors: TButton
           Left = 220
@@ -1025,12 +995,31 @@ object Form_About: TForm_About
           Caption = 'Cancel'
           TabOrder = 4
           StyleElements = [seClient, seBorder]
-          OnClick = Button_CancelColorsClick
         end
       end
     end
   end
-  object ColorDialog_Skin: TColorDialog
+  object Panel1: TPanel
+    AlignWithMargins = True
+    Left = 3
+    Top = 396
+    Width = 380
+    Height = 36
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 1
+    ExplicitLeft = -2
+    object Button_OK: TButton
+      Left = 301
+      Top = 6
+      Width = 59
+      Height = 25
+      Caption = 'Close'
+      ModalResult = 1
+      TabOrder = 0
+    end
+  end
+  object ColorDialog1: TColorDialog
     Ctl3D = False
     Options = [cdFullOpen]
     Left = 257
