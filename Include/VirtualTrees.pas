@@ -261,6 +261,9 @@ type
     FOnDrawTitle: TVTDrawTitleEvent;
     FOffsetWRMagin: Integer;
     FNodeHeightOffSet: Integer;
+    FNode_HeaderColor: TColor;
+    FNode_BodyColor: TColor;
+    FNode_FooterColor: TColor;
     /// Returns True if the property DefaultText has a value that differs from the default value, False otherwise.
     function IsDefaultTextStored(): Boolean;
     function GetImageText(Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex): string;
@@ -275,6 +278,9 @@ type
     procedure SetText(Node: PVirtualNode; Column: TColumnIndex; const Value: string);
     procedure WMSetFont(var Msg: TWMSetFont); message WM_SETFONT;
     procedure GetDataFromGrid(const AStrings : TStringList; const IncludeHeading : Boolean = True);
+    procedure SetNode_BodyColor(const Value: TColor);
+    procedure SetNode_FooterColor(const Value: TColor);
+    procedure SetNode_HeaderColor(const Value: TColor);
   protected
     /// <summary>Contains the name of the string that should be restored as selection</summary>
     /// <seealso cref="TVTSelectionOption.toRestoreSelection">
@@ -323,6 +329,8 @@ type
     property OnMeasureTextWidth: TVTMeasureTextEvent read FOnMeasureTextWidth write FOnMeasureTextWidth;
     property OnMeasureTextHeight: TVTMeasureTextEvent read FOnMeasureTextHeight write FOnMeasureTextHeight;
     property OnDrawText: TVTDrawTextEvent read FOnDrawText write FOnDrawText;
+    // Modified by ichin 2024-06-03 월 오전 12:25:19
+    property OnDrawTitle: TVTDrawTitleEvent read FOnDrawTitle write FOnDrawTitle;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy(); override;
@@ -347,9 +355,11 @@ type
     property StaticText[Node: PVirtualNode; Column: TColumnIndex]: string read GetStaticText;
     property Text[Node: PVirtualNode; Column: TColumnIndex]: string read GetText write SetText;
     // Modified by ichin 2024-05-30 목 오전 4:59:53
-    property OffsetWRMagin: Integer read FOffsetWRMagin write FOffsetWRMagin;
-    property OnDrawTitle: TVTDrawTitleEvent read FOnDrawTitle write FOnDrawTitle;
-    property NodeHeightOffSet: Integer read FNodeHeightOffSet write FNodeHeightOffSet;
+    property OffsetWRMagin: Integer    read FOffsetWRMagin     write FOffsetWRMagin;
+    property NodeHeightOffSet: Integer read FNodeHeightOffSet  write FNodeHeightOffSet;
+    property Node_HeaderColor: TColor  read FNode_HeaderColor  write SetNode_HeaderColor;
+    property Node_BodyColor: TColor    read FNode_BodyColor    write SetNode_BodyColor;
+    property Node_FooterColor: TColor  read FNode_FooterColor  write SetNode_FooterColor;
   end;
 
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
@@ -366,6 +376,10 @@ type
     property CheckImageKind; // should no more be published to make #622 fix working
     // Modified by ichin 2024-05-30 목 오후 9:07:44
     property SelectedBrushColor;
+    property Node_HeaderColor;
+    property Node_BodyColor;
+    property Node_FooterColor;
+    property OnDrawTitle;
   published
     property AccessibleName;
     property Action;
@@ -654,6 +668,10 @@ begin
   FDefaultText := cDefaultText;
   FInternalDataOffset := AllocateInternalDataArea(SizeOf(Cardinal));
   // Modified by ichin 2024-05-30 목 오전 5:00:59
+  SelectedBrushColor := clWebDarkSlateBlue;
+  FNode_HeaderColor := clBtnFace;
+  FNode_BodyColor := clBtnFace;
+  FNode_FooterColor := clSilver;
   FOffsetWRMagin := 35;
   FNodeHeightOffSet := 50;
 end;
@@ -1014,6 +1032,33 @@ begin
     FDefaultText := Value;
     if not (csLoading in ComponentState) then
       Invalidate;
+  end;
+end;
+
+procedure TCustomVirtualStringTree.SetNode_BodyColor(const Value: TColor);
+begin
+  if FNode_BodyColor <> Value then
+  begin
+    FNode_BodyColor := Value;
+    Invalidate;
+  end;
+end;
+
+procedure TCustomVirtualStringTree.SetNode_FooterColor(const Value: TColor);
+begin
+  if FNode_FooterColor <> Value then
+  begin
+    FNode_FooterColor := Value;
+    Invalidate;
+  end;
+end;
+
+procedure TCustomVirtualStringTree.SetNode_HeaderColor(const Value: TColor);
+begin
+  if FNode_HeaderColor <> Value then
+  begin
+    FNode_HeaderColor := Value;
+    Invalidate;
   end;
 end;
 
@@ -1416,18 +1461,20 @@ begin
       Images.Draw(PaintInfo.Canvas, CellRect.Left-13, 6, _Tag);  // Image Size = 16 x 16
       { Header - Title / User / Ollama }
       var _headrect: TRect := Rect(CellRect.Left+12, 5, CellRect.Right, 25);
+      PaintInfo.Canvas.Font.Color := FNode_HeaderColor;
       PaintInfo.Canvas.Font.Size := 10;  { Fix ... }
       PaintInfo.Canvas.Font.Style := [TFontStyle.fsBold];
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(_Title), Length(_Title), _headrect, DrawFormat);
       { Body Content / Message }
       var _bodyrect: TRect := Rect(CellRect.Left, _headrect.Bottom+5, CellRect.Right, CellRect.Bottom+5);
+      PaintInfo.Canvas.Font.Color := FNode_BodyColor;
       PaintInfo.Canvas.Font.Size := Self.Font.Size;
       PaintInfo.Canvas.Font.Style := [];
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(lText), Length(lText), _bodyrect, DrawFormat);
       { Footer - TimeStamp }
       var _footrect: TRect := Rect(CellRect.Right - 50, _bodyrect.Bottom+5, CellRect.Right+12, _bodyrect.Bottom+17);
+      PaintInfo.Canvas.Font.Color := FNode_FooterColor;
       PaintInfo.Canvas.Font.Size := 7;   { Fix ... }
-      PaintInfo.Canvas.Font.Color := clSilver;
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(_TimeStamp), Length(_TimeStamp), _footrect, DrawFormat or DT_RIGHT);
     end;
 end;
