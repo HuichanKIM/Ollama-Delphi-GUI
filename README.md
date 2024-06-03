@@ -20,7 +20,7 @@
  3. Delphi Athens 12.0. over
 
 
-### 3rd party Library (for Delphi developers) ###
+### 3rd party Library (Open source for Delphi developers) ###
 
 - SVGIconImageList <https://www.markdownguide.org>
 
