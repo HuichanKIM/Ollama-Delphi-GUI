@@ -23,15 +23,13 @@
 ### 3rd party Library (Open source for Delphi developers) ###
 
 - SVGIconImageList <https://www.markdownguide.org>
-
 - Overbytes ICS <https://wiki.overbyte.eu/wiki/index.php/ICS_Download>
-
 - Virtual-TreeView by JAM-Software <https://github.com/JAM-Software/Virtual-TreeView>
 
 
-### About (Screenshot)
+### About / Skin / Colors (Screenshot)
 
-![About: Preview page](./Images/O_about.png)
+![About 1: Preview page](./Images/O_about.png) ![About 2: Preview page](./Images/O_skin_themes.png)
 
 ### Chattings (Screenshot)
 
@@ -46,7 +44,6 @@
 ![Chattings 5: Preview page](./Images/O_chattings5.png)
 
 (Skin - Windows10 SlateGray, Windows11 Impressive Dark, Windows11 Modern Dark  )
-![Chattings 6: Preview page](./Images/O_skin_themes.png)
 ![Chattings 7: Preview page](./Images/O_chattings6.png)
 
 ![Chattings 8: Preview page](./Images/O_chattings7.png)
