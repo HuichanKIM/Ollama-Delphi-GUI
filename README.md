@@ -1,7 +1,10 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.5 - 05.31.2024**
+**Latest Version 0.9.6 - 06.05.2024**
 
+Change Default Skin/Style
+- Windows10 SlateGray to Windows11 Impressive Dark
+- Replace Indy Socket to System.Net.HttpClient (emb.) for Slim.
 - Replace Commercial Library to Free Component for ChattingBox
 - Support Multilingual Translation (by MS SAPI)
 - Support 3 Dark style Skin for UI
