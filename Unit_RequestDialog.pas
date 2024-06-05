@@ -69,8 +69,11 @@ end;
 
 procedure TForm_RequestDialog.FormShow(Sender: TObject);
 begin
-  Memo_Request.SetFocus;
-  Memo_Request.SelectAll;
+  if Memo_Request.CanFocus then  //  Change Style Event ?
+  begin
+    Memo_Request.SetFocus;
+    Memo_Request.SelectAll;
+  end;
 end;
 
 procedure TForm_RequestDialog.Label_ClearClick(Sender: TObject);

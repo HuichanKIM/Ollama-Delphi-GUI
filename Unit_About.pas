@@ -24,12 +24,6 @@ type
     Button_OK: TButton;
     Panel3: TPanel;
     Label_Title: TLabel;
-    GroupBox1: TGroupBox;
-    Label3: TLabel;
-    Label_OllamaWeb: TLabel;
-    Label7: TLabel;
-    Label_OllamaGitHub: TLabel;
-    Image1: TImage;
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
@@ -46,7 +40,7 @@ type
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
-    ColorDialog_Skin: TColorDialog;
+    ColorDialog_Colors: TColorDialog;
     Shape_Header: TShape;
     Shape_Body: TShape;
     Shape_Footer: TShape;
@@ -56,24 +50,31 @@ type
     Label8: TLabel;
     Shape_Selection: TShape;
     SpeedButton_Selection: TSpeedButton;
-    Button_ApplyStyle: TButton;
-    Button_ApplyColors: TButton;
     Label_Header: TLabel;
     Label_Body: TLabel;
     Label_Footer: TLabel;
-    Button_CancelColors: TButton;
     Label9: TLabel;
+    SpeedButton_DefaultColor: TSpeedButton;
+    SpeedButton_CancelColors: TSpeedButton;
+    SpeedButton_ApplyColors: TSpeedButton;
+    SpeedButton_ApplySkin: TSpeedButton;
+    Panel2: TPanel;
+    Image1: TImage;
+    GroupBox1: TGroupBox;
+    Label3: TLabel;
+    Label_OllamaWeb: TLabel;
+    Label7: TLabel;
+    Label_OllamaGitHub: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
-    procedure Label_OllamaWebClick(Sender: TObject);
-    procedure Label_OllamaGitHubClick(Sender: TObject);
     procedure Label_SystemInfoClick(Sender: TObject);
     procedure Label_GitHubClick(Sender: TObject);
     procedure SpeedButton_HeaderClick(Sender: TObject);
-    procedure Button_ApplyStyleClick(Sender: TObject);
-    procedure Button_ApplyColorsClick(Sender: TObject);
-    procedure Button_CancelColorsClick(Sender: TObject);
+    procedure SpeedButton_DefaultColorClick(Sender: TObject);
+    procedure SpeedButton_ApplySkinClick(Sender: TObject);
+    procedure SpeedButton_CancelColorsClick(Sender: TObject);
+    procedure SpeedButton_ApplyColorsClick(Sender: TObject);
   private
     FShow_Flag: Integer;
     procedure Update_Shortcuts;
@@ -82,9 +83,12 @@ type
     property Show_Flag: Integer  read FShow_Flag  write FShow_Flag;
   end;
 
+function Get_HelpShortcuts(): string;
+
 implementation
 
 uses
+  System.UITypes,
   Vcl.Themes,
   Vcl.Styles,
   Vcl.StyleAPI,
@@ -95,18 +99,20 @@ uses
 {$R *.dfm}
 
 const
-  C_Shortcut_Keys: array [0..25] of string = ('F1','F2','F3','F4','F5',
+  C_Shortcut_Keys: array [0..26] of string = ('F1','F2','F3','F4','F5',
                                               'F6','F7','F8','F9','F10',
                                               'Alt+A','Alt+B','Alt+C','Alt+D','Alt+E',
-                                              'Alt+G','Alt+L','Alt+P','Alt+Q','Alt+S','Alt+T','Alt+V','Alt+W',
+                                              'Alt+G','Alt+H','Alt+L','Alt+P','Alt+Q','Alt+S',
+                                              'Alt+T','Alt+V','Alt+W',
                                               'Ctrl+A','Ctrl+R','Ctrl+Z');
-  C_Shortcut_Desc: array [0..25] of string = ('Show Request Dialog','Send Request','Goto Welcome.','Goto Chatting Room','Translation of Prompt',
-                                              'Translation of Message','(Reserved)','(Reserved)','Reserved','Clear Chattings',
+  C_Shortcut_Desc: array [0..26] of string = ('Show Request Dialog','Send Request','Goto Welcome.','Goto Chatting Room','Translation of Prompt',
+                                              'Translation of Message','(Reserved)','(Reserved)','(Reserved)','Clear Chattings',
                                               'Ollama Alive ?','Scroll to Bottom','Copy the Message.','Delete the Message.','Skin / Colors',
-                                              '(Reserved)','Show Logs.','Show/Hide Option Panel','Beep Effect','Save All Message to Text File','Scroll to Top','TextToSpeech on the Message','(Reserved)',
+                                              'Load Image (llava)','Help - ShortCuts','Show Logs.','Show/Hide Option Panel','Beep Effect','Save All Message to Text File',
+                                              'Scroll to Top','TextToSpeech on the Message','Show About',
                                               'Abort Connection.','Default / Refresh','Close / Exit.');
 
-  // When use ''' (multi line strings), raise Error with International Char ? - Code Insight Error ? ...
+  // CodeInsight Bug ?  - When use ''' (multi line strings), raise error with "International UTF8-Char" ...
   C_DevelopInfo: string =
         'Development Tool  (GUI)'+#13#10+
         'Embarcadero Delphi 12.1  ( Object Pascal )'+#13#10#13#10+
@@ -115,17 +121,37 @@ const
         ' - Virtual-TreeView by JAM-Software (*)'+#13#10+
         ' - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)'+#13#10+
         ' - FastMM4-AVX by Maxim Masiutin (*)'+#13#10+
-        ' - Embeded Lib. : SKIA 2D Graphics'+ #13#10#13#10+
-        ' - SpeechLibrary by MS SAPI'+#13#10+
+        ' - Embeded Lib. : SKIA 2D Graphics'+ #13#10+
+        ' - SpeechLibrary by MS SAPI'+#13#10+#13#10+
         'Support Multilingual Translation  / Voice'+#13#10#13#10+
-        'Copyright (c) 2024 - JNJ Labs. Seoul, Korea.';
+        GC_CopyRights;
+
+{ ... }
+
+function Get_HelpShortcuts(): string;
+begin
+  var _list: TStrings := TStringList.Create;
+  try
+    _list.Add('* Shortcuts ...' + #13#10);
+    for var _i := 0 to Length(C_Shortcut_Keys) - 1 do
+      with _list do
+      begin
+        Add(C_Shortcut_Keys[_i] + ' - ' + C_Shortcut_Desc[_i]);
+      end;
+
+    Result := _list.Text;
+  finally
+    _list.free;
+  end;
+end;
+
+{ TForm_About. }
 
 procedure TForm_About.FormCreate(Sender: TObject);
 begin
   FShow_Flag := 0;
   StylesList_Refresh;
-
-  Label_Title.Caption := C_MainCaption;
+  Label_Title.Caption := GC_MainCaption;
   if TStyleManager.IsCustomStyleActive then
   begin
     ListView_Shortcuts.StyleElements := [seBorder];
@@ -138,7 +164,10 @@ begin
 end;
 
 procedure TForm_About.FormShow(Sender: TObject);
+const
+  c_Caption: array [0..3] of string = ('About','','','Skin / Color Setting');
 begin
+  Self.Caption := c_Caption[FShow_Flag];
   var _color0, _color1, _color2, _color3: TColor;
   _color0 := Form_RestOllama.Frame_ChattingBox.Get_CustomColor(_color1, _color2, _color3);
 
@@ -151,6 +180,7 @@ begin
   Label_Body.Font.Color :=       _color2;
   Label_Footer.Font.Color :=     _color3;
 
+  TabSheet_Style.TabVisible := FShow_Flag = 3;  // Cannot Focus Error - When Change Style Event / Bug ?
   PageControl1.ActivePageIndex := FShow_Flag;   // 0 or 3
 end;
 
@@ -175,18 +205,11 @@ begin
 end;
 
 procedure TForm_About.Label_GitHubClick(Sender: TObject);
+var
+  _LabelSender: TLabel absolute Sender;
 begin
-  ShellExecute(0, PChar('Open'), PChar(Label_GitHub.Caption), nil, nil, SW_SHOW);
-end;
-
-procedure TForm_About.Label_OllamaGitHubClick(Sender: TObject);
-begin
-  ShellExecute(0, PChar('Open'), PChar(Label_OllamaGitHub.Caption), nil, nil, SW_SHOW);
-end;
-
-procedure TForm_About.Label_OllamaWebClick(Sender: TObject);
-begin
-  ShellExecute(0, PChar('Open'), PChar(Label_OllamaWeb.Caption), nil, nil, SW_SHOW);
+  var _addr: string := _LabelSender.Caption;
+  ShellExecute(0, PChar('Open'), PChar(_addr), nil, nil, SW_SHOW);
 end;
 
 procedure TForm_About.Label_SystemInfoClick(Sender: TObject);
@@ -210,7 +233,18 @@ begin
     ComboBox_VclStyles.ItemIndex := _index;
 end;
 
-procedure TForm_About.Button_ApplyStyleClick(Sender: TObject);
+procedure TForm_About.SpeedButton_ApplyColorsClick(Sender: TObject);
+begin
+  Form_RestOllama.Frame_ChattingBox.Do_SetCustomColor(1,
+    Shape_Selection.Brush.Color,
+    Shape_Header.Brush.Color,
+    Shape_Body.Brush.Color,
+    Shape_Footer.Brush.Color);
+
+  SpeedButton_CancelColors.Enabled := True;
+end;
+
+procedure TForm_About.SpeedButton_ApplySkinClick(Sender: TObject);
 begin
   var _style: string := ComboBox_VclStyles.Items[ComboBox_VclStyles.ItemIndex];
   if not SameText(_style, TStyleManager.ActiveStyle.Name) then
@@ -223,36 +257,33 @@ begin
     Button_OK.Setfocus;
 end;
 
-procedure TForm_About.Button_ApplyColorsClick(Sender: TObject);
-begin
-  Form_RestOllama.Frame_ChattingBox.Do_SetCustomColor(1,
-    Shape_Selection.Brush.Color,
-    Shape_Header.Brush.Color,
-    Shape_Body.Brush.Color,
-    Shape_Footer.Brush.Color);
-
-  Button_CancelColors.Enabled := True;
-end;
-
-procedure TForm_About.Button_CancelColorsClick(Sender: TObject);
+procedure TForm_About.SpeedButton_CancelColorsClick(Sender: TObject);
 begin
   Form_RestOllama.Frame_ChattingBox.Do_SetCustomColor(2,
-    VC_ReservedColor[0],
-    VC_ReservedColor[1],
-    VC_ReservedColor[2],
-    VC_ReservedColor[3]);
+    GV_ReservedColor[0],
+    GV_ReservedColor[1],
+    GV_ReservedColor[2],
+    GV_ReservedColor[3]);
 
-  Shape_Selection.Brush.Color := VC_ReservedColor[0];
-  Shape_Header.Brush.Color :=    VC_ReservedColor[1];  Label_Header.Font.Color := VC_ReservedColor[1];
-  Shape_Body.Brush.Color :=      VC_ReservedColor[2];  Label_Body.Font.Color :=   VC_ReservedColor[2];
-  Shape_Footer.Brush.Color :=    VC_ReservedColor[3];  Label_Footer.Font.Color := VC_ReservedColor[3];
+  Shape_Selection.Brush.Color := GV_ReservedColor[0];
+  Shape_Header.Brush.Color :=    GV_ReservedColor[1];  Label_Header.Font.Color := GV_ReservedColor[1];
+  Shape_Body.Brush.Color :=      GV_ReservedColor[2];  Label_Body.Font.Color :=   GV_ReservedColor[2];
+  Shape_Footer.Brush.Color :=    GV_ReservedColor[3];  Label_Footer.Font.Color := GV_ReservedColor[3];
+end;
+
+procedure TForm_About.SpeedButton_DefaultColorClick(Sender: TObject);
+begin
+  Shape_Selection.Brush.Color := GC_SkinSelColor;
+  Shape_Header.Brush.Color :=    GC_SkinHeadColor;  Label_Header.Font.Color := GC_SkinHeadColor;
+  Shape_Body.Brush.Color :=      GC_SkinBodyColor;  Label_Body.Font.Color :=   GC_SkinBodyColor;
+  Shape_Footer.Brush.Color :=    GC_SkinFootColor;  Label_Footer.Font.Color := GC_SkinFootColor;
 end;
 
 procedure TForm_About.SpeedButton_HeaderClick(Sender: TObject);
 begin
-  with ColorDialog_Skin do
+  with ColorDialog_Colors do
   begin
-    Color := VC_ReservedColor[TSpeedButton(Sender).Tag];
+    Color := GV_ReservedColor[TSpeedButton(Sender).Tag];
     if Execute() then
       case TSpeedButton(Sender).Tag of
         0: begin Shape_Selection.Brush.Color := Color;  end;

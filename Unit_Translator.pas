@@ -67,8 +67,8 @@ begin
     Exit;
   end;
 
-  var _LangSource: string := C_LanguageCode[ ACodeFrom ];
-  var _LangTarget: string := C_LanguageCode[ ACodeTo ];
+  var _LangSource: string := GC_LanguageCode[ ACodeFrom ];
+  var _LangTarget: string := GC_LanguageCode[ ACodeTo ];
   var _URI := TURI.Create('https://translate.googleapis.com/translate_a/single');
   var _query := Trim(AText);
   with _URI do
@@ -88,8 +88,10 @@ begin
 
   var _Responses := TBytesStream.Create();
   var _getflag: Boolean := False;
-  var _HTTP: THTTPClient := THTTPClient.Create;
+  var _HTTP: THTTPClient := THTTPClient.Create;  // To DO : Async - Case of Poor Networking Speed ...
+  _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
   try
+    _HTTP.ContentType := 'application/json';
     _getflag := _HTTP.Get(_URI.Encode, _Responses).StatusCode = 200;
     _getflag := _getflag and (_Responses.Size > 10);
     if not _getflag then
@@ -114,7 +116,7 @@ function Get_GoogleTranslatorEx(const AUser, ACodeFrom, ACodeTo: Integer; const 
 begin
   var _trans := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
   if _trans <> '' then
-    Result := _trans.Replace(C_UTF8_LF, C_CRLF, [rfReplaceAll]);
+    Result := _trans.Replace(GC_UTF8_LF, GC_CRLF, [rfReplaceAll]);
 end;
 
 { TForm_Translator }
@@ -149,33 +151,6 @@ begin
   CheckBox_Pushtochatbox.Enabled := PushFlag;
 end;
 
-function Get_TextWithMiddleEllipsis(ACanvas: TCanvas; AText: string): string;
-begin
-  Result := AText;
-  var _Ss := AText;
-  var _Sz: TSize;
-  var _DrawRect: TRect := Rect(0,0,430,30);
-  if GetTextExtentPoint32W(ACanvas.Handle, _Ss, Length(_Ss), _Sz) then
-  begin
-    var _RectWidth := _DrawRect.Right - _DrawRect.Left;
-    if _Sz.cx > _RectWidth then
-    begin
-      _Ss := '...';
-      var _LastS: string := AText;
-      for var _i := 1 to Length(AText) div 2 do
-      begin
-        _LastS := _Ss;
-        _Ss := Copy(AText, 1, _i) + ' ... ' + Copy(AText, Length(AText) - _i + 1, _i);
-        GetTextExtentPoint32W(ACanvas.Handle, _Ss, Length(_Ss), _Sz);
-        if _Sz.cx > _RectWidth then
-          Break;
-      end;
-
-      Result := _LastS;
-    end;
-  end;
-end;
-
 procedure TForm_Translator.Get_GoogleTranslator(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string);
 const
   c_Type: array [0 .. 1 ] of string = ('Request', 'Prompt');
@@ -183,8 +158,9 @@ const
 begin
   FTransResult := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
   var _reqdisplay: string := FRequest;
+  var _rect: TRect := Rect(0,0,430,30);
   if _reqdisplay <> '' then
-  _reqdisplay := Get_TextWithMiddleEllipsis(Self.Canvas, FRequest);
+  _reqdisplay := Get_TextWithEllipsis(True, Self.Canvas, _rect, FRequest);
 
   CheckBox_Pushtochatbox.Enabled := (AUser = 0) and PushFlag;
   if FTransResult <> '' then
@@ -194,7 +170,7 @@ begin
     else
       Label_Prompt.Caption := c_Type[AUser] + '  - '+_reqdisplay;
 
-    var _trans := FTransResult.Replace(C_UTF8_LF, C_CRLF, [rfReplaceAll]);
+    var _trans := FTransResult.Replace(GC_UTF8_LF, GC_CRLF, [rfReplaceAll]);
     Memo_Translates.Lines.Add(_trans)
   end;
 end;

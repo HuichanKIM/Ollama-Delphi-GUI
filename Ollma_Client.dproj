@@ -66,7 +66,7 @@
         <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Ics.Fmx;Winapi;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\$(Platform)\$(Config)\dcu</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)\$(Config)\bin</DCC_ExeOutput>
-        <DCC_UnitSearchPath>$(LIBS2024)\Overbytes_icsv91\Source;$(LIBS2024)\Overbytes_icsv91\Source\Include;$(LIBS2024)\Indy_Update\Lib\Core;$(LIBS2024)\Indy_Update\Lib\Protocols;$(LIBS2024)\Indy_Update\Lib\System;$(LIBS2024)\skia4delphi\Source;$(LIBS2024)\skia4delphi\Source\VCL;$(LIBS2024)\skia4delphi\Source\VCL\Designtime;$(LIBS2024)\TurboPack\DOSCommand\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\Include;$(LIBS2024)\Overbytes_icsv91\Source;$(LIBS2024)\Overbytes_icsv91\Source\Include;$(LIBS2024)\skia4delphi\Source;$(LIBS2024)\skia4delphi\Source\VCL;$(LIBS2024)\skia4delphi\Source\VCL\Designtime;$(LIBS2024)\TurboPack\DOSCommand\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=OverbyteIcsHttpRestTst;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=OverbyteIcsHttpRestTst;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.OverbyteIcsHttpRestTst</VerInfo_Keys>
@@ -248,6 +248,24 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="beep1.wav" Configuration="Release" Class="ProjectFile">
+                    <Platform Name="Win64">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="logollama.png" Configuration="Release" Class="ProjectFile">
+                    <Platform Name="Win64">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="ollamawaiting.gif" Configuration="Release" Class="ProjectFile">
+                    <Platform Name="Win64">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="ollamawin.gif" Configuration="Release" Class="ProjectFile">
                     <Platform Name="Win64">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -1117,12 +1135,15 @@
         <DCCReference Include="Unit_MRUManager.pas"/>
         <DCCReference Include="Unit_ImageDropDown.pas"/>
         <DCCReference Include="SpeechLib_TLB.pas"/>
+        <DCCReference Include="Include\VirtualTrees.BaseTree.pas"/>
+        <DCCReference Include="Include\VirtualTrees.pas"/>
         <DCCReference Include="Unit_Welcome.pas">
             <Form>Frame_Welcome</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="Unit_Main.pas">
             <Form>Form_RestOllama</Form>
+            <DesignClass>T</DesignClass>
         </DCCReference>
         <DCCReference Include="Unit_AliveOllama.pas">
             <Form>TForm_AliveOllama</Form>
@@ -1132,14 +1153,18 @@
         </DCCReference>
         <DCCReference Include="Unit_About.pas">
             <Form>TForm_About</Form>
+            <DesignClass>Form_About</DesignClass>
         </DCCReference>
         <DCCReference Include="Unit_RequestDialog.pas">
             <Form>Form_RequestDialog</Form>
+            <DesignClass>T</DesignClass>
         </DCCReference>
         <DCCReference Include="Unit_ChattingBoxClass.pas">
             <Form>Frame_ChattingBoxClass</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Unit_DosCommander.pas">
+            <Form>TForm_DosCommander</Form>
         </DCCReference>
         <RcItem Include="beep0.wav">
             <ContainerId>ResourceItem</ContainerId>
@@ -1150,6 +1175,18 @@
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>BEEP1</ResourceId>
+        </RcItem>
+        <RcItem Include="logollama.png">
+            <ResourceType>RCDATA</ResourceType>
+            <ResourceId>OLOGO</ResourceId>
+        </RcItem>
+        <RcItem Include="ollamawaiting.gif">
+            <ResourceType>RCDATA</ResourceType>
+            <ResourceId>OWAITTING</ResourceId>
+        </RcItem>
+        <RcItem Include="ollamawin.gif">
+            <ResourceType>RCDATA</ResourceType>
+            <ResourceId>OWIN</ResourceId>
         </RcItem>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>

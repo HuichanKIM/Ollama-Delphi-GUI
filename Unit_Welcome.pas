@@ -20,11 +20,13 @@ type
     SkSvg_ICon: TSkSvg;
     SkLabel_Clicktohome: TSkLabel;
     SkLabel_Intro: TSkLabel;
+    SkAnimatedImage_Alive: TSkAnimatedImage;
     procedure FrameResize(Sender: TObject);
   private
-    { Private declarations }
+    FAnimationFlag: Boolean;
+    procedure SetAnimationFlag(const Value: Boolean);
   public
-    { Public declarations }
+    property AnimationFlag: Boolean  read FAnimationFlag  write SetAnimationFlag;
   end;
 
 implementation
@@ -34,7 +36,16 @@ implementation
 procedure TFrame_Welcome.FrameResize(Sender: TObject);
 begin
   SkSvg_ICon.Left := (SkLabel_Intro.Width - SkSvg_ICon.Width) div 2;
-  SkSvg_ICon.top := SkLabel_Intro.Height div 4;
+  SkSvg_ICon.Top :=   SkLabel_Intro.Height div 4;
+  SkAnimatedImage_Alive.Left := (SkLabel_Intro.Width - SkAnimatedImage_Alive.Width) div 2;
+  SkAnimatedImage_Alive.Top :=  SkLabel_Intro.Height - SkLabel_Intro.Height div 6;
+end;
+
+procedure TFrame_Welcome.SetAnimationFlag(const Value: Boolean);
+begin
+  FAnimationFlag := Value;
+  SkAnimatedImage_Alive.Animation.Enabled := Value;
+  SkAnimatedImage_Alive.Visible := Value;
 end;
 
 end.

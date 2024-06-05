@@ -12,6 +12,7 @@ object Form_Translator: TForm_Translator
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
+  FormStyle = fsStayOnTop
   KeyPreview = True
   Position = poMainFormCenter
   RoundedCorners = rcOn
@@ -95,8 +96,8 @@ object Form_Translator: TForm_Translator
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 502
-      Height = 24
+      Width = 49
+      Height = 15
       Align = alClient
       Caption = 'Prompt   '
       Font.Charset = DEFAULT_CHARSET
@@ -105,8 +106,6 @@ object Form_Translator: TForm_Translator
       Font.Name = 'Segoe UI'
       Font.Style = []
       ParentFont = False
-      ExplicitWidth = 49
-      ExplicitHeight = 15
     end
   end
 end

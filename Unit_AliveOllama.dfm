@@ -17,12 +17,13 @@ object Form_AliveOllama: TForm_AliveOllama
   FormStyle = fsStayOnTop
   KeyPreview = True
   Position = poDesigned
+  OnCloseQuery = FormCloseQuery
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   TextHeight = 15
   object GroupBox1: TGroupBox
     Left = 3
-    Top = 9
+    Top = 8
     Width = 213
     Height = 65
     Caption = 'Ollama IP'

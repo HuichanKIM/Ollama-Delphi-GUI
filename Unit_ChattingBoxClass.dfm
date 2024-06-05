@@ -418,15 +418,24 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     OnPopup = PopupMenu1Popup
     Left = 328
     Top = 288
+    object pmn_ColorSettings: TMenuItem
+      Caption = 'Set Text Colors'
+      ShortCut = 32837
+      OnClick = pmn_ColorSettingsClick
+    end
     object pmn_SelectedColor: TMenuItem
-      Caption = 'Selected Color'
+      Caption = 'Background Color of Selected Node'
       OnClick = pmn_SelectedColorClick
     end
     object N1: TMenuItem
       Caption = '-'
     end
+    object pmn_CopyText: TMenuItem
+      Caption = 'Copy Text of Selected Node'
+      OnClick = pmn_CopyTextClick
+    end
     object pmn_Delete: TMenuItem
-      Caption = 'Delete'
+      Caption = 'Delete Selected Node'
       ShortCut = 46
       OnClick = pmn_DeleteClick
     end

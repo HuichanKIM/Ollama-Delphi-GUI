@@ -14,13 +14,16 @@ uses
   Unit_MRUManager in 'Unit_MRUManager.pas',
   Unit_ImageDropDown in 'Unit_ImageDropDown.pas',
   SpeechLib_TLB in 'SpeechLib_TLB.pas',
+  VirtualTrees.BaseTree in 'Include\VirtualTrees.BaseTree.pas',
+  VirtualTrees in 'Include\VirtualTrees.pas',
   Unit_Welcome in 'Unit_Welcome.pas' {Frame_Welcome: TFrame},
-  Unit_Main in 'Unit_Main.pas' {Form_RestOllama},
+  Unit_Main in 'Unit_Main.pas' {Form_RestOllama: T},
   Unit_AliveOllama in 'Unit_AliveOllama.pas' {TForm_AliveOllama},
   Unit_Translator in 'Unit_Translator.pas' {TForm_Translator},
-  Unit_About in 'Unit_About.pas' {TForm_About},
-  Unit_RequestDialog in 'Unit_RequestDialog.pas' {Form_RequestDialog},
-  Unit_ChattingBoxClass in 'Unit_ChattingBoxClass.pas' {Frame_ChattingBoxClass: TFrame};
+  Unit_About in 'Unit_About.pas' {TForm_About: Form_About},
+  Unit_RequestDialog in 'Unit_RequestDialog.pas' {Form_RequestDialog: T},
+  Unit_ChattingBoxClass in 'Unit_ChattingBoxClass.pas' {Frame_ChattingBoxClass: TFrame},
+  Unit_DosCommander in 'Unit_DosCommander.pas' {TForm_DosCommander};
 
 {$R *.res}
 
@@ -50,15 +53,22 @@ begin
   if _mxHandle <> 0 then
   try
     Application.Initialize;
+
+    // For Last Deployment ...
     {
       var _skinfile := CV_AppPath+'skincfg.txt';
       if FileExists(_skinfile) then
       begin
+        var _default := TStyleManager.ActiveStyle.Name;
         var _skinname := IOUtils_ReadAllText(_skinfile);
+        if not SameText(_default, _skinname) then
         TStyleManager.TrySetStyle(_skinname);
+
+        GV_ApplyedSkin := True;
       end;
-    }
-    TStyleManager.TrySetStyle('Windows10 SlateGray');
+     }
+
+    TStyleManager.TrySetStyle('Windows11 Impressive Dark');
     Application.Title := 'Ollama Client GUI';
     Application.CreateForm(TForm_RestOllama, Form_RestOllama);
     Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);

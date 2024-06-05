@@ -13,10 +13,7 @@ Uses
   Vcl.ExtCtrls,
   Vcl.Forms,
   Vcl.Imaging.jpeg,
-  Vcl.Imaging.pngimage,
-  WinApi.ShellAPI,
-  System.Skia,
-  Vcl.Skia;
+  Vcl.Imaging.pngimage;
 
 type
   TImageDropDown<T: TGraphic, constructor> = Class
@@ -40,7 +37,10 @@ type
 implementation
 
 uses
+  WinApi.ShellAPI,
   Vcl.Dialogs,
+  System.Skia,
+  Vcl.Skia,
   Unit_Common,
   Unit_Main;
 

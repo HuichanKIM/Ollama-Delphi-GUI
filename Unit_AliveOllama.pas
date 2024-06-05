@@ -12,7 +12,8 @@ uses
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
-  Vcl.StdCtrls, Vcl.Buttons;
+  Vcl.StdCtrls,
+  Vcl.Buttons;
 
 type
   TForm_AliveOllama = class(TForm)
@@ -24,68 +25,81 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure SpeedButton_CheckClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     procedure LogReturn(const S: String);
   public
     IsCkeckedFlag: Boolean;
   end;
 
-var
-  V_AliveOllamaFlag: Boolean = False;
-
-function CheckAlive_Ollama(): Boolean;
-function Get_ListModels_Ollama(const ABaseURL: string): string;
+procedure CheckAlive_Ollama(const AFlag: Integer = 0);
+function Get_ListModels_Ollama(const ARequestURI: string): string;
 
 implementation
 
 uses
   Vcl.Themes,
   Unit_Common,
-  IdHTTP, IdURI;  { More Useful for Acessing Local server / no SSL - http://... }
+  Unit_Main,
+  System.Threading,
+  System.Net.HttpClient,
+  System.Net.URLClient;
 
 {$R *.dfm}
 
 const
   C_OllamaAddress = 'http://localhost:11434';
 
-function Get_ListModels_Ollama(const ABaseURL: string): string;
+procedure CheckAlive_Ollama(const AFlag: Integer);
+begin
+  TTask.Run(   // Prevent Locking for Too Slow Response at First time ...
+  procedure    // When Ollama_server(ollama_llama_server.exe) not started, Yet.
+  begin
+    var _response: string := '';
+    var _HTTP: THTTPClient := THTTPClient.Create;
+    _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
+    try
+      var _HttpResponse: IHttpResponse := _HTTP.Get(C_OllamaAddress);
+      if  _HttpResponse.StatusCode = 200 then
+      begin
+        _response := LowerCase(_HttpResponse.ContentAsString());
+        GV_AliveOllamaFlag := (Pos('ollama', _response) > 0) and (Pos('running', _response) > 1);
+      end;
+    finally
+      _HTTP.Free;
+    end;
+
+    PostMessage(Form_RestOllama.Handle, NETHTTP_MESSAGE, NETHTTP_MESSAGE_ALIVE, Ord(GV_AliveOllamaFlag));
+  end);
+end;
+
+function Get_ListModels_Ollama(const ARequestURI: string): string;
 begin
   Result := '';
+  if GV_AliveOllamaFlag then
   try
-    var _HTTP: TIdHTTP := TIdHTTP.Create;
+    var _HTTP: THTTPClient := THTTPClient.Create;
+    _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
+    _HTTP.Accept := 'application/json, text/javascript, */*; q=0.01';
+    _HTTP.ContentType := 'application/json';
     try
-      var _Query := ABaseURL;
-      Result := _HTTP.Get(_Query);
+      var _HttpResponse: IHttpResponse := _HTTP.Get(ARequestURI);
+      if _HttpResponse.StatusCode = 200 then
+        begin
+          Result := _HttpResponse.ContentAsString();
+        end;
     finally
       _HTTP.Free;
     end;
   except
     on E: Exception do
-      ShowMessage(E.ClassName+ ': '+ E.Message);
+      ShowMessage(E.ClassName + ': ' + E.Message);
   end;
 end;
 
-function CheckAlive_Ollama(): Boolean;
+procedure TForm_AliveOllama.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  Result := False;
-  V_AliveOllamaFlag := False;
-
-  try
-    var _HTTP: TIdHTTP := TIdHTTP.Create;
-    try
-      var _Query := C_OllamaAddress;
-      var _Buffer := _HTTP.Get(_Query);
-      _Buffer := LowerCase(_Buffer);
-      Result := (Pos('ollama', _Buffer) > 0) and (Pos('running', _Buffer) > 1);
-
-      V_AliveOllamaFlag := Result;
-    finally
-      _HTTP.Free;
-    end;
-  except
-    on E: Exception do
-      ShowMessage('Ollama connection error. '+C_CRLF+ E.ClassName+ ': '+ E.Message);
-  end;
+  CanClose := IsCkeckedFlag;
 end;
 
 procedure TForm_AliveOllama.FormKeyPress(Sender: TObject; var Key: Char);
@@ -104,7 +118,7 @@ begin
     Memo_Alive.Color := StyleServices.GetStyleColor(scWindow);
   end;
 
-  IsCkeckedFlag := False;
+  IsCkeckedFlag := True;
   Memo_Alive.Clear;
 end;
 
@@ -118,30 +132,36 @@ const
   c_Alive: Array [Boolean] of String = ('Not Alive','Alive On');
   c_Warning = 'Check Ollama is installed and running on local computer.';
 begin
+  IsCkeckedFlag := False;
   Memo_Alive.lines.Clear;
-  V_AliveOllamaFlag := False;
 
   try
-    var _HTTP: TIdHTTP := TIdHTTP.Create;
+    var _response: string := '';
+    var _HTTP: THTTPClient := THTTPClient.Create;
+    _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
     try
-      var _Query := C_OllamaAddress;
-      var _Buffer := _HTTP.Get(_Query);
-      LogReturn(_Buffer);
-      _Buffer := LowerCase(_Buffer);
-      V_AliveOllamaFlag := (Pos('ollama', _Buffer) > 0) and (Pos('running', _Buffer) > 1);
-      LogReturn(c_Alive[ V_AliveOllamaFlag ]);
-
-      if not V_AliveOllamaFlag then
-      Memo_Alive.lines.Add(c_Warning);
+      var _HttpResponse: IHttpResponse := _HTTP.Get(C_OllamaAddress);
+      if  _HttpResponse.StatusCode = 200 then
+      begin
+        _response := LowerCase(_HttpResponse.ContentAsString());
+        GV_AliveOllamaFlag := (Pos('ollama', _response) > 0) and (Pos('running', _response) > 1);
+      end;
     finally
       _HTTP.Free;
     end;
+
+    PostMessage(Form_RestOllama.Handle, NETHTTP_MESSAGE, NETHTTP_MESSAGE_ALIVE, Ord(GV_AliveOllamaFlag));
+    LogReturn(_response+#13#10+c_Alive[GV_AliveOllamaFlag]);
+    if not GV_AliveOllamaFlag then
+      Memo_Alive.lines.Add(c_Warning);
   except
     on E: Exception do
-      LogReturn(E.ClassName+ ': '+ E.Message);
+      LogReturn(E.ClassName + ': ' + E.Message);
   end;
+
   if Button_OK.CanFocus then
     Button_OK.SetFocus;
+
   IsCkeckedFlag := True;
 end;
 

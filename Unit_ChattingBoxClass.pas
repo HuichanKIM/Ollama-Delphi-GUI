@@ -42,6 +42,8 @@ type
     pmn_SelectedColor: TMenuItem;
     N1: TMenuItem;
     pmn_Delete: TMenuItem;
+    pmn_CopyText: TMenuItem;
+    pmn_ColorSettings: TMenuItem;
     procedure VST_ChattingBoxGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
     procedure VST_ChattingBoxBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
     procedure VST_ChattingBoxEditing(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean);
@@ -55,6 +57,8 @@ type
     procedure PopupMenu1Popup(Sender: TObject);
     procedure pmn_DeleteClick(Sender: TObject);
     procedure pmn_SelectedColorClick(Sender: TObject);
+    procedure pmn_CopyTextClick(Sender: TObject);
+    procedure pmn_ColorSettingsClick(Sender: TObject);
   private
     FVST_NBodyFontSize: Integer;
     FVST_NHeaderColor: TColor;
@@ -84,7 +88,7 @@ type
     procedure Do_ScrollToBottom(const AFlag: Integer = 0);
     function Do_SaveAllText(const AFile: string): Boolean;
     function Do_DeleteNode(): Boolean;
-    procedure Do_RestoreDefaultColor();
+    procedure Do_RestoreDefaultColor(const AFontOnlyFlag: Integer = 0);
     procedure Do_SetCustomColor(const AFlag: Integer; const ASelColor, AHeaderColor, ABodyColor, AFooterColor: TColor);
     function Get_CustomColor(var AHeaderColor, ABodyColor, AFooterColor: TColor): TColor;
     //
@@ -98,7 +102,10 @@ type
 implementation
 
 uses
-  Unit_Common;
+  System.UITypes,
+  Vcl.Clipbrd,
+  Unit_Common,
+  Unit_About;
 
 {$R *.dfm}
 
@@ -107,8 +114,8 @@ begin
   FVST_NHeaderColor :=    AHeaderColor;
   FVST_NBodyColor :=      ABodyColor;
   FVST_NFooterColor :=    AFooterColor;
-  FVST_NSelectionColor := clWebDarkSlateBlue;
-  FVST_NBodyFontSize :=   10;
+  FVST_NSelectionColor := GC_SkinSelColor;
+  FVST_NBodyFontSize :=   GC_SkinFontSize;
   FVST_ColumnOffset :=    15;
   FVST_SecondIndent :=    35;    // Reference of Indent for Ollama Response ...
 
@@ -126,7 +133,7 @@ begin
     OffsetWRMagin := 35;
     NodeHeightOffSet := 52;
     Images := VirtualImageList1;
-    SelectedBrushColor := FVST_NSelectionColor;  // in TBaseVirtualTree ...
+    SelectedBrushColor := FVST_NSelectionColor;  // in TBaseVirtualTree.pas ...
     Node_HeaderColor :=   FVST_NHeaderColor;
     Node_BodyColor :=     FVST_NBodyColor;
     Node_FooterColor :=   FVST_NFooterColor;
@@ -223,7 +230,8 @@ end;
 
 procedure TFrame_ChattingBoxClass.PopupMenu1Popup(Sender: TObject);
 begin
-  pmn_Delete.Enabled := VST_ChattingBox.SelectedCount > 0;
+  pmn_CopyText.Enabled := VST_ChattingBox.SelectedCount > 0;
+  pmn_Delete.Enabled :=   VST_ChattingBox.SelectedCount > 0;
 end;
 
 procedure TFrame_ChattingBoxClass.SetVST_NBodyFontSize(const Value: Integer);
@@ -424,6 +432,27 @@ begin
   Result := VST_ChattingBox.SelectedBrushColor;
 end;
 
+procedure TFrame_ChattingBoxClass.pmn_ColorSettingsClick(Sender: TObject);
+begin
+  with TForm_About.Create(Self) do
+  try
+    Show_Flag := 3;
+    ShowModal;
+  finally
+    Free;
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.pmn_CopyTextClick(Sender: TObject);
+begin
+  var _ItemStr := Get_NodeText;
+  if _ItemStr <> '' then
+  begin
+    Clipboard.Clear;
+    Clipboard.AsText := _ItemStr;
+  end;
+end;
+
 function TFrame_ChattingBoxClass.Do_DeleteNode: Boolean;
 begin
   Result := False;
@@ -438,18 +467,30 @@ begin
   end;
 end;
 
-procedure TFrame_ChattingBoxClass.Do_RestoreDefaultColor;
+procedure TFrame_ChattingBoxClass.Do_RestoreDefaultColor(const AFontOnlyFlag: Integer);
 begin
-  FVST_NSelectionColor := clWebDarkSlateBlue;
-  FVST_NHeaderColor :=    clBtnFace;
-  FVST_NBodyColor :=      clBtnFace;
-  FVST_NFooterColor :=    clSilver;
-  FVST_NBodyFontSize :=   10;
+  if AFontOnlyFlag = 1 then
+  begin
+    FVST_NBodyFontSize :=   10;
+    with  VST_ChattingBox do
+    begin
+      BeginUpdate;
+      Font.Size := FVST_NBodyFontSize;
+      EndUpdate;
+    end;
+    Exit;
+  end;
 
-  VC_ReservedColor[0] := FVST_NSelectionColor;
-  VC_ReservedColor[1] := FVST_NHeaderColor;
-  VC_ReservedColor[2] := FVST_NBodyColor;
-  VC_ReservedColor[3] := FVST_NFooterColor;
+  FVST_NSelectionColor := GC_SkinSelColor;
+  FVST_NHeaderColor :=    GC_SkinHeadColor;
+  FVST_NBodyColor :=      GC_SkinBodyColor;
+  FVST_NFooterColor :=    GC_SkinFootColor;
+  FVST_NBodyFontSize :=   GC_SkinFontSize;
+
+  GV_ReservedColor[0] := FVST_NSelectionColor;
+  GV_ReservedColor[1] := FVST_NHeaderColor;
+  GV_ReservedColor[2] := FVST_NBodyColor;
+  GV_ReservedColor[3] := FVST_NFooterColor;
 
   with  VST_ChattingBox do
   begin
@@ -467,10 +508,10 @@ procedure TFrame_ChattingBoxClass.Do_SetCustomColor(const AFlag: Integer; const 
 begin
   if AFlag = 1 then
   begin
-    VC_ReservedColor[0] := FVST_NSelectionColor;
-    VC_ReservedColor[1] := FVST_NHeaderColor;
-    VC_ReservedColor[2] := FVST_NBodyColor;
-    VC_ReservedColor[3] := FVST_NFooterColor;
+    GV_ReservedColor[0] := FVST_NSelectionColor;
+    GV_ReservedColor[1] := FVST_NHeaderColor;
+    GV_ReservedColor[2] := FVST_NBodyColor;
+    GV_ReservedColor[3] := FVST_NFooterColor;
   end;
 
   FVST_NSelectionColor := ASelColor;
@@ -480,10 +521,10 @@ begin
 
   if AFlag = 0 then      // for Restore Colors ...
   begin
-    VC_ReservedColor[0] := FVST_NSelectionColor;
-    VC_ReservedColor[1] := FVST_NHeaderColor;
-    VC_ReservedColor[2] := FVST_NBodyColor;
-    VC_ReservedColor[3] := FVST_NFooterColor;
+    GV_ReservedColor[0] := FVST_NSelectionColor;
+    GV_ReservedColor[1] := FVST_NHeaderColor;
+    GV_ReservedColor[2] := FVST_NBodyColor;
+    GV_ReservedColor[3] := FVST_NFooterColor;
   end;
 
   with  VST_ChattingBox do
@@ -497,10 +538,46 @@ begin
   end;
 end;
 
-
 function TFrame_ChattingBoxClass.Do_SaveAllText(const AFile: string): Boolean;
+const
+  c_Indent: array [0..1] of string = ('', '  ');
+var
+  _AddString  : string;
+  _CellText   : string;
 begin
-  Result := VST_ChattingBox.SaveToCSVFile(AFile, False);
+  var _sourcelist: TStrings := TStringList.Create;
+  var _Data: PMessageRec := nil;
+  var _index: Integer := 1;
+  var _qtag: Integer := 0;
+  var _prefix: string := '';
+  try
+    var _Node  : PVirtualNode := VST_ChattingBox.GetFirst;
+    while Assigned(_Node) do
+    begin
+      _AddString := EmptyStr;
+      _prefix := Format('*%d* ', [_index]);
+      _Data := VST_ChattingBox.GetNodeData(_Node);
+      if _Data <> nil then
+      begin
+        _qtag := _Data^.FTag;
+        _CellText :=  _prefix + _Data^.FUser;
+        _AddString := _AddString + _CellText +GC_CRLF;
+        _CellText :=  _Data^.FCaption+ FormatDateTime('( hh:nn:ss )', _Data^.FTime);
+        _AddString := _AddString + _CellText +GC_CRLF;
+
+        _sourcelist.Add(_AddString);
+      end;
+
+      _Node := _Node.NextSibling;
+      Inc(_index);
+    end;
+
+    _sourcelist.SaveToFile(AFile);
+  finally
+    _sourcelist.Free;
+  end;
+
+  Result := FileExists(AFile);
 end;
 
 procedure TFrame_ChattingBoxClass.Do_ScrollToTop(const AFlag: Integer);
