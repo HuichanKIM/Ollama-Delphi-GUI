@@ -4,7 +4,7 @@
 {
   Partial modification - PrepareCell (ln 14264)
   Add FSelectedBrushColor: TColor;
-  Add FSelectedBrushColor := clWebDarkSlateBlue;  - OnCreate
+  Add FSelectedBrushColor := TColors.DarkSlateBlue;  - OnCreate
   Add procedure SetSelectedBrushColor(const Value: TColor);
   Add property SelectedBrushColor: TColor  read FSelectedBrushColor  write SetSelectedBrushColor;
   Deprecating ...
@@ -2065,7 +2065,7 @@ begin
 
   FIndent := 18;
   // Modified by ichin 2024-05-31 금 오전 12:02:05
-  FSelectedBrushColor := clWebDarkSlateBlue;
+  FSelectedBrushColor := TColors.DarkSlateBlue;
 
   FPlusBM := TBitmap.Create;
   FHotPlusBM := TBitmap.Create;
@@ -14409,7 +14409,7 @@ begin
             // end
             //else
             //begin
-              Brush.Color := SelectedBrushColor;//clWebDarkSlateBlue;// .UnfocusedSelectionColor;
+              Brush.Color := SelectedBrushColor;// .UnfocusedSelectionColor;
               Pen.Color := FColors.UnfocusedSelectionBorderColor;
             //end;
             if (toGridExtensions in FOptions.MiscOptions) or (toFullRowSelect in FOptions.SelectionOptions) then

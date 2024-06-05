@@ -6,6 +6,7 @@ Modified parts ...
 - Partial modification (line number 1469)  - procedure DoTextDrawing of VirtualTrees.pas
 
 After Install JAM-Software/Virtual-TreeView
-Backup the same files and Overwrite 2 Files 
+
+Add ".\Include" to [Search path] in Project options. 
 
 or work around other way ...

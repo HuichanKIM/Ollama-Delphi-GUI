@@ -668,10 +668,10 @@ begin
   FDefaultText := cDefaultText;
   FInternalDataOffset := AllocateInternalDataArea(SizeOf(Cardinal));
   // Modified by ichin 2024-05-30 목 오전 5:00:59
-  SelectedBrushColor := clWebDarkSlateBlue;
-  FNode_HeaderColor := clBtnFace;
-  FNode_BodyColor := clBtnFace;
-  FNode_FooterColor := clSilver;
+  SelectedBrushColor := TColors.DarkSlateBlue;
+  FNode_HeaderColor := TColors.SysBtnFace;;
+  FNode_BodyColor := TColor($7FFF00);//TColors.SysInfoBk;
+  FNode_FooterColor := TColors.Silver;
   FOffsetWRMagin := 35;
   FNodeHeightOffSet := 50;
 end;
@@ -1434,14 +1434,15 @@ var
   lText: string;
 begin
   DefaultDraw := True;
-  var _Title: string := '';
-  var _Tag: Integer := 0;
-  var _TimeStamp: string := '';
+
   // Modified by ichin 2024-06-01 토 오전 7:56:22
   //if Assigned(FOnDrawText) then
   //  FOnDrawText(Self, PaintInfo.Canvas, PaintInfo.Node, PaintInfo.Column, Text, CellRect, DefaultDraw);
 
   // Modified by ichin 2024-05-30 목 오전 6:07:45
+  var _Title: string := '';
+  var _Tag: Integer := 0;
+  var _TimeStamp: string := '';
   if Assigned(FOnDrawTitle) then
     FOnDrawTitle(Self, PaintInfo.Node,  _Title, _TimeStamp, _Tag);
 
