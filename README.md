@@ -25,7 +25,7 @@ Change Default Skin/Style
 
 ### 3rd party Library (Open source for Delphi developers) ###
 
-- SVGIconImageList <https://www.markdownguide.org>
+- SVGIconImageList by EtheaDev <https://github.com/EtheaDev/SVGIconImageList>
 - DOSCommand by TurboPack <https://github.com/TurboPack/DOSCommand>
 - Virtual-TreeView by JAM-Software <https://github.com/JAM-Software/Virtual-TreeView>
 
