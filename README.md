@@ -1,8 +1,12 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.6 - 06.05.2024**
+**Latest Version 0.9.7 - 06.07.2024**
 
-Change Default Skin/Style
+Some slight extension of the option
+- Without Checking Ollama alive on start,Use Beep sound, Save logs on close,
+- MRU Topic Max, MRU prompt Max, Add Popup Menu to ChattingBox,
+- v.0.9.6 ...
+- Change Default Skin/Style
 - Windows10 SlateGray to Windows11 Impressive Dark
 - Replace Indy Socket to System.Net.HttpClient (emb.) for Slim.
 - Replace Commercial Library to Free Component for ChattingBox
