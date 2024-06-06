@@ -841,7 +841,7 @@ object Form_About: TForm_About
         end
       end
       object TabSheet_Style: TTabSheet
-        Caption = 'Skin / Colors  '
+        Caption = 'Options'
         ImageIndex = 3
         object Label2: TLabel
           Left = 8
@@ -853,7 +853,7 @@ object Form_About: TForm_About
         end
         object SpeedButton_DefaultColor: TSpeedButton
           Left = 8
-          Top = 172
+          Top = 165
           Width = 52
           Height = 23
           Caption = 'Default'
@@ -862,7 +862,7 @@ object Form_About: TForm_About
         end
         object SpeedButton_CancelColors: TSpeedButton
           Left = 228
-          Top = 172
+          Top = 165
           Width = 52
           Height = 23
           Caption = 'Cancel'
@@ -878,7 +878,7 @@ object Form_About: TForm_About
         end
         object SpeedButton_ApplyColors: TSpeedButton
           Left = 288
-          Top = 172
+          Top = 165
           Width = 52
           Height = 23
           Caption = 'Apply'
@@ -1069,13 +1069,112 @@ object Form_About: TForm_About
             StyleElements = [seClient, seBorder]
           end
         end
+        object GroupBox3: TGroupBox
+          Left = 8
+          Top = 193
+          Width = 338
+          Height = 100
+          Caption = 'More control ...'
+          TabOrder = 2
+          object Label10: TLabel
+            Left = 16
+            Top = 74
+            Width = 83
+            Height = 15
+            Caption = 'MRU Topic Max'
+            StyleElements = [seClient, seBorder]
+          end
+          object Label11: TLabel
+            Left = 170
+            Top = 74
+            Width = 89
+            Height = 15
+            Caption = 'Sub Prompt Max'
+            StyleElements = [seClient, seBorder]
+          end
+          object CheckBox_BeepSound: TCheckBox
+            Left = 16
+            Top = 23
+            Width = 113
+            Height = 17
+            Caption = 'Use Beep Sound'
+            Ctl3D = False
+            ParentCtl3D = False
+            TabOrder = 0
+            StyleElements = [seClient, seBorder]
+            OnClick = CheckBox_BeepSoundClick
+          end
+          object CheckBox_SaveOnCLose: TCheckBox
+            AlignWithMargins = True
+            Left = 179
+            Top = 23
+            Width = 125
+            Height = 17
+            Caption = 'Save logs on close'
+            TabOrder = 1
+            StyleElements = [seClient, seBorder]
+            OnClick = CheckBox_SaveOnCLoseClick
+          end
+          object CheckBox_NoCheckAlive: TCheckBox
+            Left = 16
+            Top = 48
+            Width = 297
+            Height = 17
+            Caption = 'Without Checking Ollama Alive on Start ( * Restart)'
+            TabOrder = 2
+            StyleElements = [seClient, seBorder]
+            OnClick = CheckBox_NoCheckAliveClick
+          end
+          object ComboBox_MRUROOT_Max: TComboBox
+            Left = 110
+            Top = 71
+            Width = 40
+            Height = 23
+            Style = csDropDownList
+            ItemIndex = 3
+            TabOrder = 3
+            Text = '25'
+            StyleElements = [seClient, seBorder]
+            OnChange = ComboBox_MRUROOT_MaxChange
+            Items.Strings = (
+              '10'
+              '15'
+              '20'
+              '25'
+              '30'
+              '35'
+              '40'
+              '45'
+              '50')
+          end
+          object ComboBox_MRUCHILD_Max: TComboBox
+            Left = 275
+            Top = 71
+            Width = 40
+            Height = 23
+            Style = csDropDownList
+            ItemIndex = 3
+            TabOrder = 4
+            Text = '25'
+            StyleElements = [seClient, seBorder]
+            OnChange = ComboBox_MRUCHILD_MaxChange
+            Items.Strings = (
+              '10'
+              '15'
+              '20'
+              '25'
+              '30'
+              '35'
+              '40'
+              '45'
+              '50')
+          end
+        end
       end
     end
   end
   object ColorDialog_Colors: TColorDialog
-    Ctl3D = False
-    Options = [cdFullOpen]
-    Left = 105
-    Top = 306
+    Left = 289
+    Top = 316
   end
 end

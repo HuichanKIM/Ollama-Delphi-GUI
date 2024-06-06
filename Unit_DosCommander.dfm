@@ -4,7 +4,7 @@ object Form_DosCommander: TForm_DosCommander
   ActiveControl = Button_OK
   BorderStyle = bsDialog
   Caption = 'Dos Commander'
-  ClientHeight = 158
+  ClientHeight = 141
   ClientWidth = 396
   Color = clWindow
   Ctl3D = False
@@ -127,7 +127,7 @@ object Form_DosCommander: TForm_DosCommander
   end
   object Button_OK: TButton
     Left = 244
-    Top = 120
+    Top = 108
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -136,7 +136,7 @@ object Form_DosCommander: TForm_DosCommander
   end
   object Button_Cancel: TButton
     Left = 332
-    Top = 120
+    Top = 108
     Width = 53
     Height = 25
     Caption = 'Cancel'

@@ -74,7 +74,7 @@ begin
       Raise;
     end
   else
-    ShowMessage('Not Supported Image Format'#13#10'  - supported format - (*.jpg, *.jpeg, *.png, *.webp,*.gif)');
+    ShowMessage('Not Supported Image Format'#13#10'  - supported format - (*.jpg, *.jpeg, *.png, *.webp, *.gif)');
 
   FDropFlag := 0;
 end;

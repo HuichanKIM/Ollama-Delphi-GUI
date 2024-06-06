@@ -17,11 +17,11 @@ uses
   VirtualTrees.BaseTree in 'Include\VirtualTrees.BaseTree.pas',
   VirtualTrees in 'Include\VirtualTrees.pas',
   Unit_Welcome in 'Unit_Welcome.pas' {Frame_Welcome: TFrame},
-  Unit_Main in 'Unit_Main.pas' {Form_RestOllama: T},
+  Unit_Main in 'Unit_Main.pas' {Form_RestOllama},
   Unit_AliveOllama in 'Unit_AliveOllama.pas' {TForm_AliveOllama},
   Unit_Translator in 'Unit_Translator.pas' {TForm_Translator},
-  Unit_About in 'Unit_About.pas' {TForm_About: Form_About},
-  Unit_RequestDialog in 'Unit_RequestDialog.pas' {Form_RequestDialog: T},
+  Unit_About in 'Unit_About.pas' {TForm_About},
+  Unit_RequestDialog in 'Unit_RequestDialog.pas' {Form_RequestDialog},
   Unit_ChattingBoxClass in 'Unit_ChattingBoxClass.pas' {Frame_ChattingBoxClass: TFrame},
   Unit_DosCommander in 'Unit_DosCommander.pas' {TForm_DosCommander};
 

@@ -153,7 +153,10 @@ begin
     PostMessage(Form_RestOllama.Handle, NETHTTP_MESSAGE, NETHTTP_MESSAGE_ALIVE, Ord(GV_AliveOllamaFlag));
     LogReturn(_response+#13#10+c_Alive[GV_AliveOllamaFlag]);
     if not GV_AliveOllamaFlag then
-      Memo_Alive.lines.Add(c_Warning);
+      begin
+        Memo_Alive.lines.Add(c_Warning);
+        Memo_Alive.lines.Add(GC_CRLF+'* On Restart, Checking Ollama Alive - On.');
+      end;
   except
     on E: Exception do
       LogReturn(E.ClassName + ': ' + E.Message);

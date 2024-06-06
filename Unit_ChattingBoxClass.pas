@@ -44,6 +44,13 @@ type
     pmn_Delete: TMenuItem;
     pmn_CopyText: TMenuItem;
     pmn_ColorSettings: TMenuItem;
+    N2: TMenuItem;
+    pmn_TextToSpeech: TMenuItem;
+    pmn_ScrollToTop: TMenuItem;
+    pmn_ScrollToBottom: TMenuItem;
+    pmn_ClearChattingBox: TMenuItem;
+    N3: TMenuItem;
+    pmn_ShowLogs: TMenuItem;
     procedure VST_ChattingBoxGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
     procedure VST_ChattingBoxBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
     procedure VST_ChattingBoxEditing(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean);
@@ -232,6 +239,7 @@ procedure TFrame_ChattingBoxClass.PopupMenu1Popup(Sender: TObject);
 begin
   pmn_CopyText.Enabled := VST_ChattingBox.SelectedCount > 0;
   pmn_Delete.Enabled :=   VST_ChattingBox.SelectedCount > 0;
+  pmn_TextToSpeech.Enabled := VST_ChattingBox.SelectedCount > 0;
 end;
 
 procedure TFrame_ChattingBoxClass.SetVST_NBodyFontSize(const Value: Integer);

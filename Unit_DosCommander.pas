@@ -13,7 +13,7 @@ uses
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.StdCtrls,
-  DosCommand;
+  DosCommand, Vcl.Buttons;
 
 const
   DOS_MESSAGE = WM_USER + 1;
@@ -27,7 +27,10 @@ type
     FDosCommand: TDosCommand;
     FDosTexts: TStrings;
     FCommand: string;
+    FBatchMemo: TMemo;
   private
+    FBatchRunning: Boolean;
+    procedure DosCommand1NewLine(ASender: TObject; const ANewLine: string; AOutputType: TOutputType);
   public
     constructor Create();
     destructor Destroy; override;
@@ -37,10 +40,13 @@ type
     function Dos_Execute(const Acmd: string): Boolean;
     function Dos_Exit(): Boolean;
     procedure Dos_CommandBatch(ACmd: string);
+    procedure Dos_CommandBatch2(ACmd: string);
     function Get_DosResult(AFlag: Integer = 0): string;
     { property }
     property DosCommand: TDosCommand  read FDosCommand;
     property Command: string  read FCommand;
+    property BatchRunning: Boolean  read FBatchRunning write FBatchRunning;
+    property BatchMemo: TMemo  read FBatchMemo  write FBatchMemo;
   end;
 
 type
@@ -75,6 +81,7 @@ implementation
 
 uses
   WinAPi.ShellAPI,
+  VCl.Themes,
   Unit_Common,
   Unit_Main;
 
@@ -87,6 +94,7 @@ constructor TG_DosCommand.Create;
 begin
   FDosTexts := TStringList.Create;
   FDosCommand :=  TDosCommand.Create(nil);
+  FBatchRunning := False;
   with FDosCommand do
   begin
     InputToOutput := False;
@@ -112,6 +120,8 @@ end;
 
 procedure TG_DosCommand.Dos_CommandBatch(ACmd: string);
 begin
+  if Trim(Acmd) = ''  then Exit;
+
   if FDosCommand.IsRunning then
     FDosCommand.Stop;
   var _batchfile: string := CV_AppPath+'ollamarun.bat';
@@ -124,6 +134,7 @@ begin
     Add('cd ' + CV_AppPath);
     Add('@echo on');
     Add(Acmd);
+    Add('pause');
 
     _success := IOUtils_WriteAllText(_batchfile, Text);
   finally
@@ -133,25 +144,88 @@ begin
   if _success then
   begin
     Sleep(10);
-    ShellExecute(0, PChar('Open'), PChar(_batchfile), nil, PChar(CV_AppPath), SW_SHOW) ;
+    ShellExecute(0, PChar('open'), PChar(_batchfile), nil, PChar(CV_AppPath), SW_SHOWNORMAL) ;
+  end;
+end;
+
+procedure TG_DosCommand.Dos_CommandBatch2(ACmd: string);
+begin
+  if Trim(Acmd) = ''  then Exit;
+
+  FBatchMemo.Lines.Clear;
+  if FDosCommand.IsRunning then
+    FDosCommand.Stop;
+
+  var _batchfile: string := CV_AppPath+'ollamarun2.bat';
+  var _commands: TStrings := TStringList.Create;
+  var _success: Boolean := False;
+  with _commands do
+  try
+    Add('@echo off');
+    Add('rem Ollama Delphi GUI');
+    Add('cd ' + CV_AppPath);
+    Add('@echo on');
+    Add(Acmd);
+
+    _success := IOUtils_WriteAllText(_batchfile, _commands.Text);
+  finally
+    Free;
+  end;
+
+  if _success then
+  begin
+    FBatchRunning := True;
+    FCommand := Acmd;
+    with FDosCommand do
+      try
+        OnNewLine := DosCommand1NewLine;
+        CommandLine := _batchfile;
+        CurrentDir := CV_AppPath;
+        OutputLines := FBatchMemo.Lines;
+
+        Execute;
+      except
+        FBatchRunning := False;
+        Abort;
+      end;
+
+    repeat
+      Sleep(100);
+      Application.ProcessMessages;
+    until (FDosCommand.EndStatus <> esStill_Active);
+
+    FBatchRunning := False;
+  end;
+end;
+
+procedure TG_DosCommand.DosCommand1NewLine(ASender: TObject; const ANewLine: string; AOutputType: TOutputType);
+begin
+  if AOutputType = otEntireLine then
+  begin
+    FBatchMemo.Lines.Add(ANewLine);
   end;
 end;
 
 procedure TG_DosCommand.DosCommandExecuteError(ASender: TObject; AE: Exception; var AHandled: Boolean);
 begin
+  if FBatchRunning then Exit;
   FDosTexts.Text := 'Error !!!'+GC_CRLF + AE.Message;
   PostMessage(Form_RestOllama.Handle, DOS_MESSAGE, DOS_MESSAGE_ERROR, 0);
 end;
 
 procedure TG_DosCommand.DosCommandTerminated(Sender: TObject);
 begin
+  if FBatchRunning then Exit;
   // Finish ...
   PostMessage(Form_RestOllama.Handle, DOS_MESSAGE, DOS_MESSAGE_FINISH, 0);
 end;
 
 function TG_DosCommand.Dos_Execute(const Acmd: string): Boolean;
 begin
+  if Trim(Acmd) = ''  then Exit;
+
   Result := False;
+  FBatchRunning := False;
   FDosCommand.OnTerminated := nil;
   if FDosCommand.IsRunning then
     FDosCommand.Stop;

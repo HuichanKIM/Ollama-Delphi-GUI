@@ -14,10 +14,6 @@ uses
   Vcl.ExtCtrls,
   Vcl.ComCtrls;
 
-const
-  MRU_MAX_ROOT  = 20;
-  MRU_MAX_CHILD = 30;
-
 type
   TTopicData = record
     td_Topic: string;
@@ -363,7 +359,7 @@ begin
                   begin
                     Write_Object( _Writer,  _PromptData);
                     Inc(_countsub);
-                    if _countsub > MRU_MAX_CHILD then
+                    if _countsub >= MRU_MAX_CHILD then
                     Break;
                   end;
                   _Sub := _Sub.getNextSibling;
@@ -372,7 +368,7 @@ begin
             end;
 
             Inc(_countroot);
-            if _countroot > MRU_MAX_ROOT then
+            if _countroot >= MRU_MAX_ROOT then
             Break;
  L_Return:
             _Tree := _Tree.getNextSibling;

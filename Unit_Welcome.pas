@@ -46,6 +46,8 @@ begin
   FAnimationFlag := Value;
   SkAnimatedImage_Alive.Animation.Enabled := Value;
   SkAnimatedImage_Alive.Visible := Value;
+  if not Value then
+  SkSvg_ICon.Opacity := 255;
 end;
 
 end.

@@ -30,8 +30,10 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  GC_Version     = 'ver 0.9.6 (2024.06.05)';
-  GC_MainCaption = 'Ollama Client GUI - '+GC_Version;
+  GC_Version0     = 'ver. 0.9.7';
+  GC_Version1     = 'ver. 0.9.7 (2024.06.06)';
+  GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
+  GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights  = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
 
 const
@@ -52,6 +54,7 @@ const
 
 procedure InitializePaths();
 function Is_Hangul(const AText: string): Boolean;
+function Is_ExternalCmd(const AText: string): Boolean;
 function Get_ReplaceSpecialChar(const AText: string): string;
 function Get_ReplaceSpecialChar2(const AText: string): string;
 function GetUsersWindowsLanguage: string;
@@ -77,6 +80,11 @@ var
   CV_LocaleID: string = 'en';
 
 var
+  MRU_MAX_ROOT:Integer   = 20;
+  MRU_MAX_CHILD: Integer = 30;
+
+var
+  GV_CheckingAliveStart: Boolean = True;
   GV_ReservedColor: array [0..3] of TColor;
   GV_ApplyedSkin: Boolean = False;
   GV_AliveOllamaFlag: Boolean = False;
@@ -116,25 +124,30 @@ begin
 end;
 
 const
-  C_RegRep1: string = '[#$%&]';
-  C_RegRep2: string = '["\{\}:;\[\]]';  // - json reserved only / all special char - '[^\w]';
-  C_RegHan3: string  = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä
-                                                 - Regular expression for Korean language test }
+  C_RegEx_Rep1: string = '[#$%&]';
+  C_RegEx_Rep2: string = '["\{\}:;\[\]]';  // - json reserved only / all special char - '[^\w]';
+  C_RegEx_Han0: string = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä- Regular expression for Korean language test }
+  C_RegEx_Dos0: string = '/(?:.*serve.*)|(?:.*create.*)|(?:.*run.*)|(?:.*pull.*)|(?:.*push.*)|(?:.*cp.*)|(?:.*rm.*)/';
 
 function Is_Hangul(const AText: string): Boolean;
 begin
   var _prestr: string := Copy(AText, 1, Min(64, Length(AText)));
-  Result := System.RegularExpressions.TRegEx.IsMatch(_prestr, C_RegHan3);
+  Result := System.RegularExpressions.TRegEx.IsMatch(_prestr, C_RegEx_Han0);
+end;
+
+function Is_ExternalCmd(const AText: string): Boolean;
+begin
+  Result := System.RegularExpressions.TRegEx.IsMatch(AText, C_RegEx_Dos0);
 end;
 
 function Get_ReplaceSpecialChar(const AText: string): string;
 begin
-  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegRep1, ' ');
+  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep1, ' ');
 end;
 
 function Get_ReplaceSpecialChar2(const AText: string): string;
 begin
-  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegRep2, ' ');
+  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep2, ' ');
 end;
 
 function IOUtils_ReadAllText(const AFilePath: string=''): string;
@@ -204,13 +217,16 @@ begin
     begin
       _Ss := '...';
       var _LastS: string := AText;
-      for var _i := 1 to Length(AText) div 2 do
+      var _length: Integer := Length(AText);
+      if AMiddle then _length := Length(AText) div 2;
+      for var _i := 1 to _length do
       begin
         _LastS := _Ss;
         if AMiddle then
            _Ss := Copy(AText, 1, _i) + ' ... ' + Copy(AText, Length(AText) - _i + 1, _i)
          else
            _Ss := Copy(AText, 1, _i) + ' ... ';
+
         GetTextExtentPoint32W(ACanvas.Handle, _Ss, Length(_Ss), _Sz);
         if _Sz.cx > _RectWidth then
           Break;
@@ -561,6 +577,9 @@ begin
 end;
 
 { Help codes ...
+
+*
+ShellExecute(0, nil, 'cmd.exe', PChar('/C ' + AnsiQuotedStr(program_path, Char(34))+ ' -fg'), PChar(program_path), SW_HIDE);
 
 Result := MyString;
 StartPos := Pos('<', Result);

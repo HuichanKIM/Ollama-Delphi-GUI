@@ -162,7 +162,7 @@ object Form_RestOllama: TForm_RestOllama
           Top = 22
           Width = 23
           Height = 25
-          Hint = 'Request for List Models'
+          Hint = 'Request / Update for List Models'
           ImageIndex = 9
           ImageName = 'All\ic_settings_applications_48px'
           Images = SVGIconVirtualImageList1
@@ -184,9 +184,7 @@ object Form_RestOllama: TForm_RestOllama
             'phi3'
             'llama3'
             'gemma'
-            'llava'
-            'codegemma'
-            'dolphin-mistral')
+            'llava')
         end
       end
       object GroupBox_Llava: TGroupBox
@@ -270,6 +268,7 @@ object Form_RestOllama: TForm_RestOllama
           ReadOnly = True
           RowSelect = True
           ShowHint = False
+          ShowLines = False
           TabOrder = 0
           OnChange = TreeView_TopicsChange
           OnClick = TreeView_TopicsClick
@@ -475,7 +474,7 @@ object Form_RestOllama: TForm_RestOllama
         Align = alTop
         Alignment = taRightJustify
         BevelOuter = bvNone
-        Caption = 'Tools ...  '
+        ShowCaption = False
         TabOrder = 3
         StyleElements = [seClient, seBorder]
         object SpeedButton_DefaultSet: TSpeedButton
@@ -497,10 +496,11 @@ object Form_RestOllama: TForm_RestOllama
           Height = 19
           Action = Action_InetAlive
           Align = alLeft
+          Images = SVGIconVirtualImageList1
         end
         object SpeedButton_SystemInfo: TSpeedButton
           AlignWithMargins = True
-          Left = 82
+          Left = 56
           Top = 3
           Width = 23
           Height = 19
@@ -516,19 +516,19 @@ object Form_RestOllama: TForm_RestOllama
         end
         object SpeedButton_SelectionColor: TSpeedButton
           AlignWithMargins = True
-          Left = 56
+          Left = 211
           Top = 3
           Width = 20
           Height = 19
+          Margins.Right = 10
           Action = Action_SelectionColor
-          Align = alLeft
+          Align = alRight
           Images = SVGIconVirtualImageList1
-          ExplicitLeft = 35
-          ExplicitHeight = 22
+          ExplicitLeft = 167
         end
         object SpeedButton_Beep: TSpeedButton
           AlignWithMargins = True
-          Left = 111
+          Left = 85
           Top = 3
           Width = 23
           Height = 19
@@ -537,6 +537,35 @@ object Form_RestOllama: TForm_RestOllama
           Align = alLeft
           Images = SVGIconVirtualImageList1
           ExplicitLeft = 130
+        end
+        object SpeedButton_Help: TSpeedButton
+          AlignWithMargins = True
+          Left = 114
+          Top = 3
+          Width = 21
+          Height = 19
+          Hint = 'Help / Shortcuts'
+          Align = alLeft
+          ImageIndex = 36
+          ImageName = 'ic_help_outline_24px'
+          Images = SVGIconVirtualImageList1
+          OnClick = SpeedButton_HelpClick
+          ExplicitLeft = 167
+        end
+        object Label1: TLabel
+          AlignWithMargins = True
+          Left = 141
+          Top = 3
+          Width = 64
+          Height = 19
+          Align = alClient
+          Alignment = taRightJustify
+          Caption = 'Skin -'
+          Layout = tlCenter
+          StyleElements = [seClient, seBorder]
+          ExplicitLeft = 175
+          ExplicitWidth = 30
+          ExplicitHeight = 15
         end
       end
       object GroupBox_GlobalFontSize: TGroupBox
@@ -1134,6 +1163,7 @@ object Form_RestOllama: TForm_RestOllama
             Top = 23
             Width = 710
             Height = 684
+            Cursor = crHandPoint
             Margins.Left = 1
             Align = alClient
             BevelInner = bvNone
@@ -1185,6 +1215,7 @@ object Form_RestOllama: TForm_RestOllama
               Top = 0
               Width = 15
               Height = 20
+              Cursor = crHandPoint
               Hint = 'Goto Chatting'
               Margins.Left = 0
               Align = alLeft
@@ -1229,6 +1260,7 @@ object Form_RestOllama: TForm_RestOllama
               Caption = 'Save logs on close'
               TabOrder = 1
               StyleElements = [seClient, seBorder]
+              OnClick = CheckBox_SaveOnCLoseClick
             end
           end
         end
@@ -1354,14 +1386,12 @@ object Form_RestOllama: TForm_RestOllama
       Top = 3
       Width = 45
       Height = 24
-      Cursor = crHandPoint
       Align = alLeft
       Alignment = taRightJustify
       AutoSize = False
       Caption = 'Request'
       Layout = tlCenter
       StyleElements = [seClient, seBorder]
-      OnClick = Label_StartRequestClick
     end
     object Label_Caption: TLabel
       Left = 246
@@ -1533,14 +1563,14 @@ object Form_RestOllama: TForm_RestOllama
     MaxLogParams = 4096
     OnHttpRestProg = HttpRest_OllamaHttpRestProg
     OnRestRequestDone = HttpRest_OllamaRestRequestDone
-    Left = 284
+    Left = 404
     Top = 136
   end
   object ActionList_Ollma: TActionList
     Images = SVGIconVirtualImageList1
     OnUpdate = ActionList_OllmaUpdate
-    Left = 280
-    Top = 216
+    Left = 416
+    Top = 208
     object Action_Options: TAction
       Hint = 'Settings Visable / Toggle'
       ImageIndex = 45
@@ -2929,8 +2959,8 @@ object Form_RestOllama: TForm_RestOllama
   object Timer_Repeater: TTimer
     Enabled = False
     OnTimer = Timer_RepeaterTimer
-    Left = 284
-    Top = 288
+    Left = 460
+    Top = 280
   end
   object OpenPictureDialog1: TOpenPictureDialog
     DefaultExt = '.jpg'

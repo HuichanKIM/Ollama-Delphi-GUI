@@ -69,7 +69,8 @@ begin
 
   var _LangSource: string := GC_LanguageCode[ ACodeFrom ];
   var _LangTarget: string := GC_LanguageCode[ ACodeTo ];
-  var _URI := TURI.Create('https://translate.googleapis.com/translate_a/single');
+  var _Head: string := 'https://translate.googleapis.com/translate_a/single';
+  var _URI := TURI.Create(_Head);
   var _query := Trim(AText);
   with _URI do
   begin
@@ -112,6 +113,7 @@ begin
   end;
 end;
 
+// To Do : ASync Effects : [ TTask.Run -> PostMessage ] ?
 function Get_GoogleTranslatorEx(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string): string;
 begin
   var _trans := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
@@ -160,7 +162,7 @@ begin
   var _reqdisplay: string := FRequest;
   var _rect: TRect := Rect(0,0,430,30);
   if _reqdisplay <> '' then
-  _reqdisplay := Get_TextWithEllipsis(True, Self.Canvas, _rect, FRequest);
+  _reqdisplay := Get_TextWithEllipsis(False, Self.Canvas, _rect, FRequest);
 
   CheckBox_Pushtochatbox.Enabled := (AUser = 0) and PushFlag;
   if FTransResult <> '' then

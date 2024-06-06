@@ -82,8 +82,8 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
         Name = 'ollama4'
       end>
     ImageCollection = ImageCollection1
-    Left = 232
-    Top = 152
+    Left = 72
+    Top = 112
   end
   object ImageCollection1: TImageCollection
     Images = <
@@ -411,13 +411,13 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
               000049454E44AE426082}
           end>
       end>
-    Left = 176
-    Top = 88
+    Left = 72
+    Top = 40
   end
   object PopupMenu1: TPopupMenu
     OnPopup = PopupMenu1Popup
-    Left = 328
-    Top = 288
+    Left = 72
+    Top = 184
     object pmn_ColorSettings: TMenuItem
       Caption = 'Set Text Colors'
       ShortCut = 32837
@@ -438,6 +438,32 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
       Caption = 'Delete Selected Node'
       ShortCut = 46
       OnClick = pmn_DeleteClick
+    end
+    object pmn_ClearChattingBox: TMenuItem
+      Caption = 'Clear ChattingBox'
+      ShortCut = 121
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object pmn_ScrollToTop: TMenuItem
+      Caption = 'Scroll to Top'
+      ShortCut = 32852
+    end
+    object pmn_ScrollToBottom: TMenuItem
+      Caption = 'Scroll to Bottom'
+      ShortCut = 32834
+    end
+    object pmn_TextToSpeech: TMenuItem
+      Caption = 'Text To Speech'
+      ShortCut = 32854
+    end
+    object N3: TMenuItem
+      Caption = '-'
+    end
+    object pmn_ShowLogs: TMenuItem
+      Caption = 'Show Logs'
+      ShortCut = 32844
     end
   end
 end

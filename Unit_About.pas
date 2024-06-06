@@ -40,7 +40,6 @@ type
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
-    ColorDialog_Colors: TColorDialog;
     Shape_Header: TShape;
     Shape_Body: TShape;
     Shape_Footer: TShape;
@@ -65,6 +64,15 @@ type
     Label_OllamaWeb: TLabel;
     Label7: TLabel;
     Label_OllamaGitHub: TLabel;
+    GroupBox3: TGroupBox;
+    CheckBox_BeepSound: TCheckBox;
+    ColorDialog_Colors: TColorDialog;
+    CheckBox_SaveOnCLose: TCheckBox;
+    CheckBox_NoCheckAlive: TCheckBox;
+    Label10: TLabel;
+    Label11: TLabel;
+    ComboBox_MRUROOT_Max: TComboBox;
+    ComboBox_MRUCHILD_Max: TComboBox;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -75,8 +83,14 @@ type
     procedure SpeedButton_ApplySkinClick(Sender: TObject);
     procedure SpeedButton_CancelColorsClick(Sender: TObject);
     procedure SpeedButton_ApplyColorsClick(Sender: TObject);
+    procedure CheckBox_BeepSoundClick(Sender: TObject);
+    procedure CheckBox_SaveOnCLoseClick(Sender: TObject);
+    procedure CheckBox_NoCheckAliveClick(Sender: TObject);
+    procedure ComboBox_MRUCHILD_MaxChange(Sender: TObject);
+    procedure ComboBox_MRUROOT_MaxChange(Sender: TObject);
   private
     FShow_Flag: Integer;
+    FUpdateLockFlag: Boolean;
     procedure Update_Shortcuts;
     procedure StylesList_Refresh;
   public
@@ -108,11 +122,11 @@ const
   C_Shortcut_Desc: array [0..26] of string = ('Show Request Dialog','Send Request','Goto Welcome.','Goto Chatting Room','Translation of Prompt',
                                               'Translation of Message','(Reserved)','(Reserved)','(Reserved)','Clear Chattings',
                                               'Ollama Alive ?','Scroll to Bottom','Copy the Message.','Delete the Message.','Skin / Colors',
-                                              'Load Image (llava)','Help - ShortCuts','Show Logs.','Show/Hide Option Panel','Beep Effect','Save All Message to Text File',
-                                              'Scroll to Top','TextToSpeech on the Message','Show About',
+                                              'Load Image (llava)','Help - ShortCuts','Show Logs.','Show/Hide Option Panel','Beep Effect','Save All Messages to Text File',
+                                              'Scroll to Top','TextToSpeech on Message','Show About',
                                               'Abort Connection.','Default / Refresh','Close / Exit.');
 
-  // CodeInsight Bug ?  - When use ''' (multi line strings), raise error with "International UTF8-Char" ...
+  // CodeInsight Bug ?  - When use ''' (multi line string), raise error with "International UTF8-Char" ...
   C_DevelopInfo: string =
         'Development Tool  (GUI)'+#13#10+
         'Embarcadero Delphi 12.1  ( Object Pascal )'+#13#10#13#10+
@@ -132,7 +146,7 @@ function Get_HelpShortcuts(): string;
 begin
   var _list: TStrings := TStringList.Create;
   try
-    _list.Add('* Shortcuts ...' + #13#10);
+    _list.Add('* Shortcuts -------------------------' + #13#10);
     for var _i := 0 to Length(C_Shortcut_Keys) - 1 do
       with _list do
       begin
@@ -147,11 +161,46 @@ end;
 
 { TForm_About. }
 
+procedure TForm_About.CheckBox_BeepSoundClick(Sender: TObject);
+begin
+  if FUpdateLockFlag then Exit;
+  Form_RestOllama.DoneSoundFlag := CheckBox_BeepSound.Checked;
+end;
+
+procedure TForm_About.CheckBox_NoCheckAliveClick(Sender: TObject);
+begin
+  if FUpdateLockFlag then Exit;
+  GV_CheckingAliveStart := not CheckBox_NoCheckAlive.Checked;
+end;
+
+procedure TForm_About.CheckBox_SaveOnCLoseClick(Sender: TObject);
+begin
+  if FUpdateLockFlag then Exit;
+  Form_RestOllama.SaveLogsOnCLoseFlag := CheckBox_SaveOnCLose.Checked;
+end;
+
+const
+ C_MRUMAX: array [0..8] of Integer = (10,15,20,25,30,35,40,45,50);
+
+procedure TForm_About.ComboBox_MRUROOT_MaxChange(Sender: TObject);
+begin
+  if FUpdateLockFlag then Exit;
+  if ComboBox_MRUROOT_Max.ItemIndex >= 0 then
+    MRU_MAX_ROOT := C_MRUMAX[ComboBox_MRUROOT_Max.ItemIndex];
+end;
+
+procedure TForm_About.ComboBox_MRUCHILD_MaxChange(Sender: TObject);
+begin
+  if FUpdateLockFlag then Exit;
+  if ComboBox_MRUCHILD_Max.ItemIndex >= 0 then
+    MRU_MAX_CHILD := C_MRUMAX[ComboBox_MRUCHILD_Max.ItemIndex];
+end;
+
 procedure TForm_About.FormCreate(Sender: TObject);
 begin
   FShow_Flag := 0;
   StylesList_Refresh;
-  Label_Title.Caption := GC_MainCaption;
+  Label_Title.Caption := GC_MainCaption1;
   if TStyleManager.IsCustomStyleActive then
   begin
     ListView_Shortcuts.StyleElements := [seBorder];
@@ -165,7 +214,7 @@ end;
 
 procedure TForm_About.FormShow(Sender: TObject);
 const
-  c_Caption: array [0..3] of string = ('About','','','Skin / Color Setting');
+  c_Caption: array [0..3] of string = ('About','','','Skin / Colors / Options');
 begin
   Self.Caption := c_Caption[FShow_Flag];
   var _color0, _color1, _color2, _color3: TColor;
@@ -179,6 +228,14 @@ begin
   Label_Header.Font.Color :=     _color1;
   Label_Body.Font.Color :=       _color2;
   Label_Footer.Font.Color :=     _color3;
+
+  FUpdateLockFlag := True;
+  ComboBox_MRUROOT_Max.ItemIndex :=  (MRU_MAX_ROOT div 5) -2;
+  ComboBox_MRUCHILD_Max.ItemIndex := (MRU_MAX_CHILD div 5) -2;
+  CheckBox_NoCheckAlive.Checked :=   not GV_CheckingAliveStart;
+  CheckBox_BeepSound.Checked :=      Form_RestOllama.DoneSoundFlag;
+  CheckBox_SaveOnCLose.Checked :=    Form_RestOllama.SaveLogsOnCLoseFlag;
+  FUpdateLockFlag := False;
 
   TabSheet_Style.TabVisible := FShow_Flag = 3;  // Cannot Focus Error - When Change Style Event / Bug ?
   PageControl1.ActivePageIndex := FShow_Flag;   // 0 or 3

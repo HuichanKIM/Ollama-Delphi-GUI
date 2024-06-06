@@ -6,6 +6,11 @@ unit Unit_Main;
 {$H+}    { Use long strings                    }
 {$J+}    { Allow typed constant to be modified }
 
+{ Modified History to Original Source
+  ln 1680 : procedure TSslHttpRest.TriggerRequestDone2; in OverbyteIcsSslHttpRest;
+     1767   - XferSize := FResponseSize;
+}
+
 interface
 
 uses
@@ -235,6 +240,8 @@ type
     SpeedButton_ReqDummy: TSpeedButton;
     Shape_OllamaAlive: TShape;
     Action_HelpShortcuts: TAction;
+    SpeedButton_Help: TSpeedButton;
+    Label1: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -299,6 +306,7 @@ type
     procedure SpeedButton_LlavaClick(Sender: TObject);
     procedure SpeedButton_BeepClick(Sender: TObject);
     procedure SpeedButton_SaveAllLogesClick(Sender: TObject);
+    procedure SpeedButton_HelpClick(Sender: TObject);
     procedure TreeView_TopicsClick(Sender: TObject);
     procedure TreeView_TopicsDblClick(Sender: TObject);
     procedure TreeView_TopicsCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
@@ -312,7 +320,7 @@ type
     procedure TrackBar_RateChange(Sender: TObject);
     procedure TrackBar_VolumeChange(Sender: TObject);
     procedure Label_DescriptionClick(Sender: TObject);
-    procedure Label_StartRequestClick(Sender: TObject);
+    procedure CheckBox_SaveOnCLoseClick(Sender: TObject);
   private
     FFrameWelcome: TFrame_Welcome;
     FModelsList: TStringList;
@@ -334,6 +342,7 @@ type
     FTTS_EngineName: string;
     FMemMonitoringFlag: Boolean;
     FDoneSoundFlag: Boolean;
+    FSaveLogsOnCLoseFlag: Boolean;
     procedure Load_ConfigIni(const AFlag: Integer = 0);
     procedure Save_ConfigIni(const AFlag: Integer = 0);
     procedure Common_RestSettings(const Aflag: Integer = 0);
@@ -375,17 +384,19 @@ type
     function GetTTS_Speaking: Boolean;
     function Get_TTSText(): string;
     procedure Set_Can_Focus(AControl: TWinControl);
+    procedure SetSaveLogsOnCLoseFlag(const Value: Boolean);
   public
     procedure Do_ChangeStyleCustom(const AFlag: Integer = 0);
     procedure Do_TTS_Speak(const AFlag: Integer; const ASource: string);
     // Property ...
-    property RequestingFlag: Boolean      read FRequestingFlag     write SetRequestingFlag;
-    property Request_Type: TRequest_Type  read FRequest_Type       write SetRequest_Type;
-    property Topic_Seleced: string        read FTopic_Seleced      write SetTopicSeleced;
-    property Model_Selected: string       read FModel_Selected     write SetModelSelected;
-    property TTS_Speaking: Boolean        read GetTTS_Speaking     write SetTTS_Speaking;
-    property MemMonitoringFlag: Boolean   read FMemMonitoringFlag  write SetMemMonitoringFlag;
-    property DoneSoundFlag: Boolean       read FDoneSoundFlag      write SetDoneSoundFlag;
+    property RequestingFlag: Boolean       read FRequestingFlag       write SetRequestingFlag;
+    property Request_Type: TRequest_Type   read FRequest_Type         write SetRequest_Type;
+    property Topic_Seleced: string         read FTopic_Seleced        write SetTopicSeleced;
+    property Model_Selected: string        read FModel_Selected       write SetModelSelected;
+    property TTS_Speaking: Boolean         read GetTTS_Speaking       write SetTTS_Speaking;
+    property MemMonitoringFlag: Boolean    read FMemMonitoringFlag    write SetMemMonitoringFlag;
+    property DoneSoundFlag: Boolean        read FDoneSoundFlag        write SetDoneSoundFlag;
+    property SaveLogsOnCLoseFlag: Boolean  read FSaveLogsOnCLoseFlag  write SetSaveLogsOnCLoseFlag;
   end;
 
 var
@@ -512,7 +523,7 @@ end;
 procedure TForm_RestOllama.FormCreate(Sender: TObject);
 begin
   { Version ... }
-  Self.Caption := GC_MainCaption;
+  Self.Caption := GC_MainCaption0;
 
   {$WARNINGS OFF}
   ReportMemoryLeaksOnShutdown := (DebugHook <> 0);
@@ -520,11 +531,40 @@ begin
 
   Randomize;
   FInitialized := False;
-  InitializePaths();
+  Unit_Common.InitializePaths();
   FIniFileName := ExtractFileName(ChangeFileExt(ParamStr(0), '.ini'));
   FCookieFileName := ChangeFileExt(FIniFileName, '.cookie');
 
-  CheckAlive_Ollama(1);
+  var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
+  with _IniFile do
+  try
+    GV_CheckingAliveStart := ReadBool(C_SectionData, 'CheckAlive', True);
+  finally
+    Free;
+  end;
+
+  FFrameWelcome := TFrame_Welcome.Create(Self);
+  with FFrameWelcome do
+  begin
+    Parent := Self;
+    Align := alClient;
+    SkLabel_Intro.OnClick := SkLabel_IntroClick;
+    SkSvg_ICon.OnClick := SkLabel_IntroClick;
+    SkLabel_Clicktohome.OnClick := SkLabel_IntroClick;
+    SkLabel_Intro.Words[5].OnClick := SkLabel_IntroWords5Click;
+    Visible := True;
+    //
+    AnimationFlag := GV_CheckingAliveStart;
+    //
+    BringToFront;
+  end;
+
+  GV_AliveOllamaFlag := True;
+  if GV_CheckingAliveStart then
+  begin
+    GV_AliveOllamaFlag := False;
+    CheckAlive_Ollama(1);
+  end;
 
   if not GV_ApplyedSkin then
   begin
@@ -557,28 +597,13 @@ begin
   {... }
 
   Memo_LogWin.Lines.Clear;
-  Memo_LogWin.Lines.Add('* Welcome to Ollama GUI 2024 ');
+  Memo_LogWin.Lines.Add('* Welcome to Ollama Client GUI 2024 ');
   Memo_LogWin.Lines.Add('* Start at : '+ FormatDateTime('YYYY.MM.DD HH:NN:SS', Now));
   Memo_LogWin.Lines.Add('* Ini File: ' + FIniFileName);
 
   if FileExists(FCookieFileName) then
     Memo_LogWin.Lines.Add('* Cookie File: ' + FCookieFileName);
   Memo_LogWin.Lines.Add('');
-
-  FFrameWelcome := TFrame_Welcome.Create(Self);
-  with FFrameWelcome do
-  begin
-    Parent := Self;
-    Align := alClient;
-    SkLabel_Intro.OnClick := SkLabel_IntroClick;
-    SkSvg_ICon.OnClick := SkLabel_IntroClick;
-    SkLabel_Clicktohome.OnClick := SkLabel_IntroClick;
-    SkLabel_Intro.Words[5].OnClick := SkLabel_IntroWords5Click;
-    Visible := True;
-    AnimationFlag := True;
-
-    BringToFront;
-  end;
 
   TreeView_Topics.Items.Clear;
   FTopicsMRU := TMRU_Manager.Create(TreeView_Topics);
@@ -648,11 +673,20 @@ begin
   GV_ReservedColor[2] := GC_SkinBodyColor;
   GV_ReservedColor[3] := GC_SkinFootColor;
   // ------------------------------------------------------------------------------------------ //
-  Frame_ChattingBox.InitializeEx(GV_ReservedColor[1], GV_ReservedColor[2] , GV_ReservedColor[3] );
+  with Frame_ChattingBox do
+  begin
+    InitializeEx(GV_ReservedColor[1], GV_ReservedColor[2] , GV_ReservedColor[3] );
+    pmn_TextToSpeech.OnClick :=     SpeedButton_TTS.OnClick;
+    pmn_ScrollToTop.OnClick  :=     SpeedButton_ScrollTop.OnClick;
+    pmn_ScrollToBottom.OnClick :=   SpeedButton_ScrollBottom.OnClick;
+    pmn_ClearChattingBox.onClick := SpeedButton_ClearChatBox.OnClick;
+    pmn_ShowLogs.OnClick :=         Action_LogsExecute;
+  end;
   // ------------------------------------------------------------------------------------------ //
   FImage_DropDown := TImageDropDown<TJPEGImage>.Create(Image_Llva, Panel_ImageLlavaBase);
   // ------------------------------------------------------------------------------------------ //
-  FModel_Selected := 'phi3';
+  Label_Caption.Caption := 'Model / Topic';
+  FModel_Selected := '';
   FTopic_Seleced := '';
   Label_Description.Tag := 1;
   Label_Description.Caption := C_ModelDesc[0];
@@ -755,9 +789,14 @@ begin
       Topic_Seleced := TreeView_Topics.items.GetFirstNode.Text;
 
     FInitialized := True;
-    StatusBar1.Panels[0].Text := 'Waiting response from Ollama';
     StatusBar1.Panels[1].Text := 'Elapsed time';
-    Application.ProcessMessages;  // for Waiting Ollama Response ...
+    if GV_CheckingAliveStart then
+      begin
+        StatusBar1.Panels[0].Text := 'Waiting response from Ollama';
+        Application.ProcessMessages;  // for Waiting Ollama Response ...
+      end
+    else
+      Set_OllamaAlive(GV_AliveOllamaFlag);
 
     FFrameWelcome.BringToFront;
   end;
@@ -782,6 +821,7 @@ begin
   var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
   with _IniFile do
   try
+    //GV_CheckingAliveStart :=         ReadBool(C_SectionData,        'CheckAlive',             True);
     FLastRequest :=                  ReadString(C_SectionData,      'LastRequest',            'Who are you ?');
     V_Username :=                    ReadString(C_SectionData,      'Nickname',               'User');
     V_LoadModelIndex :=              ReadInteger(C_SectionData,     'Loaded_Model',            0);
@@ -792,9 +832,12 @@ begin
                                      ReadBool(C_SectionOptions,     'Auto_Trans',              False);
     FTTS_EngineName :=               ReadString(C_SectionOptions,   'TTS_Engine',              '');
     TrackBar_Volume.Position :=      ReadInteger(C_SectionOptions,  'TTS_Volume',              80);
-    CheckBox_SaveOnCLose.Checked :=  ReadBool(C_SectionOptions,     'Save_Logs',               False);
+    SaveLogsOnCLoseFlag :=           ReadBool(C_SectionOptions,     'Save_Logs',               False);
     CheckBox_UseTopicSeed.Checked := ReadBool(C_SectionOptions,     'Use_TopicSeed',           False);
     DoneSoundFlag :=                 ReadBool(C_SectionOptions,     'Done_Beep',               True);
+
+    MRU_MAX_ROOT :=                  ReadInteger(C_SectionOptions,  'Mru_Root_Max',            20);
+    MRU_MAX_CHILD :=                 ReadInteger(C_SectionOptions,  'Mru_Child_Max',           30);
 
     var _color0: Integer :=          ReadInteger(C_SectionOptions,  'Node_Selected_Color',     GC_SkinSelColor);
     var _color1: Integer :=          ReadInteger(C_SectionOptions,  'Node_HeaderFont_Color',   GC_SkinHeadColor);
@@ -813,6 +856,7 @@ begin
   var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
   with _IniFile do
   try
+    WriteBool(C_SectionData,        'CheckAlive',              GV_CheckingAliveStart);
     WriteString(C_SectionData,      'LastRequest',             FLastRequest);
     WriteString(C_SectionData,      'Nickname',                V_Username);
     WriteInteger(C_SectionData,     'Loaded_Model',            V_LoadModelIndex);
@@ -822,9 +866,12 @@ begin
     WriteBool(C_SectionOptions,     'Auto_Trans',              CheckBox_AutoTranslation.Checked);
     WriteString(C_SectionOptions,   'TTS_Engine',              FTTS_EngineName);
     WriteInteger(C_SectionOptions,  'TTS_Volume',              TrackBar_Volume.Position);
-    WriteBool(C_SectionOptions,     'Save_Logs',               CheckBox_SaveOnCLose.Checked);
+    WriteBool(C_SectionOptions,     'Save_Logs',               FSaveLogsOnCLoseFlag);
     WriteBool(C_SectionOptions,     'Use_TopicSeed',           CheckBox_UseTopicSeed.Checked);
     WriteBool(C_SectionOptions,     'Done_Beep',               FDoneSoundFlag);
+
+    WriteInteger(C_SectionOptions,  'Mru_Root_Max',            MRU_MAX_ROOT);
+    WriteInteger(C_SectionOptions,  'Mru_Child_Max',           MRU_MAX_CHILD);
 
     WriteInteger(C_SectionOptions,  'Node_Selected_Color',     Frame_ChattingBox.VST_NSelectionColor);
     WriteInteger(C_SectionOptions,  'Node_HeaderFont_Color',   Frame_ChattingBox.VST_NHeaderColor);
@@ -916,7 +963,7 @@ begin
   Panel_ChatRequestBox.Enabled :=       _visflag_3;
   Frame_ChattingBox.pmn_ColorSettings.Enabled :=
                                         _visflag_3;
-
+  Action_InetAlive.Enabled :=           _visflag_3;
   Action_DefaultRefresh.Enabled :=      _visflag_3;
   Action_TransPrompt.Enabled :=         _visflag_4;
   Action_StartRequest.Enabled :=        _visflag_5;
@@ -1046,6 +1093,7 @@ begin
     ShowModal;
     if (ModalResult = mrOk) and IsCkeckedFlag then
     begin
+      GV_CheckingAliveStart := not GV_AliveOllamaFlag;
       Form_RestOllama.Panel_ChatRequestBox.Enabled := GV_AliveOllamaFlag;
       Form_RestOllama.Action_StartRequest.Enabled :=  GV_AliveOllamaFlag;
       Form_RestOllama.StatusBar1.Panels[2].Text :=    C_OllamaAlive[GV_AliveOllamaFlag];
@@ -1084,7 +1132,7 @@ begin
   begin
     var _file: string := SaveTextFileDialog1.FileName;
     if Frame_ChattingBox.Do_SaveAllText(_file) then
-    ShellExecute(0, PChar('open'), PChar(_file), nil, nil, SW_SHOW);
+    ShellExecute(0, PChar('open'), PChar(_file), nil, nil, SW_SHOWNORMAL);
   end;
 end;
 
@@ -1305,7 +1353,9 @@ end;
 procedure TForm_RestOllama.SetModelSelected(const Value: string);
 begin
   FModel_Selected := Value;
-  Label_Caption.Caption := Format(C_CaptionFormat, [Value, FTopic_Seleced]);
+  var _caption: string := Format(C_CaptionFormat, [Value, FTopic_Seleced]);
+  var _rect: TRect := Rect(0,0,Label_Caption.Canvas.ClipRect.Right - 100, Label_Caption.Canvas.ClipRect.Bottom);
+  Label_Caption.Caption := Get_TextWithEllipsis(False, Label_Caption.Canvas, _rect, _caption);
 end;
 
 procedure TForm_RestOllama.SetRequestingFlag(const Value: Boolean);
@@ -1342,6 +1392,14 @@ begin
   Label_BaseURL.Caption := V_BaseURL;
 end;
 
+procedure TForm_RestOllama.SetSaveLogsOnCLoseFlag(const Value: Boolean);
+begin
+  FSaveLogsOnCLoseFlag := Value;
+  CheckBox_SaveOnCLose.OnClick := nil;
+  CheckBox_SaveOnCLose.Checked := Value;
+  CheckBox_SaveOnCLose.OnClick := CheckBox_SaveOnCLoseClick;
+end;
+
 procedure TForm_RestOllama.SettingsChange(Sender: TObject);
 begin
   if (HttpRest_Ollama.State > httpReady) or HttpRest_Ollama.Connected then
@@ -1351,8 +1409,9 @@ end;
 procedure TForm_RestOllama.SetTopicSeleced(const Value: string);
 begin
   FTopic_Seleced := Value;
-  if FInitialized then
-  Label_Caption.Caption := Format(C_CaptionFormat, [FModel_Selected, Value]);
+  var _caption: string := Format(C_CaptionFormat, [FModel_Selected, Value]);
+  var _rect: TRect := Rect(0,0,Label_Caption.Width - 100, Label_Caption.Height);
+  Label_Caption.Caption := Get_TextWithEllipsis(False, Label_Caption.Canvas, _rect, _caption);
 end;
 
 procedure TForm_RestOllama.SkAnimatedImage_ChatClick(Sender: TObject);
@@ -1373,7 +1432,7 @@ begin
   if not GV_AliveOllamaFlag then Exit;
 
   var _address: string := Trim(FFrameWelcome.SkLabel_Intro.Words[5].Caption);
-  ShellExecute(0, PChar('Open'), PChar(_address), nil, nil, SW_SHOW);
+  ShellExecute(0, PChar('Open'), PChar(_address), nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TForm_RestOllama.SpeedButton_ClearLogBoxClick(Sender: TObject);
@@ -1404,6 +1463,11 @@ begin
     Result := R_DolphiMistral else
   if Pos('mistral', _modelname) = 1 then
     Result := R_Mistral;
+end;
+
+procedure TForm_RestOllama.CheckBox_SaveOnCLoseClick(Sender: TObject);
+begin
+  FSaveLogsOnCLoseFlag := CheckBox_SaveOnCLose.Checked;
 end;
 
 procedure TForm_RestOllama.ComboBox_ModelsChange(Sender: TObject);
@@ -1727,15 +1791,15 @@ begin
   if LogOption = loProgress then
     begin
       TThread.Queue(nil,
-      procedure
-      const _ani: array [0 .. 1] of string = ('- ', '* ');
-      begin
-        StatusBar1.Panels[0].Text := ' * '+Msg;
-        V_AniFlag := (V_AniFlag+1) mod 2;
-        var _elapsed: Int64 := V_StopWatch.ElapsedMilliseconds;
-        StatusBar1.Panels[1].Text := _ani[V_AniFlag] + MSecsToSeconds(_elapsed);
-        StatusBar1.Panels[2].Text := ' Processing ...';
-      end);
+        procedure
+          const _ani: array [0 .. 1] of string = ('- ', '* ');
+        begin
+          StatusBar1.Panels[0].Text := ' * '+Msg;
+          V_AniFlag := (V_AniFlag+1) mod 2;
+          var _elapsed: Int64 := V_StopWatch.ElapsedMilliseconds;
+          StatusBar1.Panels[1].Text := _ani[V_AniFlag] + MSecsToSeconds(_elapsed);
+          StatusBar1.Panels[2].Text := ' Processing ...';
+        end);
     end
   else
     begin
@@ -1770,10 +1834,10 @@ begin
     end;
 
     TThread.Queue(nil,
-    procedure
-    begin
-      StatusBar1.Panels[2].Text := ' Error : Code -b ' + ErrCode.ToString;
-    end);
+      procedure
+      begin
+        StatusBar1.Panels[2].Text := ' Error : Code -b ' + ErrCode.ToString;
+      end);
 
     Exit;
   end;
@@ -1818,6 +1882,7 @@ begin
             Do_DisplayJson(string(HttpRest_Ollama.ResponseRaw));
             SimpleSound_Common(DoneSoundFlag, 1);
             Inc(V_DummyFlag);
+            GV_CheckingAliveStart := False;
           end
         else
           begin
@@ -1852,11 +1917,6 @@ const
 begin
   Label_Description.Tag := (Label_Description.Tag +1 ) mod 2;
   GroupBox_Description.Height := c_DescHeight[Label_Description.Tag];
-end;
-
-procedure TForm_RestOllama.Label_StartRequestClick(Sender: TObject);
-begin
-  Action_HelpShortcuts.Execute;
 end;
 
 procedure TForm_RestOllama.PageControl_ChattingChange(Sender: TObject);
@@ -2321,7 +2381,7 @@ begin
   var _slog: string := CV_LogPath+Format('%s%s%s', ['Log_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
   Memo_LogWin.Lines.SaveToFile(_slog);
   if FileExists(_slog) then
-    ShellExecute(0, PChar('Open'), PChar(_slog) , nil, nil, SW_SHOW);
+    ShellExecute(0, PChar('Open'), PChar(_slog) , nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TForm_RestOllama.SpeedButton_SystemInfoClick(Sender: TObject);
@@ -2357,15 +2417,21 @@ begin
     TreeView_Topics.FullCollapse;
 end;
 
+procedure TForm_RestOllama.SpeedButton_HelpClick(Sender: TObject);
+begin
+  var _pos: TPoint := Panel_Setting.ClientToScreen(Point(0, Panel_Setting.Height+5));
+  ShowMessagePos(Get_HelpShortcuts, _pos.X, _pos.Y);
+end;
+
 {  TTS - FSpVoice ... }
 
 procedure TForm_RestOllama.SpVoiceAudioLevel(Sender: TObject; StreamNumber: Integer; StreamPosition: OleVariant; AudioLevel: Integer);
 begin
   TThread.Queue(nil,
-  procedure
-  begin
-    ProgressBar.Position := AudioLevel;
-  end);
+    procedure
+    begin
+      ProgressBar.Position := AudioLevel;
+    end);
 end;
 
 procedure TForm_RestOllama.SpVoiceEndStream(Sender: TObject; StreamNumber: Integer; StreamPosition: OleVariant);
@@ -2508,19 +2574,6 @@ var
   V_LastCommand: string = '--help';
 
 procedure TForm_RestOllama.Action_DosCommandExecute(Sender: TObject);
-const
-  c_ExCommands: array[0..6] of String = ('serve', 'create', 'run', 'pull', 'push', 'cp', 'rm');
-  c_OllamaClear = 'ollama run/clear';
-
-  function VerifyCmd(const ACommand: string): Boolean;
-  begin
-    var _res: string := LowerCase(ACommand);
-    Result := (_res = '') or
-              ((Pos(c_ExCommands[0], _res) = 0)  and (Pos(c_ExCommands[1], _res) = 0) and (Pos(c_ExCommands[2], _res) = 0) and
-               (Pos(c_ExCommands[3], _res) = 0)  and (Pos(c_ExCommands[4], _res) = 0) and (Pos(c_ExCommands[5], _res) = 0) and
-               (Pos(c_ExCommands[6], _res) = 0));
-  end;
-
 begin
   var _dosflag: Boolean := False;
   var _position: TPoint := Button_DosCommand.ClientToScreen(Point(Button_DosCommand.Width+5, 0));
@@ -2542,16 +2595,16 @@ begin
   if _dosflag then
   begin
     var _command: string := Format('ollama %s', [V_LastCommand]);
-    if VerifyCmd(_command) then
+    if Is_ExternalCmd(LowerCase(_command)) then
+      GV_DosCommand.Dos_CommandBatch(_command)
+    else
       begin
         if not GV_DosCommand.Dos_Execute(_command) then
         begin
           SimpleSound_Common(DoneSoundFlag, 0);
           ShowMessage('Failed to Command : '+_command);
         end;
-      end
-    else
-      GV_DosCommand.Dos_CommandBatch(_command);
+      end;
   end;
 end;
 
