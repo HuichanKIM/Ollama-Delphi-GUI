@@ -670,7 +670,7 @@ begin
   // Modified by ichin 2024-05-30 목 오전 5:00:59
   SelectedBrushColor := TColors.DarkSlateBlue;
   FNode_HeaderColor := TColors.SysBtnFace;;
-  FNode_BodyColor := TColor($7FFF00);//TColors.SysInfoBk;
+  FNode_BodyColor := TColor($7FFF00);
   FNode_FooterColor := TColors.Silver;
   FOffsetWRMagin := 35;
   FNodeHeightOffSet := 50;
