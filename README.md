@@ -1,8 +1,10 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.7 - 06.07.2024**
+**Latest Version 0.9.8 - 06.08.2024**
+Fix the Incorrect operation of Topics list after Skin Change
 
-Some slight extension of the option
+- v0.9.8 ...
+- Some slight extension of the option
 - Without Checking Ollama alive on start,Use Beep sound, Save logs on close,
 - MRU Topic Max, MRU prompt Max, Add Popup Menu to ChattingBox,
 - v.0.9.6 ...
