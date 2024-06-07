@@ -13,7 +13,8 @@ uses
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.StdCtrls,
-  DosCommand, Vcl.Buttons;
+  DosCommand,
+  Vcl.Buttons;
 
 const
   DOS_MESSAGE = WM_USER + 1;

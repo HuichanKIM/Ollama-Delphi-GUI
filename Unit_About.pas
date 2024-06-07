@@ -237,7 +237,7 @@ begin
   CheckBox_SaveOnCLose.Checked :=    Form_RestOllama.SaveLogsOnCLoseFlag;
   FUpdateLockFlag := False;
 
-  TabSheet_Style.TabVisible := FShow_Flag = 3;  // Cannot Focus Error - When Change Style Event / Bug ?
+  TabSheet_Style.TabVisible := FShow_Flag = GC_AboutSkinFlag;  // Cannot Focus Error - When Change Style Event / Bug ?
   PageControl1.ActivePageIndex := FShow_Flag;   // 0 or 3
 end;
 
@@ -307,6 +307,7 @@ begin
   if not SameText(_style, TStyleManager.ActiveStyle.Name) then
   begin
     TStyleManager.TrySetStyle(_style);
+    Application.ProcessMessages;
     Form_RestOllama.Do_ChangeStyleCustom(1);
   end;
 

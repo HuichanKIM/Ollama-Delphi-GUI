@@ -228,7 +228,7 @@ type
     Panel_ChattingBase: TPanel;
     Label_Font_Size: TLabel;
     SpeedButton_Llava: TSpeedButton;
-    pmn_ClearAll1: TMenuItem;
+    pmn_ClearAll: TMenuItem;
     N2: TMenuItem;
     Frame_ChattingBox: TFrame_ChattingBoxClass;
     SpeedButton_SelectionColor: TSpeedButton;
@@ -314,7 +314,7 @@ type
     procedure TreeView_TopicsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
     procedure TreeView_TopicsChange(Sender: TObject; Node: TTreeNode);
     procedure pmn_RenameTopicClick(Sender: TObject);
-    procedure pmn_ClearAll1Click(Sender: TObject);
+    procedure pmn_ClearAllClick(Sender: TObject);
     procedure PopupMenu_TopicsPopup(Sender: TObject);
     procedure TrackBar_GlobalFontSizeChange(Sender: TObject);
     procedure TrackBar_RateChange(Sender: TObject);
@@ -343,6 +343,7 @@ type
     FMemMonitoringFlag: Boolean;
     FDoneSoundFlag: Boolean;
     FSaveLogsOnCLoseFlag: Boolean;
+    FSelectionNode: TTreeNode;
     procedure Load_ConfigIni(const AFlag: Integer = 0);
     procedure Save_ConfigIni(const AFlag: Integer = 0);
     procedure Common_RestSettings(const Aflag: Integer = 0);
@@ -535,13 +536,18 @@ begin
   FIniFileName := ExtractFileName(ChangeFileExt(ParamStr(0), '.ini'));
   FCookieFileName := ChangeFileExt(FIniFileName, '.cookie');
 
-  var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
-  with _IniFile do
+  var _SkinStyle: string := TStyleManager.ActiveStyle.Name;
+  with System.Inifiles.TMemIniFile.Create(FIniFileName) do
   try
-    GV_CheckingAliveStart := ReadBool(C_SectionData, 'CheckAlive', True);
+    GV_CheckingAliveStart := ReadBool(C_SectionData,   'CheckAlive', True);
+    _SkinStyle :=            ReadString(C_SectionData, 'SkinStyle',  'Windows11 Impressive Dark');
   finally
     Free;
   end;
+
+  var _default := TStyleManager.ActiveStyle.Name;
+  if not SameText(_default, _SkinStyle) then
+  TStyleManager.TrySetStyle(_SkinStyle);
 
   FFrameWelcome := TFrame_Welcome.Create(Self);
   with FFrameWelcome do
@@ -564,18 +570,6 @@ begin
   begin
     GV_AliveOllamaFlag := False;
     CheckAlive_Ollama(1);
-  end;
-
-  if not GV_ApplyedSkin then
-  begin
-    var _skinfile := CV_AppPath+'skincfg.txt';
-    if FileExists(_skinfile) then
-    begin
-      var _default := TStyleManager.ActiveStyle.Name;
-      var _skinname := IOUtils_ReadAllText(_skinfile);
-      if not SameText(_default, _skinname) then
-      TStyleManager.TrySetStyle(_skinname);
-    end;
   end;
 
   { Load Image from Resource ... }
@@ -727,8 +721,8 @@ begin
 
       if AFlag = 1 then
       begin
-        Form_RequestDialog.Update;
-        Application.ProcessMessages;
+        FTopicsMRU.Update_Topics;
+        Frame_ChattingBox.VST_ChattingBox.Repaint;
       end;
     finally
       LockWindowUpdate(0);
@@ -821,7 +815,6 @@ begin
   var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
   with _IniFile do
   try
-    //GV_CheckingAliveStart :=         ReadBool(C_SectionData,        'CheckAlive',             True);
     FLastRequest :=                  ReadString(C_SectionData,      'LastRequest',            'Who are you ?');
     V_Username :=                    ReadString(C_SectionData,      'Nickname',               'User');
     V_LoadModelIndex :=              ReadInteger(C_SectionData,     'Loaded_Model',            0);
@@ -856,7 +849,9 @@ begin
   var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
   with _IniFile do
   try
+    WriteString(C_SectionData,      'SkinStyle',               TStyleManager.ActiveStyle.Name);
     WriteBool(C_SectionData,        'CheckAlive',              GV_CheckingAliveStart);
+
     WriteString(C_SectionData,      'LastRequest',             FLastRequest);
     WriteString(C_SectionData,      'Nickname',                V_Username);
     WriteInteger(C_SectionData,     'Loaded_Model',            V_LoadModelIndex);
@@ -961,6 +956,7 @@ begin
 
   Panel_ChattingButtons.Enabled :=      _visflag_3;
   Panel_ChatRequestBox.Enabled :=       _visflag_3;
+  Panel_TopicButtons.Enabled :=         _visflag_3;
   Frame_ChattingBox.pmn_ColorSettings.Enabled :=
                                         _visflag_3;
   Action_InetAlive.Enabled :=           _visflag_3;
@@ -1009,8 +1005,8 @@ procedure TForm_RestOllama.Action_ClearChattingExecute(Sender: TObject);
 begin
   Frame_ChattingBox.VST_ChattingBox.Clear;
   Action_TTS.Enabled := False;
-  SkAnimatedImage_Chat.Left := (PageControl_Chatting.Width - SkAnimatedImage_Chat.Width) div 2;
-  SkAnimatedImage_Chat.Top := (PageControl_Chatting.Height - SkAnimatedImage_Chat.Height) div 2;
+  SkAnimatedImage_Chat.Left := (PageControl_Chatting.Width -  SkAnimatedImage_Chat.Width)  div 2;
+  SkAnimatedImage_Chat.Top :=  (PageControl_Chatting.Height - SkAnimatedImage_Chat.Height) div 2;
   SkAnimatedImage_Chat.Visible := True;
   SkAnimatedImage_Chat.Animation.Enabled:= True;
 end;
@@ -1046,20 +1042,17 @@ end;
 
 procedure TForm_RestOllama.Action_LogsExecute(Sender: TObject);
 begin
-  try
-    FFrameWelcome.Visible := False;
-    PageControl_Chatting.OnChange := nil;
-    if PageControl_Chatting.ActivePage = TabSheet_ChatLogs then
-      PageControl_Chatting.ActivePage := Tabsheet_Chatting
-    else
-      begin
-        PageControl_Chatting.ActivePage := TabSheet_ChatLogs;
-        Set_Can_Focus(Memo_LogWin as TWinControl);
-      end;
-    PageControl_Chatting.OnChange := PageControl_ChattingChange;
-    PageControl_ChattingChange(Self);
-  finally
-  end;
+  FFrameWelcome.Visible := False;
+  PageControl_Chatting.OnChange := nil;
+  if PageControl_Chatting.ActivePage = TabSheet_ChatLogs then
+    PageControl_Chatting.ActivePage := Tabsheet_Chatting
+  else
+    begin
+      PageControl_Chatting.ActivePage := TabSheet_ChatLogs;
+      Set_Can_Focus(Memo_LogWin as TWinControl);
+    end;
+  PageControl_Chatting.OnChange := PageControl_ChattingChange;
+  PageControl_ChattingChange(Self);
 end;
 
 procedure TForm_RestOllama.Action_ExitExecute(Sender: TObject);
@@ -1123,7 +1116,7 @@ end;
 
 procedure TForm_RestOllama.Action_Pop_DeleteItemExecute(Sender: TObject);
 begin
-  var _res := Frame_ChattingBox.Do_DeleteNode();
+  var _dummy := Frame_ChattingBox.Do_DeleteNode();
 end;
 
 procedure TForm_RestOllama.Action_Pop_SaveAllTextExecute(Sender: TObject);
@@ -1150,7 +1143,7 @@ procedure TForm_RestOllama.Action_SelectionColorExecute(Sender: TObject);
 begin
   with TForm_About.Create(Self) do
   try
-    Show_Flag := 3;
+    Show_Flag := GC_AboutSkinFlag;
     ShowModal;
   finally
     Free;
@@ -1648,6 +1641,10 @@ begin
   Add_LogWin('With prompt/message : "' + V_MyContentPrompt+'"');
   Push_LogWin();
 
+  FSelectionNode := TreeView_Topics.Selected;
+  if FSelectionNode = nil then
+  FSelectionNode := TreeView_Topics.items.GetFirstNode;
+
   FLastRequest :=  V_MyContentPrompt;
   V_StopWatch := TStopwatch.StartNew;
   // ------------------------------------------------------------------------------------------ //
@@ -1669,13 +1666,18 @@ begin
   Add_ChattingMessage(_jsonflag, 1, _Responses);
   // ------------------------------------------------------------------------ //
 
-  if CheckBox_AutoLoadTopic.Checked then
-    Do_ListUpTopic(2, TreeView_Topics.Selected, V_MyContentPrompt);
+  RequestingFlag := False;
 
   Edit_ReqContent.SelectAll;
   Set_Can_Focus(Edit_ReqContent as TWinControl);
 
-  RequestingFlag := False;
+  if CheckBox_AutoLoadTopic.Checked and (not V_LoadModelFlag) then
+  try
+    Do_ListUpTopic(2, FSelectionNode, V_MyContentPrompt);
+  except
+    on E: Exception do
+    ShowMessage(E.ClassName +' - '+E.Message);
+  end;
 
   if CheckBox_DebugToLog.Checked then
   begin
@@ -1748,7 +1750,7 @@ end;
 procedure TForm_RestOllama.Set_OllamaAlive(const ALiveFlag: Boolean);
 const
   c_Color: array [Boolean] of TColor = (clBlack, clSilver);
-  c_Hint: array [Boolean] of string = ('Ollama Off','Ollama Alive / On');
+  c_Hint:  array [Boolean] of string = ('Ollama Off','Ollama Alive / On');
 begin
   Shape_OllamaAlive.Brush.Color := c_Color[ALiveFlag];
   Shape_OllamaAlive.Hint := c_Hint[ALiveFlag];
@@ -1824,7 +1826,7 @@ begin
     Push_LogWin(1, 'ALPN Requested by Server: ' + HttpRest_Ollama.GetAlpnProtocol);
   if ErrCode <> 0 then
   begin
-    Push_LogWin(2, '* Request failed: Error: ' + HttpRest_Ollama.RequestDoneErrorStr + // ' - ' + IntToStr(HttpRest_Ollama.StatusCode) + IcsSpace +
+    Push_LogWin(2, '* Request failed: Error: ' + HttpRest_Ollama.RequestDoneErrorStr +
                    ' (rp - '+HttpRest_Ollama.ReasonPhrase+' )');
 
     if (HttpRest_Ollama.StatusCode = 404) then
@@ -1859,38 +1861,38 @@ begin
 
   V_RepeatFlag := False;
 
-    TThread.Queue(nil,
-      procedure
-      begin
-        V_StopWatch.Stop;
-        var _elapsed: Int64 := V_StopWatch.ElapsedMilliseconds;
-        var _elapstr: string := MSecsToSeconds(_elapsed);
-        StatusBar1.Panels[1].Text := 'et '+  _elapstr;
-        StatusBar1.Panels[2].Text := ' * Stand by ...';
-        Push_LogWin(1, 'Elapsed Time after request : '+_elapstr);
+  TThread.Queue(nil,
+    procedure
+    begin
+      V_StopWatch.Stop;
+      var _elapsed: Int64 := V_StopWatch.ElapsedMilliseconds;
+      var _elapstr: string := MSecsToSeconds(_elapsed);
+      StatusBar1.Panels[1].Text := 'et '+  _elapstr;
+      StatusBar1.Panels[2].Text := ' * Stand by ...';
+      Push_LogWin(1, 'Elapsed Time after request : '+_elapstr);
 
-        if V_DummyFlag = 0 then
-        begin
-          if V_LoadModelFlag then
-            Add_ChattingMessage(0, 0, 'Request to load model : [ '+V_MyModel + ' ]')
-          else
-            Add_ChattingMessage(1, 0, V_MyContentPrompt);
-        end;
-        { look for Json response --------------------------------------------------- }
-        if ((Pos('{', HttpRest_Ollama.ResponseRaw) > 0) or (Pos('json', HttpRest_Ollama.ContentType) > 0)) then
-          begin
-            Do_DisplayJson(string(HttpRest_Ollama.ResponseRaw));
-            SimpleSound_Common(DoneSoundFlag, 1);
-            Inc(V_DummyFlag);
-            GV_CheckingAliveStart := False;
-          end
+      if V_DummyFlag = 0 then
+      begin
+        if V_LoadModelFlag then
+          Add_ChattingMessage(0, 0, 'Request to load model : [ '+V_MyModel + ' ]')
         else
-          begin
-            RequestingFlag := False;
-            Push_LogWin(2, '<Non-textual content received: ' + HttpRest_Ollama.ContentType + '>');
-          end;
-        { -------------------------------------------------------------------------- }
-      end);
+          Add_ChattingMessage(1, 0, V_MyContentPrompt);
+      end;
+      { look for Json response --------------------------------------------------- }
+      if ((Pos('{', HttpRest_Ollama.ResponseRaw) > 0) or (Pos('json', HttpRest_Ollama.ContentType) > 0)) then
+        begin
+          Do_DisplayJson(string(HttpRest_Ollama.ResponseRaw));
+          SimpleSound_Common(DoneSoundFlag, 1);
+          Inc(V_DummyFlag);
+          GV_CheckingAliveStart := False;
+        end
+      else
+        begin
+          RequestingFlag := False;
+          Push_LogWin(2, '<Non-textual content received: ' + HttpRest_Ollama.ContentType + '>');
+        end;
+      { -------------------------------------------------------------------------- }
+    end);
 
   V_LoadModelFlag := False;
   Push_LogWin(1);
@@ -1973,6 +1975,7 @@ begin
   V_LoadModelFlag := True;
 
   V_BaseURL := V_BaseURLarray[TRequest_Type.ort_Generate];
+  V_MyContentPrompt := '';
   var _MyParams: string := StringReplace( C_LoadModelPrompt, '%model%', V_MyModel, []);
 
   Add_LogWin('Starting REST request for Load Model: ' + V_BaseURL);
@@ -2020,6 +2023,7 @@ begin
   Add_LogWin('Async REST request List Models ...');
   Push_LogWin();
   V_StopWatch := TStopwatch.StartNew;
+  V_MyContentPrompt := '';
   // ------------------------------------------------------------------------ //
   var _responses: string := Get_ListModels_Ollama(_BaseURL);  // in Unit_AliveOllama.pas
   // ------------------------------------------------------------------------ //
@@ -2213,6 +2217,9 @@ end;
 
 procedure TForm_RestOllama.Do_ListUpTopic(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string);
 begin
+  if APrompt = '' then
+  Exit;
+
   var _seed: string := FTopicsMRU.AddInsertNode(AFlag, ANode, APrompt);
   Edit_TopicSeed.Text := _seed;
   if APrompt <> '' then
@@ -2255,10 +2262,11 @@ end;
 
 procedure TForm_RestOllama.PopupMenu_TopicsPopup(Sender: TObject);
 begin
-  pmn_RenameTopic.Enabled := TreeView_Topics.Selected <> nil;
+  pmn_RenameTopic.Enabled := not RequestingFlag and (TreeView_Topics.Selected <> nil);
+  pmn_ClearAll.Enabled := not RequestingFlag;
 end;
 
-procedure TForm_RestOllama.pmn_ClearAll1Click(Sender: TObject);
+procedure TForm_RestOllama.pmn_ClearAllClick(Sender: TObject);
 begin
   if MessageDlg('All topics and prompts will be erased. Continue ?', mtConfirmation, [mbOK, mbCancel], 0) = mrOk then
   FTopicsMRU.Clear_All();

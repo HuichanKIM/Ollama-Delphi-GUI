@@ -53,21 +53,6 @@ begin
   if _mxHandle <> 0 then
   try
     Application.Initialize;
-
-    // For Last Deployment ...
-    {
-      var _skinfile := CV_AppPath+'skincfg.txt';
-      if FileExists(_skinfile) then
-      begin
-        var _default := TStyleManager.ActiveStyle.Name;
-        var _skinname := IOUtils_ReadAllText(_skinfile);
-        if not SameText(_default, _skinname) then
-        TStyleManager.TrySetStyle(_skinname);
-
-        GV_ApplyedSkin := True;
-      end;
-     }
-
     TStyleManager.TrySetStyle('Windows11 Impressive Dark');
     Application.Title := 'Ollama Client GUI';
     Application.CreateForm(TForm_RestOllama, Form_RestOllama);

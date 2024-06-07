@@ -36,6 +36,7 @@ type
     //
     function Write_TreeViewToJSON(): Boolean;
     procedure Read_JsonToTreeView();
+    procedure Update_Topics(const AFlag: Integer=0);
     function GetSeedRandom(): string;
     function AddInsertNode(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string): string;
     procedure DeleteNode(const AFlag: Integer);
@@ -70,13 +71,13 @@ begin
   if _firstnode <> nil then
    _firstnode := _firstnode.getNextSibling;
 
-  FTreeView.Items.BeginUpdate;
   var _Indexflag :=  FTopicList.IndexOf(APrompt);
   var _newnode: TTreeNode := nil;
 
   if _Indexflag >= 0 then
     goto L_Finish;
 
+  FTreeView.Items.BeginUpdate;
   case AFlag of
     0:
       begin
@@ -134,32 +135,35 @@ begin
           end;
       end;
   end;
+  FTreeView.Items.EndUpdate;
 
  L_Finish:
 
-  if _Indexflag >= 0 then
+  if (_Indexflag >= 0) then
   begin
     _newnode := TTreeNode(FTopicList.Objects[_Indexflag]);
     _nodedata := PTopicData(_newnode.Data);
     if _newnode.Parent <> nil then
     _newnode.MoveTo(_newnode.Parent, naAddChildFirst);
   end;
-  FTreeView.Items.EndUpdate;
 
   if Assigned(_newnode) then
   begin
     _newnode.Selected := True;
     _newnode.MakeVisible;
   end;
+
+  if _nodedata <> nil then
   Result := _nodedata^.td_Seed;
 
-  if _Indexflag < 0 then
+  if (_Indexflag < 0) and (_newnode <> nil) then
   FTopicList.AddObject(APrompt, TObject(_newnode));
 end;
 
 procedure TMRU_Manager.DeleteNode(const AFlag: Integer);
 begin
   var _node: TTreeNode := FTreeView.Selected;
+
   if Assigned(_node) and (_node <> FTreeView.Items.GetFirstNode) then
   begin
     var _index: Integer  := -1;
@@ -222,12 +226,44 @@ begin
   end;
 end;
 
+procedure TMRU_Manager.Update_Topics(const AFlag: Integer);
+begin
+  // Modified by ichin 2024-06-08 토 오전 12:40:55 -------------------------- //
+  FTreeView.Invalidate;        // Absolutely Needed After Change Skin/Style ...
+  // ------------------------------------------------------------------------ //
+  FTopicList.Clear;
+  FTopicList.Sorted := False;
+  FTopicList.BeginUpdate;
+  FTreeView.Items.BeginUpdate;
+  var _node: TTreeNode := FTreeView.Items.GetFirstNode;
+  var _nodesub:  TTreeNode := nil;
+  while _node <> nil do
+    begin
+      FTopicList.AddObject(_node.Text, TObject(_node));
+      if _node.HasChildren then
+      begin
+        _nodesub := _node.getFirstChild;
+        while _nodesub <> nil do
+          begin
+            FTopicList.AddObject(_nodesub.Text, TObject(_nodesub));
+            _nodesub := _nodesub.getNextSibling;
+          end;
+      end;
+      _node := _node.getNextSibling;
+    end;
+  FTreeView.Items.EndUpdate;
+  FTreeView.Update;             // Invalidate + Update = Repaint ...
+  FTopicList.EndUpdate;
+  FTopicList.Sorted := True;
+end;
+
 procedure TMRU_Manager.Clear_TreeData(const AFalg: Integer);
 begin
   var _TopicData: PTopicData;
   var _PromptData: PTopicData;
   var _Tree: TTreeNode := FTreeView.Items.GetFirstNode;
   var _Sub:  TTreeNode := nil;
+
   while _Tree <> nil do
     begin
       _TopicData := PTopicData(_Tree.Data);
@@ -273,7 +309,6 @@ begin
   Write_TreeViewToJSON();
 
   Clear_TreeData();
-
   FSeedList.Free;
   FTopicList.Free;
   inherited;
@@ -403,6 +438,7 @@ begin
   var _sub: TTreeNode := nil;
 
   try
+    FTopicList.Clear;
     FTopicList.BeginUpdate;
     FSeedList.BeginUpdate;
     FTreeView.Items.BeginUpdate;

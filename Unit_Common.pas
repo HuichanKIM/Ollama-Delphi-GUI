@@ -30,8 +30,8 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  GC_Version0     = 'ver. 0.9.7';
-  GC_Version1     = 'ver. 0.9.7 (2024.06.06)';
+  GC_Version0     = 'ver. 0.9.8';
+  GC_Version1     = 'ver. 0.9.8 (2024.06.07)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights  = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
@@ -51,6 +51,9 @@ const
   GC_SkinBodyColor: TColor = TColor($7FFF00);//TColors.SysInfoBk;
   GC_SkinFootColor: TColor = TColors.Silver;
   GC_SkinFontSize: Integer = 10;
+
+const
+  GC_AboutSkinFlag = 3;
 
 procedure InitializePaths();
 function Is_Hangul(const AText: string): Boolean;
@@ -86,7 +89,6 @@ var
 var
   GV_CheckingAliveStart: Boolean = True;
   GV_ReservedColor: array [0..3] of TColor;
-  GV_ApplyedSkin: Boolean = False;
   GV_AliveOllamaFlag: Boolean = False;
 
 implementation

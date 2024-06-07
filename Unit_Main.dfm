@@ -3002,9 +3002,9 @@ object Form_RestOllama: TForm_RestOllama
     object N2: TMenuItem
       Caption = '-'
     end
-    object pmn_ClearAll1: TMenuItem
+    object pmn_ClearAll: TMenuItem
       Caption = 'Clear All'
-      OnClick = pmn_ClearAll1Click
+      OnClick = pmn_ClearAllClick
     end
   end
 end
