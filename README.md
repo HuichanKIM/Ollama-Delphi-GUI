@@ -1,6 +1,7 @@
 # Ollama-Delphi-GUI
 
 **Latest Version 0.9.8 - 06.08.2024**
+
 Fix the Incorrect operation of Topics list after Skin Change
 
 - v0.9.8 ...
