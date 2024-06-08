@@ -4,7 +4,7 @@
 
 Fix the Incorrect operation of Topics list after Skin Change
 
-- v0.9.8 ...
+- v0.9.7 ...
 - Some slight extension of the option
 - Without Checking Ollama alive on start,Use Beep sound, Save logs on close,
 - MRU Topic Max, MRU prompt Max, Add Popup Menu to ChattingBox,
