@@ -84,7 +84,7 @@ object Form_DosCommander: TForm_DosCommander
     end
     object Label_Run: TLabel
       Tag = 4
-      Left = 253
+      Left = 300
       Top = 53
       Width = 18
       Height = 15
@@ -104,15 +104,14 @@ object Form_DosCommander: TForm_DosCommander
       StyleElements = [seClient, seBorder]
       OnClick = Label_ListClick
     end
-    object Label_Rm: TLabel
-      Tag = 5
-      Left = 293
+    object Label_Show: TLabel
+      Tag = 3
+      Left = 256
       Top = 53
-      Width = 12
+      Width = 28
       Height = 15
       Cursor = crHandPoint
-      Caption = 'ps'
-      StyleElements = [seClient, seBorder]
+      Caption = 'show'
       OnClick = Label_ListClick
     end
     object Edit_CommandFlag: TEdit

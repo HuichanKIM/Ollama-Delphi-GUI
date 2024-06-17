@@ -80,6 +80,11 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
         CollectionIndex = 1
         CollectionName = 'ollama4'
         Name = 'ollama4'
+      end
+      item
+        CollectionIndex = 2
+        CollectionName = 'ic_content_copy_white_24dp'
+        Name = 'ic_content_copy_white_24dp'
       end>
     ImageCollection = ImageCollection1
     Left = 72
@@ -409,6 +414,18 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
               EB4055552493490C0683397970E5D2C2F611E2CB68342A689AF6FCD61A689AF6
               3C1A8D0A42882FEBD8BF79E9037871E98BFFFBB3E51F8D506DC0E313565A0000
               000049454E44AE426082}
+          end>
+      end
+      item
+        Name = 'ic_content_copy_white_24dp'
+        SourceImages = <
+          item
+            Image.Data = {
+              89504E470D0A1A0A0000000D49484452000000180000001808040000004A7EF5
+              730000004D49444154780163200BFC0FFCFFF23F2EC0800AC1044839491A1012
+              9890AA1AF0F9E5D57F7F340D04FDF2124D0301A701C110D730AA010A878D8657
+              7892F70B6C1AFCFFBFC4A9DC17A681440800130CCB03D003147B000000004945
+              4E44AE426082}
           end>
       end>
     Left = 72

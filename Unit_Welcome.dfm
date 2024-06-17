@@ -53,19 +53,22 @@ object Frame_Welcome: TFrame_Welcome
         Name = 'Item 4'
       end
       item
-        Caption = #13#10#13#10'- Ollama Engine from -'
+        Caption = #13#10#13#10'- OLLAMA  -'
         Name = 'Item 6'
       end
       item
-        Caption = #13#10'Ollama web site : '
+        Caption = #13#10'Web-site : '
         FontColor = claSilver
         Name = 'Item 5'
         StyledSettings = [Family, Size, Style]
       end
       item
-        Caption = ' https://ollama.com/'
+        Caption = 'https://ollama.com'
+        Cursor = crHandPoint
         Decorations.Decorations = [Underline]
+        FontColor = claSilver
         Name = 'Ollama_WebAddress'
+        StyledSettings = [Family, Size, Style]
       end
       item
         Caption = '  E-Mail : hello@ollama.com'

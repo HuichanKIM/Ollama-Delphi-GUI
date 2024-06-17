@@ -11,30 +11,52 @@ uses
   System.Types,
   System.UITypes,
   Vcl.StdCtrls,
-  Vcl.Graphics;
+  Vcl.Graphics,
+  Vcl.ExtCtrls;
+
+type
+  IIF = class
+    class function CastBool<T>(AExpression: Boolean; const ATrue, AFalse: T): T; static;
+    class function CastInteger<T>(AExpression: Integer; const ATrue, AFalse: T): T; static;
+    class function CastObject<T>(AExpression: Integer; const AObjects: TArray<T>): T; static;
+  end;
 
 const
+  DM_ACTIVATECODE = 1;
+
   DM_SERVERPORT = 17233;
   WF_DM_MESSAGE  = DM_SERVERPORT + 1;
-    WF_DM_MESSAGE_CONNECT     = WF_DM_MESSAGE + 1;
-    WF_DM_MESSAGE_DISCONNECT  = WF_DM_MESSAGE + 2;
-    WF_DM_MESSAGE_RECEIVE     = WF_DM_MESSAGE + 3;
-    WF_DM_MESSAGE_SEND        = WF_DM_MESSAGE + 4;
+    WF_DM_MESSAGE_ADDRESS     = WF_DM_MESSAGE + 1;
+    WF_DM_MESSAGE_SERVERON    = WF_DM_MESSAGE + 2;
+    WF_DM_MESSAGE_SERVEROFF   = WF_DM_MESSAGE + 3;
+    WF_DM_MESSAGE_CONNECT     = WF_DM_MESSAGE + 4;
+    WF_DM_MESSAGE_DISCONNECT  = WF_DM_MESSAGE + 5;
+    WF_DM_MESSAGE_LOGON       = WF_DM_MESSAGE + 6;
+    WF_DM_MESSAGE_REQUEST     = WF_DM_MESSAGE + 7;
+    WF_DM_MESSAGE_REQUESTEX   = WF_DM_MESSAGE + 8;
+    WF_DM_MESSAGE_RESPONSE    = WF_DM_MESSAGE + 9;
+    WF_DM_MESSAGE_IMAGE       = WF_DM_MESSAGE + 10;
+    WF_DM_MESSAGE_WARNING     = WF_DM_MESSAGE + 11;
 
 const
   NETHTTP_MESSAGE = WM_USER + 10;
     NETHTTP_MESSAGE_ALIVE = NETHTTP_MESSAGE + 1;
     NETHTTP_MESSAGE_ALIST = NETHTTP_MESSAGE + 2;
 
+const
+  WM_401_404_REPEAT = WM_USER + 758;
+
 type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
+type
+  TRequest_Type = (ort_Generate=0, ort_Chat);
 
 const
-  GC_Version0     = 'ver. 0.9.8';
-  GC_Version1     = 'ver. 0.9.8 (2024.06.07)';
+  GC_Version0     = 'ver. 0.9.9';
+  GC_Version1     = 'ver. 0.9.9 (2024.06.12)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
-  GC_CopyRights  = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
+  GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
 
 const
   GC_BTdivGB = 1073741824;
@@ -48,16 +70,35 @@ const
 const
   GC_SkinSelColor: TColor  = TColors.DarkSlateBlue;
   GC_SkinHeadColor: TColor = TColors.SysBtnFace;
-  GC_SkinBodyColor: TColor = TColor($7FFF00);//TColors.SysInfoBk;
+  GC_SkinBodyColor: TColor = TColor($7FFF00);
   GC_SkinFootColor: TColor = TColors.Silver;
   GC_SkinFontSize: Integer = 10;
 
 const
   GC_AboutSkinFlag = 3;
 
+const
+  GC_BaseURL_Generate    = 'http://localhost:11434/api/generate';
+  GC_BaseURL_Chat        = 'http://localhost:11434/api/chat';
+  GC_BaseURL_Models      = 'http://localhost:11434/api/tags';
+
+  GC_GeneratePrompt      = '{"model": "%model%","prompt": "%prompts%"}'; // option - "format":"json","stream":false}';
+  GC_GeneratePrompt_opt  = '{"model": "%model%","prompt": "%prompts%","options": {"seed": %seed%,"temperature": 0}}';
+  GC_ChatContent         = '{"model": "%model%","messages": [{"role": "user","content": "%content%"}]}';
+  GC_ChatContent_opt     = '{"model": "%model%","messages": [{"role": "user","content": "%content%"}],"options": {"seed": %seed%,"temperature": 0}}';
+
+  GC_LoadModelPrompt     = '{"model": "%model%"}';
+  GC_GenerateLlavaPrompt = '{"model": "%model%","prompt": "%prompts%","stream": false,"images": ["%images%"]}';
+  GC_ChatLlavaContent    = '{"model": "%model%","messages": [{"role": "user","content": "%content%","images": ["%images%"]}]}';
+
 procedure InitializePaths();
 function Is_Hangul(const AText: string): Boolean;
 function Is_ExternalCmd(const AText: string): Boolean;
+
+function Is_LlavaModel(const AText: string): Boolean;
+function GetBase64Endoeings(const AImage: TImage): string;
+
+function BytesToKMG(Value: Int64; ATailer: Boolean = False): string;
 function Get_ReplaceSpecialChar(const AText: string): string;
 function Get_ReplaceSpecialChar2(const AText: string): string;
 function GetUsersWindowsLanguage: string;
@@ -73,8 +114,8 @@ function MSecsToTime(const AMSec: Int64): string;
 function MSecsToSeconds(const AMSec: Int64): string;
 procedure Global_TrimAppMemorySizeEx(const AStrategy: Integer);
 function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
-function Get_TextWithEllipsis(const AMiddle: Boolean;  ACanvas: TCanvas; ARect: TRect; const AText: string): string;
 procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
+function LoadFromFileBuffered_String(const AFileName: string): string;
 
 var
   CV_AppPath: string  = '';
@@ -98,6 +139,7 @@ uses
   Winapi.TlHelp32,
   Winapi.PsAPI,
   Winapi.MMSystem,
+  WinApi.UxTheme,
   System.Math,
   System.JSON,
   System.JSON.Readers,
@@ -106,8 +148,10 @@ uses
   System.RegularExpressions,
   System.Threading,
   Unit_SysInfo,
+  OverbyteIcsUtils,
   Vcl.Styles,
   Vcl.StyleAPI,
+  Vcl.Themes,
   Vcl.Forms,
   Unit_Main;
 
@@ -125,11 +169,61 @@ begin
   CV_LogPath := IncludeTrailingPathDelimiter(CV_LogPath);
 end;
 
+{ Common Methods for Unit_Main,  Unit_RMBroker ... }
+function Is_LlavaModel(const AText: string): Boolean;
+begin
+  var _text: string := LowerCase(AText);
+  Result := (Pos('llava', _text) > 0);
+end;
+
+// TNetEncoding.Base64.EncodeBytesToString is failed to Encode Image.Picture ...
+// ? Unicode problem ...
+function GetBase64Endoeings(const AImage: TImage): string;
+begin
+  Result := '';
+  var _Input  := TMemoryStream.Create;
+  try
+    AImage.Picture.SaveToStream(_Input);
+    _Input.Position := 0;
+    Result := OverbyteIcsUtils.Base64Encode(PAnsiChar(_Input.Memory), _Input.Size);
+  finally
+    _Input.Free;
+  end;
+end;
+
+// Modified by ichin 2024-06-09 ¿œ ø¿»ƒ 5:50:52
+// Import from Animation Studio ...
+
+{ IIF.Cast ... }
+
+class function IIF.CastBool<T>(AExpression: Boolean; const ATrue, AFalse: T): T;
+begin
+  if AExpression
+    then Result := ATrue
+    else Result := AFalse;
+end;
+
+class function IIF.CastInteger<T>(AExpression: Integer; const ATrue, AFalse: T): T;
+begin
+  if AExpression = 1
+    then Result := ATrue
+    else Result := AFalse;
+end;
+
+// var LArray: TArray<Integer> := TArray<Integer>.Create(1, 2, 3, 4);
+class function IIF.CastObject<T>(AExpression: Integer; const AObjects: TArray<T>): T;
+begin
+  if (AExpression >= 0) and (AExpression < Length(AObjects)) then
+  Result := AObjects[AExpression];
+end;
+
+{ ... }
+
 const
   C_RegEx_Rep1: string = '[#$%&]';
   C_RegEx_Rep2: string = '["\{\}:;\[\]]';  // - json reserved only / all special char - '[^\w]';
   C_RegEx_Han0: string = '.*[§°-§æ§ø-§”∞°-∆R]+.*'; {  «—±€∞ÀªÁ ¡§±‘«•«ˆΩƒ- Regular expression for Korean language test }
-  C_RegEx_Dos0: string = '/(?:.*serve.*)|(?:.*create.*)|(?:.*run.*)|(?:.*pull.*)|(?:.*push.*)|(?:.*cp.*)|(?:.*rm.*)/';
+  C_RegEx_Cmd0: string = '/(?:.*serve.*)|(?:.*create.*)|(?:.*run.*)|(?:.*pull.*)|(?:.*push.*)|(?:.*cp.*)|(?:.*rm.*)/';
 
 function Is_Hangul(const AText: string): Boolean;
 begin
@@ -139,7 +233,7 @@ end;
 
 function Is_ExternalCmd(const AText: string): Boolean;
 begin
-  Result := System.RegularExpressions.TRegEx.IsMatch(AText, C_RegEx_Dos0);
+  Result := System.RegularExpressions.TRegEx.IsMatch(AText, C_RegEx_Cmd0);
 end;
 
 function Get_ReplaceSpecialChar(const AText: string): string;
@@ -150,6 +244,70 @@ end;
 function Get_ReplaceSpecialChar2(const AText: string): string;
 begin
   Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep2, ' ');
+end;
+
+function BytesToKMG(Value: Int64; ATailer: Boolean = False): string;
+const
+  c_KBYTE = Sizeof(Byte) shl 10;
+  c_MBYTE = c_KBYTE shl 10;
+  c_GBYTE = c_MBYTE shl 10;
+begin
+  var _mask: string := '%5.3f';
+  var _suffix: string := '';
+  var _float: Extended := Value;
+  var _float2: Extended := _float;
+
+  if (_float / 100) >= c_GBYTE then
+    begin
+      _suffix := 'G';
+      _float2 := _float / c_GBYTE;
+    end else
+  if (_float / 10) >= c_GBYTE then
+    begin
+      _suffix := 'G';
+      _float2 := _float / c_GBYTE;
+    end else
+  if _float >= c_GBYTE then
+    begin
+      _suffix := 'G';
+      _float2 := _float / c_GBYTE;
+    end else
+  if _float >= (c_MBYTE * 100) then
+    begin
+      _suffix := 'M';
+      _float2 := _float / c_MBYTE;
+    end else
+  if _float >= (c_MBYTE * 10) then
+    begin
+      _suffix := 'M';
+      _float2 := _float / c_MBYTE;
+    end else
+  if _float >= c_MBYTE then
+    begin
+      _suffix := 'M';
+      _float2 := _float / c_MBYTE;
+    end else
+  if _float >= (c_KBYTE * 100) then
+    begin
+      _suffix := 'K';
+      _float2 := _float / c_KBYTE;
+    end else
+  if _float >= (c_KBYTE * 10) then
+    begin
+      _suffix := 'K';
+      _float2 := _float / c_KBYTE;
+    end else
+  if _float >= c_KBYTE then
+    begin
+      _suffix := 'K';
+      _float2 := _float / c_KBYTE;
+    end;
+
+  Result := Trim(Format(_mask, [_float2]));
+  if ATailer then
+    Result := Result + ' ' + _suffix + 'bytes'
+  else
+    Result := Result + _suffix;
 end;
 
 function IOUtils_ReadAllText(const AFilePath: string=''): string;
@@ -207,6 +365,7 @@ begin
   end;
 end;
 
+{ Deprecating / Reaplcae to the EllipsePosition of TLabel property ...}
 function Get_TextWithEllipsis(const AMiddle: Boolean;  ACanvas: TCanvas; ARect: TRect; const AText: string): string;
 begin
   Result := AText;
@@ -227,7 +386,7 @@ begin
         if AMiddle then
            _Ss := Copy(AText, 1, _i) + ' ... ' + Copy(AText, Length(AText) - _i + 1, _i)
          else
-           _Ss := Copy(AText, 1, _i) + ' ... ';
+           _Ss := Copy(AText, 1, _i) + ' ...';
 
         GetTextExtentPoint32W(ACanvas.Handle, _Ss, Length(_Ss), _Sz);
         if _Sz.cx > _RectWidth then
@@ -413,7 +572,7 @@ begin
         TJsonToken.Integer:
           if _sizeflag then
             begin
-              var _newvalue: string := Format('%.3f GB', [(_JsonReader.Value.AsInt64 / GC_BTdivGB)]);
+              var _newvalue: string := BytesToKMG(_JsonReader.Value.AsInt64);
               Result := Result + _newvalue+ GC_CRLF;
               _sizeflag := False;
             end;
@@ -441,8 +600,8 @@ begin
   var _MemBuffer: _MEMORYSTATUS;
   GlobalMemoryStatus(_MemBuffer);
 
-  VTotal := Format('%.3f GB', [(_MemBuffer.dwTotalPhys / GC_BTdivGB)]);
-  VAvail := Format('%.3f GB', [(_MemBuffer.dwAvailPhys / GC_BTdivGB)]);
+  VTotal := BytesToKMG(_MemBuffer.dwTotalPhys);
+  VAvail := BytesToKMG(_MemBuffer.dwAvailPhys);
   Result := _MemBuffer.dwMemoryLoad;
 end;
 
@@ -470,7 +629,7 @@ begin
   if GetProcessMemoryInfo(GetCurrentProcess, @_MemCounters, SizeOf(_MemCounters)) then
     begin
       var _result: NativeUInt := _MemCounters.WorkingSetSize;
-      Result := Format('%.3f MB', [ _result / GC_BTdivMB ]);
+      Result := BytesToKMG(_result);
     end
   else
     RaiseLastOSError;
@@ -577,6 +736,72 @@ begin
   var _ProcessID: Cardinal := GetProcessID('ollama.exe');
   Result := _ProcessID <> 0;
 end;
+
+function GetThemeColorEx1(const className: string; part, state, propID: Integer; out Color: TColor): Boolean;
+
+  function HasThemeManifest: Boolean;
+  begin
+    Result := FindResource(hInstance, makeintresource(1), MakeIntResource(24)) > 0;
+  end;
+
+var
+  _clrRef: COLORREF ABSOLUTE Color;
+begin
+  Result := False;
+  if not StyleServices.Enabled or not HasThemeManifest then Exit;
+  var _thmHdl: HTheme := OpenThemeData(0, LPCWSTR(className));
+  if _thmHdl <> 0 then
+  try
+    Result := Succeeded(WinApi.uxTheme.GetThemeColor(_thmHdl, part, state, propID, _clrRef));
+  finally
+    CloseThemeData(_thmHdl);
+  end;
+end;
+
+procedure SleepWithoutFreeze(msec: Cardinal);
+begin
+  var _Start: DWORD := GetTickCount;
+  var _Elapsed: DWORD := 0;
+  repeat
+    // (WAIT_OBJECT_0+nCount) is returned when a message is in the queue.
+    // WAIT_TIMEOUT is returned when the timeout elapses.
+    if MsgWaitForMultipleObjects(0, Pointer(nil)^, FALSE, msec-_Elapsed, QS_ALLINPUT) <> WAIT_OBJECT_0 then
+    Break;
+    Application.ProcessMessages;
+    _Elapsed := GetTickCount - _Start;
+  until _Elapsed >= msec;
+end;
+
+function LoadFromFileBuffered_String(const AFileName: string): string;
+begin
+  var _Stream: TBufferedFileStream := TBufferedFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
+  var _Strings: TStrings := TStringList.Create;
+  _Strings.BeginUpdate;
+  try
+    _Stream.Position := 0;
+    _Strings.LoadFromStream(_Stream);
+    Result := _Strings.Text;
+  finally
+    _Strings.EndUpdate;
+    _Stream.Free;
+  end;
+end;
+
+procedure Strings_LoadFromFileBuffered(const AFileName: string; AStrings: TStrings);
+begin
+  var _Stream: TBufferedFileStream := TBufferedFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
+  AStrings.BeginUpdate;
+  try
+    AStrings.Clear;
+    _Stream.Position := 0;
+    AStrings.LoadFromStream(_Stream);
+  finally
+    AStrings.EndUpdate;
+    _Stream.Free;
+  end;
+end;
+
+
 
 { Help codes ...
 

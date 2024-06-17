@@ -31,7 +31,7 @@ type
     FBatchMemo: TMemo;
   private
     FBatchRunning: Boolean;
-    procedure DosCommand1NewLine(ASender: TObject; const ANewLine: string; AOutputType: TOutputType);
+    procedure DosCommandNewLine(ASender: TObject; const ANewLine: string; AOutputType: TOutputType);
   public
     constructor Create();
     destructor Destroy; override;
@@ -43,7 +43,7 @@ type
     procedure Dos_CommandBatch(ACmd: string);
     procedure Dos_CommandBatch2(ACmd: string);
     function Get_DosResult(AFlag: Integer = 0): string;
-    { property }
+    { property ... }
     property DosCommand: TDosCommand  read FDosCommand;
     property Command: string  read FCommand;
     property BatchRunning: Boolean  read FBatchRunning write FBatchRunning;
@@ -64,7 +64,7 @@ type
     Label_Reserved: TLabel;
     Label_Run: TLabel;
     Label_Pull: TLabel;
-    Label_Rm: TLabel;
+    Label_Show: TLabel;
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure Label_ListClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -179,7 +179,7 @@ begin
     FCommand := Acmd;
     with FDosCommand do
       try
-        OnNewLine := DosCommand1NewLine;
+        OnNewLine := DosCommandNewLine;
         CommandLine := _batchfile;
         CurrentDir := CV_AppPath;
         OutputLines := FBatchMemo.Lines;
@@ -199,7 +199,7 @@ begin
   end;
 end;
 
-procedure TG_DosCommand.DosCommand1NewLine(ASender: TObject; const ANewLine: string; AOutputType: TOutputType);
+procedure TG_DosCommand.DosCommandNewLine(ASender: TObject; const ANewLine: string; AOutputType: TOutputType);
 begin
   if AOutputType = otEntireLine then
   begin

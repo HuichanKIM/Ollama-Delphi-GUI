@@ -540,7 +540,7 @@ object Form_RestOllama: TForm_RestOllama
         end
         object SpeedButton_Help: TSpeedButton
           AlignWithMargins = True
-          Left = 114
+          Left = 141
           Top = 3
           Width = 21
           Height = 19
@@ -550,13 +550,13 @@ object Form_RestOllama: TForm_RestOllama
           ImageName = 'ic_help_outline_24px'
           Images = SVGIconVirtualImageList1
           OnClick = SpeedButton_HelpClick
-          ExplicitLeft = 167
+          ExplicitLeft = 154
         end
         object Label1: TLabel
           AlignWithMargins = True
-          Left = 141
+          Left = 168
           Top = 3
-          Width = 64
+          Width = 37
           Height = 19
           Align = alClient
           Alignment = taRightJustify
@@ -566,6 +566,18 @@ object Form_RestOllama: TForm_RestOllama
           ExplicitLeft = 175
           ExplicitWidth = 30
           ExplicitHeight = 15
+        end
+        object SpeedButton_Broker: TSpeedButton
+          AlignWithMargins = True
+          Left = 114
+          Top = 3
+          Width = 21
+          Height = 19
+          Hint = 'Log / Broker Window'
+          Action = Action_Logs
+          Align = alLeft
+          Images = SVGIconVirtualImageList1
+          ExplicitLeft = 162
         end
       end
       object GroupBox_GlobalFontSize: TGroupBox
@@ -587,18 +599,29 @@ object Form_RestOllama: TForm_RestOllama
           StyleElements = [seClient, seBorder]
         end
         object Label_Font_Size: TLabel
-          Left = 200
+          Left = 170
           Top = 25
           Width = 12
           Height = 15
           Caption = '10'
           StyleElements = [seClient, seBorder]
         end
+        object SpeedButton_SetFont: TSpeedButton
+          Left = 200
+          Top = 20
+          Width = 23
+          Height = 22
+          Hint = 'Set New Font'
+          ImageIndex = 58
+          ImageName = 'ic_title_48px'
+          Images = SVGIconVirtualImageList1
+          OnClick = SpeedButton_SetFontClick
+        end
         object TrackBar_GlobalFontSize: TTrackBar
           AlignWithMargins = True
           Left = 75
           Top = 20
-          Width = 120
+          Width = 100
           Height = 20
           Hint = '10'
           Margins.Right = 15
@@ -677,7 +700,7 @@ object Form_RestOllama: TForm_RestOllama
           Caption = 'to'
           StyleElements = [seClient, seBorder]
         end
-        object ComboBox_TtsSource: TComboBox
+        object ComboBox_TransSource: TComboBox
           Left = 56
           Top = 23
           Width = 50
@@ -692,7 +715,7 @@ object Form_RestOllama: TForm_RestOllama
             'en'
             'ko')
         end
-        object ComboBox_TtsTarget: TComboBox
+        object ComboBox_TransTarget: TComboBox
           Left = 138
           Top = 23
           Width = 50
@@ -1101,7 +1124,7 @@ object Form_RestOllama: TForm_RestOllama
         Top = 26
         Width = 722
         Height = 740
-        ActivePage = Tabsheet_Chatting
+        ActivePage = TabSheet_ChatLogs
         Align = alClient
         TabOrder = 1
         OnChange = PageControl_ChattingChange
@@ -1157,14 +1180,21 @@ object Form_RestOllama: TForm_RestOllama
         object TabSheet_ChatLogs: TTabSheet
           Caption = 'LOG'
           ImageIndex = 1
+          object Splitter1: TSplitter
+            Left = 0
+            Top = 556
+            Width = 714
+            Height = 4
+            Cursor = crVSplit
+            Align = alBottom
+            ExplicitTop = 557
+          end
           object Memo_LogWin: TMemo
             AlignWithMargins = True
-            Left = 1
+            Left = 3
             Top = 23
-            Width = 710
-            Height = 684
-            Cursor = crHandPoint
-            Margins.Left = 1
+            Width = 708
+            Height = 530
             Align = alClient
             BevelInner = bvNone
             BevelOuter = bvNone
@@ -1261,6 +1291,120 @@ object Form_RestOllama: TForm_RestOllama
               TabOrder = 1
               StyleElements = [seClient, seBorder]
               OnClick = CheckBox_SaveOnCLoseClick
+            end
+          end
+          object Panel_ServerChatting: TPanel
+            Left = 0
+            Top = 560
+            Width = 714
+            Height = 150
+            Align = alBottom
+            BevelOuter = bvNone
+            TabOrder = 2
+            object Memo_ServerChattings: TMemo
+              AlignWithMargins = True
+              Left = 3
+              Top = 23
+              Width = 708
+              Height = 124
+              Align = alClient
+              BevelInner = bvNone
+              BevelOuter = bvNone
+              BorderStyle = bsNone
+              Ctl3D = False
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clSilver
+              Font.Height = -13
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              Lines.Strings = (
+                'Serve as Remote Chatting'
+                '- Under Construction ...')
+              ParentCtl3D = False
+              ParentFont = False
+              ReadOnly = True
+              ScrollBars = ssVertical
+              TabOrder = 0
+              StyleElements = [seClient, seBorder]
+            end
+            object Panel2: TPanel
+              Left = 0
+              Top = 0
+              Width = 714
+              Height = 20
+              Align = alTop
+              Alignment = taLeftJustify
+              BevelOuter = bvNone
+              Caption = '* Server'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clBtnFace
+              Font.Height = -12
+              Font.Name = 'Segoe UI'
+              Font.Style = [fsBold]
+              ParentFont = False
+              TabOrder = 1
+              object SpeedButton_ShutdownClients: TSpeedButton
+                Left = 691
+                Top = 0
+                Width = 23
+                Height = 20
+                Hint = 'ShutDowm Broker / All Client'
+                Margins.Top = 0
+                Margins.Right = 10
+                Margins.Bottom = 0
+                Align = alRight
+                ImageIndex = 31
+                ImageName = 'ic_highlight_off_48px'
+                Images = SVGIconVirtualImageList1
+                OnClick = SpeedButton_ShutdownClientsClick
+                ExplicitLeft = 689
+              end
+              object SpeedButton_ShowRmBroker: TSpeedButton
+                Left = 645
+                Top = 0
+                Width = 23
+                Height = 20
+                Hint = 'Show Remote Broker'
+                Margins.Top = 0
+                Margins.Bottom = 0
+                Align = alRight
+                ImageIndex = 48
+                ImageName = 'ic_storage_48px'
+                Images = SVGIconVirtualImageList1
+                OnClick = SpeedButton_ShowRmBrokerClick
+                ExplicitLeft = 552
+              end
+              object SpeedButton_GetIPs: TSpeedButton
+                Left = 622
+                Top = 0
+                Width = 23
+                Height = 20
+                Hint = 'Get IP - Local, Public'
+                Margins.Top = 0
+                Margins.Bottom = 0
+                Align = alRight
+                ImageIndex = 64
+                ImageName = 'grade_black_24dp'
+                Images = SVGIconVirtualImageList1
+                OnClick = SpeedButton_GetIPsClick
+                ExplicitLeft = 593
+                ExplicitTop = 3
+              end
+              object SpeedButton_ActivateBroker: TSpeedButton
+                Left = 668
+                Top = 0
+                Width = 23
+                Height = 20
+                Hint = 'Activate Remote Broker'
+                Margins.Top = 0
+                Margins.Bottom = 0
+                Align = alRight
+                ImageIndex = 61
+                ImageName = 'ic_play_circle_outline_24px'
+                Images = SVGIconVirtualImageList1
+                OnClick = SpeedButton_ActivateBrokerClick
+                ExplicitLeft = 662
+              end
             end
           end
         end
@@ -1394,13 +1538,20 @@ object Form_RestOllama: TForm_RestOllama
       StyleElements = [seClient, seBorder]
     end
     object Label_Caption: TLabel
-      Left = 246
+      AlignWithMargins = True
+      Left = 256
       Top = 0
-      Width = 869
+      Width = 819
       Height = 30
+      Margins.Left = 10
+      Margins.Top = 0
+      Margins.Right = 10
+      Margins.Bottom = 0
       Align = alClient
       Alignment = taCenter
+      AutoSize = False
       Caption = 'Model in use - phi3'
+      EllipsisPosition = epEndEllipsis
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
       Font.Height = -12
@@ -1409,6 +1560,7 @@ object Form_RestOllama: TForm_RestOllama
       ParentFont = False
       Layout = tlCenter
       StyleElements = [seClient, seBorder]
+      ExplicitLeft = 246
       ExplicitWidth = 105
       ExplicitHeight = 15
     end
@@ -1426,6 +1578,24 @@ object Form_RestOllama: TForm_RestOllama
       Align = alLeft
       Brush.Color = clBlack
       Shape = stCircle
+    end
+    object Shape_Broker: TShape
+      AlignWithMargins = True
+      Left = 1093
+      Top = 8
+      Width = 14
+      Height = 14
+      Cursor = crHandPoint
+      Hint = 'Ollama Broker Active'
+      Margins.Left = 8
+      Margins.Top = 8
+      Margins.Right = 8
+      Margins.Bottom = 8
+      Align = alRight
+      Brush.Color = clBlack
+      Shape = stCircle
+      OnMouseDown = Shape_BrokerMouseDown
+      ExplicitLeft = 74
     end
     object Button_StartRequest: TButton
       AlignWithMargins = True
@@ -1712,7 +1882,7 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_DefaultRefreshExecute
     end
     object Action_DosCommand: TAction
-      Hint = 'Dos Command Mode Request'
+      Hint = 'Dos Command Mode'
       ImageIndex = 67
       ImageName = 'DosIcon_48'
       OnExecute = Action_DosCommandExecute
@@ -1738,14 +1908,14 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_RequestDialogExecute
     end
     object Action_About: TAction
-      Hint = 'About / Skin / Colors'
+      Hint = 'About'
       ImageIndex = 11
       ImageName = 'All\ic_settings_48px'
       ShortCut = 32855
       OnExecute = Action_AboutExecute
     end
     object Action_SelectionColor: TAction
-      Hint = 'Selection Color'
+      Hint = 'Skin / Colors'
       ImageIndex = 63
       ImageName = 'ic_apps_48px'
       ShortCut = 32837
@@ -1766,6 +1936,10 @@ object Form_RestOllama: TForm_RestOllama
       Caption = 'Help-Shortcuts'
       ShortCut = 32840
       OnExecute = Action_HelpShortcutsExecute
+    end
+    object Action_ApplyChange: TAction
+      Caption = 'Action_ApplyChange'
+      OnExecute = Action_ApplyChangeExecute
     end
   end
   object SVGIconVirtualImageList1: TSVGIconVirtualImageList
@@ -2968,6 +3142,7 @@ object Form_RestOllama: TForm_RestOllama
       'All (*.jpg;*.jpeg;*.png;*.webp;*.gif)|*.jpg;*.jpeg;*.png;*.webp;' +
       '*.gif|JPEG Image File (*.jpg)|*.jpg|Portable Network Graphics (*' +
       '.png)|*.png'
+    Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Left = 277
     Top = 553
   end
@@ -3006,5 +3181,14 @@ object Form_RestOllama: TForm_RestOllama
       Caption = 'Clear All'
       OnClick = pmn_ClearAllClick
     end
+  end
+  object FontDialog1: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    Left = 686
+    Top = 346
   end
 end

@@ -96,16 +96,21 @@ object Form_Translator: TForm_Translator
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 49
-      Height = 15
+      Width = 495
+      Height = 24
+      Margins.Right = 10
       Align = alClient
+      AutoSize = False
       Caption = 'Prompt   '
+      EllipsisPosition = epEndEllipsis
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
       Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = []
       ParentFont = False
+      ExplicitWidth = 49
+      ExplicitHeight = 15
     end
   end
 end

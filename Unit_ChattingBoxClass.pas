@@ -74,12 +74,16 @@ type
     FVST_NSelectionColor: TColor;
     FVST_ColumnOffset: Integer;
     FVST_SecondIndent: Integer;
+    FVST_FontName: string;
+    FVST_FontSize: Integer;
     function GetSelectionColor: TColor;
     procedure SetVST_NBodyFontSize(const Value: Integer);
     procedure SetVST_NSelectionColor(const Value: TColor);
     procedure SetVST_NBodyColor(const Value: TColor);
     procedure SetVST_NFooterColor(const Value: TColor);
     procedure SetVST_NHeaderColor(const Value: TColor);
+    procedure SetVST_Fontname(const Value: string);
+    procedure SetVST_FontSize(const Value: Integer);
   public
     procedure InitializeEx(const AHeaderColor, ABodyColor, AFooterColor: TColor);
     procedure FinalizeEx(const AFlag: Integer);
@@ -96,14 +100,18 @@ type
     function Do_SaveAllText(const AFile: string): Boolean;
     function Do_DeleteNode(): Boolean;
     procedure Do_RestoreDefaultColor(const AFontOnlyFlag: Integer = 0);
+    procedure Do_SetCustomFont(const AFlag: Integer; const AFontName: string; const AFontSize: Integer);
     procedure Do_SetCustomColor(const AFlag: Integer; const ASelColor, AHeaderColor, ABodyColor, AFooterColor: TColor);
     function Get_CustomColor(var AHeaderColor, ABodyColor, AFooterColor: TColor): TColor;
+    procedure Set_FontEx(AFont: TFont);
     //
     property VST_NBodyFontSize: Integer   read FVST_NBodyFontSize     write SetVST_NBodyFontSize;
     property VST_NSelectionColor: TColor  read FVST_NSelectionColor   write SetVST_NSelectionColor;
     property VST_NHeaderColor: TColor     read FVST_NHeaderColor      write SetVST_NHeaderColor;
     property VST_NBodyColor: TColor       read FVST_NBodyColor        write SetVST_NBodyColor;
     property VST_NFooterColor: TColor     read FVST_NFooterColor      write SetVST_NFooterColor;
+    property VST_FontName: string         read FVST_FontName          write SetVST_FontName;
+    property VST_FontSize: Integer        read FVST_FontSize          write SetVST_FontSize;
   end;
 
 implementation
@@ -125,6 +133,8 @@ begin
   FVST_NBodyFontSize :=   GC_SkinFontSize;
   FVST_ColumnOffset :=    15;
   FVST_SecondIndent :=    35;    // Reference of Indent for Ollama Response ...
+  FVST_FontName :=        VST_ChattingBox.Font.Name;
+  FVST_FontSize :=        GC_SkinFontSize;;
 
   with VST_ChattingBox do
   begin
@@ -138,7 +148,7 @@ begin
     SelectionCurveRadius := 20;
     {  Custom ... }
     OffsetWRMagin := 35;
-    NodeHeightOffSet := 52;
+    NodeHeightOffSet := 15;// 52;
     Images := VirtualImageList1;
     SelectedBrushColor := FVST_NSelectionColor;  // in TBaseVirtualTree.pas ...
     Node_HeaderColor :=   FVST_NHeaderColor;
@@ -247,6 +257,7 @@ begin
   if FVST_NBodyFontSize <> Value then
   begin
     FVST_NBodyFontSize := Value;
+    FVST_FontSize := Value;
     VST_ChattingBox.Font.Size := Value;
     VST_ChattingBox.Invalidate;
   end;
@@ -263,6 +274,32 @@ begin
   begin
     FVST_NSelectionColor := Value;
     VST_ChattingBox.SelectedBrushColor := Value;
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.Set_FontEx(AFont: TFont);
+begin
+  VST_ChattingBox.Font.Assign(AFont);
+  FVST_NBodyFontSize := AFont.Size;
+  FVST_FontName := AFont.Name;
+  FVST_FontSize := AFont.Size;
+end;
+
+procedure TFrame_ChattingBoxClass.SetVST_FontName(const Value: string);
+begin
+  if FVST_FontName <> Value then
+  begin
+    FVST_FontName := Value;
+    VST_ChattingBox.Font.Name := Value;
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.SetVST_FontSize(const Value: Integer);
+begin
+  if FVST_FontSize <> Value then
+  begin
+    FVST_FontSize := Value;
+    VST_ChattingBox.Font.Size := Value;
   end;
 end;
 
@@ -346,7 +383,7 @@ begin
   begin
     TargetCanvas.Font := Sender.Font;
     var _text: string := PMessageRec(VST_ChattingBox.GetNodeData(Node))^.FCaption;
-    NodeHeight := VST_ChattingBox.ComputeNodeHeight(TargetCanvas, Node, 0, _text) + VST_ChattingBox.NodeHeightOffSet;  // Title + TimeStamp
+    NodeHeight := VST_ChattingBox.ComputeNodeHeight(TargetCanvas, Node, 0, _text);
   end;
 end;
 
@@ -444,7 +481,7 @@ procedure TFrame_ChattingBoxClass.pmn_ColorSettingsClick(Sender: TObject);
 begin
   with TForm_About.Create(Self) do
   try
-    Show_Flag := 3;
+    Show_Flag := GC_AboutSkinFlag;
     ShowModal;
   finally
     Free;
@@ -453,6 +490,9 @@ end;
 
 procedure TFrame_ChattingBoxClass.pmn_CopyTextClick(Sender: TObject);
 begin
+  //with VST_ChattingBox do
+  //ContentToClipboard(CF_UNICODETEXT, TVSTTextSourceType.tstSelected);
+  //
   var _ItemStr := Get_NodeText;
   if _ItemStr <> '' then
   begin
@@ -479,13 +519,18 @@ procedure TFrame_ChattingBoxClass.Do_RestoreDefaultColor(const AFontOnlyFlag: In
 begin
   if AFontOnlyFlag = 1 then
   begin
-    FVST_NBodyFontSize :=   10;
-    with  VST_ChattingBox do
+    FVST_NBodyFontSize := 10;
+    with VST_ChattingBox do
     begin
       BeginUpdate;
+      Font.Name := Self.Font.Name;
       Font.Size := FVST_NBodyFontSize;
       EndUpdate;
     end;
+
+    FVST_FontName := Self.Font.name;
+    FVST_FontSize := 10;
+
     Exit;
   end;
 
@@ -494,6 +539,7 @@ begin
   FVST_NBodyColor :=      GC_SkinBodyColor;
   FVST_NFooterColor :=    GC_SkinFootColor;
   FVST_NBodyFontSize :=   GC_SkinFontSize;
+  FVST_FontSize :=        GC_SkinFontSize;
 
   GV_ReservedColor[0] := FVST_NSelectionColor;
   GV_ReservedColor[1] := FVST_NHeaderColor;
@@ -506,6 +552,7 @@ begin
     Node_HeaderColor :=   FVST_NHeaderColor;
     Node_BodyColor :=     FVST_NBodyColor;
     Node_FooterColor :=   FVST_NFooterColor;
+    Font.Name :=          FVST_FontName;
     Font.Size :=          FVST_NBodyFontSize;
     SelectedBrushColor := FVST_NSelectionColor;  { > Include Invalidation ... }
     EndUpdate;
@@ -535,7 +582,7 @@ begin
     GV_ReservedColor[3] := FVST_NFooterColor;
   end;
 
-  with  VST_ChattingBox do
+  with VST_ChattingBox do
   begin
     BeginUpdate;
     Node_HeaderColor :=   FVST_NHeaderColor;
@@ -546,18 +593,22 @@ begin
   end;
 end;
 
+procedure TFrame_ChattingBoxClass.Do_SetCustomFont(const AFlag: Integer; const AFontName: string; const AFontSize: Integer);
+begin
+  VST_FontName := AFontName;
+  VST_FontSize := AFontSize;
+  VST_ChattingBox.Invalidate;
+end;
+
 function TFrame_ChattingBoxClass.Do_SaveAllText(const AFile: string): Boolean;
-const
-  c_Indent: array [0..1] of string = ('', '  ');
-var
-  _AddString  : string;
-  _CellText   : string;
 begin
   var _sourcelist: TStrings := TStringList.Create;
   var _Data: PMessageRec := nil;
   var _index: Integer := 1;
   var _qtag: Integer := 0;
   var _prefix: string := '';
+  var _AddString: string := '';
+  var _CellText: string := '';
   try
     var _Node  : PVirtualNode := VST_ChattingBox.GetFirst;
     while Assigned(_Node) do

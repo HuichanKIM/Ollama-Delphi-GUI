@@ -1,66 +1,49 @@
 ﻿[Closed Files]
-File_0=TSourceModule,'E:\2024_DelphiLibs12\skia4delphi\Source\System.Skia.pas',0,1,7726,52,7733,0,0,{{62,0}
-File_1=TSourceModule,'E:\2024_DelphiLibs12\Overbytes_icsv91\Source\OverbyteIcsSslHttpRest.pas',0,1,1742,59,1757,0,0,,
-File_2=TSourceModule,'E:\2024_DelphiLibs12\Overbytes_icsv91\Source\OverbyteIcsUtils.pas',0,1,6712,1,6691,0,0,,
-File_3=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\net\System.Net.HttpClient.pas',0,1,1572,1,1590,0,0,,
-File_4=TSourceModule,'E:\OllamaCkent\Unit_Welcome.pas',0,1,22,1,50,0,0,,
-File_5=TSourceModule,'E:\OllamaCkent\Include\VirtualTrees.pas',0,1,1428,106,1449,0,0,,
-File_6=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\net\System.Net.HttpClientComponent.pas',0,1,34,1,40,0,0,,
-File_7=TSourceModule,'E:\OllamaCkent\Include\VirtualTrees.BaseTree.pas',0,1,13,1,14,0,0,,
-File_8=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.Dialogs.pas',0,1,6780,35,6784,0,0,,
-File_9=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.ActnList.pas',0,1,246,1,264,0,0,,
-File_10=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.Classes.pas',0,1,1265,1,1283,0,0,,
-File_11=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.Graphics.pas',0,1,9178,1,9178,0,0,,
-File_12=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.UITypes.pas',0,1,624,1,633,0,0,,
-File_13=TSourceModule,'E:\2024_DelphiLibs12\HemulGM\Components\HGM.Controls.Chat.pas',0,1,1300,1,1,0,0,,
-File_14=TSourceModule,'E:\2024_DelphiLibs12\StyleControls_577\athensdemo\Skia_Interaction_Fluent\Unit1.pas',0,1,1,1,1,0,0,,
+File_0=TSourceModule,'E:\2024_DelphiLibs12\NetCom7-master\Source\ncLines.pas',0,1,90,52,100,0,0,,
+File_1=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.Generics.Collections.pas',0,1,6766,1,6784,0,0,,
+File_2=TSourceModule,'E:\2024_DelphiLibs12\Overbytes_icsv91\Source\OverbyteIcsSslHttpRest.pas',0,1,568,39,586,0,0,,
+File_3=TSourceModule,'E:\OllamaCkent\Unit_About.pas',0,1,166,79,189,0,0,,
+File_4=TSourceModule,'E:\OllamaCkent\Unit_AliveOllama.pas',0,1,23,1,38,0,0,,
+File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.Classes.pas',0,1,7639,1,7651,0,0,,
+File_6=TSourceModule,'E:\2024_DelphiLibs12\NetCom7-master\Source\ncThreads.pas',0,1,280,1,1,0,0,,
+File_7=TSourceModule,'E:\2024_DelphiLibs12\NetCom7-master\Source\ncSocketList.pas',0,1,178,86,182,0,0,,
+File_8=TSourceModule,'E:\OllamaCkent\Unit_MRUManager.pas',0,1,209,97,227,0,0,,
+File_9=TSourceModule,'E:\OllamaCkent\Include\VirtualTrees.pas',0,1,15,94,165,0,0,,
+File_10=TSourceModule,'E:\2024_DelphiLibs12\NetCom7_2024_000\Demos\VideoChat\Server\CommonCommands.pas',0,1,1,1,5,0,0,,
+File_11=TSourceModule,'E:\2024_DelphiLibs12\NetCom7_2024_000\Demos\VideoChat\Server\ufrmMain.pas',0,1,188,59,77,0,0,,
+File_12=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\Indy10\System\IdStack.pas',0,1,430,1,421,0,0,,
+File_13=TSourceModule,'E:\OllamaCkent\Unit_DosCommander.pas',0,1,285,93,111,0,0,,
 
 [Modules]
 Module0=E:\OllamaCkent\Unit_Main.pas
-Module1=E:\OllamaCkent\Unit_MRUManager.pas
+Module1=E:\OllamaCkent\Unit_RMBroker.pas
 Module2=E:\OllamaCkent\Ollma_Client.dproj
-Module3=E:\OllamaCkent\Unit_About.pas
-Module4=E:\OllamaCkent\Unit_ImageDropDown.pas
+Module3=E:\OllamaCkent\Unit_DMServer.pas
+Module4=E:\2024_DelphiLibs12\NetCom7-master\Source\ncSources.pas
 Module5=E:\OllamaCkent\Unit_Common.pas
-Module6=E:\OllamaCkent\Unit_Translator.pas
-Module7=E:\OllamaCkent\Unit_DosCommander.pas
-Module8=E:\OllamaCkent\Unit_AliveOllama.pas
-Module9=E:\OllamaCkent\Unit_RequestDialog.pas
-Count=10
+Count=6
 EditWindowCount=1
 
 [E:\OllamaCkent\Unit_Main.pas]
 ModuleType=TSourceModule
 
-[E:\OllamaCkent\Unit_MRUManager.pas]
+[E:\OllamaCkent\Unit_RMBroker.pas]
 ModuleType=TSourceModule
 
 [E:\OllamaCkent\Ollma_Client.dproj]
 ModuleType=TBaseProject
 
-[E:\OllamaCkent\Unit_About.pas]
+[E:\OllamaCkent\Unit_DMServer.pas]
 ModuleType=TSourceModule
 
-[E:\OllamaCkent\Unit_ImageDropDown.pas]
+[E:\2024_DelphiLibs12\NetCom7-master\Source\ncSources.pas]
 ModuleType=TSourceModule
 
 [E:\OllamaCkent\Unit_Common.pas]
 ModuleType=TSourceModule
 
-[E:\OllamaCkent\Unit_Translator.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Unit_DosCommander.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Unit_AliveOllama.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Unit_RequestDialog.pas]
-ModuleType=TSourceModule
-
 [EditWindow0]
-ViewCount=10
+ViewCount=6
 CurrentEditView=E:\OllamaCkent\Unit_Main.pas
 View0=0
 View1=1
@@ -68,10 +51,6 @@ View2=2
 View3=3
 View4=4
 View5=5
-View6=6
-View7=7
-View8=8
-View9=9
 PercentageSizes=1
 Create=1
 Visible=1
@@ -108,9 +87,9 @@ BottomMiddelPanelData=0000080001020200000009000000446F636B5369746530100000004772
 [View0]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Ollma_Client.dpr
-CursorX=58
-CursorY=56
-TopLine=40
+CursorX=4
+CursorY=64
+TopLine=1
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -118,102 +97,58 @@ EditViewName=E:\OllamaCkent\Ollma_Client.dpr
 
 [View1]
 CustomEditViewType=TEditView
+Module=E:\OllamaCkent\Unit_DMServer.pas
+CursorX=56
+CursorY=173
+TopLine=162
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=E:\OllamaCkent\Unit_DMServer.pas
+
+[View2]
+CustomEditViewType=TEditView
+Module=E:\2024_DelphiLibs12\NetCom7-master\Source\ncSources.pas
+CursorX=16
+CursorY=145
+TopLine=128
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=E:\2024_DelphiLibs12\NetCom7-master\Source\ncSources.pas
+
+[View3]
+CustomEditViewType=TEditView
+Module=E:\OllamaCkent\Unit_RMBroker.pas
+CursorX=86
+CursorY=101
+TopLine=88
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=E:\OllamaCkent\Unit_RMBroker.pas
+
+[View4]
+CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_Main.pas
-CursorX=65
-CursorY=2077
-TopLine=2065
+CursorX=70
+CursorY=235
+TopLine=226
 LeftCol=1
 Elisions=
 Bookmarks=
 EditViewName=E:\OllamaCkent\Unit_Main.pas
 
-[View2]
-CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_DosCommander.pas
-CursorX=45
-CursorY=125
-TopLine=121
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_DosCommander.pas
-
-[View3]
-CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_AliveOllama.pas
-CursorX=39
-CursorY=68
-TopLine=140
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_AliveOllama.pas
-
-[View4]
-CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_About.pas
-CursorX=78
-CursorY=289
-TopLine=266
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_About.pas
-
 [View5]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_Common.pas
-CursorX=56
-CursorY=296
-TopLine=293
+CursorX=26
+CursorY=39
+TopLine=22
 LeftCol=1
 Elisions=
 Bookmarks=
 EditViewName=E:\OllamaCkent\Unit_Common.pas
-
-[View6]
-CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_RequestDialog.pas
-CursorX=1
-CursorY=46
-TopLine=28
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_RequestDialog.pas
-
-[View7]
-CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_ImageDropDown.pas
-CursorX=61
-CursorY=66
-TopLine=16
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_ImageDropDown.pas
-
-[View8]
-CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_Translator.pas
-CursorX=86
-CursorY=163
-TopLine=150
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_Translator.pas
-
-[View9]
-CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_MRUManager.pas
-CursorX=92
-CursorY=74
-TopLine=98
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_MRUManager.pas
 
 [Watches]
 Count=0
@@ -365,8 +300,8 @@ SplitPos=143
 
 [PropInspDesignerSelection]
 ArrangeBy=Name
-SelectedItem=Name,OnClick
-ExpandedItems=LiveBindings=0,"LiveBindings Designer=0",Margins=0,MultiSelectStyle=0,PopupMenu=0,Anchors=0,BevelEdges=0,CheckStyles=0,Constraints=0,Action=0,Images=0,Font=0,HeaderFont=0,Padding=0,StyleElements=0,Touch=0
+SelectedItem=Cursor,OnClick
+ExpandedItems=Anchors=1,BorderIcons=0,Constraints=0,CustomTitleBar=0,LiveBindings=0,"LiveBindings Designer=0",Margins=1,Border=0,Fill=1,FormFactor=1,Padding=0,SystemStatusBar=0,Touch=0,FormFactor.Devices=0,FormFactor.Orientations=0,Position=1,RotationCenter=0,Scale=0,Size=0,TouchTargetExpansion=0,StyledSettings=0,TextSettings=1,TextSettings.Font=0,Fill.Bitmap=0,Fill.Resource=0,Stroke=1,Stroke.Bitmap=0,Stroke.Resource=0,NativeOptions=0,RotationAngle=0,Font=0,StyleElements=0,Images=0,Action=0,DefaultItemStyles=0,ItemAppearance=0,ItemAppearanceObjects=0,ItemSpaces=0,TextSettings.FontColorForState=0,PlacementRectangle=0,BitmapMargins=0,GlassFrame=0,HorzScrollBar=0,ActiveControl=0,Brush=0,Pen=0
 
 [frmDesignPreview]
 PercentageSizes=1

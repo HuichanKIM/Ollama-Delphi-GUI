@@ -91,6 +91,8 @@ begin
   var _getflag: Boolean := False;
   var _HTTP: THTTPClient := THTTPClient.Create;  // To DO : Async - Case of Poor Networking Speed ...
   _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
+  _HTTP.ContentType := 'application/json';
+  _HTTP.CustomHeaders['Authorization'] := '';
   try
     _HTTP.ContentType := 'application/json';
     _getflag := _HTTP.Get(_URI.Encode, _Responses).StatusCode = 200;
@@ -159,18 +161,14 @@ const
 
 begin
   FTransResult := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
-  var _reqdisplay: string := FRequest;
-  var _rect: TRect := Rect(0,0,430,30);
-  if _reqdisplay <> '' then
-  _reqdisplay := Get_TextWithEllipsis(False, Self.Canvas, _rect, FRequest);
-
   CheckBox_Pushtochatbox.Enabled := (AUser = 0) and PushFlag;
   if FTransResult <> '' then
   begin
-    if _reqdisplay = '' then
+    Label_Prompt.EllipsisPosition := epEndEllipsis;
+    if FRequest = '' then
       Label_Prompt.Caption := 'Type: '+c_Type[AUser]
     else
-      Label_Prompt.Caption := c_Type[AUser] + '  - '+_reqdisplay;
+      Label_Prompt.Caption := c_Type[AUser] + '  - '+FRequest;
 
     var _trans := FTransResult.Replace(GC_UTF8_LF, GC_CRLF, [rfReplaceAll]);
     Memo_Translates.Lines.Add(_trans)

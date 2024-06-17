@@ -66,7 +66,7 @@
         <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Ics.Fmx;Winapi;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\$(Platform)\$(Config)\dcu</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)\$(Config)\bin</DCC_ExeOutput>
-        <DCC_UnitSearchPath>.\Include;$(LIBS2024)\Overbytes_icsv91\Source;$(LIBS2024)\Overbytes_icsv91\Source\Include;$(LIBS2024)\skia4delphi\Source;$(LIBS2024)\skia4delphi\Source\VCL;$(LIBS2024)\skia4delphi\Source\VCL\Designtime;$(LIBS2024)\TurboPack\DOSCommand\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\Include;$(LIBS2024)\Overbytes_icsv91\Source;$(LIBS2024)\Overbytes_icsv91\Source\Include;$(LIBS2024)\TurboPack\DOSCommand\Source;$(LIBS2024)\NetCom7-master\Source;$(LIBS2024)\NetCom7-master\Source\Encryption;.\Include\NetCom7\Source;.\Include\NetCom7\Encryption;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=OverbyteIcsHttpRestTst;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=OverbyteIcsHttpRestTst;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.OverbyteIcsHttpRestTst</VerInfo_Keys>
@@ -1165,6 +1165,15 @@
         </DCCReference>
         <DCCReference Include="Unit_DosCommander.pas">
             <Form>TForm_DosCommander</Form>
+        </DCCReference>
+        <DCCReference Include="Unit_DMServer.pas">
+            <Form>DM_Server</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Unit_RMBroker.pas">
+            <Form>Form_RMBroker</Form>
+            <FormType>dfm</FormType>
         </DCCReference>
         <RcItem Include="beep0.wav">
             <ContainerId>ResourceItem</ContainerId>

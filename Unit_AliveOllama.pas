@@ -129,7 +129,6 @@ end;
 
 procedure TForm_AliveOllama.SpeedButton_CheckClick(Sender: TObject);
 const
-  c_Alive: Array [Boolean] of String = ('Not Alive','Alive On');
   c_Warning = 'Check Ollama is installed and running on local computer.';
 begin
   IsCkeckedFlag := False;
@@ -151,7 +150,7 @@ begin
     end;
 
     PostMessage(Form_RestOllama.Handle, NETHTTP_MESSAGE, NETHTTP_MESSAGE_ALIVE, Ord(GV_AliveOllamaFlag));
-    LogReturn(_response+#13#10+c_Alive[GV_AliveOllamaFlag]);
+    LogReturn(_response+#13#10+ IIF.CastBool<string>(GV_AliveOllamaFlag, 'Alive On', 'Not Alive'));
     if not GV_AliveOllamaFlag then
       begin
         Memo_Alive.lines.Add(c_Warning);

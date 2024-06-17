@@ -163,19 +163,19 @@ end;
 
 procedure TForm_About.CheckBox_BeepSoundClick(Sender: TObject);
 begin
-  if FUpdateLockFlag then Exit;
+  if not FUpdateLockFlag then
   Form_RestOllama.DoneSoundFlag := CheckBox_BeepSound.Checked;
 end;
 
 procedure TForm_About.CheckBox_NoCheckAliveClick(Sender: TObject);
 begin
-  if FUpdateLockFlag then Exit;
+  if not FUpdateLockFlag then
   GV_CheckingAliveStart := not CheckBox_NoCheckAlive.Checked;
 end;
 
 procedure TForm_About.CheckBox_SaveOnCLoseClick(Sender: TObject);
 begin
-  if FUpdateLockFlag then Exit;
+  if not FUpdateLockFlag then
   Form_RestOllama.SaveLogsOnCLoseFlag := CheckBox_SaveOnCLose.Checked;
 end;
 
@@ -184,14 +184,14 @@ const
 
 procedure TForm_About.ComboBox_MRUROOT_MaxChange(Sender: TObject);
 begin
-  if FUpdateLockFlag then Exit;
+  if not FUpdateLockFlag then
   if ComboBox_MRUROOT_Max.ItemIndex >= 0 then
     MRU_MAX_ROOT := C_MRUMAX[ComboBox_MRUROOT_Max.ItemIndex];
 end;
 
 procedure TForm_About.ComboBox_MRUCHILD_MaxChange(Sender: TObject);
 begin
-  if FUpdateLockFlag then Exit;
+  if not FUpdateLockFlag then
   if ComboBox_MRUCHILD_Max.ItemIndex >= 0 then
     MRU_MAX_CHILD := C_MRUMAX[ComboBox_MRUCHILD_Max.ItemIndex];
 end;
@@ -207,6 +207,7 @@ begin
     ListView_Shortcuts.Color := StyleServices.GetStyleColor(scWindow);
   end;
 
+  FUpdateLockFlag := False;
   Label_Development.Caption := C_DevelopInfo;
   Label_SystemInfo.Caption := Get_SystemInfo();
   Update_Shortcuts();
@@ -280,10 +281,10 @@ procedure TForm_About.StylesList_Refresh;
 begin
   ComboBox_VclStyles.Items.Clear;
   for var _stylename in TStyleManager.StyleNames do
-  begin
-    if not SameText('Windows', _stylename) then
-    ComboBox_VclStyles.Items.Add(_stylename);
-  end;
+    begin
+      if not SameText('Windows', _stylename) then
+      ComboBox_VclStyles.Items.Add(_stylename);
+    end;
   var _default: string := TStyleManager.ActiveStyle.Name;
   var _index: Integer := ComboBox_VclStyles.Items.IndexOf(_default);
   if _index >= 0 then
