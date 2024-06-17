@@ -1,0 +1,733 @@
+object Form_Setting: TForm_Setting
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 811
+  ClientWidth = 407
+  Position = MainFormCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnShow = FormShow
+  DesignerMasterStyle = 3
+  object ToolBar1: TToolBar
+    Align = MostTop
+    Size.Width = 407.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object Label1: TLabel
+      Align = Left
+      StyledSettings = [Family, Size, FontColor]
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Position.X = 53.000000000000000000
+      Position.Y = 5.000000000000000000
+      Size.Width = 110.000000000000000000
+      Size.Height = 38.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      Text = 'Setting'
+      TabOrder = 1
+    end
+    object Button_MROK: TButton
+      Align = MostLeft
+      ModalResult = 1
+      Size.Width = 48.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'arrowlefttoolbutton'
+      TabOrder = 3
+      Text = 'Button_MROK'
+      TextSettings.Trimming = None
+    end
+    object Label_Info: TLabel
+      Align = Right
+      StyledSettings = [Family, Size, FontColor]
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Position.X = 312.000000000000000000
+      Position.Y = 5.000000000000000000
+      Size.Width = 90.000000000000000000
+      Size.Height = 38.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      Text = '... '
+      TabOrder = 0
+    end
+  end
+  object Panel_SettingBase: TPanel
+    Touch.GestureManager = GestureManager1
+    OnGesture = Panel_SettingBaseGesture
+    Align = Client
+    Size.Width = 407.000000000000000000
+    Size.Height = 763.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    OnMouseDown = Panel_SettingBaseMouseDown
+    object Rectangle_DesignTime: TRectangle
+      Align = Contents
+      Fill.Color = claMidnightblue
+      Size.Width = 407.000000000000000000
+      Size.Height = 763.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object Panel_ServerHost: TPanel
+      Align = Top
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 5.000000000000000000
+      Size.Width = 397.000000000000000000
+      Size.Height = 100.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      OnMouseDown = Panel_SettingBaseMouseDown
+      object Label5: TLabel
+        Align = Top
+        StyledSettings = [Family, Size, Style]
+        Margins.Top = 3.000000000000000000
+        Position.Y = 4.000000000000000000
+        Size.Width = 397.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.FontColor = claBisque
+        TextSettings.WordWrap = False
+        Text = '  Server / Host'
+        TabOrder = 0
+      end
+      object Layout1: TLayout
+        Position.X = 50.000000000000000000
+        Position.Y = 25.000000000000000000
+        Size.Width = 250.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        object Text1: TText
+          Align = Left
+          Size.Width = 63.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'IP-Address'
+          TextSettings.FontColor = claAzure
+          TextSettings.WordWrap = False
+          TextSettings.HorzAlign = Leading
+        end
+        object Edit_Host: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Client
+          TabOrder = 0
+          Text = 'LocalHost'
+          Margins.Left = 10.000000000000000000
+          Size.Width = 177.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+        end
+      end
+      object Layout2: TLayout
+        Position.X = 77.000000000000000000
+        Position.Y = 65.000000000000000000
+        Size.Width = 180.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        object Text2: TText
+          Align = Left
+          Size.Width = 35.916015625000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = '- port'
+          TextSettings.FontColor = claAzure
+          TextSettings.WordWrap = False
+          TextSettings.HorzAlign = Leading
+        end
+        object Edit_Port: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Client
+          TabOrder = 2
+          ReadOnly = True
+          Text = '17233'
+          HitTest = False
+          Margins.Left = 10.000000000000000000
+          Size.Width = 82.083984375000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+        end
+        object Text5: TText
+          Align = Right
+          Opacity = 0.800000011920929000
+          Position.X = 128.000000000000000000
+          Size.Width = 52.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = '(* Fix)'
+          TextSettings.Font.Size = 10.000000000000000000
+          TextSettings.FontColor = claAzure
+          TextSettings.WordWrap = False
+          TextSettings.HorzAlign = Leading
+        end
+      end
+      object Line1: TLine
+        Align = MostTop
+        LineType = Diagonal
+        Opacity = 0.300000011920929000
+        Size.Width = 397.000000000000000000
+        Size.Height = 1.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Color = claDarkgray
+      end
+    end
+    object Panel2: TPanel
+      Align = Top
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 115.000000000000000000
+      Size.Width = 397.000000000000000000
+      Size.Height = 62.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      object Label6: TLabel
+        Align = Top
+        StyledSettings = [Family, Size, Style]
+        Margins.Top = 3.000000000000000000
+        Position.Y = 4.000000000000000000
+        Size.Width = 397.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.FontColor = claBisque
+        TextSettings.WordWrap = False
+        Text = '  User'
+        TabOrder = 3
+      end
+      object Layout3: TLayout
+        Position.X = 50.000000000000000000
+        Position.Y = 25.000000000000000000
+        Size.Width = 250.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 4
+        object Text3: TText
+          Align = Left
+          Size.Width = 62.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'ID - Name'
+          TextSettings.FontColor = claAzure
+          TextSettings.WordWrap = False
+          TextSettings.HorzAlign = Leading
+        end
+        object Edit_UserName: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Client
+          TabOrder = 5
+          Text = 'Anonymous'
+          Margins.Left = 15.000000000000000000
+          Size.Width = 173.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+        end
+      end
+      object Line2: TLine
+        Align = MostTop
+        LineType = Diagonal
+        Opacity = 0.300000011920929000
+        Size.Width = 397.000000000000000000
+        Size.Height = 1.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Color = claDarkgray
+      end
+    end
+    object Panel1: TPanel
+      Align = Top
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 187.000000000000000000
+      Size.Width = 397.000000000000000000
+      Size.Height = 236.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      OnMouseDown = Panel_SettingBaseMouseDown
+      object Label2: TLabel
+        Align = Top
+        StyledSettings = [Family, Size, Style]
+        Margins.Top = 3.000000000000000000
+        Position.Y = 4.000000000000000000
+        Size.Width = 397.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.FontColor = claBisque
+        TextSettings.WordWrap = False
+        Text = '  Colors / Font size'
+        TabOrder = 0
+        object SpeedButton_DefaultColor: TSpeedButton
+          StyledSettings = [Family, Style, FontColor]
+          Margins.Right = 10.000000000000000000
+          Position.X = 305.000000000000000000
+          Position.Y = -2.000000000000000000
+          Size.Width = 80.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = 'buttonstyle'
+          Text = 'Default'
+          TextSettings.Trimming = None
+          OnClick = SpeedButton_DefaultColorClick
+        end
+      end
+      object Layout4: TLayout
+        Position.X = 50.000000000000000000
+        Position.Y = 25.000000000000000000
+        Size.Width = 250.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 5
+        object Text4: TText
+          Align = Left
+          Size.Width = 63.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Header'
+          TextSettings.FontColor = claAzure
+          TextSettings.HorzAlign = Leading
+        end
+        object ColorComboBox_Header: TColorComboBox
+          DropDownKind = Custom
+          Color = claChartreuse
+          Align = Client
+          DisableFocusEffect = False
+          ItemIndex = 14
+          Margins.Left = 10.000000000000000000
+          Size.Width = 177.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+        end
+      end
+      object Layout6: TLayout
+        Position.X = 50.000000000000000000
+        Position.Y = 60.000000000000000000
+        Size.Width = 250.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 3
+        object Text6: TText
+          Align = Left
+          Size.Width = 63.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Body'
+          TextSettings.FontColor = claAzure
+          TextSettings.HorzAlign = Leading
+        end
+        object ColorComboBox_Body: TColorComboBox
+          DropDownKind = Custom
+          Color = claWhite
+          Align = Client
+          DisableFocusEffect = False
+          ItemIndex = 143
+          Margins.Left = 10.000000000000000000
+          Size.Width = 177.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+        end
+      end
+      object Layout7: TLayout
+        Position.X = 50.000000000000000000
+        Position.Y = 95.000000000000000000
+        Size.Width = 250.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        object Text7: TText
+          Align = Left
+          Size.Width = 63.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Footer'
+          TextSettings.FontColor = claAzure
+          TextSettings.HorzAlign = Leading
+        end
+        object ColorComboBox_Footer: TColorComboBox
+          DropDownKind = Custom
+          Color = claSilver
+          Align = Client
+          DisableFocusEffect = False
+          ItemIndex = 128
+          Margins.Left = 10.000000000000000000
+          Size.Width = 177.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+        end
+      end
+      object Line3: TLine
+        Align = MostTop
+        LineType = Diagonal
+        Opacity = 0.300000011920929000
+        Size.Width = 397.000000000000000000
+        Size.Height = 1.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Color = claDarkgray
+      end
+      object Layout5: TLayout
+        Position.X = 50.000000000000000000
+        Position.Y = 170.000000000000000000
+        Size.Width = 250.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 4
+        object Text10: TText
+          Align = Left
+          Size.Width = 73.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Font Size'
+          TextSettings.FontColor = claAzure
+          TextSettings.HorzAlign = Leading
+        end
+        object ComboBox_FontSize: TComboBox
+          Align = Client
+          Items.Strings = (
+            'Medium - 12'
+            'Default - 14'
+            'Large - 16')
+          ItemIndex = 0
+          Size.Width = 177.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+        end
+      end
+      object Layout8: TLayout
+        Position.X = 50.000000000000000000
+        Position.Y = 130.000000000000000000
+        Size.Width = 250.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        object Text8: TText
+          Align = Left
+          Size.Width = 63.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Select'
+          TextSettings.FontColor = claAzure
+          TextSettings.HorzAlign = Leading
+        end
+        object ColorComboBox_Select: TColorComboBox
+          DropDownKind = Custom
+          Color = claBlack
+          Align = Client
+          DisableFocusEffect = False
+          ItemIndex = 7
+          Margins.Left = 10.000000000000000000
+          Size.Width = 177.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+        end
+      end
+    end
+    object Panel_Help: TPanel
+      Align = Top
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 433.000000000000000000
+      Size.Width = 397.000000000000000000
+      Size.Height = 125.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      OnMouseDown = Panel_SettingBaseMouseDown
+      object Label3: TLabel
+        Align = Top
+        StyledSettings = [Family, Size, Style]
+        Margins.Top = 3.000000000000000000
+        Position.Y = 4.000000000000000000
+        Size.Width = 397.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.FontColor = claBisque
+        TextSettings.WordWrap = False
+        Text = '  Help'
+        TabOrder = 3
+      end
+      object SpeedButton6: TSpeedButton
+        HitTest = False
+        Images = MainForm.ImageList1
+        ImageIndex = 5
+        Position.X = 30.000000000000000000
+        Position.Y = 25.000000000000000000
+        Size.Width = 170.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        Text = ' Show/Hide Models'
+        TextSettings.HorzAlign = Leading
+        TextSettings.Trimming = None
+      end
+      object SpeedButton4: TSpeedButton
+        HitTest = False
+        Images = MainForm.ImageList1
+        ImageIndex = 3
+        Position.X = 220.000000000000000000
+        Position.Y = 25.000000000000000000
+        Size.Width = 160.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        Text = ' Request Models'
+        TextSettings.HorzAlign = Leading
+        TextSettings.Trimming = None
+      end
+      object SpeedButton3: TSpeedButton
+        HitTest = False
+        Images = MainForm.ImageList1
+        ImageIndex = 1
+        Position.X = 30.000000000000000000
+        Position.Y = 55.000000000000000000
+        Size.Width = 259.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        Text = ' Connect To Serveer  (* Reset)'
+        TextSettings.HorzAlign = Leading
+        TextSettings.Trimming = None
+      end
+      object SpeedButton2: TSpeedButton
+        HitTest = False
+        Images = MainForm.ImageList1
+        ImageIndex = 2
+        Position.X = 30.000000000000000000
+        Position.Y = 85.000000000000000000
+        Size.Width = 170.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        Text = ' Prev. Prompt'
+        TextSettings.HorzAlign = Leading
+        TextSettings.Trimming = None
+      end
+      object SpeedButton1: TSpeedButton
+        HitTest = False
+        Images = MainForm.ImageList1
+        ImageIndex = 0
+        Position.X = 220.000000000000000000
+        Position.Y = 85.000000000000000000
+        Size.Width = 160.000000000000000000
+        Size.Height = 48.000000000000000000
+        Size.PlatformDefault = False
+        Text = ' Request / prompt'
+        TextSettings.HorzAlign = Leading
+        TextSettings.Trimming = None
+      end
+      object Line4: TLine
+        Align = MostTop
+        LineType = Diagonal
+        Opacity = 0.300000011920929000
+        Size.Width = 397.000000000000000000
+        Size.Height = 1.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Color = claDarkgray
+      end
+    end
+    object GroupBox1: TGroupBox
+      Align = Bottom
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 15.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 686.000000000000000000
+      Size.Width = 397.000000000000000000
+      Size.Height = 62.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Version'
+      TabOrder = 4
+      object Text9: TText
+        HitTest = False
+        Position.X = 20.000000000000000000
+        Position.Y = 30.000000000000000000
+        Size.Width = 145.000000000000000000
+        Size.Height = 20.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Ver. 0.9.5 - 2024.06.15'
+        TextSettings.FontColor = claSilver
+        TextSettings.HorzAlign = Leading
+        object Label_GiuServ: TLabel
+          Cursor = crHandPoint
+          StyledSettings = [Family, FontColor]
+          HitTest = True
+          Position.X = 152.000000000000000000
+          Size.Width = 209.000000000000000000
+          Size.Height = 17.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.Font.Size = 10.000000000000000000
+          TextSettings.Font.StyleExt = {00040000000200000004000000}
+          TextSettings.WordWrap = False
+          Text = 'https://github.com/HuichanKIM/Ollama-Delphi-GUI'
+          TabOrder = 0
+          OnClick = Label_GiuServClick
+        end
+      end
+    end
+  end
+  object Image_Ollama: TImage
+    MultiResBitmap.Height = 200
+    MultiResBitmap.Width = 200
+    MultiResBitmap = <
+      item
+        Width = 200
+        Height = 200
+        PNG = {
+          89504E470D0A1A0A0000000D49484452000000C8000000C80806000000AD58AE
+          9E0000000473424954080808087C08648800000B7949444154789CEDDD6B829B
+          381207F0A2FD4ADBE9EE9939C25E617295EC5576AEB27B95CC55B207483FFCC4
+          E625D80F19CFBADB4608904055FAFF3E26344888520901321100000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          00000000408368EC02F824CBF36A369D5EFD7B144522CF539A66D57C3EBBFA77
+          A9F5EDE26EEC02F860BDDE7CABAAEA66701011557F19B858CE24695A55557533
+          38887ED637CB7331F5ED23F89EA250AA9ADC99F713DC7BD7A228AAC96462BC3D
+          F7FAF61574E59552D55D8BE038E37AD184565F1B82AD785996559F76E776D1F4
+          1D2272ABAF2DC1DE83F46DEFB2E4734FB2DE6CBFF7DDC7EBDBDBBF6D94859B20
+          7B055B37DC5C7AD5D0EA6B53B019A44959968DDB28A5BCCF22EBF5E69BC97626
+          F54D92C4FBFADA165C8F60D29B9E7BCA431C57ABE5D2685B5FB5A96F7C3C56CB
+          FB7BA36D43810CF2C1E505F079B56ABC187C7E3E6272DF7059DFD572D958DF53
+          605924A8DEA0E962DE1F627A7CF87C754E9AFECED75EB56BB9B9D6D70564900B
+          B78283A8797CBED9EE82EA55438200F9CBF174AAFDBFC964A2ED319F1E1FAC97
+          A7AF3C2F3A6781A60C5130989CB0259854D977D8C06DD8115A7D5D410631D474
+          41FC787DFD3A5459FA52CA680A7B809280372A8DDCF0CD55DD3E7C9ACDFAF1FA
+          FAD5463939D4D5B520D224917EC8603A5CE032ECB0554EDD7E942A693AD5DF9B
+          4910C410CB344334D91F621BBB11613209E2D2092383D8ECF96D64A24B799E57
+          D39A0FB5F2BCA0F97CD67A9F43649036FBE12C8C6E6020C7D3A931537D1CCBD7
+          050711D16C367DB7BD5265EF4CA80CDEB982FF13DF03100D9741EAF6D5F54325
+          1DA5144DA7D3D64FC25DD7551A6410879452555555D6838388683299D0CFACF2
+          FEA15D9665D66698420880260810CB369BCDAFE721918BC0F8E8EEEEEEDDA212
+          B3D9ED8518A09B207A08DD50E1783A19BDC56AB22F0EDA6605DB9312DC88AF20
+          91DD46468074DF17471862016820405A3A1EEBDFFA6D23CB728A0CE57961E598
+          D05EFD243CDC94E73911E93F4BD5E9322CB97C58C87D88C70D32484B45A9FE68
+          FB374AA9BFB345DFE39FF763B2C802F427FE268BC8FE8D669B5EDCF58D6CDB8C
+          829BF47682CF206D1FAC6D777BA3ED6D650C93E3BCBCBC7C717D9C5089EF0188
+          867DD5A4EDFE6C725136641030B6D96C7E6DDA66CC8BC6E4D86D866436962CE5
+          4E7C0F40D42E83645956757D5DC3971EB5EB4C575996EF16A8C0CB8AC82044F4
+          FE1574EEC14144F4B65EFFA7CBDF5DBED785E9E49FBC6954975C37F629496879
+          7FEFD5B94CD3B49ACFE74E8FE153A7E04A1019E4F575DDFAD9451BBE050711D1
+          62B1F0AE4C1C0573125D6511DF7BD150EB6D4B1019A428F4AB0C427BA1DCA388
+          0F90383EB6FAD1CA3638F4A22ECB184290880E10A554B55C767BB1B0288A9B6F
+          DB66594E443C82E36CBBDDFE4654FF067151747F5B587A90B069E4B6BA2C94C0
+          E9A277A9CB452FF5DC89AC94EB17F84281F3287088B53FC4ADDEB495D8A8B644
+          51143DBFBDFDD374FB52E0704BDCC561D2EB65594E8BC55C5CDD5DD2AD00F97E
+          BB6EAB41FA4A540631098E34CD101C1DCC66B328CB7383EDA69424A9984C22E6
+          4231098ED329A1E5D2BFA7DE9C2449522D168BC6EDA40C5D4554C264C62A4D33
+          FAF409AF5FD8906579359B350FB7240489882156637064080E9BE6F359941B3C
+          3B89E323FBA116FB8BC6E72FFCA40BE1DC8BC8203ADC1BC867219C5BD60162EB
+          97A3C09D244958B711EB1E009F84FA41723BB0CE203AACBB2DF006DBC896DC6B
+          7124B53DC46610001B4406C8213E8E5D84E09CBF93010F1C8FA74A67ECF2854A
+          D726EBF5E6DBD8E5EB82E5B850EA78973B89ED22728805608BB800514A8D5D84
+          6095A5BCD1ADB800994EA7ECD2B814BBDDF6CFB1CB601BCB8B89FB92FC455174
+          5A8A8843DDB8B7CD47F88DC21BEA1AB94F03DB985DBBDCC7E110D3C3C3E74EE5
+          71513FA9589E1097BD94ED9918D7D3CE6DCB5328554D34DFCFB83C7F1C0350DC
+          3D481F49DAFC2DF521365B35A5288A419EC9B47DF6A30B8EF3FE7A174A107101
+          D2E781D4C2E0E70256CB65E336555519DD639465D9F85BE985E1AC9CC9855D28
+          E5F4E2DF1F0EE2828B5DCA2372F740CAB4F7D4EDBF691F799ED37CDE6D5595CD
+          765B3D3D3E6AB7D17D7BDF263B743987785028D866B3B57A13FDD176B7A7288A
+          A2AEC14144F4CBD3D3DF99A56E9BC5624E69CD5031C63B6AADB18B68A2713348
+          DDBEEBFEF6E3EFFED9141F8FD5F2FEF6E2DC8738A687CFD7B35C36B2641D6410
+          4FBCBD75FB0D3E57EA2E8C3CCF9D050711D16AB98CCE2BB77FF479B5BAF93765
+          5936EED7C585CC313888986610227D6FD5A7D76E3B4DE9CB338536E5D0D53149
+          12BAEFF0937212B30711D30CD2A4EDCF1E5CAA6BC8360D3CC6C55077CCCD7677
+          75E146511429759D49A2288ABA0487646C03A4E9039DD8F079C52DB7A65B6F6D
+          77ABD7CC0DD6AF75E556399F1E1F6E6E3B9D4E8CEA68A2E9F9D12949BAEE7A74
+          AC7B8BB1D3FAADE38F3D9418A34C63B7834B6C338889BAE94E1BD69BCD771BFB
+          B9F525E4AD7F33F5F2F2F2E5D631FA96B38EF4B5C9D846F6D958BD978D9EDAD5
+          94EB90594472F620129E4188FC7EB7C8E4E2F1F902F3F9DCDAC23E40F6FB43E3
+          363E37A42E00BA06C766BBFB6FF712993139A76F6BBF9E5775E16DEFD486CBA7
+          C36D8ED967FF1FF7D7B7ACB6F77769BDD97EFFE5E9F11F4DDBF99CFD4CB1AFC0
+          599FD7446C1D2F940019FA5C8F89FD100BAE1545E1ED90929B600224A495FFBA
+          7CEFDE864976787E7EFEDD69210622220D96655935B599ED94EFF3106B8869DE
+          5086592232C8D0C151B7CF3EB36597FBEB53DEA2B8FE6AD0E40DDEB6245CFC26
+          D807489A65DA8BD2C5C5E14ADF77A288882693EB2675F5CA7DD374B2CFD3EBA6
+          D8F702633FC9F5E97DAC5B6571F9C156DD312F71CF34EC33888FC6E839EB8EE9
+          323842C03A4076FBBDFE35EBD3C9791974AFC29F06FA014BDD178DAE356508EE
+          C32CD6BD8B4FE9BDED978836E866EFF2BCA0F97C3648FD7D6A07DB5867109FE8
+          2E82CBD7D75FDEDEFED5E73897FBAA3B6496E783050711D1FED0FC3E1C8CA0D2
+          F8F1FAFAD5B7320DA169D83946BD95E305EB5C629BFAD234ADE69A9510C74CEB
+          5535CEB8DBE73A731D66B11D62E982636C511445BBDD7EB0E329A5D85E80BE63
+          1B20BE7B7A7AECBD184293F3FE7DF8D120DFD62AB365F413DB952EA5EBD6A71D
+          DBE11057AB55F302D8B7F459D77708BA36E19AE158169A4866637027B14D30C4
+          82410CF5D0D43696514D24B3B7E24EE24C1632088006020440030102A0810001
+          D04080C0208E037C7AE002BB598533CC62F947629B88CC2058170A6C111920AE
+          D785826B717C14D929B14C7B44321F4A7126B53DD86690CD66FBE7D86500F958
+          46F599AED772BDDC0DBCA76B8BC321A68787EBDF6CE78065A1CFA4A6756E24B7
+          03DB2116C010580788F4359938C81A967E4D9274A8A238C136F59D494EEF1C48
+          3FFFAC33880964117732E13F014D2420404C7AA8E3F124BE21C7309B4EB5FF7F
+          88E3814AE20EEBF477561445D5F4F49C7BAAF78D49669670CED957E02C9406F3
+          4148E79AFD10EBECE5E5E5CBD865809F24DDF68988F2B3A69E2D4952BABFFF24
+          AACE63903E7375494C4588C26AB83185749EC50CB138AF20CE8D524AFBFF92A6
+          D6C504C8DD9DBE2A927AB5B199AC059CA6A98820111120927A2C2E9ABE31F779
+          F5FD3644F4AA218D897D12C279679F41F6FB83B6919AC6CBD0DD76BBFD4DF7FF
+          12323BFB080FA117F399F4F3CF3E8300B88400815EB8678826A203447AE37190
+          335FA38C75809C4E788DDD7753E66B94B1EE61A5DF207221B91D586710F0439E
+          E76317C119B6914D24BBE7E246E2C2D544C820005A6203E475BDFE63EC32007F
+          6C531F91DCB4CE91D4B6109B41006C40800068880D9044C8073B302EB6634322
+          4CF3FA04F7200035242F418A0081DE9A9620E58C758070FDED6DE0837580AC96
+          4BEDD8B614F0C92777BBFD7EEC22F4C23A409AB0BD3364E4F9F9F977DDFF3F3D
+          3EA21900000000000000A0BFFF01DF3A9678AE61ACDA0000000049454E44AE42
+          6082}
+        FileName = 'F:\Temps\ollama01.png'
+      end>
+    Anchors = [akRight, akBottom]
+    Cursor = crHandPoint
+    Opacity = 0.800000011920929000
+    Position.X = 350.000000000000000000
+    Position.Y = 670.000000000000000000
+    Size.Width = 40.000000000000000000
+    Size.Height = 40.000000000000000000
+    Size.PlatformDefault = False
+    OnClick = Image_OllamaClick
+    object Text_Ollama: TText
+      Position.X = -96.000000000000000000
+      Position.Y = 24.000000000000000000
+      Size.Width = 97.000000000000000000
+      Size.Height = 18.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'https://ollama.com/'
+      TextSettings.Font.Size = 10.000000000000000000
+      TextSettings.FontColor = claSilver
+    end
+  end
+  object GestureManager1: TGestureManager
+    Sensitivity = 80.000000000000000000
+    Left = 184
+    Top = 494
+    GestureData = <
+      item
+        Control = Panel_SettingBase
+        Collection = <
+          item
+            GestureID = sgiRightLeft
+          end
+          item
+            GestureID = sgiLeftRight
+          end
+          item
+            GestureID = sgiLeft
+          end
+          item
+            GestureID = sgiRight
+          end>
+      end>
+  end
+end

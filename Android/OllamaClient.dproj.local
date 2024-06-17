@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<ActiveMobileDevice>
+		<NoProfile Android64="R59W100FA9Y" Android="R59W100FA9Y"/>
+	</ActiveMobileDevice>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.312,E:\2024_DelphiLibs12\AI-Vision-Chat\Unit1.fmx=E:\2024_DelphiLibs12\AI-Vision-Chat\Unit_Setting.fmx</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.913,=E:\OllamaCkent\Android\DW.Toast.Android.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.911,E:\2024_DelphiLibs12\AI-Vision-Chat\Unit_Main.fmx=E:\2024_DelphiLibs12\AI-Vision-Chat\uMainForm.fmx</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.801,=C:\Users\Public\Documents\Embarcadero\Studio\23.0\Styles\Android\MaterialOxfordBlueSE_Android.style</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.341,=E:\OllamaCkent\Android\ollama.png</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.068,=E:\OllamaCkent\Android\DW.JSON.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.180,=E:\OllamaCkent\Android\DW.Androidapi.JNI.Widget.Toast.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.349,=E:\OllamaCkent\Android\ollamallava.png</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.049,E:\2024_DelphiLibs12\AI-Vision-Chat\OllamaClient.dproj=E:\2024_DelphiLibs12\AI-Vision-Chat\AIVisionChat.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.486,=E:\OllamaCkent\Android\Include\FMX.ListView.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.028,E:\OllamaCkent\Android\Include\FMX.ListView.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.911,E:\2024_DelphiLibs12\AI-Vision-Chat\Unit_Main.pas=E:\2024_DelphiLibs12\AI-Vision-Chat\uMainForm.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.777,C:\Users\Public\Documents\Embarcadero\Studio\23.0\Styles\Android\MaterialOxfordBlueSE_Android.style=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.434,=E:\2024_DelphiLibs12\AI-Vision-Chat\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.312,E:\2024_DelphiLibs12\AI-Vision-Chat\Unit1.pas=E:\2024_DelphiLibs12\AI-Vision-Chat\Unit_Setting.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.865,=E:\OllamaCkent\Android\MaterialOxfordBlueSE_Android.style</Transaction>
+  </Transactions>
+</BorlandProject>

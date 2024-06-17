@@ -1,0 +1,139 @@
+inherited Form_Setting_NmXhdpiPh: TForm_Setting_NmXhdpiPh
+  ClientHeight = 615
+  ClientWidth = 400
+  DesignerMasterStyle = 0
+  inherited ToolBar1: TToolBar
+    Size.Width = 400.000000000000000000
+    Size.Height = 48.000000000000000000
+    inherited Label1: TLabel
+      Position.X = 53.000000000000000000
+      Size.Height = 38.000000000000000000
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+    end
+    inherited Button_Return: TButton
+      Size.Width = 48.000000000000000000
+      Size.Height = 48.000000000000000000
+    end
+  end
+  inherited Panel_SettingBase: TPanel
+    Size.Width = 400.000000000000000000
+    Size.Height = 567.000000000000000000
+    inherited Panel_ServerHost: TPanel
+      Size.Width = 390.000000000000000000
+      inherited Label5: TLabel
+        Size.Width = 390.000000000000000000
+      end
+      inherited Layout1: TLayout
+        inherited Edit_Host: TEdit
+          Size.Height = 32.000000000000000000
+        end
+      end
+      inherited Layout2: TLayout
+        inherited Edit_Port: TEdit
+          Size.Height = 32.000000000000000000
+        end
+      end
+      inherited Line1: TLine
+        Size.Width = 390.000000000000000000
+      end
+    end
+    inherited Panel2: TPanel
+      Size.Width = 390.000000000000000000
+      inherited Label6: TLabel
+        Size.Width = 390.000000000000000000
+      end
+      inherited Layout3: TLayout
+        inherited Edit_UserName: TEdit
+          Size.Height = 32.000000000000000000
+        end
+      end
+      inherited Line2: TLine
+        Size.Width = 390.000000000000000000
+      end
+    end
+    inherited Panel1: TPanel
+      Size.Width = 390.000000000000000000
+      inherited Label2: TLabel
+        Size.Width = 390.000000000000000000
+        inherited SpeedButton_DefaultColor: TSpeedButton
+          Position.X = 330.000000000000000000
+          Size.Height = 48.000000000000000000
+        end
+      end
+      inherited Layout4: TLayout
+        inherited ColorComboBox_Header: TColorComboBox
+          Size.Height = 32.000000000000000000
+        end
+      end
+      inherited Layout6: TLayout
+        inherited ColorComboBox_Body: TColorComboBox
+          Size.Height = 32.000000000000000000
+        end
+      end
+      inherited Layout7: TLayout
+        inherited ColorComboBox_Footer: TColorComboBox
+          Size.Height = 32.000000000000000000
+        end
+      end
+      inherited Line3: TLine
+        Size.Width = 390.000000000000000000
+      end
+    end
+    inherited Panel_Help: TPanel
+      Size.Width = 390.000000000000000000
+      inherited Label3: TLabel
+        Size.Width = 390.000000000000000000
+      end
+      inherited SpeedButton6: TSpeedButton
+        Size.Height = 48.000000000000000000
+      end
+      inherited SpeedButton4: TSpeedButton
+        Size.Height = 48.000000000000000000
+      end
+      inherited SpeedButton3: TSpeedButton
+        Size.Height = 48.000000000000000000
+      end
+      inherited SpeedButton2: TSpeedButton
+        Size.Height = 48.000000000000000000
+      end
+      inherited SpeedButton1: TSpeedButton
+        Size.Height = 48.000000000000000000
+      end
+      inherited Line4: TLine
+        Size.Width = 390.000000000000000000
+      end
+    end
+    inherited SkSvg1: TSkSvg
+      Position.X = 335.000000000000000000
+      Position.Y = 505.000000000000000000
+    end
+    inherited GroupBox1: TGroupBox
+      Position.Y = 425.000000000000000000
+      Size.Width = 390.000000000000000000
+      inherited Text9: TText
+        inherited Label_GiuServ: TLabel
+          TextSettings.Font.StyleExt = {00040000000200000004000000}
+        end
+      end
+    end
+  end
+  inherited GestureManager1: TGestureManager
+    GestureData = <
+      item
+        Control = Panel_SettingBase
+        Collection = <
+          item
+            GestureID = sgiRightLeft
+          end
+          item
+            GestureID = sgiLeftRight
+          end
+          item
+            GestureID = sgiLeft
+          end
+          item
+            GestureID = sgiRight
+          end>
+      end>
+  end
+end
