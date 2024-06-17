@@ -1,8 +1,12 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.8 - 06.08.2024**
+**Latest Version 0.9.9 - 06.18.2024**
 
-Fix the Incorrect operation of Topics list after Skin Change
+If your computer has good performance, 
+use it as a server/broker to connect your Android smartphone
+
+- v0.9.8
+- Fix the Incorrect operation of Topics list after Skin Change
 
 - v0.9.7 ...
 - Some slight extension of the option
@@ -40,6 +44,11 @@ Fix the Incorrect operation of Topics list after Skin Change
 ### About / Skin / Colors (Screenshot)
 
 ![About 1: Preview page](./Images/O_about.png) ![About 2: Preview page](./Images/O_skin_themes.png)
+
+### Android (Screenshot)
+
+![Android 1: Preview page](./Images/sn_20240618_070418_1.png) ![Android 2: Preview page](./Images/sn_20240618_071425_1.png)
+![Android 3: Preview page](./Images/sn_20240618_071403_1.png)
 
 ### Chattings (Screenshot)
 
