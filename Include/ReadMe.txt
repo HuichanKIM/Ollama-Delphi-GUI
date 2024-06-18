@@ -9,4 +9,8 @@ After Install JAM-Software/Virtual-TreeView
 
 Add ".\Include" to [Search path] in Project options. 
 
+for adding Broker/Server functions
+Add ".\Include\NetCom7" to [Search path] in Project options. 
+Add ".\Include\NetCom7\Encryption" to [Search path] in Project options. 
+
 or work around other way ...
