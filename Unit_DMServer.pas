@@ -64,6 +64,7 @@ type
     procedure DM_ActiveServer(const AFlag: Integer = 0);
     procedure Do_ShutDownBroker(const AFlag: Integer);
     function Get_Logs(): string;
+    function Get_Logins(): string;
     function Get_LogByIndex(const AIndex: Integer): string;
     function Get_Queue(): string;
     function Get_Queue_Count: Integer;
@@ -111,6 +112,9 @@ const
 
 const
   C_CMD_TYPE_STR: array [C_CMD_TYPE] of string = ('Request','Response');
+const  // Common with OllamaClient Android ...
+  //C_JsonFmt  = '{"user": "Ollama","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
+  C_JsonFmt2 = '{"user": "Ollama","queue": "%queue%","model": "%model%","response": "%response%"}';
 
 function GetLocalIP_Winsock: string;
 type
@@ -178,7 +182,7 @@ begin
     Active := False;
     KeepAlive := True;
     NoDelay := True;
-    Port := 17233;
+    Port := DM_SERVERPORT;
     EncryptionKey := 'SetEncryptionKey';
     OnConnected := ncServerSource_RMConnected;
     OnDisconnected := ncServerSource_RMDisconnected;
@@ -415,8 +419,6 @@ begin
 end;
 
 procedure TDM_Server.Set_Request2Queues(const ARequestsJson: string; const AQueue: Integer);
-const
-  c_JsonFmt = '{"user": "%user%","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
 begin
   var _queuenum: string := IntToStr(AQueue);
   var _Result := ARequestsJson.Replace('%queue%', _queuenum, [rfIgnoreCase]);
@@ -426,8 +428,6 @@ begin
 end;
 
 function TDM_Server.Get_Request2Bytes(const ARequestsJson: string; const AQueue: Integer): TBytes;
-const
-  c_JsonFmt = '{"user": "%user%","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
 begin
   var _queuenum: string := Format('%.3d', [AQueue]);
   var _Result := ARequestsJson.Replace('%queue%', _queuenum, [rfIgnoreCase]);
@@ -539,9 +539,17 @@ begin
   end;
 end;
 
+function TDM_Server.Get_Logins(): string;
+begin
+  ConnectedUsersLock.Acquire;
+  try
+    Result := ConnectedUsers.CommaText;
+  finally
+    ConnectedUsersLock.Release;
+  end;
+end;
+
 procedure TDM_Server.Response_ToClient(const AQueue, AModel, AResponse: string);
-const
-  c_JsonFmt = '{"user": "Ollama","queue": "%queue%","model": "%model%","prompt": "%response%"}';
 begin
   var _queueline: TncLine := nil;
   var _UserData: TConnectedUserData;
@@ -564,7 +572,7 @@ begin
   if _queueline <> nil then
   begin
     var _qunumber: string := Format('%.3d', [_queue]);
-    var _response: string := StringReplace(c_JsonFmt, '%queue%', _qunumber, [rfIgnoreCase]);
+    var _response: string := StringReplace(C_JsonFmt2, '%queue%', _qunumber, [rfIgnoreCase]);
     _response := StringReplace(_response, '%model%', AModel, [rfIgnoreCase]);
     _response := StringReplace(_response, '%response%', AResponse, [rfIgnoreCase]);
     var _data: TBytes := TEncoding.UTF8.GetBytes(_response);
@@ -588,13 +596,13 @@ begin
   try
     var _data: TBytes := TEncoding.UTF8.GetBytes(AResponse);
     for var _i := 0 to _SocketList.Count - 1 do
-          FncServerSource_RM.ExecCommand(_SocketList.Lines[_i], cmdSrvUpdateUsers, _data, False, True);
+      FncServerSource_RM.ExecCommand(_SocketList.Lines[_i], cmdSrvUpdateUsers, _data, False, True);
   finally
     FncServerSource_RM.Lines.UnlockList;
   end;
 end;
 
-// No encode to utf8  on the assumption that model anme is english only ...
+// No encode to utf8  on the assumption that model name is english only ...
 procedure TDM_Server.InformClientsOfModels(const AFlag: Integer);
 begin
   var _Models: TStrings := TStringList.Create;

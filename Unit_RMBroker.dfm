@@ -45,10 +45,10 @@ object Form_RMBroker: TForm_RMBroker
       AlignWithMargins = True
       Left = 63
       Top = 3
-      Width = 274
+      Width = 280
       Height = 19
       Margins.Left = 10
-      Align = alLeft
+      Align = alClient
       AutoSize = False
       Caption = '...'
       EllipsisPosition = epEndEllipsis
@@ -60,6 +60,23 @@ object Form_RMBroker: TForm_RMBroker
       ParentFont = False
       Layout = tlCenter
       StyleElements = [seClient, seBorder]
+      ExplicitWidth = 274
+    end
+    object SpeedButton_GetUsers: TSpeedButton
+      AlignWithMargins = True
+      Left = 349
+      Top = 3
+      Width = 40
+      Height = 19
+      Cursor = crHandPoint
+      Align = alRight
+      Caption = 'Users'
+      ImageIndex = 68
+      ImageName = 'logonicon'
+      OnClick = SpeedButton_GetUsersClick
+      ExplicitLeft = 352
+      ExplicitTop = 0
+      ExplicitHeight = 25
     end
     object CheckBox_Logoption: TCheckBox
       Left = 392
@@ -69,8 +86,6 @@ object Form_RMBroker: TForm_RMBroker
       Margins.Right = 10
       Align = alRight
       Caption = 'Log Contents'
-      Checked = True
-      State = cbChecked
       TabOrder = 0
     end
   end

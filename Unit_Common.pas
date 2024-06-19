@@ -53,7 +53,7 @@ type
 
 const
   GC_Version0     = 'ver. 0.9.9';
-  GC_Version1     = 'ver. 0.9.9 (2024.06.12)';
+  GC_Version1     = 'ver. 0.9.9 (2024.06.18)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
@@ -100,6 +100,7 @@ function GetBase64Endoeings(const AImage: TImage): string;
 
 function BytesToKMG(Value: Int64; ATailer: Boolean = False): string;
 function Get_ReplaceSpecialChar(const AText: string): string;
+function Get_ReplaceSpecialChar1(const AText: string): string;
 function Get_ReplaceSpecialChar2(const AText: string): string;
 function GetUsersWindowsLanguage: string;
 function Get_LocaleIDString(const AFlag: Integer = 0): string;
@@ -239,6 +240,11 @@ end;
 function Get_ReplaceSpecialChar(const AText: string): string;
 begin
   Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep1, ' ');
+end;
+
+function Get_ReplaceSpecialChar1(const AText: string): string;
+begin
+  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep2, ' ');
 end;
 
 function Get_ReplaceSpecialChar2(const AText: string): string;

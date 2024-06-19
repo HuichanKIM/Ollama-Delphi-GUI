@@ -844,8 +844,8 @@ begin
     V_Username :=                     ReadString(C_SectionData,      'Nickname',               'User');
     V_LoadModelIndex :=               ReadInteger(C_SectionData,     'Loaded_Model',            0);
     Action_Options.Tag :=             ReadInteger(C_SectionOptions,  'Action_Options_Tag',      1);
-    ComboBox_TransSource.ItemIndex :=   ReadInteger(C_SectionOptions,  'TTS_Source',              0);
-    ComboBox_TransTarget.ItemIndex :=   ReadInteger(C_SectionOptions,  'TTS_Target',              _indexid);
+    ComboBox_TransSource.ItemIndex := ReadInteger(C_SectionOptions,  'TTS_Source',              0);
+    ComboBox_TransTarget.ItemIndex := ReadInteger(C_SectionOptions,  'TTS_Target',              _indexid);
     CheckBox_AutoTranslation.Checked :=
                                       ReadBool(C_SectionOptions,     'Auto_Trans',              False);
     FTTS_EngineName :=                ReadString(C_SectionOptions,   'TTS_Engine',              '');
@@ -1234,7 +1234,7 @@ begin
       begin
         _requests := Memo_Request.Lines.Text;
         _requests := StringReplace(_requests, GC_CRLF, ' ', [rfReplaceAll]);
-        _requests := Get_ReplaceSpecialChar2(_requests);
+        _requests := Get_ReplaceSpecialChar1(_requests);
       end
     else
       Exit;
@@ -1597,7 +1597,7 @@ begin
     Exit;
   end;
 
-  V_MyContentPrompt := Get_ReplaceSpecialChar2(V_MyContentPrompt);
+  V_MyContentPrompt := Get_ReplaceSpecialChar1(V_MyContentPrompt);
 
   RequestingFlag := True;
   V_BaseURL := V_BaseURLarray[Request_Type];
@@ -1609,13 +1609,13 @@ begin
       case RadioGroup_PromptType.ItemIndex of
         0: begin
              _RawParams := StringReplace( GC_GenerateLlavaPrompt, '%model%',    V_MyModel,         [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,            '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,            '%images%',   _ImageData,        [rfIgnoreCase]);
+             _RawParams := StringReplace( _RawParams,             '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
+             _RawParams := StringReplace( _RawParams,             '%images%',   _ImageData,        [rfIgnoreCase]);
            end;
         1: begin
              _RawParams := StringReplace( GC_ChatLlavaContent,    '%model%',    V_MyModel,         [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,            '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,            '%images%',   _ImageData,        [rfIgnoreCase]);
+             _RawParams := StringReplace( _RawParams,             '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
+             _RawParams := StringReplace( _RawParams,             '%images%',   _ImageData,        [rfIgnoreCase]);
            end;
       end;
     end
@@ -1636,13 +1636,13 @@ begin
           case RadioGroup_PromptType.ItemIndex of
             0: begin
                  _RawParams := StringReplace( GC_GeneratePrompt_opt, '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,           '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,           '%seed%',     _tseed,            [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,            '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,            '%seed%',     _tseed,            [rfIgnoreCase]);
                end;
             1: begin
                  _RawParams := StringReplace( GC_ChatContent_opt,    '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,           '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,           '%seed%',     _tseed,            [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,            '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,            '%seed%',     _tseed,            [rfIgnoreCase]);
                end;
           end;
 
@@ -1653,11 +1653,11 @@ begin
           case RadioGroup_PromptType.ItemIndex of
             0: begin
                  _RawParams := StringReplace( GC_GeneratePrompt, '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,       '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,        '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
                end;
             1: begin
                  _RawParams := StringReplace( GC_ChatContent,    '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,       '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,        '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
                end;
           end;
     end;
@@ -2051,7 +2051,7 @@ begin
   V_StopWatch := TStopwatch.StartNew;
   V_MyContentPrompt := '';
   // ------------------------------------------------------------------------ //
-  var _responses: string := Get_ListModels_Ollama(_BaseURL);  // in Unit_AliveOllama.pas
+  var _responses: string := Get_ListModels_Ollama(_BaseURL);                  // from Unit_AliveOllama.pas
   // ------------------------------------------------------------------------ //
   V_StopWatch.Stop;
   var _elapsed: Int64 := V_StopWatch.ElapsedMilliseconds;
@@ -2190,7 +2190,7 @@ begin
       with TForm_Translator.Create(Self) do
       try
         Request := _request;
-        PushFlag := _addflag;//  Allowed to response node ...
+        PushFlag := _addflag;  //  Allowed to response node ...
         Get_GoogleTranslator(Ord(AMode), _codefrom, _codeto, _ItemStr);
         ShowModal;
         if ModalResult = mrOk then
@@ -2661,8 +2661,10 @@ begin
 end;
 
 
-{ Dos Command processing ...
- Not Chatting Mode / Not Use Ollama Models ... }
+{
+ Dos Command processing ...
+ Not Chatting Mode / Not Use Ollama Models ...
+}
 
 var
   V_LastCommand: string = '--help';
@@ -2792,8 +2794,6 @@ begin
   var _log: string := Format('%s  %s', [FormatDateTime('hh:nn:ss', Time), ALog]);
   Memo_ServerChattings.Lines.Add(_log);
   PostMessage(Memo_ServerChattings.Handle, EM_LINESCROLL, 0, 999999);
-
-  ////Rm_StartRequest(3, '');
 end;
 
 procedure TForm_RestOllama.WFDMMESSAGE(var Msg: TMessage);
@@ -2807,7 +2807,7 @@ begin
     WF_DM_MESSAGE_SERVERON:
       begin
         Shape_Broker.Brush.Color := clSilver;
-        Log_Server(2, 'Remote Broker/Server is activate.');
+        Log_Server(2, 'Remote Broker/Server is activated.');
       end;
     WF_DM_MESSAGE_SERVEROFF:
       begin

@@ -25,7 +25,7 @@ uses
   Vcl.ComCtrls,
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
-  Unit_Common;
+  Unit_Common, Vcl.Buttons;
 
 type
   TForm_RMBroker = class(TForm)
@@ -37,6 +37,7 @@ type
     Label1: TLabel;
     Label_Connection: TLabel;
     CheckBox_Logoption: TCheckBox;
+    SpeedButton_GetUsers: TSpeedButton;
     procedure HttpRestOllama_RMRestRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure HttpRestOllama_RMHttpRestProg(Sender: TObject; LogOption: TLogOption; const Msg: string);
     procedure FormDestroy(Sender: TObject);
@@ -45,6 +46,7 @@ type
     procedure RMDMMESSAGE(var Msg: TMessage); Message WF_DM_MESSAGE;
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormCreate(Sender: TObject);
+    procedure SpeedButton_GetUsersClick(Sender: TObject);
   private
     FAborting_Flag: Boolean;
     FRequesting_Flag: Boolean;
@@ -139,11 +141,11 @@ end;
 
 procedure TForm_RMBroker.FormCreate(Sender: TObject);
 begin
-  FUser_Rm := 'user';
-  FQueue_Rm := '1000';
+  FUser_Rm :=   'user';
+  FQueue_Rm :=  '999';
   FMmodel_Rm := 'phi3';
-  FPrompt_Rm:= 'Who are you ?';
-  CheckBox_Logoption.Visible := False;
+  FPrompt_Rm:=  'Who are you ?';
+  //CheckBox_Logoption.Visible := False;
   Memo_Log_Rm.Lines.Clear;
 end;
 
@@ -270,7 +272,7 @@ begin
     begin
       Exit;
     end;
-    Push_LogWin(1, 'New Remote Request Arrived ... ');
+
     var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(_requestjson) as TJSONObject;
     try
       FUser_Rm :=   _JsonObj.Get('user').JsonValue.Value;
@@ -280,8 +282,9 @@ begin
     finally
       _JsonObj.Free;
     end;
-  end;
+   end;
 
+  Push_LogWin(1, 'New Remote Request Arrived : '+FQueue_Rm);
   var _queue: Integer := StrToIntDef(FQueue_Rm, 1);
   Label_Connection.Caption := Format('U-%s Qn-%.3d M-%s', [ FUser_Rm, _queue, FMmodel_Rm]);
   if (FMmodel_Rm = '') then
@@ -291,8 +294,9 @@ begin
     DM_Server.Response_ToClient(FQueue_Rm, FMmodel_Rm, 'Empty Request');
     Exit;
   end;
-
-  FPrompt_Rm := Get_ReplaceSpecialChar2(FPrompt_Rm);
+  // ------------------------------------------------------------------------ //
+  FPrompt_Rm := Get_ReplaceSpecialChar1(FPrompt_Rm);
+  // ------------------------------------------------------------------------ //
   var _RawParams: string := '';
   if Is_LlavaModel(FMmodel_Rm) then
     begin
@@ -318,7 +322,8 @@ begin
   Common_RestSettings_Ex(V_RmDummyFlag);
 
   Add_LogWin('Starting REST request for URL: ' + V_RmBaseURL);
-  Add_LogWin('With prompt/message : "' + FPrompt_Rm+'"');
+  if CheckBox_Logoption.Checked then
+    Add_LogWin('With prompt/message : "' + FPrompt_Rm+'"');
   Push_LogWin();
 
   V_RmStopWatch := TStopwatch.StartNew;
@@ -326,6 +331,13 @@ begin
   var _StatCode := HttpRestOllama_RM.RestRequest(THttpRequest.httpPOST, V_RmBaseURL, True, _RawParams);
   // ------------------------------------------------------------------------------------------ //
   Push_LogWin(1, 'Async REST request started');
+end;
+
+procedure TForm_RMBroker.SpeedButton_GetUsersClick(Sender: TObject);
+begin
+  var _logins: string := DM_Server.Get_Logins();
+  var _pos: TPoint := SpeedButton_GetUsers.ClientToScreen(Point(0, 25));
+  ShowMessagePos(_logins, _pos.X, _pos.Y);
 end;
 
 procedure TForm_RMBroker.Timer_Repeater_RmTimer(Sender: TObject);
@@ -397,6 +409,9 @@ begin
         begin
           var _Responses := Unit_Common.Get_DisplayJson(Form_RestOllama.RadioGroup_PromptType.ItemIndex, False,
                                                         string(HttpRestOllama_RM.ResponseRaw));
+          // Modified by ichin 2024-06-18 È­ ¿ÀÈÄ 4:12:42  ------------------ //
+          _Responses := Get_ReplaceSpecialChar1(_Responses);
+          // ---------------------------------------------------------------- //
           DM_Server.Response_ToClient(FQueue_Rm, FMmodel_Rm, _Responses);
           SimpleSound_Common(Form_RestOllama.DoneSoundFlag, 1);
           Inc(V_RmDummyFlag);
@@ -410,7 +425,6 @@ begin
           DM_Server.Response_ToClient(FQueue_Rm, FMmodel_Rm, 'Communication Error');
         end;
 
-      //Form_RestOllama.RequestingFlag := False;
       FRequesting_Flag := False;
       { ---------------------------------------------------------------------- }
     end);
