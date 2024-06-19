@@ -88,6 +88,16 @@ type
     Text1: TText;
     Image_Ollama: TImage;
     Text_Ollama: TText;
+    Button_MoveTop: TButton;
+    SpeedButton_PopupMenu: TSpeedButton;
+    Layout_PopupMenu: TLayout;
+    SpeedButton_Clear: TSpeedButton;
+    SpeedButton_GotoTop: TSpeedButton;
+    SpeedButton_GotoBtm: TSpeedButton;
+    Rectangle1: TRectangle;
+    Text2: TText;
+    ShadowEffect1: TShadowEffect;
+    SpeedButton_CopyText: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -109,6 +119,13 @@ type
     procedure ListView_ChatBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
     procedure Timer_UpdaterTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure ListView_ChatBoxScrollViewChange(Sender: TObject);
+    procedure Button_MoveTopClick(Sender: TObject);
+    procedure ListView_ChatBoxResized(Sender: TObject);
+    procedure SpeedButton_PopupMenuClick(Sender: TObject);
+    procedure SpeedButton_ClearClick(Sender: TObject);
+    procedure Layout_RequestResized(Sender: TObject);
+    procedure SpeedButton_CopyTextClick(Sender: TObject);
   private
     FClient_Source: TncClientSource;
     //
@@ -117,6 +134,7 @@ type
     FUpdateFlag: Integer;
     FIniFile: string;
     FConnectionFlag: Boolean;
+    FLogonFlag: Boolean;
     FServerHost: string;
     FServerPort: Integer;
     FCurrentMessage: TText;
@@ -124,6 +142,7 @@ type
     FConnectErrorMsg: string;
     FKBBounds: TRectF;
     FNeedOffset: Boolean;
+    FNeedScrollTop: Boolean;
     FColorHeader: TAlphaColor;
     FColorBody: TAlphaColor;
     FColorFooter: TAlphaColor;
@@ -134,29 +153,32 @@ type
     FFont_Size: Single;
     FBitmaps: TDictionary<Integer, TBitmap>;
     FDWToast: TToast;
+    procedure Load_ConfigIni(const AFlag: Integer);
+    procedure Save_ConfigIni(const AFlag: Integer);
+    procedure UpdateClientProtocol(const AFlag: Integer = 0);
     procedure SetConnectionFlag(const Value: Boolean);
     procedure SetServerHost(const Value: string);
     procedure SetServerPort(const Value: Integer);
     procedure SetUserName(const Value: string);
-    procedure UpdateClientProtocol(const AFlag: Integer = 0);
-    procedure Load_ConfigIni(const AFlag: Integer);
-    procedure Save_ConfigIni(const AFlag: Integer);
-    procedure Do_Request(const ARequest: string);
-    function Get_JsonToBytes(const ARequest: string): TBytes;
-    procedure Do_ShowModalSetting;
-    function GetItemsBitmap(const AIndex: Integer): TBitmap;
-    function GetTextHeight(const AFlag: Integer; const  D: TListItemText; const Width: Single; const Text: string): Integer;
-    procedure AddUpdate_Message(const AFlag: Integer; const AUser, AQueue,AModel, AText: String);
-    procedure SetItemsBitmap;
-    procedure Update_ScrollBar;
-    procedure Get_ModelList(const AFlag: Integer = 0);
     procedure SetFont_Size(const Value: Single);
     procedure SetProcessingFlag(const Value: Integer);
-  public
+    procedure AddUpdate_Message(const AFlag: Integer; const AUser, AQueue,AModel, AText: String);
+    procedure SetItemsBitmap;
+    procedure Do_Request(const ARequest: string);
+    procedure Do_ShowModalSetting;
     function MemoryStreamToBase64(const Atype: Integer; const MemoryStream: TMemoryStream): string;
+    function Get_JsonToBytes(const ARequest: string): TBytes;
+    function GetItemsBitmap(const AIndex: Integer): TBitmap;
+    function GetTextHeight(const AFlag: Integer; const  D: TListItemText; const Width: Single; const Text: string): Integer;
+    procedure Get_ModelList(const AFlag: Integer = 0);
+    function GetLogonFlag: Boolean;
+    procedure SetLogonFlag(const Value: Boolean);
+    function Get_CopyText: string;
+  public
     procedure Do_ShowHideVirtualKeyboard(const AFlag: Boolean; const AControl: TControl);
     { property ...  }
     property ConnectionFlag: Boolean    read FConnectionFlag    write SetConnectionFlag;
+    property LogonFlag: Boolean         read GetLogonFlag       write SetLogonFlag;
     property UserName: string           read FUserName          write SetUserName;
     property ServerHost: string         read FServerHost        write SetServerHost;
     property ServerPort: Integer        read FServerPort        write SetServerPort;
@@ -181,8 +203,10 @@ uses
   System.JSON,
   System.IOUtils,
   FMX.Platform,
+  FMX.Clipboard,
   FMX.Styles,
   FMX.VirtualKeyboard,
+  FMX.Menus,
   System.IniFiles,
   Unit_Setting;
 
@@ -204,13 +228,45 @@ const
 { ... Sync with Preserved Server Constant }
 
 const
-  C_IniFileName = 'oci_cfg.ini';
-  C_SectionHost = 'Server';
+  C_IniFileName    = 'oci_cfg.ini';
+  C_SectionHost    = 'Server';
   C_SectionOptions = 'Options';
+  C_WaitingToast   = 'Waiting for a response from the server ...';
+
+const  // Common with Ollama_Client Broker/Server ...
+  C_JsonFmt  = '{"user": "%user%","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
+  //C_JsonFmt2 = '{"user": "%user%","queue": "%queue%","model": "%model%","response": "%response%"}';
+
+const
+  C_LogonColor: array [Boolean] of TAlphaColor = (TAlphaColorRec.Black, TAlphaColorRec.Chartreuse);
+
+const
+  C_UpdateFlag_None   = 0;
+  C_UpdateFlag_Logon  = 1;
+  C_UpdateFlag_Models = 2;
+  C_UpdateFlag_Scroll = 3;
+  C_UpdateFlag_Keybrd = 4;
 
 var
   V_Model: string = 'phi3';
   V_DoneFlag: Boolean = True;
+
+{ Tools ... }
+
+procedure DelayedSetFocus(Control: TControl);
+begin
+  TThread.CreateAnonymousThread(
+    procedure
+    begin
+      TThread.Synchronize( nil,
+         procedure
+         begin
+           Control.SetFocus;
+         end
+      );
+    end
+  ).Start;
+end;
 
 { MainForm }
 
@@ -222,16 +278,19 @@ begin
   Text_Status.Text := 'Not Connected ...';
   FFirstFlag := True;
   FClosingFlag := False;
+  FNeedScrollTop := True;
   FConnectionFlag := False;
   FCurrentMessage := TText.Create(Self);
   Memo_Prompt.Lines.Text := 'Hello';
   FCurrentMessage.Text := 'Hello';
   FProcessingFlag := 0;
-  FUpdateFlag := 0;
+  FUpdateFlag := C_UpdateFlag_None;
   Button_Connect.Enabled := True;
   Button_ModelList.Enabled := False;
+  Button_MoveTop.Visible := False;
   Layout_ModelUser.Visible := False;
-  Label_Welcome.TextSettings.FontColor := TAlphaColorRec.White;
+  Layout_PopupMenu.Visible := False;
+  Label_Welcome.TextSettings.FontColor :=  TAlphaColorRec.White;
   Label_Welcome2.TextSettings.FontColor := TAlphaColorRec.White;
 
   FClient_Source := TncClientSource.Create(Self);
@@ -260,6 +319,7 @@ begin
   Rectangle_Designtime.Free;
   var _MyStyle: TFmxObject := TStyleManager.GetStyleResource('MYSTYLE');
   TStyleManager.SetStyle(_MyStyle);
+  ApplyStyleLookup;
   // ------------------------------------------------------------------------ //
 
   FDWToast := TToast.Create;
@@ -273,6 +333,7 @@ begin
   FColorFooter := TAlphaColorRec.Silver;
   FColorSelect := TAlphaColorRec.Navy;
   FIniFile := System.IOUtils.TPath.Combine(System.IOUtils.TPath.GetDocumentsPath, C_IniFileName);
+
   Load_ConfigIni(0);
 
   FClient_Source.Host := FServerHost;
@@ -301,7 +362,13 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
+  FClosingFlag := False;
   Timer_Updater.Enabled := True;
+end;
+
+procedure TMainForm.Layout_RequestResized(Sender: TObject);
+begin
+  ListView_ChatBoxScrollViewChange(Sender);
 end;
 
 procedure TMainForm.ListBox_ModelsChange(Sender: TObject);
@@ -373,12 +440,22 @@ end;
 
 procedure TMainForm.SetServerHost(const Value: string);
 begin
-  FServerHost := Value;
+  if FServerHost <> Value then
+  begin
+    FDWToast.Make('Host Changed ...');
+    FServerHost := Value;
+    ListBox_Users.Clear;
+    UpdateClientProtocol(1);
+  end;
 end;
 
 procedure TMainForm.SetServerPort(const Value: Integer);
 begin
-  FServerPort := Value;
+  if FServerPort <> Value then
+  begin
+    FServerPort := Value;
+    UpdateClientProtocol(1);
+  end;
 end;
 
 procedure TMainForm.SetUserName(const Value: string);
@@ -390,7 +467,6 @@ procedure TMainForm.FClient_SourceConnected(Sender: TObject; aLine: TncLine);
 begin
   if FUserName = '' then
     FUserName := 'Anonymous';
-
   ConnectionFlag := True;
 end;
 
@@ -402,10 +478,17 @@ begin
     begin
       ConnectionFlag := False;
       ListBox_Users.Clear;
+      LogonFlag := False;
     end);
 end;
 
-function TMainForm.FClient_SourceHandleCommand(Sender: TObject; aLine: TncLine; aCmd: Integer; const aData: TBytes; aRequiresResult: Boolean; const aSenderComponent, aReceiverComponent: string): TBytes;
+function TMainForm.FClient_SourceHandleCommand(Sender: TObject;
+                                               aLine: TncLine;
+                                               aCmd: Integer;
+                                               const aData: TBytes;
+                                               aRequiresResult: Boolean;
+                                               const aSenderComponent,
+                                               aReceiverComponent: string): TBytes;
 begin
   if FClosingFlag then Exit;
 
@@ -430,9 +513,9 @@ begin
               end;
               AddUpdate_Message(2, '', '', '', 'Users List Received...');
             end;
-            FUpdateFlag := 1;
+            FUpdateFlag := C_UpdateFlag_Models;
             if ListBox_Users.items.Count > 0 then
-               FDWToast.Make('Logon to Broker.');
+               FDWToast.Make('Success : Logon to Broker.');
           end;
         cmdSrvLlavaImage:     // postponed ...
           begin
@@ -469,7 +552,7 @@ begin
               var _Name: string :=   _JsonObj.Get('user').JsonValue.Value;
               var _Queue: string :=  _JsonObj.Get('queue').JsonValue.Value;
               var _Model: string :=  _JsonObj.Get('model').JsonValue.Value;
-              var _Prompt: string := _JsonObj.Get('prompt').JsonValue.Value;
+              var _Prompt: string := _JsonObj.Get('response').JsonValue.Value;
 
               AddUpdate_Message(1, _Name, _Queue, _Model, _Prompt);
             finally
@@ -523,24 +606,91 @@ begin
 end;
 
 procedure TMainForm.SetConnectionFlag(const Value: Boolean);
-const
-  c_Color: array [Boolean] of TAlphaColor = (TAlphaColorRec.Gray, TAlphaColorRec.Beige);
 begin
   if FClosingFlag then Exit;
 
   ProcessingFlag := 0;
   FConnectionFlag := Value;
   Button_ModelList.Enabled := Value;
-  Circle_Connection.Fill.Color := c_Color[Value];
+  Circle_Connection.Fill.Color := C_LogonColor[Value and LogonFlag];
   if Value then
     Text_Status.Text := 'Connected'
   else
     Text_Status.Text := 'Not Connected ...';
 end;
 
+const
+  C_PMN_GotoTop    = 0;
+  C_PMN_GotoBottom = 1;
+  C_PMN_Clear      = 2;
+
+procedure TMainForm.SpeedButton_ClearClick(Sender: TObject);
+var
+  _menubutton:  TSpeedButton absolute Sender;
+begin
+  Layout_PopupMenu.Visible := False;
+  case _menubutton.Tag of
+    C_PMN_GotoTop:
+       if ListView_ChatBox.ItemCount > 0 then
+         ListView_ChatBox.Selected := ListView_ChatBox.Items[0];
+    C_PMN_GotoBottom:
+       if ListView_ChatBox.ItemCount > 0 then
+         ListView_ChatBox.Selected := ListView_ChatBox.Items[ListView_ChatBox.ItemCount-1];
+    C_PMN_Clear:
+       begin
+         ListView_ChatBox.Items.Clear;
+         FFirstFlag := True;
+         Label_Welcome.Visible := True;
+       end;
+  end;
+end;
+
+procedure TMainForm.SpeedButton_CopyTextClick(Sender: TObject);
+begin
+  if (ListView_ChatBox.ItemCount > 0) and (ListView_ChatBox.Selected <> nil) then
+  begin
+   var _Drawable_b := TListItemText(ListView_ChatBox.Selected.View.FindDrawable('txtBody'));
+   if Assigned(_Drawable_b) then
+      begin
+        var _text: string := _Drawable_b.Text;
+        Memo_Prompt.lines.Text := _text;
+        var _ClipBoard: IFMXExtendedClipboardService;
+        if TPlatformServices.Current.SupportsPlatformService(IFMXExtendedClipboardService, _ClipBoard) then
+          _ClipBoard.SetClipboard(_text);
+      end;
+  end;
+end;
+
+function TMainForm.Get_CopyText(): string;
+var
+  _ClipBoard: IFMXClipboardService;
+begin
+  if TPlatformServices.Current.SupportsPlatformService(IFMXClipboardService, _ClipBoard) then
+  begin
+    var _Value: TValue := _ClipBoard.GetClipboard;
+    var _text: string;
+    if not _Value.IsEmpty and _Value.TryAsType(_text)
+      then _text := _Value.ToString
+      else _text := '';
+
+    Result := _text;
+  end;
+end;
+
+procedure TMainForm.SpeedButton_PopupMenuClick(Sender: TObject);
+begin
+  Layout_PopupMenu.Visible := not Layout_PopupMenu.Visible;
+  if Layout_PopupMenu.Visible then
+  begin
+    Layout_PopupMenu.Position.X := SpeedButton_PopupMenu.Position.X - Layout_PopupMenu.Width - 5;
+    Layout_PopupMenu.Position.Y := SpeedButton_PopupMenu.Position.Y+2;
+    Layout_PopupMenu.BringToFront;
+  end;
+end;
+
 procedure TMainForm.SpeedButton_RestoreClick(Sender: TObject);
 begin
-  if Memo_Prompt.Lines.Text = '' then
+  if Memo_Prompt.Lines.Text.Trim = '' then
     Memo_Prompt.Lines.Text := FCurrentMessage.Text
   else
     Memo_Prompt.Lines.Text := '';
@@ -567,16 +717,14 @@ begin
 end;
 
 function TMainForm.Get_JsonToBytes(const ARequest: string): TBytes;
-const
-  c_JsonFmt = '{"user": "%user%","queue": "%queue%", "model": "%model%","prompt": "%prompt%"}';
 begin
   Result := [];
   var _user: string := FUserName;
-  var _model: string := '';
+  var _model: string := 'phi3';
   if (ListBox_Models.Items.Count > 0) and (ListBox_Models.ItemIndex >= 0) then
     _model := ListBox_Models.Items[ListBox_Models.ItemIndex];
   var _req: string :=
-          StringReplace(c_JsonFmt, '%user%',   _user,    [rfIgnoreCase]);
+          StringReplace(C_JsonFmt, '%user%',   _user,    [rfIgnoreCase]);
   _req := StringReplace(_req,      '%model%',  _model,   [rfIgnoreCase]);
   _req := StringReplace(_req,      '%prompt%', ARequest, [rfIgnoreCase]);
   Result := TEncoding.UTF8.GetBytes(_req);
@@ -591,7 +739,7 @@ begin
   end;
   if ProcessingFlag > 0 then
   begin
-    FDWToast.Make('Waiting for a response from the server ...');
+    FDWToast.Make(C_WaitingToast);
     Exit;
   end;
 
@@ -607,7 +755,7 @@ begin
   if ListBox_Users.Count < 1 then
   begin
     FDWToast.Make('Let''s go to Logon ...');
-    FUpdateFlag := 5;
+    FUpdateFlag := C_UpdateFlag_Logon;
     Button_ConnectClick(Self);
 
     Exit;
@@ -615,7 +763,7 @@ begin
 
   if ProcessingFlag > 0 then
   begin
-    FDWToast.Make('Waiting for a response from the server ...');
+    FDWToast.Make(C_WaitingToast);
     Exit;
   end;
 
@@ -626,7 +774,6 @@ begin
     Exit;
   end;
 
-  //AddUpdate_Message(0, _request);
   FCurrentMessage.Text := _request;
   Memo_Prompt.Lines.Text := '';
 
@@ -652,6 +799,7 @@ begin
     begin
       FConnectErrorMsg := E.Message;
       FClient_Source.Active := False;
+      FDWToast.Make(E.Message);
     end;
   end;
 end;
@@ -672,7 +820,7 @@ begin
   if FClosingFlag then Exit;
   if ProcessingFlag > 0 then
   begin
-    FDWToast.Make('Waiting for a response from the server ...');
+    FDWToast.Make(C_WaitingToast);
     Exit;
   end;
 
@@ -685,6 +833,7 @@ begin
     begin
       FConnectErrorMsg := E.Message;
       FClient_Source.Active := False;
+      FDWToast.Make(E.Message);
     end;
   end;
 end;
@@ -706,10 +855,12 @@ begin
   FKBBounds.Create(0, 0, 0, 0);
   FNeedOffset := False;
   Layout_Request.Margins.Bottom := 0;
+  FNeedScrollTop := True;
 end;
 
 procedure TMainForm.FormVirtualKeyboardShown(Sender: TObject; KeyboardVisible: Boolean; const Bounds: TRect);
 begin
+  FNeedScrollTop := False;
   FNeedOffset := False;
   FKBBounds := TRectF.Create(Bounds);
   FKBBounds.TopLeft := ScreenToClient(FKBBounds.TopLeft);
@@ -744,30 +895,37 @@ end;
 
 procedure TMainForm.Timer_UpdaterTimer(Sender: TObject);
 begin
-  //Timer_Updater.Enabled := False;
-  if FUpdateFlag = 1 then
+  if FUpdateFlag = C_UpdateFlag_Logon then
   begin
-    FUpdateFlag := 0;
+    if ListBox_Users.Count > 0 then
+    begin
+      FUpdateFlag := C_UpdateFlag_None;
+      LogonFlag := True;
+      FDWToast.Make('Success : Logon to Broker.');
+    end;
+  end;
+  if FUpdateFlag = C_UpdateFlag_Models then
+  begin
+    FUpdateFlag := C_UpdateFlag_None;
     var _req: TBytes := BytesOf('Request Model List');
     FClient_Source.ExecCommand(cmdCntModellist, _req, False, True);
   end;
-  if FUpdateFlag = 3 then    // Trick ? The Update Speed of Customized ListView is too slow ....
+  if FUpdateFlag = C_UpdateFlag_Scroll then    // Trick ? The Update Speed of Customized ListView is too slow ....
   begin
-    FUpdateFlag := 0;
+    FUpdateFlag := C_UpdateFlag_None;
     if ListView_ChatBox.Selected <> nil then
       begin
         ListView_ChatBox.Resize;
         ListView_ChatBox.ScrollViewPos := 99999;
       end;
   end;
-  if FUpdateFlag = 5 then
+  if FUpdateFlag = C_UpdateFlag_Keybrd then
   begin
-    if ListBox_Users.Count > 0 then
-    begin
-      FUpdateFlag := 0;
-      FDWToast.Make('Success to Logon ...');
-    end;
+    FUpdateFlag := C_UpdateFlag_None;
+    ListView_ChatBoxScrollViewChange(Sender);
   end;
+
+  Circle_Connection.Fill.Color := C_LogonColor[ConnectionFlag and LogonFlag];
 
   if ProcessingFlag = 0 then
   begin
@@ -792,8 +950,6 @@ begin
     Label_Welcome.Visible := False;
   end;
 
-  //var _title: string := 'Ollama';
-  //if AFlag = 0 then
   var _title: string := Format('%s  [%s] - %s', [AUser, AQueue, AModel ]);
   var _timestamp: string := FormatDateTime('(hh:nn:ss)', Now);
   var _item: TListViewItem := ListView_ChatBox.Items.Add;
@@ -810,14 +966,7 @@ begin
 
   ListView_ChatBox.Selected := ListView_ChatBox.Items[_item.Index];
   Application.ProcessMessages;
-  FUpdateFlag := 3;
-end;
-
-procedure TMainForm.Update_ScrollBar;
-begin
-  with ListView_ChatBox do
-  begin
-  end;
+  FUpdateFlag := C_UpdateFlag_Scroll;
 end;
 
 function TMainForm.GetTextHeight(const AFlag: Integer; const  D: TListItemText; const Width: Single; const Text: string): Integer;
@@ -846,6 +995,18 @@ begin
   end;
 end;
 
+procedure TMainForm.SetProcessingFlag(const Value: Integer);
+begin
+  FProcessingFlag := Value;
+  if Value > 0 then
+  begin
+    Layout_Animation.Position.X := (ListView_ChatBox.Width - Layout_Animation.Width) / 2;
+    Layout_Animation.Position.Y := (Self.ClientHeight - Layout_Animation.Height) / 2;
+  end;
+  Layout_Animation.Visible := Value > 0;
+  ActivityFloatAni.Enabled := Value > 0;
+end;
+
 { For ListView Ownerdwar = False ... }
 
 procedure TMainForm.SetItemsBitmap();
@@ -864,16 +1025,16 @@ begin
   end;
 end;
 
-procedure TMainForm.SetProcessingFlag(const Value: Integer);
+function TMainForm.GetLogonFlag: Boolean;
 begin
-  FProcessingFlag := Value;
-  if Value > 0 then
-  begin
-    Layout_Animation.Position.X := (ListView_ChatBox.Width - Layout_Animation.Width) / 2;
-    Layout_Animation.Position.Y := (Self.ClientHeight - Layout_Animation.Height) / 2;
-  end;
-  Layout_Animation.Visible := Value > 0;
-  ActivityFloatAni.Enabled := Value > 0;
+  Result := ListBox_Users.items.Count > 0;
+  FLogonFlag := ListBox_Users.items.Count > 0;
+end;
+
+procedure TMainForm.SetLogonFlag(const Value: Boolean);
+begin
+  FLogonFlag := Value;
+  Circle_Connection.Fill.Color := C_LogonColor[Value and ConnectionFlag];
 end;
 
 function TMainForm.GetItemsBitmap(const AIndex: Integer): TBitmap;
@@ -886,7 +1047,29 @@ end;
 
 procedure TMainForm.ListView_ChatBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
+  Layout_PopupMenu.Visible := False;
   Do_ShowHideVirtualKeyboard(False, nil);
+end;
+
+procedure TMainForm.Button_MoveTopClick(Sender: TObject);
+begin
+  if ListView_ChatBox.ItemCount > 0 then
+    ListView_ChatBox.ScrollTo(0);
+end;
+
+procedure TMainForm.ListView_ChatBoxResized(Sender: TObject);
+begin
+  ListView_ChatBoxScrollViewChange(Sender);
+end;
+
+procedure TMainForm.ListView_ChatBoxScrollViewChange(Sender: TObject);
+begin
+  if not FNeedScrollTop then Exit;
+  if ListView_ChatBox.ItemCount < 1 then Exit;
+  var _LastItemBottom: Single := ListView_ChatBox.GetItemRect(ListView_ChatBox.ItemCount - 1).Bottom;
+  var _ListViewBottom: Single := ListView_ChatBox.LocalRect.Bottom;
+
+  Button_MoveTop.Visible := ((_LastItemBottom - _ListViewBottom) < 30);
 end;
 
 procedure TMainForm.SetFont_Size(const Value: Single);
@@ -900,7 +1083,6 @@ begin
       for var _object: TCommonObjectAppearance in Objects do
         if _object.ClassType = TTextObjectAppearance then
           TTextObjectAppearance(_object).Font.Size := Value;
-      // ListView_ChatBox.Items.ItemsInvalidate;  // n/a
     finally
       ListView_ChatBox.EndUpdate;
     end;
@@ -910,6 +1092,8 @@ end;
 
 procedure TMainForm.ListView_ChatBoxUpdateObjects(const Sender: TObject; const AItem: TListViewItem);
 begin
+  AItem.BeginUpdate;
+
   var _IconImg: TListItemImage := TListItemImage(AItem.View.FindDrawable('imgIcon'));
   _IconImg.OwnsBitmap := False;
   _IconImg.Bitmap := GetItemsBitmap(AItem.ImageIndex);
@@ -943,6 +1127,8 @@ begin
       _Drawable_f.Height := _FooterHeight;
       _Drawable_f.Width :=  _AvailableWidth;
       _Drawable_f.PlaceOffset.Y := _Drawable_b.PlaceOffset.Y +_Drawable_b.Height;
+
+  AItem.EndUpdate;
  end;
 
 { Form_Setting / Options, Colors ... }
@@ -959,16 +1145,18 @@ begin
     begin
       if AResult = mrOK then
       begin
-        Self.ServerHost := Form_Setting.Edit_Host.Text.Trim;
-        Self.ServerPort := StrToIntDef(Form_Setting.Edit_Port.text.Trim, C_BasePort);
-        Self.UserName :=   Form_Setting.Edit_UserName.Text;
+        Self.ServerHost :=   Form_Setting.Edit_Host.Text.Trim;
+        Self.ServerPort :=   StrToIntDef(Form_Setting.Edit_Port.text.Trim, C_BasePort);
+        Self.UserName :=     Form_Setting.Edit_UserName.Text;
 
-        FColorHeader := Form_Setting.ColorComboBox_Header.Color;
-        FColorBody :=   Form_Setting.ColorComboBox_Body.Color;
-        FColorFooter := Form_Setting.ColorComboBox_Footer.Color;
-        FColorSelect := Form_Setting.ColorComboBox_Select.Color;
+        Self.FColorHeader := Form_Setting.ColorComboBox_Header.Color;
+        Self.FColorBody :=   Form_Setting.ColorComboBox_Body.Color;
+        Self.FColorFooter := Form_Setting.ColorComboBox_Footer.Color;
+        Self.FColorSelect := Form_Setting.ColorComboBox_Select.Color;
 
-        Font_Size :=    12 + Form_Setting.ComboBox_FontSize.ItemIndex * 2;
+        Font_Size := 12 + Form_Setting.ComboBox_FontSize.ItemIndex * 2;
+
+        ListView_ChatBox.ApplyStyleLookup;
       end;
     end);
 end;

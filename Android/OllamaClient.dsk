@@ -1,25 +1,27 @@
 ﻿[Closed Files]
-File_0=TSourceModule,'E:\2024_DelphiLibs12\FMXExpress\Cross-Platform-Samples\28-PopupMenuButton\Unit1.pas',0,1,13,1,1,0,0,,
-File_1=TSourceModule,'E:\2024_DelphiLibs12\FMXExpress\Cross-Platform-Samples\13-Animation\Unit1.pas',0,1,4,50,22,0,0,,
-File_2=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.Types.pas',0,1,1964,82,1971,0,0,,
-File_3=TSourceModule,'E:\OllamaCkent\Android\FMX.ListView.pas',0,1,3297,11,3299,0,0,{{1101,0}
-File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.DynamicAppearance.pas',0,1,331,1,1,0,0,,
-File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.TextLayout.pas',0,1,526,77,545,0,0,,
-File_6=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.Adapters.Base.pas',0,1,512,65,262,0,0,,
-File_7=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.pas',0,1,4508,23,4511,0,0,,
-File_8=TSourceModule,'E:\OllamaCkent\Android\FMX.ListView.Adapters.Base.pas',0,1,1,1,1,0,0,,
-File_9=TSourceModule,'E:\2024_DelphiLibs12\ModernListView\FMX.ListView.pas',0,1,3479,29,3509,0,0,{{1100,0}
-File_10=TSourceModule,'E:\OllamaCkent\Android\FMX.ListView.Types.pas',0,1,1858,45,1876,0,0,,
-File_11=TSourceModule,'E:\OllamaCkent\Android\FMX.ListView.DynamicAppearance.pas',0,1,85,1,1,0,0,,
-File_12=TSourceModule,'E:\OllamaCkent\Android\FMX.ListView.Appearances.pas',0,1,1888,1,1698,0,0,,
-File_13=TSourceModule,'E:\OllamaCkent\Android\FMX.ListView.Android.pas',0,1,1,1,1,0,0,,
-File_14=TSourceModule,'E:\OllamaCkent\Android\Include\FMX.ListView.pas',0,1,3271,38,3292,0,0,{{1104,0}
+File_0=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Forms.pas',0,1,6748,90,6755,0,0,{{882,4}
+File_1=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Types.pas',0,1,5808,1,5832,0,0,{{6036,0}
+File_2=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Controls.pas',0,1,6039,82,5984,0,0,{{701,4}
+File_3=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Graphics.pas',0,1,7172,11,7205,0,0,,
+File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Styles.Objects.pas',0,1,1,1,1,0,0,,
+File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.pas',0,1,2465,83,2508,0,0,{{1095,0}
+File_6=TSourceModule,'E:\OllamaCkent\Android\FMX.ListView.pas',0,1,3269,31,3282,0,0,{{1101,0}
+File_7=TSourceModule,'E:\2024_DelphiLibs12\ModernListView\FMX.ListView.Types.pas',0,1,3502,83,3518,0,0,,
+File_8=TSourceModule,'E:\2024_DelphiLibs12\ModernListView\FMX.ListView.pas',0,1,3794,43,3803,0,0,,
+File_9=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.Types.pas',0,1,364,1,12,0,0,{{1260,0}
+File_10=TSourceModule,'E:\2024_DelphiLibs12\FMXExpress\Cross-Platform-Samples\28-PopupMenuButton\Unit1.pas',0,1,13,1,1,0,0,,
+File_11=TSourceModule,'E:\2024_DelphiLibs12\FMXExpress\Cross-Platform-Samples\13-Animation\Unit1.pas',0,1,4,50,22,0,0,,
+File_12=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.DynamicAppearance.pas',0,1,331,1,1,0,0,,
+File_13=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.TextLayout.pas',0,1,526,77,545,0,0,,
+File_14=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.Adapters.Base.pas',0,1,512,65,262,0,0,,
 
 [Modules]
 Module0=E:\OllamaCkent\Android\Unit_Main.pas
 Module1=E:\OllamaCkent\Android\OllamaClient.dproj
-Module2=E:\OllamaCkent\Android\Unit_Setting.pas
-Count=3
+Module2=c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Styles.pas
+Module3=E:\OllamaCkent\Android\Unit_Setting.pas
+Module4=E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas
+Count=5
 EditWindowCount=1
 
 [E:\OllamaCkent\Android\Unit_Main.pas]
@@ -28,15 +30,23 @@ ModuleType=TSourceModule
 [E:\OllamaCkent\Android\OllamaClient.dproj]
 ModuleType=TBaseProject
 
+[c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Styles.pas]
+ModuleType=TSourceModule
+
 [E:\OllamaCkent\Android\Unit_Setting.pas]
 ModuleType=TSourceModule
 
+[E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas]
+ModuleType=TSourceModule
+
 [EditWindow0]
-ViewCount=3
+ViewCount=5
 CurrentEditView=E:\OllamaCkent\Android\Unit_Main.pas
 View0=0
 View1=1
 View2=2
+View3=3
+View4=4
 PercentageSizes=1
 Create=1
 Visible=1
@@ -84,9 +94,9 @@ EditViewName=E:\OllamaCkent\Android\OllamaClient.dpr
 [View1]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Android\Unit_Main.pas
-CursorX=45
-CursorY=415
-TopLine=411
+CursorX=55
+CursorY=885
+TopLine=945
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -94,10 +104,32 @@ EditViewName=E:\OllamaCkent\Android\Unit_Main.pas
 
 [View2]
 CustomEditViewType=TEditView
+Module=c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Styles.pas
+CursorX=1
+CursorY=1175
+TopLine=1157
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Styles.pas
+
+[View3]
+CustomEditViewType=TEditView
+Module=E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas
+CursorX=17
+CursorY=619
+TopLine=659
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas
+
+[View4]
+CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Android\Unit_Setting.pas
-CursorX=35
-CursorY=193
-TopLine=87
+CursorX=75
+CursorY=191
+TopLine=4
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -253,8 +285,8 @@ SplitPos=143
 
 [PropInspDesignerSelection]
 ArrangeBy=Name
-SelectedItem=Active,Action
-ExpandedItems=Anchors=1,BorderIcons=0,Constraints=0,CustomTitleBar=0,LiveBindings=0,"LiveBindings Designer=0",Margins=1,Border=0,Fill=1,FormFactor=1,Padding=0,SystemStatusBar=0,Touch=0,FormFactor.Devices=0,FormFactor.Orientations=0,Position=1,RotationCenter=0,Scale=0,Size=0,TouchTargetExpansion=0,StyledSettings=0,TextSettings=1,TextSettings.Font=0,Fill.Bitmap=0,Fill.Resource=0,Stroke=1,Stroke.Bitmap=0,Stroke.Resource=0,NativeOptions=0,RotationAngle=0,Font=0,StyleElements=0,Images=0,Action=0,DefaultItemStyles=0,ItemAppearance=0,ItemAppearanceObjects=0,ItemSpaces=0,TextSettings.FontColorForState=0,PlacementRectangle=0,BitmapMargins=0,GlassFrame=0,HorzScrollBar=0,ActiveControl=0
+SelectedItem=Position.X,OnTimer
+ExpandedItems=Anchors=0,LiveBindings=0,Fill=1,"LiveBindings Designer=0",Margins=0,Padding=0,Position=1,RotationAngle=0,RotationCenter=0,Scale=0,Size=0,Stroke=1,Touch=0,Fill.Bitmap=1,Fill.Resource=1,TouchTargetExpansion=0,Fill.Bitmap.Image=0,Stroke.Bitmap=1,Stroke.Resource=0,Stroke.Bitmap.Image=1,StyledSettings=0,TextSettings=1,TextSettings.Font=1,TextSettings.Font.Style=1,ActiveControl=0,TextSettings.FontColorForState=0,ItemSpaces=0,NativeOptions=0
 
 [frmDesignPreview]
 PercentageSizes=1

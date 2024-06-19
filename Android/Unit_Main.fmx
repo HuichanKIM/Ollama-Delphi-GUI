@@ -28,7 +28,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 45
+    TabOrder = 55
     object Text_Status: TText
       Align = Contents
       Margins.Left = 10.000000000000000000
@@ -57,7 +57,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 120.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 22
+    TabOrder = 31
     object Layout3: TLayout
       Align = MostLeft
       Size.Width = 140.000000000000000000
@@ -184,7 +184,8 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 60.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 20
+    TabOrder = 29
+    OnResized = Layout_RequestResized
     object Button_Request: TButton
       Align = Right
       Default = True
@@ -249,7 +250,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 30.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 50
+    TabOrder = 60
     object Text_Caption2: TText
       Align = Client
       HitTest = False
@@ -262,7 +263,7 @@ object MainForm: TMainForm
       TextSettings.FontColor = claBisque
       object Circle_Connection: TCircle
         Align = Left
-        Fill.Color = claGray
+        Fill.Color = claBlack
         HitTest = False
         Size.Width = 15.000000000000000000
         Size.Height = 29.000000000000000000
@@ -293,8 +294,9 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 357.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 16
+    TabOrder = 25
     OnMouseDown = ListView_ChatBoxMouseDown
+    OnResized = ListView_ChatBoxResized
     ItemAppearance.ItemHeight = 60
     ItemAppearanceObjects.ItemObjects.ObjectsCollection = <
       item
@@ -347,7 +349,9 @@ object MainForm: TMainForm
         Appearance.Visible = False
         Appearance.PlaceOffset.X = 38.000000000000000000
       end>
-    StyleLookup = 'ListView_ChatBoxStyle1'
+    ItemAppearanceObjects.FooterObjects.Text.TextAlign = Trailing
+    OnScrollViewChange = ListView_ChatBoxScrollViewChange
+    PullToRefresh = True
     object Label_Welcome: TLabel
       Align = Top
       AutoSize = True
@@ -511,6 +515,128 @@ object MainForm: TMainForm
         end
       end
     end
+    object Button_MoveTop: TButton
+      Align = Bottom
+      Position.X = 176.000000000000000000
+      Position.Y = 309.000000000000000000
+      Size.Width = 48.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'arrowuptoolbutton'
+      TabOrder = 1
+      Text = 'Button_MoveTop'
+      TextSettings.Trimming = None
+      OnClick = Button_MoveTopClick
+    end
+    object SpeedButton_PopupMenu: TSpeedButton
+      Anchors = [akTop, akRight]
+      Cursor = crHandPoint
+      Position.X = 363.000000000000000000
+      Position.Y = 8.000000000000000000
+      Scale.X = 0.600000023841857900
+      Scale.Y = 0.600000023841857900
+      Size.Width = 48.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'drawertoolbutton'
+      Text = 'SpeedButton_PopupMenu'
+      TextSettings.Trimming = None
+      OnClick = SpeedButton_PopupMenuClick
+    end
+    object Layout_PopupMenu: TLayout
+      Anchors = [akTop, akRight]
+      Position.X = 208.000000000000000000
+      Position.Y = 10.000000000000000000
+      Size.Width = 144.000000000000000000
+      Size.Height = 155.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      object Rectangle1: TRectangle
+        Align = Contents
+        Size.Width = 144.000000000000000000
+        Size.Height = 155.000000000000000000
+        Size.PlatformDefault = False
+        XRadius = 10.000000000000000000
+        YRadius = 10.000000000000000000
+        object Text2: TText
+          Align = MostTop
+          Size.Width = 144.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'MENU'
+        end
+        object SpeedButton_Clear: TSpeedButton
+          Tag = 2
+          Align = Top
+          Margins.Left = 5.000000000000000000
+          Margins.Right = 3.000000000000000000
+          Position.X = 5.000000000000000000
+          Position.Y = 115.000000000000000000
+          Size.Width = 136.000000000000000000
+          Size.Height = 30.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = 'buttonstyle'
+          Text = 'Clear'
+          TextSettings.HorzAlign = Leading
+          TextSettings.Trimming = None
+          OnClick = SpeedButton_ClearClick
+        end
+        object SpeedButton_GotoTop: TSpeedButton
+          Align = Top
+          Margins.Left = 5.000000000000000000
+          Margins.Right = 3.000000000000000000
+          Position.X = 5.000000000000000000
+          Position.Y = 25.000000000000000000
+          Size.Width = 136.000000000000000000
+          Size.Height = 30.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = 'buttonstyle'
+          Text = 'Goto Top'
+          TextSettings.HorzAlign = Leading
+          TextSettings.Trimming = None
+          OnClick = SpeedButton_ClearClick
+        end
+        object SpeedButton_GotoBtm: TSpeedButton
+          Tag = 1
+          Align = Top
+          Margins.Left = 5.000000000000000000
+          Margins.Right = 3.000000000000000000
+          Position.X = 5.000000000000000000
+          Position.Y = 55.000000000000000000
+          Size.Width = 136.000000000000000000
+          Size.Height = 30.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = 'buttonstyle'
+          Text = 'Goto Bottom'
+          TextSettings.HorzAlign = Leading
+          TextSettings.Trimming = None
+          OnClick = SpeedButton_ClearClick
+        end
+        object SpeedButton_CopyText: TSpeedButton
+          Tag = 2
+          Align = Top
+          Margins.Left = 5.000000000000000000
+          Margins.Right = 3.000000000000000000
+          Position.X = 5.000000000000000000
+          Position.Y = 85.000000000000000000
+          Size.Width = 136.000000000000000000
+          Size.Height = 30.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = 'buttonstyle'
+          Text = 'Copy2Propmt'
+          TextSettings.HorzAlign = Leading
+          TextSettings.Trimming = None
+          OnClick = SpeedButton_CopyTextClick
+        end
+      end
+      object ShadowEffect1: TShadowEffect
+        Distance = 3.000000000000000000
+        Direction = 45.000000000000000000
+        Softness = 0.300000011920929000
+        Opacity = 0.600000023841857900
+        ShadowColor = claBlack
+      end
+    end
   end
   object Timer_Updater: TTimer
     Enabled = False
@@ -578,7 +704,7 @@ object MainForm: TMainForm
       Anchors = [akTop, akRight]
       Hint = 'Connect / DisConnect'
       Images = ImageList1
-      ImageIndex = 1
+      ImageIndex = 4
       Opacity = 0.800000011920929000
       Margins.Right = 5.000000000000000000
       Position.X = 314.000000000000000000
@@ -612,6 +738,7 @@ object MainForm: TMainForm
     object ActivityCircle: TCircle
       Align = Contents
       Fill.Kind = None
+      HitTest = False
       Size.Width = 100.000000000000000000
       Size.Height = 100.000000000000000000
       Size.PlatformDefault = False
@@ -619,6 +746,7 @@ object MainForm: TMainForm
       Stroke.Thickness = 2.000000000000000000
       object ActivityArc: TArc
         Align = Client
+        HitTest = False
         Margins.Left = 4.000000000000000000
         Margins.Top = 4.000000000000000000
         Margins.Right = 4.000000000000000000
@@ -630,8 +758,8 @@ object MainForm: TMainForm
         Stroke.Thickness = 3.000000000000000000
         Stroke.Cap = Round
         Stroke.Dash = Dot
-        StartAngle = -45.000000000000000000
-        EndAngle = -45.000000000000000000
+        StartAngle = -70.000000000000000000
+        EndAngle = -20.000000000000000000
         object ActivityFloatAni: TFloatAnimation
           Enabled = True
           Duration = 1.000000000000000000
@@ -644,6 +772,7 @@ object MainForm: TMainForm
       object ClipCircle: TCircle
         Align = Client
         Fill.Kind = None
+        HitTest = False
         Margins.Left = 10.000000000000000000
         Margins.Top = 10.000000000000000000
         Margins.Right = 10.000000000000000000
@@ -652,10 +781,10 @@ object MainForm: TMainForm
         Size.Height = 80.000000000000000000
         Size.PlatformDefault = False
         Stroke.Color = claAliceblue
-        Stroke.Thickness = 2.000000000000000000
       end
       object Text1: TText
         Align = Center
+        HitTest = False
         Text = 'wait'
         TextSettings.Font.Size = 16.000000000000000000
         TextSettings.Font.StyleExt = {00070000000000000004000000}
@@ -1272,6 +1401,102 @@ object MainForm: TMainForm
             FileName = 'E:\OllamaCkent\Temp\option48_5.png'
           end>
         Name = 'option48_5'
+      end
+      item
+        MultiResBitmap.LoadSize = 0
+        MultiResBitmap = <
+          item
+            Scale = 1.500000000000000000
+            Width = 24
+            Height = 24
+            PNG = {
+              89504E470D0A1A0A0000000D4948445200000018000000180806000000E0773D
+              F80000000473424954080808087C08648800000387494441544889AD9641681C
+              6514C77F6F765371270954B2499CB4040F2D08C6A229628B7A2815434E6A6B6E
+              4504E9B5C9A5971C0BBD95E4D48B82788DB5B9146B507A5021228D26F650680B
+              D22633996FB7C492FDBE4AC9CE3C0F3B9B6C36BB6B84BEE3FBBFEFFFBDF7E67B
+              EF3F42075B8DED48CED309554E838C007E0639D03B22FC98A4327778B0FB4E3B
+              0E69E58CA2CAAB9A9319E0032001590456207D5C8BF0FA8063A027801CB02089
+              4E0541CFDD4E09D7C8633B191AEB22639FACC56E3A8E2BFDED62E3B8D2BF16BB
+              E9C8D827A1B12E8AED6447F2B5D85E0E8DD5D0D89B51B4D9F79FD96C57BCD917
+              1A7B333456D7627BB911DB6E5114DB49156604BE7EB9DFFF4C44B48EDDBFAF2F
+              F8BDEE6C2A1C07F094DB6ED3BF76E4883CABC7A8AAAC97DC570A9F8A32150C76
+              CF6E5F90F5FC36F053D0EF8F3792476537AAA97E03BC02FC93B95F04FE124F3E
+              098AFE52E32551C97D07BC27891E0F829EBB1E80E66446604B92F45C23F9A3B2
+              0B34D505A04B606C68A0BB3034D05D101803BA34D5854765176CB743442549CF
+              096C658FA4F6146BBD73D37B7A6BDCD5D0D8ADB5F2E6D1666CADBC793434762B
+              32EEEA1E2C76D3A1B1BA1ADB112FE7E90490E449BF680E54741CE5FAA162EFBD
+              66EC50B1F71ECA7545C79BB18C2BC9793AE16543B43838D8536A0E048681B885
+              BF6E7116B3CB6A5CB2A8CA692F9BD0953604CB08AFB5A5AF61CB6DD01590110F
+              F0772674B7A9CAB7C0A9C8B80F9BB1CC772A8B6961E963C0CFB7CD0ED0ADC215
+              39E03E069D0B8D9DF152B906907A7A16740AF843B70A573A71E40187CAC15660
+              A1B0D1F5AC7AE086226F0017534F2F6E5F0E087AA350D8E862673E1AB2938308
+              4E42535904AF3A34E0BFDB8847E6E9474AFA25F012E822F003E23DAC1D4E8781
+              F7414E001B82F7793050986F3C1F1AF733A479A252E552686C757DBD52DC268F
+              ED856C272D476537DAAEFCA8EC464363974363358AED85BA7F7DBD520C8DAD46
+              A5CA252F49650EC825E29DAF655E39A3C22CE8BC24FEC9C655D06C41D15F92C4
+              3F093AAFC26C642A670032AE5C92CA9CD4CAB1DF0BBC5DA53A9A23FF1BF05012
+              FF9D2090A7EDC8775512694173EE176038A1FA569EFC92C2AF4303DD63CDCBAE
+              0AF4A670ECF040F79FFB21AFDBAAB1AF7BB579DA04F2F565B793454D683432EE
+              81AAB654BA4EA6AA1219F720FB1EAD85A72E3851C9DEFABF821395ECAD5682B3
+              37F8394BE6FE455FF57744FF06B2219237F723FA1D7BFD3C7E5BFE059DF4208B
+              684B3EA90000000049454E44AE426082}
+            FileName = 'F:\Temps\user24_1.png'
+          end>
+        Name = 'user24_1'
+      end
+      item
+        MultiResBitmap.LoadSize = 0
+        MultiResBitmap = <
+          item
+            Scale = 3.000000000000000000
+            Width = 48
+            Height = 48
+            PNG = {
+              89504E470D0A1A0A0000000D49484452000000300000003008060000005702F9
+              870000000473424954080808087C086488000004C3494441546881ED994D685D
+              4514C7FF9386D4A04DB42A486D5EAD25250157ADCB88E9AA2074A1B8701337E2
+              A215C54DE3C282E0AA0BA1B1AD1B211415DC354DA596A01BAB6D1725968220A4
+              8D8A09098DE9077E149398BE9F8B9997CE9DCC9D77DF47AB68FE70E1F1EEF9F8
+              CFCC993367CE95D6B086FF374C338C0046524952BFA4A725754B7A4C528713F9
+              4DD2554997258D4B3A2369CA184333FCD70DA003D8075C0096298E65A7B30FE8
+              A8EEA9F9C4DB81B780F91A48E761DED96AAF874BCD2104F4491A96B43D47A42C
+              695ED28C6CE818D9507A5CD223925A72F42E4B7AC51873B6564E850018601058
+              8ACCE20230020C005DC0BA887E2B50025E064E3A9D108BCE4753F6A6EFBC05F8
+              2087F821A0AB0E9B5DC050CE408E02792B55B3239343FE1CD0D304FB3DC0F99C
+              4134BE126E497D9481C3405B8EBC017602078063EE39E0FE8B1202DA1CE172E0
+              6B7FA3E49F211BF365E09D04916DC097112215DD2F806D8981BF1BE82E619346
+              5DE4DB818980C4E104F99DC0B508F110D7801D89411C0DE427A827C56273B38F
+              73E487CD46602A42F6967B424C011B736CB5395F3E066B25DF41F6905A20B161
+              818381C31F813DC003EED903FC14C81C4CD8EB259B9D7EA196131B7BC4FB3894
+              906D05663CD91BC01311B9ADEE5D0533406BC2EE50C0616F51F2065BA7F8B39F
+              9BE7816EB21B6FA820A932D09D902D05AB7081C8FE8B1D162549FE263B6D8C99
+              CE7324E961654B92EF13B2FE3BE374A330C64C491AF3FEDAE1B865101B40BF24
+              BF1438912024D97AC7C796846CF82ED40D31E2FD5E27CB2D0DE088B76CB753E1
+              E3E4D703D73D9D692219069BA9A63DB9EBC0FA2AB64B8E4305474299D80AF871
+              392F6936E5C418B328E9B8F7D76649A7B099C4B8A757D2E7EE5D05C79D6E0AB3
+              8E438C5B1CC0256FC4DF5655D0CA4CDD0CB2C66DEC213411CC224E76553CE7D8
+              BEE8E95D0ADFC756C0CFB7D56254D2CA861B90B410D8DEEE1EDFCF82A401A753
+              04BFE6705B719242E192D618734AD26E499309B14949BB9D6C53103B48FC59DF
+              508B3163CCD7C053925E90F49CA44AE1F683A4D392460AC47D88CE1C6E710063
+              5ECCCD91382DEF36B0A7FC558FCF582813237745361424E951499B24158D5701
+              F749DA2AE949490FC986E1EF927E9634698C29B4AF1C36390E3EB70C620318F7
+              7E1B49BB247D5485F406492FBAA74F91CDE6B0085C943D1C3F35C6CCA4ECCA1E
+              5CFE3E1CCF91CB90D942B6C77332217B3FF6B6554F7BE54FE0436073C2FEA827
+              BF5C28F552B098039E0526EB201EE226F02A41A146C1622E6F106139FD7EF0FE
+              0DE2ED95BF8033D8ABE14BC02EA01F781E7BB71E05FEC819C831BCD202DBEDF0
+              51AC9C76CAB10B4DA534789BD577DE5BC07B40AA90ABD87E107813988D0CE233
+              6C6DD54376F6E7A8B505C9EA2BE579E0B508F96F48D4F55506321CB1F7317036
+              F8AFB62BA57310BBD487CE86C9B927D7E0E775D28DE1FA2EF5CE781FF15807F8
+              84480BB14E3FB1958546DA2A9EF1B0B105B635D2595DBBB08F36E0BB889FC61A
+              5BCE78AC5703CD6B2DF6B2BA8D02CD6A2D3A272D3983A834770BD5F681CD12F7
+              A2B9EB39ACD65E3F816DAF9788148064DBEBA339C49780FDB5CCFCDDFCC031AB
+              3B97914EDD29CCFE990F1C3EB0297610DB316B1473CE567DA9B2C18134FA916F
+              2F0D7EE4BBD79F59AFC896C45FE9DFF099750D6BF80FE06FEC9C72DAFB59C064
+              0000000049454E44AE426082}
+            FileName = 'E:\OllamaCkent\Temp\LogOn48.png'
+          end>
+        Name = 'LogOn48'
       end>
     Destination = <
       item
@@ -1301,7 +1526,7 @@ object MainForm: TMainForm
       item
         Layers = <
           item
-            Name = 'ic_gamepad_white_48dp'
+            Name = 'LogOn48'
           end>
       end
       item
@@ -1314,6 +1539,12 @@ object MainForm: TMainForm
         Layers = <
           item
             Name = 'option48_5'
+          end>
+      end
+      item
+        Layers = <
+          item
+            Name = 'ic_gamepad_white_48dp'
           end>
       end>
     Left = 200

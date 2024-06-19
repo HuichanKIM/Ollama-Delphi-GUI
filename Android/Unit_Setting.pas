@@ -65,14 +65,13 @@ type
     Text_Ollama: TText;
     GestureManager1: TGestureManager;
     GroupBox1: TGroupBox;
-    Text9: TText;
+    Text_Version: TText;
     Label_GiuServ: TLabel;
     Line1: TLine;
     Line2: TLine;
     Line3: TLine;
     Line4: TLine;
     Rectangle_DesignTime: TRectangle;
-    Label_Info: TLabel;
     Layout5: TLayout;
     Text10: TText;
     ComboBox_FontSize: TComboBox;
@@ -80,6 +79,8 @@ type
     Layout8: TLayout;
     Text8: TText;
     ColorComboBox_Select: TColorComboBox;
+    Circle_Connection2: TCircle;
+    Text9: TText;
     procedure FormShow(Sender: TObject);
     procedure Panel_SettingBaseMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
     procedure SpeedButton_DefaultColorClick(Sender: TObject);
@@ -130,6 +131,7 @@ end;
 procedure TForm_Setting.FormCreate(Sender: TObject);
 begin
   Rectangle_DesignTime.Free;
+  Text_Version.Text := 'Ver. 0.9.9 - 2024.06.18';
 end;
 
 procedure TForm_Setting.FormShow(Sender: TObject);
@@ -155,6 +157,8 @@ begin
     else
       ComboBox_FontSize.ItemIndex := 1;
   end;
+
+  Circle_Connection2.fill.Color := MainForm.Circle_Connection.fill.Color;
 end;
 
 procedure TForm_Setting.Image_OllamaClick(Sender: TObject);

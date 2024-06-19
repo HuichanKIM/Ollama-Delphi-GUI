@@ -31,7 +31,7 @@ object Form_Setting: TForm_Setting
       Size.PlatformDefault = False
       TextSettings.Font.StyleExt = {00070000000000000004000000}
       Text = 'Setting'
-      TabOrder = 1
+      TabOrder = 0
     end
     object Button_MROK: TButton
       Align = MostLeft
@@ -40,25 +40,30 @@ object Form_Setting: TForm_Setting
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'arrowlefttoolbutton'
-      TabOrder = 3
+      TabOrder = 2
       Text = 'Button_MROK'
       TextSettings.Trimming = None
     end
-    object Label_Info: TLabel
-      Align = Right
-      StyledSettings = [Family, Size, FontColor]
-      Margins.Left = 5.000000000000000000
-      Margins.Top = 5.000000000000000000
-      Margins.Right = 5.000000000000000000
-      Margins.Bottom = 5.000000000000000000
-      Position.X = 312.000000000000000000
-      Position.Y = 5.000000000000000000
-      Size.Width = 90.000000000000000000
-      Size.Height = 38.000000000000000000
+    object Circle_Connection2: TCircle
+      Align = MostRight
+      Fill.Color = claBlack
+      HitTest = False
+      Margins.Right = 10.000000000000000000
+      Position.X = 382.000000000000000000
+      Size.Width = 15.000000000000000000
+      Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
-      TextSettings.HorzAlign = Trailing
-      Text = '... '
-      TabOrder = 0
+      object Text9: TText
+        Position.X = -88.000000000000000000
+        Position.Y = 7.000000000000000000
+        Size.Width = 82.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'connection - '
+        TextSettings.FontColor = claSilver
+        TextSettings.HorzAlign = Trailing
+        TextSettings.VertAlign = Trailing
+      end
     end
   end
   object Panel_SettingBase: TPanel
@@ -496,13 +501,13 @@ object Form_Setting: TForm_Setting
       object SpeedButton3: TSpeedButton
         HitTest = False
         Images = MainForm.ImageList1
-        ImageIndex = 1
+        ImageIndex = 4
         Position.X = 30.000000000000000000
         Position.Y = 55.000000000000000000
-        Size.Width = 259.000000000000000000
+        Size.Width = 331.000000000000000000
         Size.Height = 48.000000000000000000
         Size.PlatformDefault = False
-        Text = ' Connect To Serveer  (* Reset)'
+        Text = 'Log-on/  Connect To Serveer  (* Reset)'
         TextSettings.HorzAlign = Leading
         TextSettings.Trimming = None
       end
@@ -555,14 +560,14 @@ object Form_Setting: TForm_Setting
       Size.PlatformDefault = False
       Text = 'Version'
       TabOrder = 4
-      object Text9: TText
+      object Text_Version: TText
         HitTest = False
         Position.X = 20.000000000000000000
         Position.Y = 30.000000000000000000
         Size.Width = 145.000000000000000000
         Size.Height = 20.000000000000000000
         Size.PlatformDefault = False
-        Text = 'Ver. 0.9.5 - 2024.06.15'
+        Text = 'Ver. 0.9.9 - 2024.06.18'
         TextSettings.FontColor = claSilver
         TextSettings.HorzAlign = Leading
         object Label_GiuServ: TLabel
@@ -705,6 +710,7 @@ object Form_Setting: TForm_Setting
       Size.PlatformDefault = False
       Text = 'https://ollama.com/'
       TextSettings.Font.Size = 10.000000000000000000
+      TextSettings.Font.StyleExt = {00040000000200000004000000}
       TextSettings.FontColor = claSilver
     end
   end
