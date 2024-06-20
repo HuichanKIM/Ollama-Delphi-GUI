@@ -47,8 +47,8 @@ use it as a server/broker to connect your Android smartphone
 
 ### Android (Screenshot)
 
-![Android 1: Preview page](./Images/sn_20240618_070418_1.png) ![Android 2: Preview page](./Images/sn_20240618_071425_1.png)
-![Android 3: Preview page](./Images/sn_20240618_071403_1.png)
+![Android 1: Preview page](./Images/android_1.png) ![Android 2: Preview page](./Images/android_2.png)
+![Android 3: Preview page](./Images/android_3.png)
 
 ### Chattings (Screenshot)
 
