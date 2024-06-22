@@ -28,13 +28,13 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 55
+    TabOrder = 61
     object Text_Status: TText
-      Align = Contents
+      Align = Client
       Margins.Left = 10.000000000000000000
       Margins.Right = 10.000000000000000000
-      Size.Width = 379.000000000000000000
-      Size.Height = 22.000000000000000000
+      Size.Width = 218.000000000000000000
+      Size.Height = 21.000000000000000000
       Size.PlatformDefault = False
       Text = 'Not Connected ...'
       TextSettings.Font.Size = 10.000000000000000000
@@ -50,6 +50,19 @@ object MainForm: TMainForm
       Size.PlatformDefault = False
       Stroke.Color = claDarkgray
     end
+    object Text_Logon: TText
+      Align = MostRight
+      Margins.Right = 10.000000000000000000
+      Position.X = 238.000000000000000000
+      Position.Y = 1.000000000000000000
+      Size.Width = 151.000000000000000000
+      Size.Height = 21.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'logon - '
+      TextSettings.Font.Size = 10.000000000000000000
+      TextSettings.FontColor = claSilver
+      TextSettings.HorzAlign = Trailing
+    end
   end
   object Layout_ModelUser: TLayout
     Align = MostTop
@@ -57,7 +70,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 120.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 31
+    TabOrder = 37
     object Layout3: TLayout
       Align = MostLeft
       Size.Width = 140.000000000000000000
@@ -184,7 +197,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 60.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 29
+    TabOrder = 35
     OnResized = Layout_RequestResized
     object Button_Request: TButton
       Align = Right
@@ -250,7 +263,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 30.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 60
+    TabOrder = 66
     object Text_Caption2: TText
       Align = Client
       HitTest = False
@@ -294,7 +307,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 357.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 25
+    TabOrder = 31
     OnMouseDown = ListView_ChatBoxMouseDown
     OnResized = ListView_ChatBoxResized
     ItemAppearance.ItemHeight = 60
@@ -699,7 +712,7 @@ object MainForm: TMainForm
       TextSettings.Trimming = None
       OnClick = Button_SettingClick
     end
-    object Button_Connect: TButton
+    object Button_Logon: TButton
       Align = Right
       Anchors = [akTop, akRight]
       Hint = 'Connect / DisConnect'
@@ -714,7 +727,7 @@ object MainForm: TMainForm
       StyleLookup = 'buttonstyle'
       TabOrder = 0
       TextSettings.Trimming = None
-      OnClick = Button_ConnectClick
+      OnClick = Button_LogonClick
     end
     object Text_Toolbar: TText
       Align = Client
@@ -788,7 +801,7 @@ object MainForm: TMainForm
         Text = 'wait'
         TextSettings.Font.Size = 16.000000000000000000
         TextSettings.Font.StyleExt = {00070000000000000004000000}
-        TextSettings.FontColor = claSkyblue
+        TextSettings.FontColor = claSpringgreen
       end
     end
   end

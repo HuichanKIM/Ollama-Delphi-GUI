@@ -76,7 +76,7 @@ type
     Button_ModelList: TButton;
     Circle_Connection: TCircle;
     Button_Setting: TButton;
-    Button_Connect: TButton;
+    Button_Logon: TButton;
     Text_Toolbar: TText;
     Label_Welcome: TLabel;
     Label_Welcome2: TLabel;
@@ -98,13 +98,14 @@ type
     Text2: TText;
     ShadowEffect1: TShadowEffect;
     SpeedButton_CopyText: TSpeedButton;
+    Text_Logon: TText;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FClient_SourceConnected(Sender: TObject; aLine: TncLine);
     procedure FClient_SourceDisconnected(Sender: TObject; aLine: TncLine);
     function FClient_SourceHandleCommand(Sender: TObject; aLine: TncLine; aCmd: Integer; const aData: TBytes; aRequiresResult: Boolean; const aSenderComponent, aReceiverComponent: string): TBytes;
-    procedure Button_ConnectClick(Sender: TObject);
+    procedure Button_LogonClick(Sender: TObject);
     procedure Edit_PromptEnter(Sender: TObject);
     procedure Edit_PromptExit(Sender: TObject);
     procedure Button_ModelUserClick(Sender: TObject);
@@ -155,7 +156,6 @@ type
     FDWToast: TToast;
     procedure Load_ConfigIni(const AFlag: Integer);
     procedure Save_ConfigIni(const AFlag: Integer);
-    procedure UpdateClientProtocol(const AFlag: Integer = 0);
     procedure SetConnectionFlag(const Value: Boolean);
     procedure SetServerHost(const Value: string);
     procedure SetServerPort(const Value: Integer);
@@ -175,6 +175,7 @@ type
     procedure SetLogonFlag(const Value: Boolean);
     function Get_CopyText: string;
   public
+    procedure UpdateClientLogon(const AFlag: Integer = 0);
     procedure Do_ShowHideVirtualKeyboard(const AFlag: Boolean; const AControl: TControl);
     { property ...  }
     property ConnectionFlag: Boolean    read FConnectionFlag    write SetConnectionFlag;
@@ -202,6 +203,7 @@ uses
   System.Net.Mime,
   System.JSON,
   System.IOUtils,
+  System.RegularExpressions,
   FMX.Platform,
   FMX.Clipboard,
   FMX.Styles,
@@ -233,7 +235,7 @@ const
   C_SectionOptions = 'Options';
   C_WaitingToast   = 'Waiting for a response from the server ...';
 
-const  // Common with Ollama_Client Broker/Server ...
+const  // Syncronized with Ollama_Client Broker/Server ...
   C_JsonFmt  = '{"user": "%user%","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
   //C_JsonFmt2 = '{"user": "%user%","queue": "%queue%","model": "%model%","response": "%response%"}';
 
@@ -268,6 +270,14 @@ begin
   ).Start;
 end;
 
+const
+  C_RegEx_Rep2: string = '["\{\}:;\[\]]';  // - json reserved only / all special char - '[^\w]';
+
+function Get_ReplaceSpecialChar_2(const AText: string): string;
+begin
+  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep2, ' ');
+end;
+
 { MainForm }
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -285,7 +295,7 @@ begin
   FCurrentMessage.Text := 'Hello';
   FProcessingFlag := 0;
   FUpdateFlag := C_UpdateFlag_None;
-  Button_Connect.Enabled := True;
+  Button_Logon.Enabled := True;
   Button_ModelList.Enabled := False;
   Button_MoveTop.Visible := False;
   Layout_ModelUser.Visible := False;
@@ -338,6 +348,8 @@ begin
 
   FClient_Source.Host := FServerHost;
   FClient_Source.Port := FServerPort;
+  FClient_Source.Line.UserID := FUserName;
+  Text_Logon.Text := FUserName;
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -445,7 +457,9 @@ begin
     FDWToast.Make('Host Changed ...');
     FServerHost := Value;
     ListBox_Users.Clear;
-    UpdateClientProtocol(1);
+
+    FUpdateFlag := C_UpdateFlag_Logon;
+    UpdateClientLogon(1);
   end;
 end;
 
@@ -454,13 +468,19 @@ begin
   if FServerPort <> Value then
   begin
     FServerPort := Value;
-    UpdateClientProtocol(1);
+    FUpdateFlag := C_UpdateFlag_Logon;
+    UpdateClientLogon(1);
   end;
 end;
 
 procedure TMainForm.SetUserName(const Value: string);
 begin
-  FUserName := Value;
+  if FUserName <> Value then
+  begin
+    FUserName := Value;
+    FUpdateFlag := C_UpdateFlag_Logon;
+    UpdateClientLogon(1);
+  end;
 end;
 
 procedure TMainForm.FClient_SourceConnected(Sender: TObject; aLine: TncLine);
@@ -482,6 +502,8 @@ begin
     end);
 end;
 
+{ THandleCommandThread ... }
+
 function TMainForm.FClient_SourceHandleCommand(Sender: TObject;
                                                aLine: TncLine;
                                                aCmd: Integer;
@@ -501,6 +523,7 @@ begin
         cmdSrvUpdateUsers:
           begin
             ProcessingFlag := 0;
+            FUpdateFlag := C_UpdateFlag_None;
             var _data: string := TEncoding.UTF8.GetString(aData);
             with ListBox_Users do
             begin
@@ -513,9 +536,17 @@ begin
               end;
               AddUpdate_Message(2, '', '', '', 'Users List Received...');
             end;
-            FUpdateFlag := C_UpdateFlag_Models;
-            if ListBox_Users.items.Count > 0 then
-               FDWToast.Make('Success : Logon to Broker.');
+
+            if (ListBox_Users.items.Count > 0) and
+               (ListBox_Users.items.Indexof(FUserName) >= 0) then
+              begin
+                Text_Logon.Text := 'Logon - '+FUserName;
+                FDWToast.Make('Success 1 : Logon to Broker.');
+                FUpdateFlag := C_UpdateFlag_Models;
+              end
+            else
+              FDWToast.Make('Failed 0 : Logon to Broker.');
+            ProcessingFlag := 0;
           end;
         cmdSrvLlavaImage:     // postponed ...
           begin
@@ -527,11 +558,13 @@ begin
               _BytesStream.Free;
             end;
             AddUpdate_Message(2, '','', '', 'Llava Image Received...');
+            ProcessingFlag := 0;
           end;
         cmdCntRequest:
           begin
-            /// ProcessingFlag := 0;  // reserved ... //
+            /// ProcessingFlag := 0;  // Wait for response ... //
             var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(aData, 0) as TJSONObject;
+            if Assigned(_JsonObj) then
             try
               var _Name: string :=   _JsonObj.Get('user').JsonValue.Value;
               var _Queue: string :=  _JsonObj.Get('queue').JsonValue.Value;
@@ -548,6 +581,7 @@ begin
             ProcessingFlag := 0;
             var _data: string := TEncoding.UTF8.GetString(aData);
             var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(_data) as TJSONObject;
+            if Assigned(_JsonObj) then
             try
               var _Name: string :=   _JsonObj.Get('user').JsonValue.Value;
               var _Queue: string :=  _JsonObj.Get('queue').JsonValue.Value;
@@ -558,6 +592,7 @@ begin
             finally
               _JsonObj.Free;
             end;
+            ProcessingFlag := 0;
           end;
         cmdSrvModellist:       // on the assumption that model anme is english only ...
           begin
@@ -585,11 +620,13 @@ begin
               Text_Models.Text := 'Models - '+IntToStr(Items.Count);
             end;
             AddUpdate_Message(2, '', '', '', 'Model List Received...');
+            ProcessingFlag := 0;
           end;
         cmdSrvRefused:
           begin
             ProcessingFlag := 0;
-            AddUpdate_Message(1, '', '', '', StringOf(aData));
+            AddUpdate_Message(1, 'Ollama', '?', '?', StringOf(aData));
+            ProcessingFlag := 0;
           end;
       end;
     end);
@@ -734,8 +771,8 @@ procedure TMainForm.Do_Request(const ARequest: string);
 begin
   if not FClient_Source.Active then
   begin
-    UpdateClientProtocol(1);
-    Sleep(10);
+    UpdateClientLogon(1);
+    Sleep(1000);
   end;
   if ProcessingFlag > 0 then
   begin
@@ -755,8 +792,7 @@ begin
   if ListBox_Users.Count < 1 then
   begin
     FDWToast.Make('Let''s go to Logon ...');
-    FUpdateFlag := C_UpdateFlag_Logon;
-    Button_ConnectClick(Self);
+    Button_LogonClick(Self);
 
     Exit;
   end;
@@ -777,12 +813,19 @@ begin
   FCurrentMessage.Text := _request;
   Memo_Prompt.Lines.Text := '';
 
+  _request := Get_ReplaceSpecialChar_2(_request);  // *** //
   Do_Request(_request);
 end;
 
-procedure TMainForm.UpdateClientProtocol(const AFlag: Integer);
+procedure TMainForm.UpdateClientLogon(const AFlag: Integer);
 begin
   if FClosingFlag then Exit;
+
+  if FClient_Source.Active then
+    begin
+      FClient_Source.Active := False;
+      Sleep(1000);
+    end;
 
   FClient_Source.Host := FServerHost;
   FClient_Source.Port := FServerPort;
@@ -791,7 +834,7 @@ begin
   if AFlag = 1 then
   try
     FClient_Source.Active := True;
-    Sleep(10);
+    Sleep(1000);
     var _username: TBytes := TEncoding.UTF8.GetBytes(FUserName);
     FClient_Source.ExecCommand(cmdCntUserLogin, _username, False, True);
   except
@@ -804,15 +847,16 @@ begin
   end;
 end;
 
-procedure TMainForm.Button_ConnectClick(Sender: TObject);
+procedure TMainForm.Button_LogonClick(Sender: TObject);
 begin
   if FClient_Source.Active then
     begin
       FClient_Source.Active := False;
-      Sleep(10);
+      Sleep(1000);
     end;
 
-  UpdateClientProtocol(1);
+  FUpdateFlag := C_UpdateFlag_Logon;
+  UpdateClientLogon(1);
 end;
 
 procedure TMainForm.Get_ModelList(const AFlag: Integer);
@@ -897,12 +941,13 @@ procedure TMainForm.Timer_UpdaterTimer(Sender: TObject);
 begin
   if FUpdateFlag = C_UpdateFlag_Logon then
   begin
-    if ListBox_Users.Count > 0 then
-    begin
-      FUpdateFlag := C_UpdateFlag_None;
-      LogonFlag := True;
-      FDWToast.Make('Success : Logon to Broker.');
-    end;
+    if (ListBox_Users.Count > 0) and
+       (ListBox_Users.Items.IndexOf(FUserName) >= 0)  then
+      begin
+        FUpdateFlag := C_UpdateFlag_None;
+        LogonFlag := True;
+        FDWToast.Make('Success : Logon to Broker.');
+      end;
   end;
   if FUpdateFlag = C_UpdateFlag_Models then
   begin
@@ -929,8 +974,8 @@ begin
 
   if ProcessingFlag = 0 then
   begin
-    Layout_Animation.Visible := False;
     ActivityFloatAni.Enabled := False;
+    Layout_Animation.Visible := False;
   end;
 end;
 
@@ -1003,8 +1048,9 @@ begin
     Layout_Animation.Position.X := (ListView_ChatBox.Width - Layout_Animation.Width) / 2;
     Layout_Animation.Position.Y := (Self.ClientHeight - Layout_Animation.Height) / 2;
   end;
-  Layout_Animation.Visible := Value > 0;
+
   ActivityFloatAni.Enabled := Value > 0;
+  Layout_Animation.Visible := Value > 0;
 end;
 
 { For ListView Ownerdwar = False ... }

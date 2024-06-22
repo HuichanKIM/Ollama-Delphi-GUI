@@ -81,6 +81,7 @@ type
     ColorComboBox_Select: TColorComboBox;
     Circle_Connection2: TCircle;
     Text9: TText;
+    SpeedButton_NewLogon: TSpeedButton;
     procedure FormShow(Sender: TObject);
     procedure Panel_SettingBaseMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
     procedure SpeedButton_DefaultColorClick(Sender: TObject);
@@ -88,8 +89,11 @@ type
     procedure Label_GiuServClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Image_OllamaClick(Sender: TObject);
+    procedure SpeedButton_NewLogonClick(Sender: TObject);
+    procedure Edit_UserNameTyping(Sender: TObject);
   private
     FInitializeFlag: Boolean;
+    FUserNameSaved: string;
   public
     { Public declarations }
   end;
@@ -128,10 +132,16 @@ begin
 end;
 {$ENDIF}
 
+procedure TForm_Setting.Edit_UserNameTyping(Sender: TObject);
+begin
+  var _new: string := Edit_UserName.Text.Trim;
+  SpeedButton_NewLogon.Visible := not SameText(FUserNameSaved, _new);
+end;
+
 procedure TForm_Setting.FormCreate(Sender: TObject);
 begin
   Rectangle_DesignTime.Free;
-  Text_Version.Text := 'Ver. 0.9.9 - 2024.06.18';
+  Text_Version.Text := 'Ver. 0.9.10 - 2024.06.21';
 end;
 
 procedure TForm_Setting.FormShow(Sender: TObject);
@@ -141,7 +151,6 @@ begin
     FInitializeFlag := True;
     Edit_Host.Text :=     MainForm.ServerHost;
     Edit_Port.Text :=     MainForm.ServerPort.ToString;
-    Edit_UserName.Text := MainForm.UserName;
 
     ColorComboBox_Header.Color := MainForm.ColorHeader;
     ColorComboBox_Body.Color :=   MainForm.ColorBody;
@@ -158,6 +167,11 @@ begin
       ComboBox_FontSize.ItemIndex := 1;
   end;
 
+  FUserNameSaved := MainForm.UserName;
+  Edit_UserName.OnChange := nil;
+  Edit_UserName.Text := MainForm.UserName;
+  Edit_UserName.OnTyping := Edit_UserNameTyping;
+  SpeedButton_NewLogon.Visible := False;
   Circle_Connection2.fill.Color := MainForm.Circle_Connection.fill.Color;
 end;
 
@@ -195,6 +209,11 @@ begin
   ColorComboBox_Footer.Color := TAlphaColorRec.Silver;
   ColorComboBox_Select.Color := TAlphaColorRec.Navy;
   ComboBox_FontSize.ItemIndex := 0;
+end;
+
+procedure TForm_Setting.SpeedButton_NewLogonClick(Sender: TObject);
+begin
+  MainForm.UserName := Edit_UserName.Text.Trim;
 end;
 
 end.

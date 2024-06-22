@@ -240,6 +240,18 @@ object Form_Setting: TForm_Setting
           Size.Width = 173.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
+          OnTyping = Edit_UserNameTyping
+        end
+        object SpeedButton_NewLogon: TSpeedButton
+          StyledSettings = [Style, FontColor]
+          Position.X = 254.000000000000000000
+          Size.Width = 80.000000000000000000
+          Size.Height = 25.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = 'buttonstyle'
+          Text = 'New Logon'
+          TextSettings.Trimming = None
+          OnClick = SpeedButton_NewLogonClick
         end
       end
       object Line2: TLine
@@ -293,7 +305,7 @@ object Form_Setting: TForm_Setting
       end
       object Layout4: TLayout
         Position.X = 50.000000000000000000
-        Position.Y = 25.000000000000000000
+        Position.Y = 35.000000000000000000
         Size.Width = 250.000000000000000000
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
@@ -322,7 +334,7 @@ object Form_Setting: TForm_Setting
       end
       object Layout6: TLayout
         Position.X = 50.000000000000000000
-        Position.Y = 60.000000000000000000
+        Position.Y = 70.000000000000000000
         Size.Width = 250.000000000000000000
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
@@ -351,7 +363,7 @@ object Form_Setting: TForm_Setting
       end
       object Layout7: TLayout
         Position.X = 50.000000000000000000
-        Position.Y = 95.000000000000000000
+        Position.Y = 105.000000000000000000
         Size.Width = 250.000000000000000000
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
@@ -389,7 +401,7 @@ object Form_Setting: TForm_Setting
       end
       object Layout5: TLayout
         Position.X = 50.000000000000000000
-        Position.Y = 170.000000000000000000
+        Position.Y = 180.000000000000000000
         Size.Width = 250.000000000000000000
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
@@ -418,7 +430,7 @@ object Form_Setting: TForm_Setting
       end
       object Layout8: TLayout
         Position.X = 50.000000000000000000
-        Position.Y = 130.000000000000000000
+        Position.Y = 140.000000000000000000
         Size.Width = 250.000000000000000000
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
@@ -564,18 +576,20 @@ object Form_Setting: TForm_Setting
         HitTest = False
         Position.X = 20.000000000000000000
         Position.Y = 30.000000000000000000
-        Size.Width = 145.000000000000000000
+        Size.Width = 155.000000000000000000
         Size.Height = 20.000000000000000000
         Size.PlatformDefault = False
         Text = 'Ver. 0.9.9 - 2024.06.18'
         TextSettings.FontColor = claSilver
+        TextSettings.WordWrap = False
         TextSettings.HorzAlign = Leading
         object Label_GiuServ: TLabel
           Cursor = crHandPoint
           StyledSettings = [Family, FontColor]
           HitTest = True
-          Position.X = 152.000000000000000000
-          Size.Width = 209.000000000000000000
+          Position.X = 160.000000000000000000
+          Position.Y = 2.000000000000000000
+          Size.Width = 200.000000000000000000
           Size.Height = 17.000000000000000000
           Size.PlatformDefault = False
           TextSettings.Font.Size = 10.000000000000000000
