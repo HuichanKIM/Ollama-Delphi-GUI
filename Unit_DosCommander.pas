@@ -223,7 +223,7 @@ end;
 
 function TG_DosCommand.Dos_Execute(const Acmd: string): Boolean;
 begin
-  if Trim(Acmd) = ''  then Exit;
+  if Trim(Acmd) = ''  then Exit(False);
 
   Result := False;
   FBatchRunning := False;

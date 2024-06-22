@@ -9,6 +9,7 @@ uses
   Vcl.Forms,
   Vcl.Themes,
   Vcl.Styles,
+  MidasLib,
   Unit_Common in 'Unit_Common.pas',
   Unit_SysInfo in 'Unit_SysInfo.pas',
   Unit_MRUManager in 'Unit_MRUManager.pas',

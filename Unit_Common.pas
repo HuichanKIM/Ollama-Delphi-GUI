@@ -18,11 +18,12 @@ type
   IIF = class
     class function CastBool<T>(AExpression: Boolean; const ATrue, AFalse: T): T; static;
     class function CastInteger<T>(AExpression: Integer; const ATrue, AFalse: T): T; static;
-    class function CastObject<T>(AExpression: Integer; const AObjects: TArray<T>): T; static;
   end;
 
 const
-  DM_ACTIVATECODE = 1;
+  // Acivate Remote Broker/Server ------------------------------------------  //
+  DM_ACTIVATECODE = 1;                           { 0 - Deactivate  1- Activate }
+  // ------------------------------------------- Acivate Remote Broker/Server //
 
   DM_SERVERPORT = 17233;
   WF_DM_MESSAGE  = DM_SERVERPORT + 1;
@@ -38,13 +39,22 @@ const
     WF_DM_MESSAGE_IMAGE       = WF_DM_MESSAGE + 10;
     WF_DM_MESSAGE_WARNING     = WF_DM_MESSAGE + 11;
 
-const
-  NETHTTP_MESSAGE = WM_USER + 10;
-    NETHTTP_MESSAGE_ALIVE = NETHTTP_MESSAGE + 1;
-    NETHTTP_MESSAGE_ALIST = NETHTTP_MESSAGE + 2;
+      WF_DM_ADDRESS_FLAG     = 1;
+      WF_DM_SERVERON_FLAG    = 2;
+      WF_DM_SERVEROFF_FLAG   = 3;
+      WF_DM_CONNECT_FLAG     = 4;
+      WF_DM_DISCONNECT_FLAG  = 5;
+      WF_DM_LOGON_FLAG       = 6;
+      WF_DM_REQUEST_FLAG     = 7;
+      WF_DM_REQUESTEX_FLAG   = 8;
+      WF_DM_RESPONSE_FLAG    = 9;
+      WF_DM_IMAGE_FLAG       = 10;
+      WF_DM_WARNING_FLAG     = 11;
 
 const
-  WM_401_404_REPEAT = WM_USER + 758;
+  WM_NETHTTP_MESSAGE = WM_USER + 10;
+    WM_NETHTTP_MESSAGE_ALIVE = WM_NETHTTP_MESSAGE + 1;
+    WM_NETHTTP_MESSAGE_ALIST = WM_NETHTTP_MESSAGE + 2;
 
 type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
@@ -52,8 +62,8 @@ type
   TRequest_Type = (ort_Generate=0, ort_Chat);
 
 const
-  GC_Version0     = 'ver. 0.9.9';
-  GC_Version1     = 'ver. 0.9.9 (2024.06.18)';
+  GC_Version0     = 'ver. 0.9.10';
+  GC_Version1     = 'ver. 0.9.10 (2024.06.20)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
@@ -78,6 +88,11 @@ const
   GC_AboutSkinFlag = 3;
 
 const
+  GC_MRU_NewRoot  = 0;
+  GC_MRU_AddRoot  = 1;
+  GC_MRU_AddChild = 2;
+
+const
   GC_BaseURL_Generate    = 'http://localhost:11434/api/generate';
   GC_BaseURL_Chat        = 'http://localhost:11434/api/chat';
   GC_BaseURL_Models      = 'http://localhost:11434/api/tags';
@@ -99,9 +114,8 @@ function Is_LlavaModel(const AText: string): Boolean;
 function GetBase64Endoeings(const AImage: TImage): string;
 
 function BytesToKMG(Value: Int64; ATailer: Boolean = False): string;
-function Get_ReplaceSpecialChar(const AText: string): string;
-function Get_ReplaceSpecialChar1(const AText: string): string;
-function Get_ReplaceSpecialChar2(const AText: string): string;
+function Get_ReplaceSpecialChar4Trans(const AText: string): string;
+function Get_ReplaceSpecialChar4Json(const AText: string): string;
 function GetUsersWindowsLanguage: string;
 function Get_LocaleIDString(const AFlag: Integer = 0): string;
 function ReadAllText_Unicode(const AFilePath: string=''): string;
@@ -118,6 +132,32 @@ function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
 procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
 function LoadFromFileBuffered_String(const AFileName: string): string;
 
+const
+  C_Connection_Svg0 = '''
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+    <path d="M0 0h48v48H0z" fill="none"/>
+    <path fill="#6e6e6e" d="M24 4C12.97 4 4 12.97 4 24s8.97 20 20 20 20-8.97 20-20S35.03 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm6-16c0 3.31-2.69 6-6 6s-6-2.69-6-6 2.69-6 6-6 6 2.69 6 6z"/>
+    </svg>
+    ''';
+  C_Connection_Svg1 = '''
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+    <path d="M0 0h48v48H0z" fill="none"/>
+    <path fill="#ddd" d="M24 4C12.97 4 4 12.97 4 24s8.97 20 20 20 20-8.97 20-20S35.03 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm6-16c0 3.31-2.69 6-6 6s-6-2.69-6-6 2.69-6 6-6 6 2.69 6 6z"/>
+    </svg>
+    ''';
+  C_RemoteConn_Svg0 = '''
+    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px">
+    <rect fill="none" height="24" width="24"/>
+    <path fill="#6e6e6e" d="M21.29,13.9L18,12l3.29-1.9c0.48-0.28,0.64-0.89,0.37-1.37l-2-3.46c-0.28-0.48-0.89-0.64-1.37-0.37L15,6.8V3 c0-0.55-0.45-1-1-1h-4C9.45,2,9,2.45,9,3v3.8L5.71,4.9C5.23,4.63,4.62,4.79,4.34,5.27l-2,3.46C2.06,9.21,2.23,9.82,2.71,10.1L6,12 l-3.29,1.9c-0.48,0.28-0.64,0.89-0.37,1.37l2,3.46c0.28,0.48,0.89,0.64,1.37,0.37L9,17.2V21c0,0.55,0.45,1,1,1h4c0.55,0,1-0.45,1-1 v-3.8l3.29,1.9c0.48,0.28,1.09,0.11,1.37-0.37l2-3.46C21.94,14.79,21.77,14.18,21.29,13.9z M18.43,16.87l-4.68-2.7 C13.42,13.97,13,14.21,13,14.6V20h-2v-5.4c0-0.38-0.42-0.63-0.75-0.43l-4.68,2.7l-1-1.73l4.68-2.7c0.33-0.19,0.33-0.67,0-0.87 l-4.68-2.7l1-1.73l4.68,2.7C10.58,10.03,11,9.79,11,9.4V4h2v5.4c0,0.38,0.42,0.63,0.75,0.43l4.68-2.7l1,1.73l-4.68,2.7 c-0.33,0.19-0.33,0.67,0,0.87l4.68,2.7L18.43,16.87z"/>
+    </svg>
+    ''';
+  C_RemoteConn_Svg1 = '''
+    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px">
+    <rect fill="none" height="24" width="24"/>
+    <path fill="#ddd" d="M21.29,13.9L18,12l3.29-1.9c0.48-0.28,0.64-0.89,0.37-1.37l-2-3.46c-0.28-0.48-0.89-0.64-1.37-0.37L15,6.8V3 c0-0.55-0.45-1-1-1h-4C9.45,2,9,2.45,9,3v3.8L5.71,4.9C5.23,4.63,4.62,4.79,4.34,5.27l-2,3.46C2.06,9.21,2.23,9.82,2.71,10.1L6,12 l-3.29,1.9c-0.48,0.28-0.64,0.89-0.37,1.37l2,3.46c0.28,0.48,0.89,0.64,1.37,0.37L9,17.2V21c0,0.55,0.45,1,1,1h4c0.55,0,1-0.45,1-1 v-3.8l3.29,1.9c0.48,0.28,1.09,0.11,1.37-0.37l2-3.46C21.94,14.79,21.77,14.18,21.29,13.9z M18.43,16.87l-4.68-2.7 C13.42,13.97,13,14.21,13,14.6V20h-2v-5.4c0-0.38-0.42-0.63-0.75-0.43l-4.68,2.7l-1-1.73l4.68-2.7c0.33-0.19,0.33-0.67,0-0.87 l-4.68-2.7l1-1.73l4.68,2.7C10.58,10.03,11,9.79,11,9.4V4h2v5.4c0,0.38,0.42,0.63,0.75,0.43l4.68-2.7l1,1.73l-4.68,2.7 c-0.33,0.19-0.33,0.67,0,0.87l4.68,2.7L18.43,16.87z"/>
+    </svg>
+    ''';
+
 var
   CV_AppPath: string  = '';
   CV_TmpPath: string  = 'temp';
@@ -132,6 +172,7 @@ var
   GV_CheckingAliveStart: Boolean = True;
   GV_ReservedColor: array [0..3] of TColor;
   GV_AliveOllamaFlag: Boolean = False;
+  GV_RemoteBanList: TStringList;
 
 implementation
 
@@ -148,8 +189,8 @@ uses
   System.JSON.Types,
   System.RegularExpressions,
   System.Threading,
+  System.NetEncoding,
   Unit_SysInfo,
-  OverbyteIcsUtils,
   Vcl.Styles,
   Vcl.StyleAPI,
   Vcl.Themes,
@@ -177,6 +218,63 @@ begin
   Result := (Pos('llava', _text) > 0);
 end;
 
+const
+    ICS_Base64OutA: array [0..64] of AnsiChar = (
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '='
+    );
+
+function ICS_Base64Encode(const Input : PAnsiChar; Len: Integer) : AnsiString;
+begin
+    var _Count := 0;
+    var _I := Len;
+    while (_I mod 3) > 0 do
+        Inc(_I);
+    _I := (_I div 3) * 4;
+    SetLength(Result, _I);
+    _I := 0;
+    while _Count < Len do
+    begin
+      Inc(_I);
+      Result[_I] := ICS_Base64OutA[(Byte(Input[_Count]) and $FC) shr 2];
+      if (_Count + 1) < Len then
+        begin
+          Inc(_I);
+          Result[_I] := ICS_Base64OutA[((Byte(Input[_Count]) and $03) shl 4) +
+                                       ((Byte(Input[_Count + 1]) and $F0) shr 4)];
+          if (_Count + 2) < Len then
+            begin
+              Inc(_I);
+              Result[_I] := ICS_Base64OutA[((Byte(Input[_Count + 1]) and $0F) shl 2) +
+                                           ((Byte(Input[_Count + 2]) and $C0) shr 6)];
+              Inc(_I);
+              Result[_I] := ICS_Base64OutA[(Byte(Input[_Count + 2]) and $3F)];
+            end
+          else
+            begin
+              Inc(_I);
+              Result[_I] := ICS_Base64OutA[(Byte(Input[_Count + 1]) and $0F) shl 2];
+              Inc(_I);
+              Result[_I] := '=';
+            end
+        end
+      else
+        begin
+          Inc(_I);
+          Result[_I] := ICS_Base64OutA[(Byte(Input[_Count]) and $03) shl 4];
+          Inc(_I);
+          Result[_I] := '=';
+          Inc(_I);
+          Result[_I] := '=';
+        end;
+
+      Inc(_Count, 3);
+    end;
+end;
+
 // TNetEncoding.Base64.EncodeBytesToString is failed to Encode Image.Picture ...
 // ? Unicode problem ...
 function GetBase64Endoeings(const AImage: TImage): string;
@@ -186,7 +284,7 @@ begin
   try
     AImage.Picture.SaveToStream(_Input);
     _Input.Position := 0;
-    Result := OverbyteIcsUtils.Base64Encode(PAnsiChar(_Input.Memory), _Input.Size);
+    Result := ICS_Base64Encode(_Input.Memory, _Input.Size);
   finally
     _Input.Free;
   end;
@@ -211,18 +309,11 @@ begin
     else Result := AFalse;
 end;
 
-// var LArray: TArray<Integer> := TArray<Integer>.Create(1, 2, 3, 4);
-class function IIF.CastObject<T>(AExpression: Integer; const AObjects: TArray<T>): T;
-begin
-  if (AExpression >= 0) and (AExpression < Length(AObjects)) then
-  Result := AObjects[AExpression];
-end;
-
 { ... }
 
 const
-  C_RegEx_Rep1: string = '[#$%&]';
-  C_RegEx_Rep2: string = '["\{\}:;\[\]]';  // - json reserved only / all special char - '[^\w]';
+  C_RegEx_Trans: string = '[#$%&]';
+  C_RegEx_Json: string = '["\{\}:;\[\]]';  // - json reserved only / all special char - '[^\w]';
   C_RegEx_Han0: string = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä- Regular expression for Korean language test }
   C_RegEx_Cmd0: string = '/(?:.*serve.*)|(?:.*create.*)|(?:.*run.*)|(?:.*pull.*)|(?:.*push.*)|(?:.*cp.*)|(?:.*rm.*)/';
 
@@ -237,19 +328,14 @@ begin
   Result := System.RegularExpressions.TRegEx.IsMatch(AText, C_RegEx_Cmd0);
 end;
 
-function Get_ReplaceSpecialChar(const AText: string): string;
+function Get_ReplaceSpecialChar4Trans(const AText: string): string;
 begin
-  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep1, ' ');
+  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Trans, ' ');
 end;
 
-function Get_ReplaceSpecialChar1(const AText: string): string;
+function Get_ReplaceSpecialChar4Json(const AText: string): string;
 begin
-  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep2, ' ');
-end;
-
-function Get_ReplaceSpecialChar2(const AText: string): string;
-begin
-  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep2, ' ');
+  Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Json, ' ');
 end;
 
 function BytesToKMG(Value: Int64; ATailer: Boolean = False): string;
@@ -307,7 +393,13 @@ begin
     begin
       _suffix := 'K';
       _float2 := _float / c_KBYTE;
-    end;
+    end
+   else
+    begin
+      _mask := '%5.0f';
+      _suffix := '';
+      _float2 := _float;  // 123
+    end ;
 
   Result := Trim(Format(_mask, [_float2]));
   if ATailer then
@@ -371,7 +463,7 @@ begin
   end;
 end;
 
-{ Deprecating / Reaplcae to the EllipsePosition of TLabel property ...}
+{ Substitute for Reaplcae to the EllipsePosition of TLabel property ...}
 function Get_TextWithEllipsis(const AMiddle: Boolean;  ACanvas: TCanvas; ARect: TRect; const AText: string): string;
 begin
   Result := AText;
@@ -751,7 +843,7 @@ function GetThemeColorEx1(const className: string; part, state, propID: Integer;
   end;
 
 var
-  _clrRef: COLORREF ABSOLUTE Color;
+  _clrRef: COLORREF absolute Color;
 begin
   Result := False;
   if not StyleServices.Enabled or not HasThemeManifest then Exit;
@@ -843,7 +935,12 @@ procedure TCustomVirtualStringTree.WMSetFont(var Msg: TWMSetFont);
 
 initialization
   CV_LocaleID := Get_LocaleIDString(1);
+  GV_RemoteBanList := TStringList.Create;
+  GV_RemoteBanList.Sorted := True;
+  GV_RemoteBanList.Duplicates := dupIgnore;
+  GV_RemoteBanList.CaseSensitive := False;
 
 finalization
+  GV_RemoteBanList.Free;
 
 end.

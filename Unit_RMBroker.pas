@@ -8,64 +8,72 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.Types,
   System.JSON,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
-  OverbyteIcsWSocket,
-  OverbyteIcsWndControl,
-  OverbyteIcsHttpProt,
-  OverbyteIcsLogger,
-  OverbyteIcsTypes,
-  OverbyteIcsUtils,
-  OverbyteIcsURL,
-  OverbyteIcsSSLEAY,
-  OverbyteIcsSslHttpRest,
+  REST.Types,
+  REST.Client,
+  Data.Bind.Components,
+  Data.Bind.ObjectScope,
   Vcl.ComCtrls,
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
-  Unit_Common, Vcl.Buttons;
+  Unit_Common,
+  Vcl.Buttons,
+  System.Skia,
+  Vcl.Skia;
 
 type
   TForm_RMBroker = class(TForm)
-    HttpRestOllama_RM: TSslHttpRest;
+    RESTClient_RM: TRESTClient;
+    RESTRequest_RM: TRESTRequest;
+    RESTResponse_RM: TRESTResponse;
     Panel1: TPanel;
     Memo_Log_Rm: TMemo;
     StatusBar_RM: TStatusBar;
-    Timer_Repeater_Rm: TTimer;
     Label1: TLabel;
     Label_Connection: TLabel;
     CheckBox_Logoption: TCheckBox;
     SpeedButton_GetUsers: TSpeedButton;
-    procedure HttpRestOllama_RMRestRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
-    procedure HttpRestOllama_RMHttpRestProg(Sender: TObject; LogOption: TLogOption; const Msg: string);
-    procedure FormDestroy(Sender: TObject);
-    procedure Timer_Repeater_RmTimer(Sender: TObject);
-    procedure RM401404REPEAT(var Msg : TMessage); Message WM_401_404_REPEAT;
-    procedure RMDMMESSAGE(var Msg: TMessage); Message WF_DM_MESSAGE;
-    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    SkSvg_RMBroker: TSkSvg;
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure RM_DMMESSAGE(var Msg: TMessage); Message WF_DM_MESSAGE;
     procedure SpeedButton_GetUsersClick(Sender: TObject);
+    //
+    procedure OnRESTRequest_RMError(Sender: TObject);
+    procedure RESTClient_RMReceiveData(const Sender: TObject; AContentLength, AReadCount: Int64; var AAbort: Boolean);
+    procedure RESTClient_RMSendData(const Sender: TObject; AContentLength, AWriteCount: Int64; var AAbort: Boolean);
   private
     FAborting_Flag: Boolean;
     FRequesting_Flag: Boolean;
+    FRemoteCntFlag: Integer;
+    FResponseSize: Int64;
+    FProcessCntFlag: Integer;
     //
     FUser_Rm: string;
     FQueue_Rm: string;
     FMmodel_Rm: string;
     FPrompt_Rm: string;
-    procedure Common_RestSettings_Ex(const Aflag: Integer);
-    procedure Do_Abort(const AFlag: Integer);
-    procedure Rm_StartRequest(const Aflag: Integer = 0; const APrompt: string = '');
+    procedure OnRESTRequest_RMAfterRequest;
+    procedure Common_RestSettings_Rm(const Aflag: Integer);
+    procedure Do_Abort(const AFlag: Integer=0);
+    procedure Rm_StartRequest();
     procedure Add_LogWin (const ALog: string) ;
     procedure Push_LogWin(const AFlag: Integer = 0; const ALog: string = '');
+    procedure SetProcessCntFlag(const Value: Integer);
+    procedure Reset_RESTComponentsToDefaults;
   public
-    property Requesting_Flag: Boolean  read FRequesting_Flag  write FRequesting_Flag;
-    property User_Rm: string    read FUser_Rm    write FUser_Rm;
-    property Queue_Rm: string   read FQueue_Rm   write FQueue_Rm;
-    property Mmodel_Rm: string  read FMmodel_Rm  write FMmodel_Rm;
-    property Prompt_Rm: string  read FPrompt_Rm  write FPrompt_Rm;
+    property User_Rm: string            read FUser_Rm           write FUser_Rm;
+    property Queue_Rm: string           read FQueue_Rm          write FQueue_Rm;
+    property Mmodel_Rm: string          read FMmodel_Rm         write FMmodel_Rm;
+    property Prompt_Rm: string          read FPrompt_Rm         write FPrompt_Rm;
+    property Requesting_Flag: Boolean   read FRequesting_Flag   write FRequesting_Flag;
+    property ProcessCntFlag: Integer    read FProcessCntFlag    write SetProcessCntFlag;
   end;
 
 var
@@ -77,6 +85,7 @@ uses
   System.JSON.Types,
   System.Threading,
   System.Diagnostics,
+  System.UITypes,
   Unit_Main,
   Unit_DMServer;
 
@@ -84,75 +93,36 @@ uses
 
 var
   V_RmStopWatch: TStopWatch;
+  V_RmElapsedInterval: Int64;
   V_RmBaseURL: string = GC_BaseURL_Chat;
   V_RmBaseURLarray: array[TRequest_Type] of string = (GC_BaseURL_Generate, GC_BaseURL_Chat);
   V_RmDummyFlag: Integer = 0;
   V_RmBuffLogLines: string;
   V_RmRepeatFlag: Boolean = False;
 
-procedure TForm_RMBroker.Common_RestSettings_Ex(const Aflag: Integer);
-begin
-  if Aflag > 1 then
-  with HttpRestOllama_RM do
-  begin
-    RestParams.Clear;
-    RestParams.PContent := TPContent.PContBodyJson;
-    Exit;
-  end;
-
-  with HttpRestOllama_RM do   { Fit to Local server }
-  begin
-    DebugLevel :=       THttpDebugLevel.DebugNone;
-    NoSSL :=            True;
-    ServerAuth :=       THttpAuthType.httpAuthNone;
-    AuthBearerToken :=  '';
-    ContentTypePost :=  'application/json; charset=UTF-8';
-    Username :=         'user';
-    Password :=         '';
-    ProxyURL :=         '';
-    AlpnProtocols.CommaText := ',';
-    SocketFamily :=     TSocketFamily.sfAny;
-    Accept :=           '*.*';
-    HttpMemStrategy :=  THttpMemStrategy.HttpStratMem;
-    HttpDownFileName := '';
-    HttpDownReplace :=  False;
-    HttpUploadStrat :=  THttpUploadStrat.HttpUploadNone;
-    HttpUploadFile :=   '';
-    ProgIntSecs :=      1;
-    { Use Raw parameters }
-    RestParams.Clear;
-    RestParams.PContent := TPContent.PContBodyJson;
-
-    ShowProgress :=     True;
-    Timeout :=          300;
-  end;
-end;
-
-procedure TForm_RMBroker.Do_Abort(const AFlag: Integer);
-begin
-  FAborting_Flag := True;
-  if (HttpRestOllama_RM.State > httpReady) or HttpRestOllama_RM.Connected then
-  begin
-    HttpRestOllama_RM.Abort;
-    HttpRestOllama_RM.ClearResp;
-  end;
-  FAborting_Flag := False;
-end;
+{  TForm_RMBroker ...}
 
 procedure TForm_RMBroker.FormCreate(Sender: TObject);
 begin
+  if DM_ACTIVATECODE = 0 then Exit;
+
   FUser_Rm :=   'user';
   FQueue_Rm :=  '999';
   FMmodel_Rm := 'phi3';
   FPrompt_Rm:=  'Who are you ?';
-  //CheckBox_Logoption.Visible := False;
   Memo_Log_Rm.Lines.Clear;
+  SkSvg_RMBroker.Svg.Source := C_RemoteConn_Svg1;
 end;
 
 procedure TForm_RMBroker.FormDestroy(Sender: TObject);
 begin
+  if DM_ACTIVATECODE = 0 then Exit;
+
   FRequesting_Flag := True;
   Do_Abort(0);
+
+  var _slog: string := Format('%s%s%s', ['Log_rm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+  Memo_Log_Rm.Lines.SaveToFile(CV_LogPath+_slog);
 end;
 
 procedure TForm_RMBroker.FormKeyPress(Sender: TObject; var Key: Char);
@@ -162,29 +132,6 @@ begin
     Key := #0;
     ModalResult := mrCancel;
   end;
-end;
-
-procedure TForm_RMBroker.HttpRestOllama_RMHttpRestProg(Sender: TObject; LogOption: TLogOption; const Msg: string);
-
-  function CheckCompleted(const AMsg: string): Boolean;
-  begin
-    Result := False;
-    var _msg: string := LowerCase(AMsg);
-    Result := (Pos('completed,', _msg) > 0) and (Pos('size', _msg) > 1);
-  end;
-
-begin
-  if LogOption = loProgress then
-    begin
-      TThread.Queue(nil,
-        procedure
-        begin
-          var _elapsed: Int64 := V_RmStopWatch.ElapsedMilliseconds;
-          StatusBar_RM.SimpleText := ' * '+Msg;
-        end);
-    end;
-  if CheckCompleted(Msg) then
-    Push_LogWin(1, Msg);
 end;
 
 procedure TForm_RMBroker.Add_LogWin(const ALog: string);
@@ -215,21 +162,7 @@ begin
   end;
 end;
 
-procedure TForm_RMBroker.RM401404REPEAT(var Msg: TMessage);
-begin
-  if V_RmRepeatFlag then
-  begin
-    SimpleSound_Common(Form_RestOllama.DoneSoundFlag, 0);
-    V_RmRepeatFlag := False;
-    Do_Abort(1);
-    Sleep(1);
-    Timer_Repeater_Rm.Enabled := True;
-  end;
-
-  Msg.Result := 0;
-end;
-
-procedure TForm_RMBroker.RMDMMESSAGE(var Msg: TMessage);
+procedure TForm_RMBroker.RM_DMMESSAGE(var Msg: TMessage);
 begin
   case Msg.WParam of
     WF_DM_MESSAGE_ADDRESS:;
@@ -240,10 +173,14 @@ begin
     WF_DM_MESSAGE_LOGON:;
     WF_DM_MESSAGE_REQUEST:
       begin
-        Rm_StartRequest(0);
+        Rm_StartRequest();
       end;
     WF_DM_MESSAGE_REQUESTEX:;
-     WF_DM_MESSAGE_RESPONSE:;
+    WF_DM_MESSAGE_RESPONSE:
+      begin
+        Push_LogWin(1, 'Response OK.');
+        Push_LogWin(1);
+      end;
     WF_DM_MESSAGE_IMAGE:;
     WF_DM_MESSAGE_WARNING:
       begin
@@ -254,53 +191,107 @@ begin
   Msg.Result := 0;
 end;
 
+procedure TForm_RMBroker.SetProcessCntFlag(const Value: Integer);
+begin
+  FProcessCntFlag := Value;
+  var _cntflag: Boolean := ((Value mod 2) = 1);
+  if Self.Visible then
+    SkSvg_RMBroker.Svg.Source := IIF.CastBool<string>(_cntflag, C_RemoteConn_Svg1, C_RemoteConn_Svg0);
+end;
+
+procedure TForm_RMBroker.SpeedButton_GetUsersClick(Sender: TObject);
+begin
+  var _logins: string := DM_Server.Get_Logins();
+  var _pos: TPoint := SpeedButton_GetUsers.ClientToScreen(Point(0, 25));
+  ShowMessagePos(_logins, _pos.X, _pos.Y);
+end;
+
 { Remote Control ... }
 
-procedure TForm_RMBroker.Rm_StartRequest(const Aflag: Integer; const APrompt: string);
+procedure TForm_RMBroker.Reset_RESTComponentsToDefaults;
 begin
-  if (Aflag = 0) and FRequesting_Flag then
+  RESTRequest_RM.ResetToDefaults;
+  RESTClient_RM.ResetToDefaults;
+  RESTResponse_RM.ResetToDefaults;
+end;
+
+procedure TForm_RMBroker.Common_RestSettings_Rm(const Aflag: Integer);
+begin
+  FRemoteCntFlag := 0;
+  V_RmElapsedInterval := 0;
+  RESTResponse_RM.ResetToDefaults;
+  RESTClient_RM.BaseURL := V_RmBaseURL;
+  RESTClient_RM.ContentType := CONTENTTYPE_APPLICATION_JSON;
+  RESTClient_RM.SynchronizedEvents := True;
+  with RESTRequest_RM do
   begin
-    Do_Abort(1);
-    DM_Server.Response_ToClient(FQueue_Rm, FMmodel_Rm, 'Busy Now ...');
+    SynchronizedEvents := True;
+    Method := rmPOST;
+    Params.Clear;
+    TransientParams.Clear;
+    ClearBody;
+  end;
+end;
+
+procedure TForm_RMBroker.Do_Abort(const AFlag: Integer);
+begin
+  FAborting_Flag := True;
+
+  RESTRequest_RM.Cancel;
+  Application.ProcessMessages;
+
+  Common_RestSettings_Rm(0);
+  V_RmStopwatch.Stop;
+  Requesting_Flag := False;
+  FAborting_Flag := False;
+end;
+
+procedure TForm_RMBroker.Rm_StartRequest();
+begin
+  if FRequesting_Flag then
+  begin
+    DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, 'Busy Now ...');
     Exit;
   end;
 
-  if Aflag = 0 then
+  var _requestjson: string := DM_Server.Get_Queue;
+  if _requestjson = '' then
   begin
-    var _requestjson: string := DM_Server.Get_Queue;
-    if _requestjson = '' then
-    begin
-      Exit;
-    end;
+    Exit;
+  end;
 
-    var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(_requestjson) as TJSONObject;
-    try
+  var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(_requestjson) as TJSONObject;
+  try
+    if Assigned(_JsonObj) then
+    begin
       FUser_Rm :=   _JsonObj.Get('user').JsonValue.Value;
       FQueue_Rm :=  _JsonObj.Get('queue').JsonValue.Value;
       FMmodel_Rm := _JsonObj.Get('model').JsonValue.Value;
       FPrompt_Rm:=  _JsonObj.Get('prompt').JsonValue.Value;
-    finally
-      _JsonObj.Free;
     end;
-   end;
+  finally
+    _JsonObj.Free;
+  end;
 
   Push_LogWin(1, 'New Remote Request Arrived : '+FQueue_Rm);
   var _queue: Integer := StrToIntDef(FQueue_Rm, 1);
   Label_Connection.Caption := Format('U-%s Qn-%.3d M-%s', [ FUser_Rm, _queue, FMmodel_Rm]);
   if (FMmodel_Rm = '') then
-    FMmodel_Rm := Form_RestOllama.ComboBox_Models.Text;
+    FMmodel_Rm := Form_RestOllama.Model_Selected;
   if (FPrompt_Rm = '') or (FMmodel_Rm = '') then
   begin
-    DM_Server.Response_ToClient(FQueue_Rm, FMmodel_Rm, 'Empty Request');
+    DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, 'Empty Request');
     Exit;
   end;
   // ------------------------------------------------------------------------ //
-  FPrompt_Rm := Get_ReplaceSpecialChar1(FPrompt_Rm);
+  FPrompt_Rm := Get_ReplaceSpecialChar4Json(FPrompt_Rm);
+  // ------------------------------------------------------------------------ //
+  Form_RestOllama.RemoteProcessingFlag := True;
   // ------------------------------------------------------------------------ //
   var _RawParams: string := '';
   if Is_LlavaModel(FMmodel_Rm) then
     begin
-      DM_Server.Response_ToClient(FQueue_Rm, FMmodel_Rm, 'Not supported yet');
+      DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, 'Not supported yet');
       Exit;
     end
   else
@@ -316,10 +307,9 @@ begin
            end;
       end;
     end;
-
+  StatusBar_RM.SimpleText := '* Requesting';
   FRequesting_Flag := True;
   V_RmBaseURL := V_RmBaseURLarray[Form_RestOllama.Request_Type];
-  Common_RestSettings_Ex(V_RmDummyFlag);
 
   Add_LogWin('Starting REST request for URL: ' + V_RmBaseURL);
   if CheckBox_Logoption.Checked then
@@ -327,29 +317,49 @@ begin
   Push_LogWin();
 
   V_RmStopWatch := TStopwatch.StartNew;
+  Common_RestSettings_Rm(V_RmDummyFlag);
   // ------------------------------------------------------------------------------------------ //
-  var _StatCode := HttpRestOllama_RM.RestRequest(THttpRequest.httpPOST, V_RmBaseURL, True, _RawParams);
+  with RESTRequest_RM do
+  begin
+    Params.AddBody(_RawParams, CONTENTTYPE_APPLICATION_JSON);
+    ExecuteAsync(
+      OnRESTRequest_RMAfterRequest,
+      True, True,
+      OnRESTRequest_RMError);
+  end;
   // ------------------------------------------------------------------------------------------ //
   Push_LogWin(1, 'Async REST request started');
 end;
 
-procedure TForm_RMBroker.SpeedButton_GetUsersClick(Sender: TObject);
+procedure TForm_RMBroker.RESTClient_RMReceiveData(const Sender: TObject; AContentLength, AReadCount: Int64; var AAbort: Boolean);
 begin
-  var _logins: string := DM_Server.Get_Logins();
-  var _pos: TPoint := SpeedButton_GetUsers.ClientToScreen(Point(0, 25));
-  ShowMessagePos(_logins, _pos.X, _pos.Y);
+  FResponseSize := AReadCount;
+  Inc(FRemoteCntFlag);
+  var _elapsed: Int64 := V_RmStopWatch.ElapsedMilliseconds;
+  if (_elapsed - V_RmElapsedInterval) > 500 then    // 0.5 sec ...
+  begin
+    V_RmElapsedInterval := _elapsed;
+    TThread.Queue(nil,
+      procedure
+      begin
+        StatusBar_RM.SimpleText := Format('* Response Read Count : %s', [BytesToKMG(AReadCount)]);
+        ProcessCntFlag := FRemoteCntFlag;
+        Form_RestOllama.RemoteProcessCntFlag := FRemoteCntFlag;
+      end);
+  end;
 end;
 
-procedure TForm_RMBroker.Timer_Repeater_RmTimer(Sender: TObject);
+procedure TForm_RMBroker.RESTClient_RMSendData(const Sender: TObject; AContentLength, AWriteCount: Int64; var AAbort: Boolean);
 begin
-  Timer_Repeater_Rm.Enabled := False;
-  V_RmRepeatFlag := False;
-  Push_LogWin(2, '* Redirection once cause of 401, 404 error ...'+GC_CRLF);
-
-  Rm_StartRequest(1);
+  TThread.Queue(nil,
+    procedure
+    begin
+      if AWriteCount mod 5 = 0 then
+        StatusBar_RM.SimpleText := StatusBar_RM.SimpleText + '.';
+    end)
 end;
 
-procedure TForm_RMBroker.HttpRestOllama_RMRestRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
+procedure TForm_RMBroker.OnRESTRequest_RMAfterRequest;    { synchronized by default ... }
 begin
   if FAborting_Flag then
   begin
@@ -357,83 +367,41 @@ begin
     Exit;
   end;
 
-  if HttpRestOllama_RM.GetAlpnProtocol <> '' then
-    Push_LogWin(1, 'ALPN Requested by Server: ' + HttpRestOllama_RM.GetAlpnProtocol);
-  if ErrCode <> 0 then
-  begin
-    Push_LogWin(2, '* Request failed: Error: ' + HttpRestOllama_RM.RequestDoneErrorStr +
-                   ' (rp - '+HttpRestOllama_RM.ReasonPhrase+' )');
-
-    if (HttpRestOllama_RM.StatusCode = 404) then
-    begin
-      V_RmRepeatFlag := True;
-      PostMessage(Self.Handle, WM_401_404_REPEAT, 0, 0);
-    end;
-
-    TThread.Queue(nil,
-      procedure
-      begin
-        Push_LogWin(1, ' Error : Code -b ' + ErrCode.ToString);
-      end);
-
-    Exit;
-  end;
-
-  if (HttpRestOllama_RM.StatusCode = 400) then
-    begin
-      Push_LogWin(2, 'Error Code 400 : '+String(HttpRestOllama_RM.ResponseRaw));
-      Exit;
-    end else
-  if (HttpRestOllama_RM.StatusCode = 401) then
-    begin
-      Push_LogWin(1, String(HttpRestOllama_RM.ResponseRaw));
-      PostMessage(Self.Handle, WM_401_404_REPEAT, 0, 0);
-      Exit;
-    end;
-
-  Add_LogWin('Content Type : ' + HttpRestOllama_RM.ContentType);
-  Add_LogWin('Request done, StatusCode ' + IntToStr(HttpRestOllama_RM.StatusCode));
-
   V_RmRepeatFlag := False;
 
-  TThread.Queue(nil,
-    procedure
-    begin
-      V_RmStopWatch.Stop;
-      var _elapsed: Int64 := V_RmStopWatch.ElapsedMilliseconds;
-      var _elapstr: string := MSecsToSeconds(_elapsed);
-      Add_LogWin('Elapsed Time after request : '+_elapstr);
+  V_RmStopWatch.Stop;
+  var _elapsed: Int64 := V_RmStopWatch.ElapsedMilliseconds;
+  var _elapstr: string := MSecsToSeconds(_elapsed);
+  var _updown: string := Format('Response Size : %s', [BytesToKMG(FResponseSize)]);
+  Add_LogWin(_updown);
+  Add_LogWin('Elapsed Time after request : '+_elapstr);
+  StatusBar_RM.SimpleText := '* '+_updown;
 
-      { look for Json response ----------------------------------------------- }
-      if ((Pos('{', HttpRestOllama_RM.ResponseRaw) > 0) or (Pos('json', HttpRestOllama_RM.ContentType) > 0)) then
-        begin
-          var _Responses := Unit_Common.Get_DisplayJson(Form_RestOllama.RadioGroup_PromptType.ItemIndex, False,
-                                                        string(HttpRestOllama_RM.ResponseRaw));
-          // Modified by ichin 2024-06-18 È­ ¿ÀÈÄ 4:12:42  ------------------ //
-          _Responses := Get_ReplaceSpecialChar1(_Responses);
-          // ---------------------------------------------------------------- //
-          DM_Server.Response_ToClient(FQueue_Rm, FMmodel_Rm, _Responses);
-          SimpleSound_Common(Form_RestOllama.DoneSoundFlag, 1);
-          Inc(V_RmDummyFlag);
+  { Core routine ------------------------------------------------------------- }
+    var _Responses := Unit_Common.Get_DisplayJson(Form_RestOllama.RadioGroup_PromptType.ItemIndex, False,
+                                                  string(RESTResponse_RM.Content));
+    _Responses := Get_ReplaceSpecialChar4Json(_Responses);
+    // ---------------------------------------------------------------------- //
+    DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, _Responses);
+    // ---------------------------------------------------------------------- //
+    SimpleSound_Common(Form_RestOllama.DoneSoundFlag, 1);
+    Inc(V_RmDummyFlag);
 
-          // Push_LogWin(2, _Responses);   // Debug ...
-          GV_CheckingAliveStart := False;
-        end
-      else
-        begin
-          Push_LogWin(2, '<Non-textual content received: ' + HttpRestOllama_RM.ContentType + '>');
-          DM_Server.Response_ToClient(FQueue_Rm, FMmodel_Rm, 'Communication Error');
-        end;
-
-      FRequesting_Flag := False;
-      { ---------------------------------------------------------------------- }
-    end);
-
-  Push_LogWin(1);
+    GV_CheckingAliveStart := False;
+    FRequesting_Flag := False;
+    Push_LogWin();
+  { -------------------------------------------------------------------------- }
+  ProcessCntFlag := 1;
+  Form_RestOllama.RemoteProcessingFlag := False;
 
   if DM_Server.Get_Queue_Count > 0 then
     Rm_StartRequest();
 end;
 
+procedure TForm_RMBroker.OnRESTRequest_RMError(Sender: TObject);
+begin
+  Do_Abort(1);
+  Push_LogWin(1,  RESTResponse_RM.StatusText);
+end;
 
 end.

@@ -6,11 +6,6 @@ unit Unit_Main;
 {$H+}    { Use long strings                    }
 {$J+}    { Allow typed constant to be modified }
 
-{ Modified History to Original Source
-  ln 1654 : procedure TSslHttpRest.TriggerRequestDone2; in OverbyteIcsSslHttpRest;
-     1740 : - XferSize := FResponseSize;  (override)
-}
-
 interface
 
 uses
@@ -49,18 +44,12 @@ uses
   System.Skia,
   SVGIconImageCollection,
   SVGIconVirtualImageList,
-  OverbyteIcsWSocket,
-  OverbyteIcsTypes,
-  OverbyteIcsUtils,
-  OverbyteIcsURL,
-  OverbyteIcsLogger,
-  OverbyteIcsSSLEAY,
-  OverbyteIcsSslHttpRest,
-  OverbyteIcsHttpProt,
-  OverbyteIcsSuperObject,
-  OverbyteIcsBlacklist,
-  OverbyteIcsWndControl,
+  REST.Types,
+  REST.Client,
+  Data.Bind.Components,
+  Data.Bind.ObjectScope,
   Vcl.OleServer,
+  Vcl.CheckLst,
   SpeechLib_TLB,
   Unit_Common,
   Unit_MRUManager,
@@ -80,7 +69,6 @@ type
 
   TForm_RestOllama = class(TForm, IChangedCommon)
     Button_StartRequest: TButton;
-    HttpRest_Ollama: TSslHttpRest;
     Button_Abort: TButton;
     PageControl_Chatting: TPageControl;
     Tabsheet_Chatting: TTabSheet;
@@ -112,7 +100,6 @@ type
     Label_Caption: TLabel;
     TabSheet_ChatLogs: TTabSheet;
     Memo_LogWin: TMemo;
-    Timer_Repeater: TTimer;
     Panel_ChatRequestBox: TPanel;
     Edit_ReqContent: TEdit;
     Button_SendRequest: TButton;
@@ -237,14 +224,13 @@ type
     Action_CustomFontColor: TAction;
     Action_BeepEffect: TAction;
     SpeedButton_ReqDummy: TSpeedButton;
-    Shape_OllamaAlive: TShape;
     Action_HelpShortcuts: TAction;
     SpeedButton_Help: TSpeedButton;
     Label1: TLabel;
     Action_ApplyChange: TAction;
     Panel_ServerChatting: TPanel;
     Memo_ServerChattings: TMemo;
-    Panel2: TPanel;
+    Panel_RemoteBroker: TPanel;
     Splitter1: TSplitter;
     SpeedButton_ShutdownClients: TSpeedButton;
     SpeedButton_ShowRmBroker: TSpeedButton;
@@ -253,17 +239,25 @@ type
     FontDialog1: TFontDialog;
     SpeedButton_ActivateBroker: TSpeedButton;
     SpeedButton_Broker: TSpeedButton;
-    Shape_Broker: TShape;
+    SkSvg_Broker: TSkSvg;
+    SkSvg_OllamaAlive: TSkSvg;
+    Label_IP_Port: TLabel;
+    Panel_BanList: TPanel;
+    Label2: TLabel;
+    CheckListBox_ConnIPs: TCheckListBox;
+    Panel_RemoteChattBase: TPanel;
+    RESTClient_Ollama: TRESTClient;
+    RESTRequest_Ollama: TRESTRequest;
+    RESTResponse_Ollama: TRESTResponse;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
-    //  Messagw Proc ...
-    procedure WM401404REPEAT(var Msg : TMessage); Message WM_401_404_REPEAT;
-    procedure WMNETHTTPMESSAGE(var Msg : TMessage); Message NETHTTP_MESSAGE;
-    procedure WFDMMESSAGE(var Msg: TMessage); Message WF_DM_MESSAGE;
+    // Messagw Proc ...
+    procedure WM_NETHTTPMESSAGE(var Msg: TMessage); Message WM_NETHTTP_MESSAGE;
+    procedure WF_DMMESSAGE(var Msg: TMessage); Message WF_DM_MESSAGE;
     // ...
     procedure Action_OptionsExecute(Sender: TObject);
     procedure Action_ExitExecute(Sender: TObject);
@@ -292,20 +286,16 @@ type
     procedure Action_HelpShortcutsExecute(Sender: TObject);
     procedure Action_ApplyChangeExecute(Sender: TObject);
     procedure ActionList_OllmaUpdate(Action: TBasicAction; var Handled: Boolean);
-    procedure HttpRest_OllamaHttpRestProg(Sender: TObject; LogOption: TLogOption; const Msg: string);
-    procedure HttpRest_OllamaRestRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure RadioGroup_PromptTypeClick(Sender: TObject);
     procedure PageControl_ChattingResize(Sender: TObject);
     procedure PageControl_ChattingChange(Sender: TObject);
     procedure Edit_ReqContentKeyPress(Sender: TObject; var Key: Char);
     procedure Edit_NicknameChange(Sender: TObject);
-    procedure SettingsChange(Sender: TObject);
     procedure ComboBox_ModelsChange(Sender: TObject);
     procedure ComboBox_TTSEngineChange(Sender: TObject);
     procedure SkLabel_IntroClick(Sender: TObject);
     procedure SkLabel_IntroWords5Click(Sender: TObject);
     procedure SkAnimatedImage_ChatClick(Sender: TObject);
-    procedure Timer_RepeaterTimer(Sender: TObject);
     procedure Timer_SystemTimer(Sender: TObject);
     procedure SpeedButton_ClearLogBoxClick(Sender: TObject);
     procedure SpeedButton_LoadModelClick(Sender: TObject);
@@ -323,6 +313,11 @@ type
     procedure SpeedButton_BeepClick(Sender: TObject);
     procedure SpeedButton_SaveAllLogesClick(Sender: TObject);
     procedure SpeedButton_HelpClick(Sender: TObject);
+    procedure SpeedButton_GetIPsClick(Sender: TObject);
+    procedure SpeedButton_SetFontClick(Sender: TObject);
+    procedure SpeedButton_ShowRmBrokerClick(Sender: TObject);
+    procedure SpeedButton_ShutdownClientsClick(Sender: TObject);
+    procedure SpeedButton_ActivateBrokerClick(Sender: TObject);
     procedure TreeView_TopicsClick(Sender: TObject);
     procedure TreeView_TopicsDblClick(Sender: TObject);
     procedure TreeView_TopicsCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
@@ -337,19 +332,18 @@ type
     procedure TrackBar_VolumeChange(Sender: TObject);
     procedure Label_DescriptionClick(Sender: TObject);
     procedure CheckBox_SaveOnCLoseClick(Sender: TObject);
-    procedure SpeedButton_GetIPsClick(Sender: TObject);
-    procedure SpeedButton_SetFontClick(Sender: TObject);
-    procedure SpeedButton_ShowRmBrokerClick(Sender: TObject);
-    procedure SpeedButton_ShutdownClientsClick(Sender: TObject);
-    procedure SpeedButton_ActivateBrokerClick(Sender: TObject);
-    procedure Shape_BrokerMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure CheckListBox_ConnIPsClickCheck(Sender: TObject);
+    procedure SkSvg_BrokerClick(Sender: TObject);
+    //
+    procedure RESTClient_OllamaReceiveData(const Sender: TObject; AContentLength, AReadCount: Int64; var AAbort: Boolean);
+    procedure RESTClient_OllamaSendData(const Sender: TObject; AContentLength, AWriteCount: Int64; var AAbort: Boolean);
+    procedure OnRESTRequest_OllamaError(Sender: TObject);
   private
     FFrameWelcome: TFrame_Welcome;
     FModelsList: TStringList;
     FRequest_Type: TRequest_Type;
     FRequestingFlag: Boolean;
     FIniFileName: string;
-    FCookieFileName: string;
     FInitialized: Boolean;
     FTopicsMRU: TMRU_Manager;
     FLastRequest: string;
@@ -366,26 +360,29 @@ type
     FDoneSoundFlag: Boolean;
     FSaveLogsOnCLoseFlag: Boolean;
     FSelectionNode: TTreeNode;
-    // Interface ...
-    procedure ApplyChange;
-    // ...
     procedure Load_ConfigIni(const AFlag: Integer = 0);
     procedure Save_ConfigIni(const AFlag: Integer = 0);
-    procedure Common_RestSettings(const Aflag: Integer = 0);
+    // Interface ...
+    procedure ApplyChange;
+  private
+    FRemoteProcessingFlag: Boolean;
+    FRemoteProcessCntFlag: Integer;
+    // Request / Respomse ...
+    procedure Do_StartRequest(const Aflag: Integer; const APrompt: string='');
+    procedure Do_Abort(const AFlag: Integer=0);
+    procedure Common_RestSettings(const AFlag: Integer);
+    procedure OnRESTRequest_OllamaAfterRequest;
     procedure Add_LogWin (const ALog: string) ;
     procedure Push_LogWin(const AFlag: Integer = 0; const ALog: string = '');
-    procedure Do_StartRequest(const Aflag: Integer; const APrompt: string='');
     procedure Do_DisplayJson(const RespStr: string);
     procedure Do_LoadModel(const AIndex: Integer);
-    procedure Do_Abort(const AFlag: Integer = 0);
-    procedure Do_ListModels(const AIndex: Integer);
+    procedure Do_ListModels(const AIndex: Integer = 0);
     procedure Do_DisplayJson_Models(const RespStr: string);
     procedure Do_TransLate(const AMode: TTranlateMode; const ACodepage: Integer; const ASrc: string);
-    procedure Do_AddtoRequest(const AFlag: Integer);
+    procedure Do_AddToRequest(const AFlag: Integer);
     procedure Do_ListUpTopic(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string);
     procedure Add_ChattingMessage(const AFlag, ALocation: Integer; const APrompt: string);
     procedure Insert_ChattingTranslate(const AIndex, ALocation: Integer; const ATranslation: string);
-    //function GetBase64Endoeings(const AImage: TImage): string;
     procedure Action_StartRequestMode(const AMode: Integer = 0);
     procedure Return_FocusToVST(const AFlag: Integer = 0);
     procedure Set_OllamaAlive(const ALiveFlag: Boolean);
@@ -411,22 +408,29 @@ type
     procedure SetTTS_Speaking(const Value: Boolean);
     function GetTTS_Speaking: Boolean;
     function Get_TTSText(): string;
+    // Remote Broker ...
     procedure Log_Server(const AFlag: Integer; const ALog: string);
-    procedure Log_Server2(const AFlag: Integer; const ALog: string);
+    procedure SetRemoteProcessingFlag(const Value: Boolean);
+    procedure SetRemoteProcessCntFlag(const Value: Integer);
+    procedure Build_BanListUp(const AFlag: Integer = 0);
+    procedure ResetRESTComponentsToDefaults;
   public
     procedure Do_ChangeStyleCustom(const AFlag: Integer = 0);
     procedure Do_TTS_Speak(const AFlag: Integer; const ASource: string);
     function Get_ReadyRequest(): Boolean;
     // Property ...
-    property RequestingFlag: Boolean       read FRequestingFlag       write SetRequestingFlag;
-    property Request_Type: TRequest_Type   read FRequest_Type         write SetRequest_Type;
-    property Topic_Seleced: string         read FTopic_Seleced        write SetTopicSeleced;
-    property Model_Selected: string        read FModel_Selected       write SetModelSelected;
-    property TTS_Speaking: Boolean         read GetTTS_Speaking       write SetTTS_Speaking;
-    property MemMonitoringFlag: Boolean    read FMemMonitoringFlag    write SetMemMonitoringFlag;
-    property DoneSoundFlag: Boolean        read FDoneSoundFlag        write SetDoneSoundFlag;
-    property SaveLogsOnCLoseFlag: Boolean  read FSaveLogsOnCLoseFlag  write SetSaveLogsOnCLoseFlag;
-    property ModelsList: TStringList       read FModelsList;
+    property RequestingFlag: Boolean        read FRequestingFlag        write SetRequestingFlag;
+    property Request_Type: TRequest_Type    read FRequest_Type          write SetRequest_Type;
+    property Topic_Seleced: string          read FTopic_Seleced         write SetTopicSeleced;
+    property Model_Selected: string         read FModel_Selected        write SetModelSelected;
+    property TTS_Speaking: Boolean          read GetTTS_Speaking        write SetTTS_Speaking;
+    property MemMonitoringFlag: Boolean     read FMemMonitoringFlag     write SetMemMonitoringFlag;
+    property DoneSoundFlag: Boolean         read FDoneSoundFlag         write SetDoneSoundFlag;
+    property SaveLogsOnCLoseFlag: Boolean   read FSaveLogsOnCLoseFlag   write SetSaveLogsOnCLoseFlag;
+    property ModelsList: TStringList        read FModelsList;
+    // Remote Broker ...
+    property RemoteProcessingFlag: Boolean  read FRemoteProcessingFlag  write SetRemoteProcessingFlag;
+    property RemoteProcessCntFlag: Integer  read FRemoteProcessCntFlag  write SetRemoteProcessCntFlag;
   end;
 
 var
@@ -488,6 +492,8 @@ resourcestring
   R_Mistral =
       'Mistral is a 7B parameter model, distributed with the Apache license. '+
       'It is available in both instruct (instruction following) and text completion.';
+  R_QWen2 =
+      'Qwen2 is a new series of large language models from Alibaba group.';
 
 { How to ? ...
   Multimodal models
@@ -502,7 +508,7 @@ const
   C_LlavaPromptContent  = 'Describe this image:'; // 'What is in this picture?';
 
   C_OllamaAlive: array [Boolean] of string = (' * Ollama is dead.',' * Ollama is running.');
-  C_ModelDesc:   array [0 .. 8] of string = (R_Aya, R_Phi3, R_Llama3, R_Llama2, R_Gemma, R_Llava, R_Codegemma, R_DolphiMistral, R_Mistral);
+  C_ModelDesc:   array [0 .. 9] of string = (R_Aya, R_Phi3, R_Llama3, R_Llama2, R_Gemma, R_Llava, R_Codegemma, R_DolphiMistral, R_Mistral, R_QWen2);
 
 const
   C_TimestampFontSize = 8;
@@ -519,11 +525,26 @@ const
   SPF_DEFAULT      = 0;
   SPF_ASYNC        = 1 shl 0;
 
+const
+  C_TTS_Play  = 0;
+  C_TTS_Pause = 1;
+  C_TTS_Stop  = 2;
+
+  C_TOPIC_Add = 0;
+  C_TOPIC_Run = 1;
+
+  C_CHATLOC_Left  = 0;
+  C_CHATLOC_Right = 1;
+
+  C_CHATUser_Ollama   = 0;
+  C_CHATUser_Model    = 1;
+  C_CHATOllama_Model  = 2;
+  C_CHATOllama_System = 3;
+
 var
   V_BuffLogLines: string;
   V_StopWatch :TStopWatch;
   V_BaseURL: string = GC_BaseURL_Chat;
-  V_RepeatFlag: Boolean = False;
   V_LoadModelFlag: Boolean = False;
   V_Username: string = 'User';
   V_LoadModelIndex: Integer = 0;
@@ -534,6 +555,7 @@ var
   V_LlavaSource: string = 'art.png';
   V_DummyFlag: Integer = 0;
   V_TaskSystem: ITask;
+  V_ElapsedInterval: Int64;
 
 { ... }
 
@@ -552,7 +574,6 @@ begin
   FInitialized := False;
   Unit_Common.InitializePaths();
   FIniFileName := ExtractFileName(ChangeFileExt(ParamStr(0), '.ini'));
-  FCookieFileName := ChangeFileExt(FIniFileName, '.cookie');
 
   var _SkinStyle: string := TStyleManager.ActiveStyle.Name;
   with System.Inifiles.TMemIniFile.Create(FIniFileName) do
@@ -614,12 +635,11 @@ begin
     Add('* Welcome to Ollama Client GUI 2024 ');
     Add('* Start at : '+ FormatDateTime('YYYY.MM.DD HH:NN:SS', Now));
     Add('* Ini File: ' + FIniFileName);
-    if FileExists(FCookieFileName) then
-    Add('* Cookie File: ' + FCookieFileName);
     Add('');
   end;
 
   TreeView_Topics.Items.Clear;
+  CheckListBox_ConnIPs.Items.Clear;
   FTopicsMRU := TMRU_Manager.Create(TreeView_Topics);
 
   FModelsList := TStringList.Create;
@@ -650,6 +670,9 @@ begin
     EventInterests := SVEAllEvents;
   end;
 
+  SkSvg_OllamaAlive.Svg.Source := C_Connection_Svg0;
+  SkSvg_Broker.Svg.Source := C_RemoteConn_Svg0;
+
   ComboBox_TTSEngine.Clear;
   var _SOTokens: ISpeechObjectTokens := FSpVoice.GetVoices('', '');
   var _SOToken: ISpeechObjectToken;
@@ -673,7 +696,6 @@ begin
   // TTS Engine ------------------------------------------------------------- //
 
   Action_TTS.Enabled := False;
-
   Tabsheet_Chatting.TabVisible :=  False;
   TabSheet_ChatLogs.TabVisible :=  False;
   GroupBox_CPUMem.Visible :=       False;
@@ -707,8 +729,8 @@ begin
 
   // Remote Server Chatting ...
   Memo_ServerChattings.Clear;
-  Panel_ServerChatting.Visible := DM_ACTIVATECODE = 1;
-  Splitter1.Visible := DM_ACTIVATECODE = 1;
+  Panel_ServerChatting.Visible := (DM_ACTIVATECODE = 1);
+  Splitter1.Visible := (DM_ACTIVATECODE = 1);
 end;
 
 procedure TForm_RestOllama.FormDestroy(Sender: TObject);
@@ -717,7 +739,6 @@ begin
     ISpeechObjectToken(Pointer(ComboBox_TTSEngine.Items.Objects[_i]))._Release;
 
   FreeAndNil(FSpVoice);
-  OverbyteIcsWSocket.UnLoadSsl;
 end;
 
 procedure TForm_RestOllama.Do_ChangeStyleCustom(const AFlag: Integer);
@@ -771,11 +792,7 @@ begin
 
     StatusBar1.Panels[0].Width := Self.Width div 2;
 
-    Common_RestSettings;
-    if FileExists(FCookieFileName) then
-    HttpRest_Ollama.RestCookies.LoadFromFile(FCookieFileName);
-
-    Do_ListUpTopic(0, nil, '');    { Topic Initilization  }
+    Do_ListUpTopic(GC_MRU_NewRoot, nil, '');    { Topic Initilization  }
     FTopicsMRU.Read_JsonToTreeView;
 
     for var _i := 0 to 10 do
@@ -785,6 +802,10 @@ begin
       end;
     ComboBox_TransSource.ItemIndex := 0;
     ComboBox_TransTarget.ItemIndex := 1;
+
+    SpeedButton_ShowRmBroker.Enabled := (DM_ACTIVATECODE = 1);
+    SkSvg_Broker.Enabled := (DM_ACTIVATECODE = 1);
+    SkSvg_Broker.Visible := (DM_ACTIVATECODE = 1);
 
     var _fmemo: string := CV_AppPath+CF_Memos;
     if FileExists(_fmemo) then
@@ -826,8 +847,8 @@ begin
   FTopicsMRU.free;
   FModelsList.Free;
   FImage_DropDown.Free;
-  HttpRest_Ollama.RestCookies.SaveToFile(FCookieFileName);
-  HttpRest_Ollama.ClearResp;
+
+  // RestRequest ...
 end;
 
 procedure TForm_RestOllama.Load_ConfigIni(const AFlag: Integer);
@@ -920,10 +941,8 @@ procedure TForm_RestOllama.FormCloseQuery(Sender: TObject; var CanClose: Boolean
 begin
   CanClose := False;
 
-  V_RepeatFlag := False;
   Do_TTSSpeak_Stop();
-  if (HttpRest_Ollama.State > httpReady) or HttpRest_Ollama.Connected then
-    Do_Abort(2);
+  Do_Abort(2);
   if Assigned(V_TaskSystem) then
     V_TaskSystem.Cancel;
 
@@ -1005,7 +1024,7 @@ end;
 
 procedure TForm_RestOllama.Action_AbortExecute(Sender: TObject);
 begin
-  Do_Abort();
+  Do_Abort(3);
 end;
 
 procedure TForm_RestOllama.Action_AboutExecute(Sender: TObject);
@@ -1060,9 +1079,6 @@ end;
 
 procedure TForm_RestOllama.Action_DefaultRefreshExecute(Sender: TObject);
 begin
-  if not RequestingFlag then
-    Common_RestSettings();
-
   TrackBar_GlobalFontSize.OnChange := nil;
   TrackBar_GlobalFontSize.Position := 10;
   Label_Font_Size.Caption := '10';
@@ -1197,7 +1213,6 @@ end;
 
 procedure TForm_RestOllama.Action_SendRequestExecute(Sender: TObject);
 begin
-  V_RepeatFlag := True;
   Do_StartRequest(0);
 end;
 
@@ -1228,21 +1243,257 @@ begin
     Top  := _pos.Y;
     PreLoader := FLastRequest;
     Code_From := ComboBox_TransSource.Itemindex;
-    Code_to := ComboBox_TransTarget.ItemIndex;
+    Code_to :=   ComboBox_TransTarget.ItemIndex;
     ShowModal;
     if ModalResult = mrOk then
       begin
         _requests := Memo_Request.Lines.Text;
         _requests := StringReplace(_requests, GC_CRLF, ' ', [rfReplaceAll]);
-        _requests := Get_ReplaceSpecialChar1(_requests);
+        _requests := Get_ReplaceSpecialChar4Json(_requests);
       end
     else
       Exit;
   end;
 
   Edit_ReqContent.Text := _requests;
-  V_RepeatFlag := True;
   Do_StartRequest(1, _requests);
+end;
+
+{  Midas RESTRequest ...  }
+
+var
+  V_ReadCount: Int64 = 0;
+  V_WriteCount: Integer = 0;
+
+procedure TForm_RestOllama.ResetRESTComponentsToDefaults;
+begin
+  RESTRequest_Ollama.ResetToDefaults;
+  RESTClient_Ollama.ResetToDefaults;
+  RESTResponse_Ollama.ResetToDefaults;
+end;
+
+procedure TForm_RestOllama.Common_RestSettings(const AFlag: Integer);
+begin
+  V_ReadCount := 0;
+  V_WriteCount := 0;
+  V_ElapsedInterval := 0;
+  RESTResponse_Ollama.ResetToDefaults;
+  RESTClient_Ollama.BaseURL := V_BaseURL;
+  RESTClient_Ollama.ContentType := CONTENTTYPE_APPLICATION_JSON;
+  RESTClient_Ollama.SynchronizedEvents := True;
+  with RESTRequest_Ollama do
+  begin
+    Method := rmPOST;
+    SynchronizedEvents := True;
+    Params.Clear;
+    TransientParams.Clear;
+    ClearBody;
+  end;
+end;
+
+procedure TForm_RestOllama.Do_Abort(const AFlag: Integer);
+begin
+  FAbortingFlag := True;
+
+  if AFlag < 2 then
+  begin
+    Push_LogWin(1, 'Aborting operation by user.');
+    Push_LogWin(1);
+  end;
+
+  if RequestingFlag or (AFlag  = 3) then
+  begin
+    RESTRequest_Ollama.Cancel;
+    Application.ProcessMessages;
+  end;
+  Common_RestSettings(0);
+  StatusBar1.Panels[2].Text := ' Abort ...';
+
+  Do_TTSSpeak_Stop();
+  V_Stopwatch.Stop;
+  RequestingFlag := False;
+  FAbortingFlag := False;
+end;
+
+procedure TForm_RestOllama.Do_StartRequest(const Aflag: Integer; const APrompt: string='');
+begin
+  if RequestingFlag then
+  begin
+    Exit;
+  end;
+
+  if V_DummyFlag = 0 then
+  begin
+    if PageControl_Chatting.ActivePage <> Tabsheet_Chatting then
+    begin
+      PageControl_Chatting.ActivePage := Tabsheet_Chatting;
+      PageControl_ChattingChange(Self);
+      Application.ProcessMessages;
+    end;
+  end;
+
+  V_MyContentPrompt := Trim(Edit_ReqContent.Text);
+  if (Aflag = 1) and (APrompt <> '') then
+    V_MyContentPrompt := APrompt;
+
+  V_MyModel := ComboBox_Models.Text;
+  if (V_MyContentPrompt = '') or (V_MyModel = '') then
+  begin
+    ShowMessage('Empty "Content / Model" is not allowed.');
+    Exit;
+  end;
+
+  V_MyContentPrompt := Get_ReplaceSpecialChar4Json(V_MyContentPrompt);
+
+  RequestingFlag := True;
+  StatusBar1.Panels[0].Text := '* Requesting ...';
+  V_BaseURL := V_BaseURLarray[Request_Type];
+  var _RawParams: string := '';
+  if Is_LlavaModel(V_MyModel) then
+    begin
+      var _ImageData: string := GetBase64Endoeings(Image_Llva);
+      if _ImageData = '' then Exit;
+      case RadioGroup_PromptType.ItemIndex of
+        0: begin
+             _RawParams := StringReplace( GC_GenerateLlavaPrompt, '%model%',    V_MyModel,         [rfIgnoreCase]);
+             _RawParams := StringReplace( _RawParams,             '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
+             _RawParams := StringReplace( _RawParams,             '%images%',   _ImageData,        [rfIgnoreCase]);
+           end;
+        1: begin
+             _RawParams := StringReplace( GC_ChatLlavaContent,    '%model%',    V_MyModel,         [rfIgnoreCase]);
+             _RawParams := StringReplace( _RawParams,             '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
+             _RawParams := StringReplace( _RawParams,             '%images%',   _ImageData,        [rfIgnoreCase]);
+           end;
+      end;
+    end
+  else
+    begin
+      var _optionflag: Boolean := False;
+      var _tseed: string := '';
+
+      if CheckBox_UseTopicSeed.Checked then
+        begin
+          _tseed := Edit_TopicSeed.Text;
+          if _tseed <> '' then
+          _optionflag := True;
+        end;
+
+      if _optionflag then
+        begin
+          case RadioGroup_PromptType.ItemIndex of
+            0: begin
+                 _RawParams := StringReplace( GC_GeneratePrompt_opt, '%model%',    V_MyModel,         [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,            '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,            '%seed%',     _tseed,            [rfIgnoreCase]);
+               end;
+            1: begin
+                 _RawParams := StringReplace( GC_ChatContent_opt,    '%model%',    V_MyModel,         [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,            '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,            '%seed%',     _tseed,            [rfIgnoreCase]);
+               end;
+          end;
+
+          // Debug
+          Add_LogWin('Request Topic Seed : '+ _tseed);
+        end
+      else
+          case RadioGroup_PromptType.ItemIndex of
+            0: begin
+                 _RawParams := StringReplace( GC_GeneratePrompt, '%model%',    V_MyModel,         [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,        '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
+               end;
+            1: begin
+                 _RawParams := StringReplace( GC_ChatContent,    '%model%',    V_MyModel,         [rfIgnoreCase]);
+                 _RawParams := StringReplace( _RawParams,        '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
+               end;
+          end;
+    end;
+
+  Edit_ReqContent.TextHint := V_MyContentPrompt;
+  Add_LogWin('Starting REST request for URL: ' + V_BaseURL);
+  Add_LogWin('With prompt/message : "' + V_MyContentPrompt+'"');
+  Push_LogWin();
+
+  FSelectionNode := TreeView_Topics.Selected;
+  if FSelectionNode = nil then
+  FSelectionNode := TreeView_Topics.items.GetFirstNode;
+
+  FLastRequest :=  V_MyContentPrompt;
+  V_StopWatch := TStopwatch.StartNew;
+  // ------------------------------------------------------------------------------------------ //
+  Common_RestSettings(V_DummyFlag);
+  with RESTRequest_Ollama do
+  begin
+    Params.AddBody(_RawParams, CONTENTTYPE_APPLICATION_JSON);
+    ExecuteAsync(
+      OnRESTRequest_OllamaAfterRequest,
+      True, True,
+      OnRESTRequest_OllamaError);
+  end;
+  // ------------------------------------------------------------------------------------------ //
+  Add_ChattingMessage(C_CHATUser_Model, C_CHATLOC_Left, V_MyContentPrompt);
+
+  Push_LogWin(1, 'Async REST request started');
+end;
+
+procedure TForm_RestOllama.RESTClient_OllamaReceiveData(const Sender: TObject; AContentLength, AReadCount: Int64; var AAbort: Boolean);
+begin
+  V_ReadCount := AReadCount;
+  var _elapsed: Int64 := V_StopWatch.ElapsedMilliseconds;
+  if (_elapsed - V_ElapsedInterval) > 1000 then    // 1 sec ...
+  begin
+    V_ElapsedInterval := _elapsed;
+    TThread.Queue(nil,
+      procedure
+      begin
+        StatusBar1.Panels[0].Text := Format('* Response / Read Count : %s', [BytesToKMG(AReadCount)]);
+        StatusBar1.Panels[1].Text :=  '* '+ MSecsToSeconds(_elapsed);
+        StatusBar1.Panels[2].Text := ' Processing ...';
+      end);
+  end;
+end;
+
+procedure TForm_RestOllama.RESTClient_OllamaSendData(const Sender: TObject; AContentLength, AWriteCount: Int64; var AAbort: Boolean);
+begin
+  V_WriteCount := AWriteCount;
+  TThread.Queue(nil,
+    procedure
+    begin
+      StatusBar1.Panels[0].Text := Format('* Request / Send Count : %s', [BytesToKMG(AWriteCount)]);
+      StatusBar1.Panels[2].Text := ' Requesting ...';
+    end);
+end;
+
+procedure TForm_RestOllama.OnRESTRequest_OllamaAfterRequest;   { synchronized by default ... }
+begin
+  if FAbortingFlag then Exit;
+
+  V_StopWatch.Stop;
+  var _elapsed: Int64 := V_StopWatch.ElapsedMilliseconds;
+  var _elapstr: string := MSecsToSeconds(_elapsed);
+  var _updown: string := Format('Request/Response Size : Up %s / Down %s', [BytesToKMG(V_WriteCount), BytesToKMG(V_ReadCount)]);
+  StatusBar1.Panels[0].Text := '* '+_updown;
+  StatusBar1.Panels[1].Text := 'et '+  _elapstr;
+  StatusBar1.Panels[2].Text := ' * Stand by ...';
+  Add_LogWin(_updown);
+  Add_LogWin('Elapsed Time after request : '+_elapstr);
+
+  { Core routine ------------------------------------------------------------- }
+    Do_DisplayJson(string(RESTResponse_Ollama.Content));
+  { -------------------------------------------------------------------------- }
+
+  SimpleSound_Common(DoneSoundFlag, 1);
+  Inc(V_DummyFlag);
+  GV_CheckingAliveStart := False;
+
+  Push_LogWin(1);
+  V_LoadModelFlag := False;
+end;
+
+procedure TForm_RestOllama.OnRESTRequest_OllamaError(Sender: TObject);
+begin
+  Do_Abort(1);
+  Push_LogWin(1,  RESTResponse_Ollama.StatusText);
 end;
 
 { Add_ChattingPrompt ... }
@@ -1251,18 +1502,15 @@ procedure TForm_RestOllama.Add_ChattingMessage(const AFlag, ALocation: Integer; 
 begin
   var _user: string := V_Username;
   case AFlag of
-    0: _user := V_Username + '  > Ollama';                     // user
-    1: _user := V_Username + '  > '+V_MyModel;                 // user
-    2:; // reserved ...                                        // user
-    3: _user := 'Ollama [ ' + V_MyModel+' ]';                  // ollama
-    4: _user := 'Ollama - System';                             // ollama
-    5: _user := 'Ollama [ ' + V_MyModel+' ] ( Translated )';   // ollama
-    6:; // reserved ...                                        // ollama
+    C_CHATUser_Ollama  : _user := V_Username + '  > Ollama';                     // user
+    C_CHATUser_Model   : _user := V_Username + '  > '+V_MyModel;                 // user
+    C_CHATOllama_Model : _user := 'Ollama [ ' + V_MyModel+' ]';                  // ollama
+    C_CHATOllama_System: _user := 'Ollama - System';                             // ollama
   end;
 
   Frame_ChattingBox.Add_ChattingMessage(_user, ALocation, APrompt);
 
-  if CheckBox_AutoTranslation.Checked and (ALocation = 1) then
+  if CheckBox_AutoTranslation.Checked and (ALocation = C_CHATLOC_Right) then
   begin
     Application.ProcessMessages;
     var _tmode: TTranlateMode := TTranlateMode(2);
@@ -1339,28 +1587,6 @@ begin
   FSpVoice.Volume := TrackBar_Volume.Position;
 end;
 
-procedure TForm_RestOllama.Do_Abort(const AFlag: Integer);
-begin
-  FAbortingFlag := True;
-  if (HttpRest_Ollama.State > httpReady) or HttpRest_Ollama.Connected then
-  begin
-    if AFlag < 2 then
-    begin
-      Push_LogWin(1, 'Aborting operation by user.');
-      Push_LogWin(1);
-    end;
-    HttpRest_Ollama.Abort;
-    HttpRest_Ollama.ClearResp;
-    StatusBar1.Panels[2].Text := ' Abort ...';
-    Application.ProcessMessages;
-  end;
-
-  Do_TTSSpeak_Stop();
-  V_Stopwatch.Stop;
-  RequestingFlag := False;
-  FAbortingFlag := False;
-end;
-
 procedure TForm_RestOllama.SetDoneSoundFlag(const Value: Boolean);
 begin
   FDoneSoundFlag := Value;
@@ -1372,18 +1598,9 @@ end;
 procedure TForm_RestOllama.SetMemMonitoringFlag(const Value: Boolean);
 begin
   FMemMonitoringFlag := Value;
-  if Value then
-    begin
-      Label_Counter.Caption := '30';
-      Shape_Memory.Brush.Color := clLime;
-      Label_Counter.Font.Color := clWhite;
-    end
-  else
-    begin
-      Label_Counter.Caption := '0';
-      Shape_Memory.Brush.Color := clGray;
-      Label_Counter.Font.Color := clSilver;
-    end;
+  Label_Counter.Caption :=    IIF.CastBool<string>(Value, '30', '0');
+  Shape_Memory.Brush.Color := IIF.CastBool<TColor>(Value, clLime, clGray);
+  Label_Counter.Font.Color := IIF.CastBool<TColor>(Value, clWhite, clSilver);
 end;
 
 procedure TForm_RestOllama.SetModelSelected(const Value: string);
@@ -1434,12 +1651,6 @@ begin
   CheckBox_SaveOnCLose.OnClick := CheckBox_SaveOnCLoseClick;
 end;
 
-procedure TForm_RestOllama.SettingsChange(Sender: TObject);
-begin
-  if (HttpRest_Ollama.State > httpReady) or HttpRest_Ollama.Connected then
-    Do_Abort(1);
-end;
-
 procedure TForm_RestOllama.SetTopicSeleced(const Value: string);
 begin
   FTopic_Seleced := Value;
@@ -1469,6 +1680,18 @@ begin
   ShellExecute(0, PChar('Open'), PChar(_address), nil, nil, SW_SHOWNORMAL);
 end;
 
+procedure TForm_RestOllama.SkSvg_BrokerClick(Sender: TObject);
+begin
+  FFrameWelcome.Visible := False;
+  PageControl_Chatting.OnChange := nil;
+  PageControl_Chatting.ActivePage := TabSheet_ChatLogs;
+  Set_Can_Focus(Memo_ServerChattings as TWinControl);
+  PageControl_Chatting.OnChange := PageControl_ChattingChange;
+  PageControl_ChattingChange(Self);
+
+  Form_RMBroker.ShowModal;
+end;
+
 procedure TForm_RestOllama.SpeedButton_ClearLogBoxClick(Sender: TObject);
 begin
   Memo_LogWin.Lines.Clear;
@@ -1496,7 +1719,9 @@ begin
   if Pos('dolphin-mistral', _modelname) = 1 then
     Result := R_DolphiMistral else
   if Pos('mistral', _modelname) = 1 then
-    Result := R_Mistral;
+    Result := R_Mistral else
+  if Pos('qwen2', _modelname) = 1 then
+    Result := R_QWen2;
 end;
 
 procedure TForm_RestOllama.CheckBox_SaveOnCLoseClick(Sender: TObject);
@@ -1525,171 +1750,16 @@ begin
     Set_Can_Focus(Frame_ChattingBox.VST_ChattingBox as TWinControl);
 end;
 
-procedure TForm_RestOllama.Common_RestSettings(const Aflag: Integer);
-begin
-  if Aflag > 1 then
-  with HttpRest_Ollama do
-  begin
-    RestParams.Clear;
-    RestParams.PContent := TPContent.PContBodyJson;
-    Exit;
-  end;
-
-  with HttpRest_Ollama do   { Fit to Local server }
-  begin
-    DebugLevel :=       THttpDebugLevel.DebugNone;
-    NoSSL :=            True;
-    ServerAuth :=       THttpAuthType.httpAuthNone;
-    AuthBearerToken :=  '';
-    ContentTypePost :=  'application/json; charset=UTF-8';
-    Username :=         'user';
-    Password :=         '';
-    ProxyURL :=         '';
-    AlpnProtocols.CommaText := ',';
-    SocketFamily :=     TSocketFamily.sfAny;
-    Accept :=           '*.*';
-    HttpMemStrategy :=  THttpMemStrategy.HttpStratMem;
-    HttpDownFileName := '';
-    HttpDownReplace :=  False;
-    HttpUploadStrat :=  THttpUploadStrat.HttpUploadNone;
-    HttpUploadFile :=   '';
-    ProgIntSecs :=      1;
-    { Use Raw parameters }
-    RestParams.Clear;
-    RestParams.PContent := TPContent.PContBodyJson;
-
-    ShowProgress :=     True;
-    Timeout :=          300;
-  end;
-end;
-
 // * Start ------------------------------------------------------------------ //
-
-procedure TForm_RestOllama.Do_StartRequest(const Aflag: Integer; const APrompt: string='');
-begin
-  if RequestingFlag then
-  begin
-    Do_Abort(1);
-    Exit;
-  end;
-
-  if V_DummyFlag = 0 then
-  begin
-    if PageControl_Chatting.ActivePage <> Tabsheet_Chatting then
-    begin
-      PageControl_Chatting.ActivePage := Tabsheet_Chatting;
-      PageControl_ChattingChange(Self);
-      Application.ProcessMessages;
-    end;
-  end;
-
-  Common_RestSettings(V_DummyFlag);
-
-  V_MyContentPrompt := Trim(Edit_ReqContent.Text);
-  if (Aflag = 1) and (APrompt <> '') then
-    V_MyContentPrompt := APrompt;
-
-  V_MyModel := ComboBox_Models.Text;
-
-  if (V_MyContentPrompt = '') or (V_MyModel = '') then
-  begin
-    ShowMessage('Empty "Content / Model" is not allowed.');
-    Exit;
-  end;
-
-  V_MyContentPrompt := Get_ReplaceSpecialChar1(V_MyContentPrompt);
-
-  RequestingFlag := True;
-  V_BaseURL := V_BaseURLarray[Request_Type];
-  var _RawParams: string := '';
-  if Is_LlavaModel(V_MyModel) then
-    begin
-      var _ImageData: string := GetBase64Endoeings(Image_Llva);
-      if _ImageData = '' then Exit;
-      case RadioGroup_PromptType.ItemIndex of
-        0: begin
-             _RawParams := StringReplace( GC_GenerateLlavaPrompt, '%model%',    V_MyModel,         [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,             '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,             '%images%',   _ImageData,        [rfIgnoreCase]);
-           end;
-        1: begin
-             _RawParams := StringReplace( GC_ChatLlavaContent,    '%model%',    V_MyModel,         [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,             '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,             '%images%',   _ImageData,        [rfIgnoreCase]);
-           end;
-      end;
-    end
-  else
-    begin
-      var _optionflag: Boolean := False;
-      var _tseed: string := '';
-
-      if CheckBox_UseTopicSeed.Checked then
-        begin
-          _tseed := Edit_TopicSeed.Text;
-          if _tseed <> '' then
-          _optionflag := True;
-        end;
-
-      if _optionflag then
-        begin
-          case RadioGroup_PromptType.ItemIndex of
-            0: begin
-                 _RawParams := StringReplace( GC_GeneratePrompt_opt, '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,            '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,            '%seed%',     _tseed,            [rfIgnoreCase]);
-               end;
-            1: begin
-                 _RawParams := StringReplace( GC_ChatContent_opt,    '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,            '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,            '%seed%',     _tseed,            [rfIgnoreCase]);
-               end;
-          end;
-
-          // Debug
-          Add_LogWin('Request Topic Seed : '+ _tseed);
-        end
-      else
-          case RadioGroup_PromptType.ItemIndex of
-            0: begin
-                 _RawParams := StringReplace( GC_GeneratePrompt, '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,        '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
-               end;
-            1: begin
-                 _RawParams := StringReplace( GC_ChatContent,    '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,        '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
-               end;
-          end;
-    end;
-
-  Edit_ReqContent.TextHint := V_MyContentPrompt;
-  Add_LogWin('Starting REST request for URL: ' + V_BaseURL);
-  Add_LogWin('With prompt/message : "' + V_MyContentPrompt+'"');
-  Push_LogWin();
-
-  FSelectionNode := TreeView_Topics.Selected;
-  if FSelectionNode = nil then
-  FSelectionNode := TreeView_Topics.items.GetFirstNode;
-
-  FLastRequest :=  V_MyContentPrompt;
-  V_StopWatch := TStopwatch.StartNew;
-  // ------------------------------------------------------------------------------------------ //
-  var _StatCode := HttpRest_Ollama.RestRequest(THttpRequest.httpPOST, V_BaseURL, True, _RawParams);
-  // ------------------------------------------------------------------------------------------ //
-  if V_DummyFlag > 0 then
-    Add_ChattingMessage(1, 0, V_MyContentPrompt);
-
-  Push_LogWin(1, 'Async REST request started');
-end;
 
 procedure TForm_RestOllama.Do_DisplayJson(const RespStr: string);
 begin
   var _Responses: String := Unit_Common.Get_DisplayJson(RadioGroup_PromptType.ItemIndex, V_LoadModelFlag, RespStr);
-  var _jsonflag: Integer := 3;
+  var _jsonflag: Integer := C_CHATOllama_Model;
   if V_LoadModelFlag then
-    _jsonflag := 4;
+    _jsonflag := C_CHATOllama_System;
   // ------------------------------------------------------------------------ //
-  Add_ChattingMessage(_jsonflag, 1, _Responses);
+  Add_ChattingMessage(_jsonflag, C_CHATLOC_Right, _Responses);
   // ------------------------------------------------------------------------ //
 
   RequestingFlag := False;
@@ -1699,7 +1769,7 @@ begin
 
   if CheckBox_AutoLoadTopic.Checked and (not V_LoadModelFlag) then
   try
-    Do_ListUpTopic(2, FSelectionNode, V_MyContentPrompt);
+    Do_ListUpTopic(GC_MRU_AddChild, FSelectionNode, V_MyContentPrompt);
   except
     on E: Exception do
     ShowMessage(E.ClassName +' - '+E.Message);
@@ -1720,7 +1790,7 @@ begin
   var _ParseJson: string := Unit_Common.Get_DisplayJson_Models(_parsingsrc, _mcount, FModelsList);
   var _Responses: string := _ParseJson+GC_CRLF+'Models Count : '+ _mcount.ToString;
   // ------------------------------------------------------------------------ //
-  Add_ChattingMessage(4, 1, _Responses);
+  Add_ChattingMessage(C_CHATOllama_System, C_CHATLOC_Right, _Responses);
   // ------------------------------------------------------------------------ //
 
   if FModelsList.Count > 0 then
@@ -1736,7 +1806,7 @@ begin
   end;
   RequestingFlag := False;
 
-  Add_LogWin('Downloaded Size : '+ OverbyteIcsUtils.IntToKbyte(Length(RespStr)));
+  Add_LogWin('Downloaded Size : '+BytesToKMG(Length(RespStr)));
   Push_LogWin(1, 'Registered Models Count : '+ _mcount.ToString);
 
   if CheckBox_DebugToLog.Checked then
@@ -1745,39 +1815,11 @@ begin
   end;
 end;
 
-procedure TForm_RestOllama.Timer_RepeaterTimer(Sender: TObject);
-begin
-  Timer_Repeater.Enabled := False;
-  V_RepeatFlag := False;
-  StatusBar1.Panels[0].Text := 'Redirection ...';
-  Push_LogWin(1, '* Redirection once cause of 401, 404 error ...'+GC_CRLF);
-  if V_LoadModelFlag then
-    begin
-      V_LoadModelFlag := False;
-      Do_LoadModel(0);
-    end
-  else
-    Do_StartRequest(4);
-end;
-
-procedure TForm_RestOllama.WM401404REPEAT(var Msg: TMessage);
-begin
-  if V_RepeatFlag then
-  begin
-    SimpleSound_Common(DoneSoundFlag, 0);
-    V_RepeatFlag := False;
-    Do_Abort(1);
-    Sleep(1);
-    Timer_Repeater.Enabled := True;
-  end;
-
-  Msg.Result := 0;
-end;
-
 procedure TForm_RestOllama.Set_OllamaAlive(const ALiveFlag: Boolean);
 begin
-  Shape_OllamaAlive.Brush.Color := IIF.CastBool<TColor>(ALiveFlag, clSilver, clBlack);
-  Shape_OllamaAlive.Hint :=        IIF.CastBool<string>(ALiveFlag, 'Ollama Alive / On', 'Ollama Off');
+  SkSvg_OllamaAlive.Svg.Source := IIF.CastBool<string>(ALiveFlag, C_Connection_Svg1, C_Connection_Svg0);
+  SkSvg_OllamaAlive.Hint :=       IIF.CastBool<string>(ALiveFlag, 'Ollama Alive / On', 'Ollama Off');
+
   Panel_ChatRequestBox.Enabled := ALiveFlag;
   Action_StartRequest.Enabled :=  ALiveFlag;
   var _dummy: Boolean := False;
@@ -1787,145 +1829,25 @@ begin
     ShowMessage('Ollama is not connected. Check Ollama is running ...');
 end;
 
-procedure TForm_RestOllama.Shape_BrokerMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  Form_RMBroker.ShowModal;
-end;
-
-procedure TForm_RestOllama.WMNETHTTPMESSAGE(var Msg: TMessage);
+procedure TForm_RestOllama.WM_NETHTTPMESSAGE(var Msg: TMessage);
 begin
   case Msg.WParam of
-    NETHTTP_MESSAGE_ALIVE:
+    WM_NETHTTP_MESSAGE_ALIVE:
       begin
         GV_AliveOllamaFlag := Msg.LParam = 1;
         Set_OllamaAlive(GV_AliveOllamaFlag);
         FFrameWelcome.AnimationFlag := False;
         FFrameWelcome.SkSvg_ICon.Opacity := 255;
       end;
-    NETHTTP_MESSAGE_ALIST:;
+    WM_NETHTTP_MESSAGE_ALIST:;
   end;
 end;
 
 var
   V_AniFlag: Integer = 0;
 
-procedure TForm_RestOllama.HttpRest_OllamaHttpRestProg(Sender: TObject; LogOption: TLogOption; const Msg: string);
-
-  function CheckCompleted(const AMsg: string): Boolean;
-  begin
-    Result := False;
-    var _msg: string := LowerCase(AMsg);
-    Result := (Pos('completed,', _msg) > 0) and (Pos('size', _msg) > 1);
-  end;
-
-begin
-  if LogOption = loProgress then
-    begin
-      TThread.Queue(nil,
-        procedure
-        begin
-          StatusBar1.Panels[0].Text := ' * '+Msg;
-          V_AniFlag := (V_AniFlag+1) mod 2;
-          var _elapsed: Int64 := V_StopWatch.ElapsedMilliseconds;
-          StatusBar1.Panels[1].Text := IIF.CastInteger<string>(V_AniFlag, '* ', '- ')+ MSecsToSeconds(_elapsed);
-          StatusBar1.Panels[2].Text := ' Processing ...';
-        end);
-    end
-  else
-    begin
-      Push_LogWin(1, Msg);
-    end;
-
-  if CheckCompleted(Msg) then
-    Push_LogWin(1, Msg);
-end;
-
 { Non Thread Safe of Async Request ? }
 { ... V9.1 update log window, request may take a long time }
-procedure TForm_RestOllama.HttpRest_OllamaRestRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
-begin
-  if FAbortingFlag then
-  begin
-    FAbortingFlag := False;
-    Exit;
-  end;
-
-  if HttpRest_Ollama.GetAlpnProtocol <> '' then
-    Push_LogWin(1, 'ALPN Requested by Server: ' + HttpRest_Ollama.GetAlpnProtocol);
-  if ErrCode <> 0 then
-  begin
-    Push_LogWin(2, '* Request failed: Error: ' + HttpRest_Ollama.RequestDoneErrorStr +
-                   ' (rp - '+HttpRest_Ollama.ReasonPhrase+' )');
-
-    if (HttpRest_Ollama.StatusCode = 404) then
-    begin
-      V_RepeatFlag := True;
-      PostMessage(Self.Handle, WM_401_404_REPEAT, 0, 0);
-    end;
-
-    TThread.Queue(nil,
-      procedure
-      begin
-        StatusBar1.Panels[2].Text := ' Error : Code -b ' + ErrCode.ToString;
-      end);
-
-    Exit;
-  end;
-
-  if (HttpRest_Ollama.StatusCode = 400) then
-    begin
-      Push_LogWin(2, 'Error Code 400 : '+String(HttpRest_Ollama.ResponseRaw));
-      Exit;
-    end else
-  if (HttpRest_Ollama.StatusCode = 401) then
-    begin
-      Push_LogWin(1, String(HttpRest_Ollama.ResponseRaw));
-      PostMessage(Self.Handle, WM_401_404_REPEAT, 0, 0);
-      Exit;
-    end;
-
-  Add_LogWin('Content Type : ' + HttpRest_Ollama.ContentType);
-  Add_LogWin('Request done, StatusCode ' + IntToStr(HttpRest_Ollama.StatusCode));
-
-  V_RepeatFlag := False;
-
-  TThread.Queue(nil,
-    procedure
-    begin
-      V_StopWatch.Stop;
-      var _elapsed: Int64 := V_StopWatch.ElapsedMilliseconds;
-      var _elapstr: string := MSecsToSeconds(_elapsed);
-      StatusBar1.Panels[1].Text := 'et '+  _elapstr;
-      StatusBar1.Panels[2].Text := ' * Stand by ...';
-      Push_LogWin(1, 'Elapsed Time after request : '+_elapstr);
-
-      if V_DummyFlag = 0 then
-      begin
-        if V_LoadModelFlag then
-          Add_ChattingMessage(0, 0, 'Request to load model : [ '+V_MyModel + ' ]')
-        else
-          Add_ChattingMessage(1, 0, V_MyContentPrompt);
-      end;
-      { look for Json response --------------------------------------------------- }
-      if ((Pos('{', HttpRest_Ollama.ResponseRaw) > 0) or (Pos('json', HttpRest_Ollama.ContentType) > 0)) then
-        begin
-          Do_DisplayJson(string(HttpRest_Ollama.ResponseRaw));
-          SimpleSound_Common(DoneSoundFlag, 1);
-          Inc(V_DummyFlag);
-          GV_CheckingAliveStart := False;
-        end
-      else
-        begin
-          RequestingFlag := False;
-          Push_LogWin(2, '<Non-textual content received: ' + HttpRest_Ollama.ContentType + '>');
-        end;
-      { -------------------------------------------------------------------------- }
-    end);
-
-  V_LoadModelFlag := False;
-  Push_LogWin(1);
-end;
-
 procedure TForm_RestOllama.Edit_NicknameChange(Sender: TObject);
 begin
   V_Username := Edit_Nickname.Text;
@@ -1936,7 +1858,6 @@ begin
   if Key = #13 then
   begin
     Key := #0;
-    V_RepeatFlag := True;
     Do_StartRequest(2);
   end;
 end;
@@ -1950,7 +1871,6 @@ end;
 procedure TForm_RestOllama.PageControl_ChattingChange(Sender: TObject);
 begin
   var _visflag_0: Boolean := (not FFrameWelcome.Visible) and (PageControl_Chatting.ActivePage = Tabsheet_Chatting);
-
   if _visflag_0 and SkAnimatedImage_Chat.Visible then
     SkAnimatedImage_Chat.Animation.Enabled := True;
   if _visflag_0 then
@@ -1988,8 +1908,6 @@ begin
   if RequestingFlag then
     Do_Abort(1);
 
-  Common_RestSettings;
-
   V_MyModel := ComboBox_Models.Text;
   if V_MyModel = '' then
   begin
@@ -2002,17 +1920,24 @@ begin
 
   V_BaseURL := V_BaseURLarray[TRequest_Type.ort_Generate];
   V_MyContentPrompt := '';
-  var _MyParams: string := StringReplace( GC_LoadModelPrompt, '%model%', V_MyModel, []);
+  var _ModelParams: string := StringReplace( GC_LoadModelPrompt, '%model%', V_MyModel, []);
 
   Add_LogWin('Starting REST request for Load Model: ' + V_BaseURL);
   Add_LogWin('With Model : ' + V_MyModel);
   Push_LogWin();
   V_StopWatch := TStopwatch.StartNew;                    // httpGET ?
-  // ------------------------------------------------------------------------------------------ //
-  var _StatCode := HttpRest_Ollama.RestRequest(THttpRequest.httpPOST, V_BaseURL, True, _MyParams);
-  // ------------------------------------------------------------------------------------------ //
-  if V_DummyFlag > 0 then
-  Add_ChattingMessage(0, 0, 'Request to load model : [ '+V_MyModel + ' ]');
+  // ------------------------------------------------------------------------ //
+  Common_RestSettings(V_DummyFlag);
+  with RESTRequest_Ollama do
+  begin
+    Params.AddBody(_ModelParams, CONTENTTYPE_APPLICATION_JSON);
+    ExecuteAsync(
+      OnRESTRequest_OllamaAfterRequest,
+      True, True,
+      OnRESTRequest_OllamaError);
+  end;
+  // ------------------------------------------------------------------------ //
+  Add_ChattingMessage(C_CHATUser_Ollama, C_CHATLOC_Left, 'Request to load model : [ '+V_MyModel + ' ]');
 
   Push_LogWin(1, 'Async REST request Load Model : '+V_MyModel);
 end;
@@ -2021,7 +1946,7 @@ end;
 
 procedure TForm_RestOllama.SpeedButton_ListModelsClick(Sender: TObject);
 begin
-  Do_ListModels(0);
+  Do_ListModels();
 end;
 
 procedure TForm_RestOllama.SpeedButton_LlavaClick(Sender: TObject);
@@ -2044,7 +1969,7 @@ begin
   StatusBar1.Panels[1].Text := '';
   StatusBar1.Panels[2].Text := ' Processing ...';
   // ------------------------------------------------------------------------ //
-  Add_ChattingMessage(0, 0, _Request);
+  Add_ChattingMessage(C_CHATUser_Ollama, C_CHATLOC_Left, _Request);
   // ------------------------------------------------------------------------ //
   Add_LogWin('Async REST request List Models ...');
   Push_LogWin();
@@ -2172,7 +2097,7 @@ begin
 
   if _ItemStr <> '' then
   begin
-    _ItemStr := Get_ReplaceSpecialChar(_ItemStr);
+    _ItemStr := Get_ReplaceSpecialChar4Trans(_ItemStr);
     if AMode = TTranlateMode.otm_MessagePush then    // Deprecating ...
       begin
         var _transresult := Get_GoogleTranslatorEx(0, _codefrom, _codeto, _ItemStr);
@@ -2227,7 +2152,7 @@ end;
 var
   V_LastInput: string = 'New prompt ?';
 
-procedure TForm_RestOllama.Do_AddtoRequest(const AFlag: Integer);
+procedure TForm_RestOllama.Do_AddToRequest(const AFlag: Integer);
 begin
   var _node: TTreeNode := TreeView_Topics.Selected;
   if Assigned(_node) then
@@ -2242,17 +2167,15 @@ begin
     Edit_TopicSeed.Text := _tseed;
   end;
 
-  if AFlag = 3 then
+  if AFlag = C_TOPIC_Run then
   begin
-    V_RepeatFlag := True;
     Do_StartRequest(7);
   end;
 end;
 
 procedure TForm_RestOllama.Do_ListUpTopic(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string);
 begin
-  if APrompt = '' then
-  Exit;
+  if APrompt = '' then Exit;
 
   var _seed: string := FTopicsMRU.AddInsertNode(AFlag, ANode, APrompt);
   Edit_TopicSeed.Text := _seed;
@@ -2264,7 +2187,7 @@ procedure TForm_RestOllama.SpeedButton_NewRootnodeClick(Sender: TObject);
 begin
   if TreeView_Topics.Items.Count < 1 then
     begin
-      Do_ListUpTopic(0, nil, '');
+      Do_ListUpTopic(GC_MRU_NewRoot, nil, '');
     end
   else
     begin
@@ -2272,7 +2195,7 @@ begin
       var _clickedok: Boolean := Vcl.Dialogs.InputQuery('New Topic', 'Prompt', _newprompt);
       if _clickedok and (_newprompt <> '') then
         begin
-          Do_ListUpTopic(1, nil, _newprompt);
+          Do_ListUpTopic(GC_MRU_AddRoot, nil, _newprompt);
         end;
     end;
 end;
@@ -2286,7 +2209,7 @@ procedure TForm_RestOllama.SpeedButton_AddTopicClick(Sender: TObject);
 begin
   if TreeView_Topics.Items.Count < 1 then
     begin
-      Do_ListUpTopic(0, nil, '');
+      Do_ListUpTopic(GC_MRU_NewRoot, nil, '');
     end
   else
     begin
@@ -2294,7 +2217,7 @@ begin
       var _clickedok: Boolean := Vcl.Dialogs.InputQuery('Input Box', 'Prompt', _newprompt);
       if _clickedok and (_newprompt <> '') then
         begin
-          Do_ListUpTopic(2, TreeView_Topics.Selected, _newprompt);
+          Do_ListUpTopic(GC_MRU_AddChild, TreeView_Topics.Selected, _newprompt);
         end;
     end;
 end;
@@ -2336,7 +2259,7 @@ begin
     Exit;
   end;
 
-  Do_ListUpTopic(2, TreeView_Topics.Selected, _prompt);
+  Do_ListUpTopic(GC_MRU_AddChild, TreeView_Topics.Selected, _prompt);
 end;
 
 procedure TForm_RestOllama.SpeedButton_BeepClick(Sender: TObject);
@@ -2358,7 +2281,7 @@ end;
 
 procedure TForm_RestOllama.TreeView_TopicsClick(Sender: TObject);
 begin
-  Do_AddtoRequest(0);
+  Do_AddToRequest(C_TOPIC_Add);
 end;
 
 const
@@ -2386,7 +2309,6 @@ begin
       _tseed := PTopicData(_node.Data)^.td_Seed;
     Edit_TopicSeed.Text := _tseed;
 
-    V_RepeatFlag := True;
     Do_StartRequest(8);
   end;
 end;
@@ -2418,7 +2340,7 @@ end;
 
 procedure TForm_RestOllama.SpeedButton_RunRequestClick(Sender: TObject);
 begin
-  Do_AddtoRequest(3);
+  Do_AddToRequest(C_TOPIC_Run);
 end;
 
 procedure TForm_RestOllama.SpeedButton_SaveAllLogesClick(Sender: TObject);
@@ -2530,12 +2452,6 @@ end;
 
 procedure TForm_RestOllama.ComboBox_TTSEngineChange(Sender: TObject);
 begin
-  //if TTS_Speaking then
-  //begin
-  //  Return_FocusToVST();
-  //  Exit;
-  //end;
-
   var _index: Integer := ComboBox_TTSEngine.ItemIndex;
   var _SOToken: ISpeechObjectToken := ISpeechObjectToken(Pointer(ComboBox_TTSEngine.Items.Objects[_index]));
   FSpVoice.Voice := _SOToken;
@@ -2604,13 +2520,11 @@ begin
 end;
 
 procedure TForm_RestOllama.SetTTS_Speaking(const Value: Boolean);
-const
-  c_Color: array [Boolean] of TColor = (clGray, clLime);
 begin
   if FTTS_Speaking <> Value then
   begin
     FTTS_Speaking := Value;
-    Shape_TTS.Brush.Color := c_Color[Value];
+    Shape_TTS.Brush.Color := IIF.CastBool<TColor>(Value, clLime, clGray);
   end;
 end;
 
@@ -2639,7 +2553,7 @@ end;
 procedure TForm_RestOllama.SpeedButton_TTSPlayClick(Sender: TObject);
 begin
   case TSpeedButton(Sender).Tag of
-    0:
+    C_TTS_Play:
       begin
         if not FBeenPaused then
           Do_TTSSpeak_Ex(0, Get_TTSText())
@@ -2649,13 +2563,13 @@ begin
             FBeenPaused := False;
           end
       end;
-    1:
+    C_TTS_Pause:
       begin
         if not FBeenPaused then
           FSpVoice.Pause;
         FBeenPaused := True
       end;
-    2:
+    C_TTS_Stop:
       Do_TTSSpeak_Stop();
   end;
 end;
@@ -2704,6 +2618,11 @@ begin
   end;
 end;
 
+const
+  C_DOSCMD_Start  = 0;
+  C_DOSCMD_Stop   = 1;
+  C_DOSCMD_Finish = 2;
+
 procedure TForm_RestOllama.DM_DosCommandProc(const AFlag: Integer; const AText: string);
 begin
   if (AFlag = 0) and RequestingFlag then
@@ -2712,7 +2631,7 @@ begin
     Exit;
   end;
 
-  if AFlag = 0 then
+  if AFlag = C_DOSCMD_Start then
     begin
       RequestingFlag := True;
       var _Command := 'Dos Command - "'+GV_DosCommand.Command+'"';
@@ -2721,11 +2640,11 @@ begin
       StatusBar1.Panels[1].Text := '';
       StatusBar1.Panels[2].Text := ' Processing ...';
       // -------------------------------------------------------------------- //
-      Add_ChattingMessage(0, 0, _Command);
+      Add_ChattingMessage(C_CHATUser_Ollama, C_CHATLOC_Left, _Command);
       // -------------------------------------------------------------------- //
       V_StopWatch := TStopwatch.StartNew;
     end else
-  if AFlag = 2 then
+  if AFlag = C_DOSCMD_Finish then
     begin
       // -------------------------------------------------------------------- //
       var _responses: string := GV_DosCommand.Get_DosResult;
@@ -2736,7 +2655,7 @@ begin
       StatusBar1.Panels[1].Text := 'et '+  _elapstr;
       StatusBar1.Panels[2].Text := ' * Stand by ...';
       // -------------------------------------------------------------------- //
-      Add_ChattingMessage(4, 1, _responses);
+      Add_ChattingMessage(C_CHATOllama_System, C_CHATLOC_Right, _responses);
       // -------------------------------------------------------------------- //
       RequestingFlag := False;
       Push_LogWin(1);
@@ -2748,24 +2667,24 @@ begin
   case Msg.WParam of
     DOS_MESSAGE_START:
       begin
-        DM_DosCommandProc(0);
+        DM_DosCommandProc(C_DOSCMD_Start);
         StatusBar1.Panels[0].Text := 'Dos command started ...';
       end;
     DOS_MESSAGE_STOP:
       begin
-        DM_DosCommandProc(1);
+        DM_DosCommandProc(C_DOSCMD_Stop);
         StatusBar1.Panels[0].Text := 'Dos command stop ...';
       end;
     DOS_MESSAGE_FINISH:
       begin
         SimpleSound_Common(DoneSoundFlag, 1);
-        DM_DosCommandProc(2);
+        DM_DosCommandProc(C_DOSCMD_Finish);
         StatusBar1.Panels[0].Text := 'Dos command finish ...';
       end;
     DOS_MESSAGE_ERROR:
       begin
         SimpleSound_Common(DoneSoundFlag, 0);
-        DM_DosCommandProc(2);
+        DM_DosCommandProc(C_DOSCMD_Finish);
         StatusBar1.Panels[0].Text := GV_DosCommand.Get_DosResult;
       end;
   end;
@@ -2780,71 +2699,113 @@ begin
   GetLocalPublicIP(1);
 end;
 
-procedure TForm_RestOllama.Log_Server(const AFlag: Integer; const ALog: string);
+procedure TForm_RestOllama.Build_BanListUp(const AFlag: Integer);
 begin
-  var _log: string := ALog;
-  if AFlag < 4 then
-    _log := Format('%s  %s', [FormatDateTime('hh:nn:ss', Time), ALog]);
-  Memo_ServerChattings.Lines.Add(_log);
-  PostMessage(Memo_ServerChattings.Handle, EM_LINESCROLL, 0, 999999);
+  GV_RemoteBanList.Clear;
+  if CheckListBox_ConnIPs.items.Count > 0 then
+  begin
+    for var _i := 0 to CheckListBox_ConnIPs.items.Count-1 do
+      begin
+        if CheckListBox_ConnIPs.Checked[_i] then
+        GV_RemoteBanList.Add(CheckListBox_ConnIPs.Items[_i]);
+      end;
+  end;
 end;
 
-procedure TForm_RestOllama.Log_Server2(const AFlag: Integer; const ALog: string);
+procedure TForm_RestOllama.CheckListBox_ConnIPsClickCheck(Sender: TObject);
+begin
+  CheckListBox_ConnIPs.Enabled := False;
+  try
+    Build_BanListUp;
+  finally
+    CheckListBox_ConnIPs.Enabled := True;
+  end;
+end;
+
+procedure TForm_RestOllama.Log_Server(const AFlag: Integer; const ALog: string);
 begin
   var _log: string := Format('%s  %s', [FormatDateTime('hh:nn:ss', Time), ALog]);
   Memo_ServerChattings.Lines.Add(_log);
   PostMessage(Memo_ServerChattings.Handle, EM_LINESCROLL, 0, 999999);
+
+  if AFlag = WF_DM_CONNECT_FLAG then
+    begin
+      var _posi: Integer := Pos('/', ALog);
+      if _posi > 0 then
+      begin
+        var _ip: string := Trim(Copy(ALog, _posi+1, Length(ALog)-_posi));
+        if CheckListBox_ConnIPs.Items.IndexOf(_ip)  < 0 then
+        begin
+          CheckListBox_ConnIPs.Items.Add(_ip);
+        end;
+      end;
+    end else
+  if AFlag = WF_DM_DISCONNECT_FLAG then
+    begin
+     var _posi: Integer := Pos('/', ALog);
+      if _posi > 0 then
+      begin
+        var _ip: string := Trim(Copy(ALog, _posi+1, Length(ALog)-_posi));
+        var _index := CheckListBox_ConnIPs.Items.IndexOf(_ip);
+        if _index >= 0 then
+        begin
+          CheckListBox_ConnIPs.Items.Delete(_index);
+          Build_BanListUp();
+        end;
+      end;
+    end;
 end;
 
-procedure TForm_RestOllama.WFDMMESSAGE(var Msg: TMessage);
-//Shape_Broker
+procedure TForm_RestOllama.WF_DMMESSAGE(var Msg: TMessage);
 begin
   case Msg.WParam of
     WF_DM_MESSAGE_ADDRESS:
       begin
-        Log_Server(1, DM_ServerAddress);
+        Self.Caption := Format('%s   ( IP - Local %s  Public %s,  port - %d )', [GC_MainCaption0,DM_LocalIP,DM_PublicIP,DM_Port]);
+        Label_IP_Port.Caption := DM_ServerAddress;
       end;
     WF_DM_MESSAGE_SERVERON:
       begin
-        Shape_Broker.Brush.Color := clSilver;
-        Log_Server(2, 'Remote Broker/Server is activated.');
+        Log_Server(WF_DM_SERVERON_FLAG, 'Remote Broker/Server is activated.');
       end;
     WF_DM_MESSAGE_SERVEROFF:
       begin
-        Shape_Broker.Brush.Color := clBlack;
-        Log_Server(3, 'Remote Broker/Server is down.');
+        Log_Server(WF_DM_SERVEROFF_FLAG, 'Remote Broker/Server is down.');
       end;
     WF_DM_MESSAGE_CONNECT:
       begin
-        Log_Server(4, DM_Server.Get_LogByIndex(Msg.LParam));
+        Log_Server(WF_DM_CONNECT_FLAG, DM_Server.Get_LogByIndex(Msg.LParam));
       end;
     WF_DM_MESSAGE_DISCONNECT:
       begin
-        Log_Server(5, DM_Server.Get_LogByIndex(Msg.LParam));
+        Log_Server(WF_DM_DISCONNECT_FLAG, DM_Server.Get_LogByIndex(Msg.LParam));
       end;
-    WF_DM_MESSAGE_LOGON:
+    WF_DM_MESSAGE_LOGON..WF_DM_MESSAGE_IMAGE:
       begin
-        Log_Server(6, DM_Server.Get_LogByIndex(Msg.LParam));
-      end;
-    WF_DM_MESSAGE_REQUEST:
-      begin
-        Log_Server2(7, DM_Server.Get_LogByIndex(Msg.LParam));
-      end;
-    WF_DM_MESSAGE_REQUESTEX:
-      begin
-        Log_Server2(8, DM_Server.Get_LogByIndex(Msg.LParam));
-      end;
-    WF_DM_MESSAGE_RESPONSE:
-      begin
-        Log_Server2(9, DM_Server.Get_LogByIndex(Msg.LParam));
-      end;
-    WF_DM_MESSAGE_IMAGE:
-      begin
-        Log_Server2(10, DM_Server.Get_LogByIndex(Msg.LParam));
+        Log_Server(Msg.WParam - WF_DM_MESSAGE, DM_Server.Get_LogByIndex(Msg.LParam));
       end;
   end;
 
   Msg.Result := 0;
+end;
+
+{ Remote Access ... }
+
+procedure TForm_RestOllama.SetRemoteProcessingFlag(const Value: Boolean);
+begin
+  FRemoteProcessingFlag := Value;
+  FRemoteProcessCntFlag  := 0;
+  SkSvg_Broker.Svg.Source := IIF.CastBool<string>(Value, C_RemoteConn_Svg1, C_RemoteConn_Svg0);
+end;
+
+procedure TForm_RestOllama.SetRemoteProcessCntFlag(const Value: Integer);
+begin
+  FRemoteProcessCntFlag := Value;
+  if FRemoteProcessingFlag then
+  begin
+    var _cntflag: Boolean := ((Value mod 2) = 1);
+    SkSvg_Broker.Svg.Source := IIF.CastBool<string>(_cntflag, C_RemoteConn_Svg1, C_RemoteConn_Svg0);
+  end;
 end;
 
 initialization

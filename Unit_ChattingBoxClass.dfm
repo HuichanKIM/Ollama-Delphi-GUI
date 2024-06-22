@@ -1,8 +1,8 @@
 object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
   Left = 0
   Top = 0
-  Width = 640
-  Height = 480
+  Width = 589
+  Height = 607
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,8 +15,8 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
   object VST_ChattingBox: TVirtualStringTree
     Left = 0
     Top = 0
-    Width = 640
-    Height = 480
+    Width = 589
+    Height = 607
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -449,6 +449,7 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     end
     object pmn_CopyText: TMenuItem
       Caption = 'Copy Text of Selected Node'
+      ShortCut = 32835
       OnClick = pmn_CopyTextClick
     end
     object pmn_Delete: TMenuItem
@@ -479,7 +480,7 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
       Caption = '-'
     end
     object pmn_ShowLogs: TMenuItem
-      Caption = 'Show Logs'
+      Caption = 'Show Logs / Broker'
       ShortCut = 32844
     end
   end

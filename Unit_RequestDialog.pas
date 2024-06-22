@@ -106,7 +106,7 @@ begin
 
   if _ItemStr <> '' then
   begin
-    _ItemStr := Get_ReplaceSpecialChar(_ItemStr);
+    _ItemStr := Get_ReplaceSpecialChar4Trans(_ItemStr);
     Memo_Request.lines.Text := Get_GoogleTranslatorEx(0, _codefrom, _codeto, _ItemStr);
   end;
 end;

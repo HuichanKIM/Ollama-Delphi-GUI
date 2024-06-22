@@ -66,11 +66,12 @@
         <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Ics.Fmx;Winapi;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\$(Platform)\$(Config)\dcu</DCC_DcuOutput>
         <DCC_ExeOutput>.\$(Platform)\$(Config)\bin</DCC_ExeOutput>
-        <DCC_UnitSearchPath>.\Include;$(LIBS2024)\Overbytes_icsv91\Source;$(LIBS2024)\Overbytes_icsv91\Source\Include;$(LIBS2024)\TurboPack\DOSCommand\Source;$(LIBS2024)\NetCom7-master\Source;$(LIBS2024)\NetCom7-master\Source\Encryption;.\Include\NetCom7\Source;.\Include\NetCom7\Encryption;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>.\Include;.\Include\NetCom7\Source;.\Include\NetCom7\Source\Encryption;$(LIBS2024)\TurboPack\DOSCommand\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=OverbyteIcsHttpRestTst;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=OverbyteIcsHttpRestTst;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.OverbyteIcsHttpRestTst</VerInfo_Keys>
         <Custom_Styles>&quot;Windows10 SlateGray|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows10SlateGray.vsf&quot;;&quot;Windows11 Impressive Dark|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows11_Impressive_Dark.vsf&quot;;&quot;Windows11 Modern Dark|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows11_Modern_Dark.vsf&quot;</Custom_Styles>
+        <FeatureFilesAdded>Interbase;DB2;Firebird;SQLite</FeatureFilesAdded>
         <DCC_Define>SKIA;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
@@ -171,6 +172,11 @@
                 <Platform value="Win64">True</Platform>
             </Platforms>
             <Deployment Version="4">
+                <DeployFile LocalName="$(BDS)\bin64\midas.dll" Configuration="Debug" Class="File">
+                    <Platform Name="Win64">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile Condition="'$(SKIADIR)'==''" Required="true" LocalName="$(BDS)\bin64\sk4d.dll" Configuration="Debug" Class="Skia">
                     <Platform Name="Win64">
                         <RemoteDir>.\</RemoteDir>
@@ -1168,12 +1174,10 @@
         </DCCReference>
         <DCCReference Include="Unit_DMServer.pas">
             <Form>DM_Server</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="Unit_RMBroker.pas">
             <Form>Form_RMBroker</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <RcItem Include="beep0.wav">
             <ContainerId>ResourceItem</ContainerId>

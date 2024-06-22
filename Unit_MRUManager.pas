@@ -59,7 +59,7 @@ uses
   Unit_Common;
 
 { TMRU_Manager ... }
-{ Returns the next node in the tree view at the same level as the calling node. }
+{ getNextSibling - Returns the next node in the tree view at the same level as the calling node. }
 
 function TMRU_Manager.AddInsertNode(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string): string;
 
@@ -80,7 +80,7 @@ begin
 
   FTreeView.Items.BeginUpdate;
   case AFlag of
-    0:
+    GC_MRU_NewRoot:
       begin
         New(_nodedata);
         with _nodedata^ do
@@ -91,7 +91,7 @@ begin
           end;
         _newnode := FTreeView.Items.AddObjectFirst(nil, _nodedata^.td_Topic, _nodedata);
       end;
-    1:
+    GC_MRU_AddRoot:
       begin
         New(_nodedata);
         with _nodedata^ do
@@ -102,7 +102,7 @@ begin
           end;
         _newnode := FTreeView.Items.InsertObject(_firstnode, APrompt, _nodedata);
       end;
-    2:
+    GC_MRU_AddChild:
       begin
         New(_nodedata);
         with _nodedata^ do
@@ -252,7 +252,6 @@ end;
 procedure TMRU_Manager.Clear_TreeData(const AFalg: Integer);
 begin
   var _TopicData: PTopicData;
-  var _PromptData: PTopicData;
   var _node: TTreeNode := FTreeView.Items.GetFirstNode;
 
   while _node <> nil do

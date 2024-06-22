@@ -3,7 +3,7 @@ object Form_RMBroker: TForm_RMBroker
   Top = 0
   ActiveControl = Memo_Log_Rm
   BorderStyle = bsDialog
-  Caption = 'Remote Broker'
+  Caption = 'Remote Broker / Server'
   ClientHeight = 369
   ClientWidth = 494
   Color = clBtnFace
@@ -31,11 +31,11 @@ object Form_RMBroker: TForm_RMBroker
     TabOrder = 0
     object Label1: TLabel
       AlignWithMargins = True
-      Left = 10
+      Left = 33
       Top = 3
       Width = 40
       Height = 19
-      Margins.Left = 10
+      Margins.Left = 5
       Align = alLeft
       Caption = 'Current'
       Layout = tlCenter
@@ -43,9 +43,9 @@ object Form_RMBroker: TForm_RMBroker
     end
     object Label_Connection: TLabel
       AlignWithMargins = True
-      Left = 63
+      Left = 86
       Top = 3
-      Width = 280
+      Width = 257
       Height = 19
       Margins.Left = 10
       Align = alClient
@@ -60,6 +60,7 @@ object Form_RMBroker: TForm_RMBroker
       ParentFont = False
       Layout = tlCenter
       StyleElements = [seClient, seBorder]
+      ExplicitLeft = 63
       ExplicitWidth = 274
     end
     object SpeedButton_GetUsers: TSpeedButton
@@ -77,6 +78,16 @@ object Form_RMBroker: TForm_RMBroker
       ExplicitLeft = 352
       ExplicitTop = 0
       ExplicitHeight = 25
+    end
+    object SkSvg_RMBroker: TSkSvg
+      AlignWithMargins = True
+      Left = 3
+      Top = 2
+      Width = 22
+      Height = 20
+      Margins.Top = 2
+      Align = alLeft
+      ExplicitTop = -1
     end
     object CheckBox_Logoption: TCheckBox
       Left = 392
@@ -110,62 +121,28 @@ object Form_RMBroker: TForm_RMBroker
     TabOrder = 1
     WordWrap = False
   end
-  object HttpRestOllama_RM: TSslHttpRest
-    LocalAddr = '0.0.0.0'
-    LocalAddr6 = '::'
-    ProxyPort = '80'
-    Agent = 'Ollama Client'
+  object RESTClient_RM: TRESTClient
     Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
-    AcceptLanguage = 'utf-8, *;q=0.8'
-    Username = 'user'
-    NoCache = False
-    ResponseNoException = False
-    ContentTypePost = 'application/json'
-    LmCompatLevel = 0
-    RequestVer = '1.1'
-    FollowRelocation = True
-    LocationChangeMaxCount = 5
-    ServerAuth = httpAuthNone
-    ProxyAuth = httpAuthNone
-    BandwidthLimit = 10000
-    BandwidthSampling = 1000
-    Options = [httpoNoBasicAuth, httpoNoNTLMAuth, httpoEnableContentCoding, httpoNoDigestAuth]
-    Timeout = 300
-    SocksLevel = '5'
-    SocksAuthentication = socksNoAuthentication
-    SocketFamily = sfAny
-    SocketErrs = wsErrFriendly
-    RestParams.PContent = PContUrlencoded
-    RestParams.RfcStrict = False
-    RestParams.FormDataUtf8 = True
-    RestParams = <>
-    DebugLevel = DebugNone
-    MaxBodySize = 1024000
-    SslCliSecurity = sslCliSecNone
-    SslSessCache = False
-    CertVerMethod = CertVerNone
-    SslRootFile = 'RootCaCertsBundle.pem'
-    SslRevocation = False
-    SslReportChain = False
-    SslAllowSelfSign = False
-    HttpMemStrategy = HttpStratMem
-    HttpDownReplace = False
-    ResumeMinSize = 65535
-    ProgIntSecs = 1
-    ShowProgress = True
-    HttpUploadStrat = HttpUploadNone
-    SharedSslCtx = False
-    NoSSL = True
-    MaxLogParams = 4096
-    OnHttpRestProg = HttpRestOllama_RMHttpRestProg
-    OnRestRequestDone = HttpRestOllama_RMRestRequestDone
-    Left = 140
-    Top = 128
+    AcceptCharset = 'utf-8, *;q=0.8'
+    Params = <>
+    ReadTimeout = 60000
+    SynchronizedEvents = False
+    OnSendData = RESTClient_RMSendData
+    OnReceiveData = RESTClient_RMReceiveData
+    Left = 160
+    Top = 104
   end
-  object Timer_Repeater_Rm: TTimer
-    Enabled = False
-    OnTimer = Timer_Repeater_RmTimer
-    Left = 219
-    Top = 224
+  object RESTRequest_RM: TRESTRequest
+    Client = RESTClient_RM
+    Method = rmPOST
+    Params = <>
+    Response = RESTResponse_RM
+    SynchronizedEvents = False
+    Left = 264
+    Top = 102
+  end
+  object RESTResponse_RM: TRESTResponse
+    Left = 220
+    Top = 151
   end
 end

@@ -42,6 +42,7 @@ uses
   Unit_Common,
   Unit_Main,
   System.Threading,
+  System.NetConsts,
   System.Net.HttpClient,
   System.Net.URLClient;
 
@@ -69,7 +70,7 @@ begin
       _HTTP.Free;
     end;
 
-    PostMessage(Form_RestOllama.Handle, NETHTTP_MESSAGE, NETHTTP_MESSAGE_ALIVE, Ord(GV_AliveOllamaFlag));
+    PostMessage(Form_RestOllama.Handle, WM_NETHTTP_MESSAGE, WM_NETHTTP_MESSAGE_ALIVE, Ord(GV_AliveOllamaFlag));
   end);
 end;
 
@@ -149,7 +150,7 @@ begin
       _HTTP.Free;
     end;
 
-    PostMessage(Form_RestOllama.Handle, NETHTTP_MESSAGE, NETHTTP_MESSAGE_ALIVE, Ord(GV_AliveOllamaFlag));
+    PostMessage(Form_RestOllama.Handle, WM_NETHTTP_MESSAGE, WM_NETHTTP_MESSAGE_ALIVE, Ord(GV_AliveOllamaFlag));
     LogReturn(_response+#13#10+ IIF.CastBool<string>(GV_AliveOllamaFlag, 'Alive On', 'Not Alive'));
     if not GV_AliveOllamaFlag then
       begin

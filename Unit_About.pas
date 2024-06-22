@@ -108,7 +108,8 @@ uses
   Vcl.StyleAPI,
   Winapi.ShellAPI,
   Unit_Main,
-  Unit_Common;
+  Unit_Common,
+  Unit_DMServer;
 
 {$R *.dfm}
 
@@ -131,7 +132,6 @@ const
         'Development Tool  (GUI)'+#13#10+
         'Embarcadero Delphi 12.1  ( Object Pascal )'+#13#10#13#10+
         ' 3rd party Reference Library  (* open source)'+#13#10+
-        ' - Overbytes ICS 9.1 by François Piette (*)'+#13#10+
         ' - Virtual-TreeView by JAM-Software (*)'+#13#10+
         ' - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)'+#13#10+
         ' - FastMM4-AVX by Maxim Masiutin (*)'+#13#10+
@@ -210,6 +210,13 @@ begin
   FUpdateLockFlag := False;
   Label_Development.Caption := C_DevelopInfo;
   Label_SystemInfo.Caption := Get_SystemInfo();
+  if DM_ACTIVATECODE = 1 then
+  begin
+    Label_SystemInfo.Caption := Label_SystemInfo.Caption+GC_CRLF+GC_CRLF+
+                                '   Local IP : '+ DM_LocalIP +GC_CRLF+
+                                '   Public IP : '+ DM_PublicIP +GC_CRLF+
+                                '   Port : '+IntToStr(DM_Port);
+  end;
   Update_Shortcuts();
 end;
 

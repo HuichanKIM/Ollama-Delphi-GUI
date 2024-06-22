@@ -611,10 +611,16 @@ object Form_RestOllama: TForm_RestOllama
           Top = 20
           Width = 23
           Height = 22
-          Hint = 'Set New Font'
-          ImageIndex = 58
-          ImageName = 'ic_title_48px'
+          Hint = 'Set New Font Size'
+          Caption = 'Ff'
           Images = SVGIconVirtualImageList1
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clSilver
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Style = [fsBold]
+          ParentFont = False
+          StyleElements = [seClient, seBorder]
           OnClick = SpeedButton_SetFontClick
         end
         object TrackBar_GlobalFontSize: TTrackBar
@@ -669,7 +675,6 @@ object Form_RestOllama: TForm_RestOllama
           Top = 18
           Width = 50
           Height = 21
-          ReadOnly = True
           TabOrder = 1
           StyleElements = [seClient, seBorder]
         end
@@ -1301,109 +1306,178 @@ object Form_RestOllama: TForm_RestOllama
             Align = alBottom
             BevelOuter = bvNone
             TabOrder = 2
-            object Memo_ServerChattings: TMemo
+            object Panel_BanList: TPanel
               AlignWithMargins = True
-              Left = 3
-              Top = 23
-              Width = 708
-              Height = 124
-              Align = alClient
-              BevelInner = bvNone
+              Left = 591
+              Top = 3
+              Width = 120
+              Height = 144
+              Margins.Left = 0
+              Align = alRight
               BevelOuter = bvNone
-              BorderStyle = bsNone
-              Ctl3D = False
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clSilver
-              Font.Height = -13
-              Font.Name = 'Segoe UI'
-              Font.Style = []
-              Lines.Strings = (
-                'Serve as Remote Chatting'
-                '- Under Construction ...')
-              ParentCtl3D = False
-              ParentFont = False
-              ReadOnly = True
-              ScrollBars = ssVertical
+              ShowCaption = False
               TabOrder = 0
-              StyleElements = [seClient, seBorder]
+              object Label2: TLabel
+                Left = 0
+                Top = 0
+                Width = 120
+                Height = 20
+                Align = alTop
+                AutoSize = False
+                Caption = '* Ban List'
+                StyleElements = [seClient, seBorder]
+                ExplicitWidth = 130
+              end
+              object CheckListBox_ConnIPs: TCheckListBox
+                Left = 0
+                Top = 20
+                Width = 120
+                Height = 124
+                Align = alClient
+                ItemHeight = 15
+                Items.Strings = (
+                  '192.168.123.123'
+                  '127.0.0.1')
+                TabOrder = 0
+                OnClickCheck = CheckListBox_ConnIPsClickCheck
+              end
             end
-            object Panel2: TPanel
+            object Panel_RemoteChattBase: TPanel
               Left = 0
               Top = 0
-              Width = 714
-              Height = 20
-              Align = alTop
-              Alignment = taLeftJustify
+              Width = 591
+              Height = 150
+              Align = alClient
               BevelOuter = bvNone
-              Caption = '* Server'
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clBtnFace
-              Font.Height = -12
-              Font.Name = 'Segoe UI'
-              Font.Style = [fsBold]
-              ParentFont = False
               TabOrder = 1
-              object SpeedButton_ShutdownClients: TSpeedButton
-                Left = 691
-                Top = 0
-                Width = 23
-                Height = 20
-                Hint = 'ShutDowm Broker / All Client'
-                Margins.Top = 0
-                Margins.Right = 10
-                Margins.Bottom = 0
-                Align = alRight
-                ImageIndex = 31
-                ImageName = 'ic_highlight_off_48px'
-                Images = SVGIconVirtualImageList1
-                OnClick = SpeedButton_ShutdownClientsClick
-                ExplicitLeft = 689
+              object Memo_ServerChattings: TMemo
+                AlignWithMargins = True
+                Left = 3
+                Top = 23
+                Width = 585
+                Height = 124
+                Align = alClient
+                BevelInner = bvNone
+                BevelOuter = bvNone
+                BorderStyle = bsNone
+                Ctl3D = False
+                Font.Charset = DEFAULT_CHARSET
+                Font.Color = clSilver
+                Font.Height = -13
+                Font.Name = 'Segoe UI'
+                Font.Style = []
+                Lines.Strings = (
+                  'Serve as Remote Chatting'
+                  '- Under Construction ...')
+                ParentCtl3D = False
+                ParentFont = False
+                ReadOnly = True
+                ScrollBars = ssVertical
+                TabOrder = 0
+                StyleElements = [seClient, seBorder]
               end
-              object SpeedButton_ShowRmBroker: TSpeedButton
-                Left = 645
+              object Panel_RemoteBroker: TPanel
+                Left = 0
                 Top = 0
-                Width = 23
+                Width = 591
                 Height = 20
-                Hint = 'Show Remote Broker'
-                Margins.Top = 0
-                Margins.Bottom = 0
-                Align = alRight
-                ImageIndex = 48
-                ImageName = 'ic_storage_48px'
-                Images = SVGIconVirtualImageList1
-                OnClick = SpeedButton_ShowRmBrokerClick
-                ExplicitLeft = 552
-              end
-              object SpeedButton_GetIPs: TSpeedButton
-                Left = 622
-                Top = 0
-                Width = 23
-                Height = 20
-                Hint = 'Get IP - Local, Public'
-                Margins.Top = 0
-                Margins.Bottom = 0
-                Align = alRight
-                ImageIndex = 64
-                ImageName = 'grade_black_24dp'
-                Images = SVGIconVirtualImageList1
-                OnClick = SpeedButton_GetIPsClick
-                ExplicitLeft = 593
-                ExplicitTop = 3
-              end
-              object SpeedButton_ActivateBroker: TSpeedButton
-                Left = 668
-                Top = 0
-                Width = 23
-                Height = 20
-                Hint = 'Activate Remote Broker'
-                Margins.Top = 0
-                Margins.Bottom = 0
-                Align = alRight
-                ImageIndex = 61
-                ImageName = 'ic_play_circle_outline_24px'
-                Images = SVGIconVirtualImageList1
-                OnClick = SpeedButton_ActivateBrokerClick
-                ExplicitLeft = 662
+                Align = alTop
+                Alignment = taLeftJustify
+                BevelOuter = bvNone
+                Caption = '* Broker'
+                Font.Charset = DEFAULT_CHARSET
+                Font.Color = clBtnFace
+                Font.Height = -12
+                Font.Name = 'Segoe UI'
+                Font.Style = [fsBold]
+                ParentFont = False
+                TabOrder = 1
+                object SpeedButton_ShutdownClients: TSpeedButton
+                  AlignWithMargins = True
+                  Left = 563
+                  Top = 0
+                  Width = 23
+                  Height = 20
+                  Hint = 'ShutDowm Broker / All Client'
+                  Margins.Left = 0
+                  Margins.Top = 0
+                  Margins.Right = 5
+                  Margins.Bottom = 0
+                  Align = alRight
+                  ImageIndex = 31
+                  ImageName = 'ic_highlight_off_48px'
+                  Images = SVGIconVirtualImageList1
+                  OnClick = SpeedButton_ShutdownClientsClick
+                  ExplicitLeft = 689
+                end
+                object SpeedButton_ShowRmBroker: TSpeedButton
+                  Left = 517
+                  Top = 0
+                  Width = 23
+                  Height = 20
+                  Hint = 'Show Remote Broker'
+                  Margins.Top = 0
+                  Margins.Bottom = 0
+                  Align = alRight
+                  ImageIndex = 48
+                  ImageName = 'ic_storage_48px'
+                  Images = SVGIconVirtualImageList1
+                  OnClick = SpeedButton_ShowRmBrokerClick
+                  ExplicitLeft = 552
+                end
+                object SpeedButton_GetIPs: TSpeedButton
+                  Left = 494
+                  Top = 0
+                  Width = 23
+                  Height = 20
+                  Hint = 'Get IP - Local, Public'
+                  Margins.Top = 0
+                  Margins.Bottom = 0
+                  Align = alRight
+                  ImageIndex = 64
+                  ImageName = 'grade_black_24dp'
+                  Images = SVGIconVirtualImageList1
+                  OnClick = SpeedButton_GetIPsClick
+                  ExplicitLeft = 593
+                  ExplicitTop = 3
+                end
+                object SpeedButton_ActivateBroker: TSpeedButton
+                  Left = 540
+                  Top = 0
+                  Width = 23
+                  Height = 20
+                  Hint = 'Activate Remote Broker'
+                  Margins.Top = 0
+                  Margins.Bottom = 0
+                  Align = alRight
+                  ImageIndex = 61
+                  ImageName = 'ic_play_circle_outline_24px'
+                  Images = SVGIconVirtualImageList1
+                  OnClick = SpeedButton_ActivateBrokerClick
+                  ExplicitLeft = 662
+                end
+                object Label_IP_Port: TLabel
+                  AlignWithMargins = True
+                  Left = 60
+                  Top = 3
+                  Width = 431
+                  Height = 14
+                  Margins.Left = 60
+                  Align = alClient
+                  AutoSize = False
+                  Caption = 'IPs ...'
+                  EllipsisPosition = epEndEllipsis
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clSilver
+                  Font.Height = -12
+                  Font.Name = 'Segoe UI'
+                  Font.Style = [fsBold]
+                  ParentFont = False
+                  Layout = tlCenter
+                  StyleElements = [seClient, seBorder]
+                  ExplicitWidth = 28
+                  ExplicitHeight = 15
+                end
               end
             end
           end
@@ -1564,38 +1638,34 @@ object Form_RestOllama: TForm_RestOllama
       ExplicitWidth = 105
       ExplicitHeight = 15
     end
-    object Shape_OllamaAlive: TShape
+    object SkSvg_Broker: TSkSvg
       AlignWithMargins = True
-      Left = 74
-      Top = 8
-      Width = 14
-      Height = 14
-      Hint = 'Ollama Alive'
-      Margins.Left = 8
-      Margins.Top = 8
-      Margins.Right = 8
-      Margins.Bottom = 8
-      Align = alLeft
-      Brush.Color = clBlack
-      Shape = stCircle
-    end
-    object Shape_Broker: TShape
-      AlignWithMargins = True
-      Left = 1093
-      Top = 8
-      Width = 14
-      Height = 14
+      Left = 1090
+      Top = 5
+      Width = 20
+      Height = 20
       Cursor = crHandPoint
-      Hint = 'Ollama Broker Active'
-      Margins.Left = 8
-      Margins.Top = 8
-      Margins.Right = 8
-      Margins.Bottom = 8
+      Hint = 'Remote Access (as Broker)'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Align = alRight
-      Brush.Color = clBlack
-      Shape = stCircle
-      OnMouseDown = Shape_BrokerMouseDown
-      ExplicitLeft = 74
+      OnClick = SkSvg_BrokerClick
+      ExplicitLeft = 1050
+    end
+    object SkSvg_OllamaAlive: TSkSvg
+      AlignWithMargins = True
+      Left = 71
+      Top = 5
+      Width = 20
+      Height = 20
+      Hint = 'Ollama Off'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Align = alLeft
     end
     object Button_StartRequest: TButton
       AlignWithMargins = True
@@ -1683,58 +1753,6 @@ object Form_RestOllama: TForm_RestOllama
       Images = SVGIconVirtualImageList1
       TabOrder = 6
     end
-  end
-  object HttpRest_Ollama: TSslHttpRest
-    LocalAddr = '0.0.0.0'
-    LocalAddr6 = '::'
-    ProxyPort = '80'
-    Agent = 'Ollama Client'
-    Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
-    AcceptLanguage = 'utf-8, *;q=0.8'
-    Username = 'user'
-    NoCache = False
-    ResponseNoException = False
-    ContentTypePost = 'application/json'
-    LmCompatLevel = 0
-    RequestVer = '1.1'
-    FollowRelocation = True
-    LocationChangeMaxCount = 5
-    ServerAuth = httpAuthNone
-    ProxyAuth = httpAuthNone
-    BandwidthLimit = 10000
-    BandwidthSampling = 1000
-    Options = [httpoNoBasicAuth, httpoNoNTLMAuth, httpoEnableContentCoding, httpoNoDigestAuth]
-    Timeout = 300
-    SocksLevel = '5'
-    SocksAuthentication = socksNoAuthentication
-    SocketFamily = sfAny
-    SocketErrs = wsErrFriendly
-    RestParams.PContent = PContUrlencoded
-    RestParams.RfcStrict = False
-    RestParams.FormDataUtf8 = True
-    RestParams = <>
-    DebugLevel = DebugNone
-    MaxBodySize = 1024000
-    SslCliSecurity = sslCliSecNone
-    SslSessCache = False
-    CertVerMethod = CertVerNone
-    SslRootFile = 'RootCaCertsBundle.pem'
-    SslRevocation = False
-    SslReportChain = False
-    SslAllowSelfSign = False
-    HttpMemStrategy = HttpStratMem
-    HttpDownReplace = False
-    ResumeMinSize = 65535
-    ProgIntSecs = 1
-    ShowProgress = True
-    HttpUploadStrat = HttpUploadNone
-    SharedSslCtx = False
-    NoSSL = True
-    MaxLogParams = 4096
-    OnHttpRestProg = HttpRest_OllamaHttpRestProg
-    OnRestRequestDone = HttpRest_OllamaRestRequestDone
-    Left = 404
-    Top = 136
   end
   object ActionList_Ollma: TActionList
     Images = SVGIconVirtualImageList1
@@ -2289,6 +2307,11 @@ object Form_RestOllama: TForm_RestOllama
         CollectionIndex = 68
         CollectionName = 'logonicon'
         Name = 'logonicon'
+      end
+      item
+        CollectionIndex = 69
+        CollectionName = 'All\Connection'
+        Name = 'All\Connection'
       end>
     ImageCollection = SVGIconImageCollection1
     PreserveItems = True
@@ -3141,15 +3164,21 @@ object Form_RestOllama: TForm_RestOllama
           'd="M19.75,15.67a6,6,0,1,0-7.51,0A11,11,0,0,0,5,26v1H27V26A11,11,' +
           '0,0,0,19.75,15.67ZM12,11a4,4,0,1,1,4,4A4,4,0,0,1,12,11ZM7.06,25a' +
           '9,9,0,0,1,17.89,0Z"/></g></svg>'
+      end
+      item
+        IconName = 'All\Connection'
+        SVGText = 
+          '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0' +
+          ' 0 24 24" width="24px" fill="#000000">'#13#10'<path d="M0 0h24v24H0V0z' +
+          '" fill="none"/>'#13#10'<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10' +
+          ' 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 ' +
+          '8 3.59 8 8-3.59 8-8 8zm0-12.5c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 ' +
+          '4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 5.5c-.55 0-1-.45-1-' +
+          '1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>'#13#10'</svg>'
+        FixedColor = cl3DLight
       end>
     Left = 660
     Top = 119
-  end
-  object Timer_Repeater: TTimer
-    Enabled = False
-    OnTimer = Timer_RepeaterTimer
-    Left = 460
-    Top = 280
   end
   object OpenPictureDialog1: TOpenPictureDialog
     DefaultExt = '.jpg'
@@ -3205,5 +3234,29 @@ object Form_RestOllama: TForm_RestOllama
     Font.Style = []
     Left = 686
     Top = 346
+  end
+  object RESTClient_Ollama: TRESTClient
+    Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
+    AcceptCharset = 'utf-8, *;q=0.8'
+    Params = <>
+    ReadTimeout = 60000
+    SynchronizedEvents = False
+    OnSendData = RESTClient_OllamaSendData
+    OnReceiveData = RESTClient_OllamaReceiveData
+    Left = 496
+    Top = 424
+  end
+  object RESTRequest_Ollama: TRESTRequest
+    Client = RESTClient_Ollama
+    Method = rmPOST
+    Params = <>
+    Response = RESTResponse_Ollama
+    SynchronizedEvents = False
+    Left = 608
+    Top = 422
+  end
+  object RESTResponse_Ollama: TRESTResponse
+    Left = 556
+    Top = 510
   end
 end

@@ -52,8 +52,6 @@ type
     procedure Lock_List;
     procedure Unlock_List;
     procedure InformClientsOfLogins(aDontSendToLine: TncLine = nil);
-    procedure Log_Chat2(const ACode: Integer; const AStr: string);
-    procedure ResponseToClientsAll(const AResponse: string);
     //
     procedure Lock_Queue;
     procedure Unlock_Queue;
@@ -63,13 +61,12 @@ type
   public
     procedure DM_ActiveServer(const AFlag: Integer = 0);
     procedure Do_ShutDownBroker(const AFlag: Integer);
-    function Get_Logs(): string;
     function Get_Logins(): string;
     function Get_LogByIndex(const AIndex: Integer): string;
     function Get_Queue(): string;
     function Get_Queue_Count: Integer;
-    procedure Response_ToClient(const AQueue, AModel, AResponse: string);
-    procedure InformClientsOfModels(const AFlag: Integer);
+    procedure Response_ToClient(const AUser, AQueue, AModel, AResponse: string);
+    procedure InformClientsOfModels(const AFlag: Integer; ALine: TncLine = nil);
   end;
 
 var
@@ -92,6 +89,7 @@ uses
   System.AnsiStrings,
   System.Net.HttpClient,
   System.Net.URLClient,
+  System.NetConsts,
   Unit_Common,
   Unit_Main,
   Unit_RMBroker;
@@ -161,7 +159,8 @@ begin
           begin
             var _response := _HttpResponse.ContentAsString();
             var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(_response), 0) as TJSONObject;
-            DM_PublicIP := _JsonObj.Get('ip').JsonValue.Value;
+            if Assigned(_JsonObj) then
+              DM_PublicIP := _JsonObj.Get('ip').JsonValue.Value;
             _JsonObj.Free;
           end;
       finally
@@ -197,8 +196,8 @@ begin
   FLogList.Add('Remote Log ...');
   ConnectedUsersLock := TCriticalSection.Create;
   ConnectedUsers := TStringList.Create;
-  ConnectedUsers.Sorted := True;
-  ConnectedUsers.Duplicates := dupError;
+  ConnectedUsers.Sorted := True;   // Affect Speed of Response ?
+  ConnectedUsers.Duplicates := dupIgnore;
   ConnectedUsers.CaseSensitive := False;
 
   FncServerSource_RM.Active := False;
@@ -235,6 +234,9 @@ begin
 
   FCLoseFlag := True;
   Do_ShutDownBroker(0);
+
+  var _slog: string := Format('%s%s%s', ['Log_dm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+  FLogList.SaveToFile(CV_LogPath+_slog);
 
   FLogList.Free;
   ConnectedUsers.Free;
@@ -280,16 +282,6 @@ end;
 procedure TDM_Server.Unlock_List;
 begin
   LeaveCriticalSection(FCriticalSection);
-end;
-
-function TDM_Server.Get_Logs: string;
-begin
-  Lock_List;
-  try
-    Result := FLogList.Text;
-  finally
-    Unlock_List;
-  end;
 end;
 
 { Queue ... }
@@ -342,22 +334,17 @@ begin
   end;
 end;
 
-procedure TDM_Server.Log_Chat(const ACode: Integer; const AStr: string);
+function TDM_Server.Get_Logins(): string;
 begin
-  if FCLoseFlag then Exit;
-
-  Lock_List;
+  ConnectedUsersLock.Acquire;
   try
-    var _log := Format('%s  %s', [FormatDateTime('hh:nn:ss', Time), AStr]);
-    var _index := FLogList.Add(_log);
-    if ACode > 3 then
-      Post_Message(ACode, _index);
+    Result := ConnectedUsers.CommaText;
   finally
-    Unlock_List;
+    ConnectedUsersLock.Release;
   end;
 end;
 
-procedure TDM_Server.Log_Chat2(const ACode: Integer; const AStr: string);
+procedure TDM_Server.Log_Chat(const ACode: Integer; const AStr: string);
 begin
   if FCLoseFlag then Exit;
 
@@ -374,34 +361,33 @@ procedure TDM_Server.Post_Message(const ACode: Integer; const AMsgIndex: Integer
 begin
   var _wparam: WPARAM := WF_DM_MESSAGE_CONNECT;
   case ACode of
-      4: _wparam := WF_DM_MESSAGE_CONNECT;
-      5: _wparam := WF_DM_MESSAGE_DISCONNECT;
-      6: _wparam := WF_DM_MESSAGE_LOGON;
-      7: _wparam := WF_DM_MESSAGE_REQUEST;
-      8: _wparam := WF_DM_MESSAGE_REQUESTEX;
-      9: _wparam := WF_DM_MESSAGE_RESPONSE;
-     10: _wparam := WF_DM_MESSAGE_IMAGE;
-     11: _wparam := WF_DM_MESSAGE_WARNING;
-   else
-     Exit;
+    WF_DM_CONNECT_FLAG    : _wparam := WF_DM_MESSAGE_CONNECT;
+    WF_DM_DISCONNECT_FLAG : _wparam := WF_DM_MESSAGE_DISCONNECT;
+    WF_DM_LOGON_FLAG      : _wparam := WF_DM_MESSAGE_LOGON;
+    WF_DM_REQUEST_FLAG    : _wparam := WF_DM_MESSAGE_REQUEST;
+    WF_DM_REQUESTEX_FLAG  : _wparam := WF_DM_MESSAGE_REQUESTEX;
+    WF_DM_RESPONSE_FLAG   : _wparam := WF_DM_MESSAGE_RESPONSE;
+    WF_DM_IMAGE_FLAG      : _wparam := WF_DM_MESSAGE_IMAGE;
+    WF_DM_WARNING_FLAG    : _wparam := WF_DM_MESSAGE_WARNING;
+    else
+      Exit;
   end;
   PostMessage(Form_RestOllama.Handle, WF_DM_MESSAGE, _wparam, AMsgIndex);
 end;
 
 procedure TDM_Server.ncServerSource_RMConnected(Sender: TObject; aLine: TncLine);
 begin
-  Log_Chat(4, 'Client connected: ' + aLine.UserID +' '+ aLine.PeerIP);
+  Log_Chat(WF_DM_CONNECT_FLAG, 'Client connected /' + aLine.PeerIP);
 end;
 
 procedure TDM_Server.ncServerSource_RMDisconnected(Sender: TObject; aLine: TncLine);
 begin
-  Log_Chat(5, 'Client disconnected: ' + aLine.UserID +' '+ aLine.PeerIP);
+  Log_Chat(WF_DM_DISCONNECT_FLAG, 'Client disconnected: ' + aLine.UserID +' /'+ aLine.PeerIP);
 
-  // Check Connected Users list to delete the entry
   ConnectedUsersLock.Acquire;
   var UserData: TConnectedUserData;
   try
-    for var _i := 0 to ConnectedUsers.Count - 1 do
+    for var _i := 0 to ConnectedUsers.Count - 1 do  // Substitute for aLine.UserID ?
     begin
       UserData := TConnectedUserData(ConnectedUsers.Objects[_i]);
       if Assigned(UserData) and (UserData.Line = aLine) then
@@ -434,14 +420,37 @@ begin
   Result := TEncoding.UTF8.GetBytes(_Result);
 end;
 
+function Get_UserID(const ARequet: string): string;
+begin
+  Result := 'Unknown';
+  if ARequet.Trim <> '' then
+  begin
+    var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(ARequet) as TJSONObject;
+    try
+      if Assigned(_JsonObj) then
+        Result := _JsonObj.Get('user').JsonValue.Value;
+    finally
+      _JsonObj.Free;
+    end;
+  end;
+end;
+
 function TDM_Server.ncServerSource_RMHandleCommand(Sender: TObject;
-                                                 aLine: TncLine;
-                                                 aCmd: Integer;
-                                                 const aData: TBytes;
-                                                 aRequiresResult: Boolean;
-                                                 const aSenderComponent, aReceiverComponent: string): TBytes;
+                                                   aLine: TncLine;
+                                                   aCmd: Integer;
+                                                   const aData: TBytes;
+                                                   aRequiresResult: Boolean;
+                                                   const aSenderComponent, aReceiverComponent: string): TBytes;
 begin
   SetLength(Result, 0);  // Result = [] at Async Mode ?
+
+  // Ban ...
+  if GV_RemoteBanList.IndexOf(aLine.PeerIP) >= 0 then
+  begin
+    var _data: TBytes := BytesOf('Sorry, You are not allowed.');
+    FncServerSource_RM.ExecCommand(aLine, cmdSrvRefused, _data, False, True);
+    Exit;
+  end;
 
   case aCmd of
     cmdCntUserLogin:
@@ -465,7 +474,8 @@ begin
                  _UserData.Line := aLine;
             end;
 
-          Log_Chat(6, 'Client login: ' + _UserID +' ('+ aLine.PeerIP+')');
+          aLine.UserID := _UserID;
+          Log_Chat(WF_DM_LOGON_FLAG, 'Client login: ' + _UserID +' ('+ aLine.PeerIP+')');
         finally
           ConnectedUsersLock.Release;
         end;
@@ -477,46 +487,34 @@ begin
       end;
     cmdCntRequest:
       begin
-        var _str := TEncoding.UTF8.GetString(aData);
-        Inc(FQueueNum);
+        var _request := TEncoding.UTF8.GetString(aData);
+        var _UserID := Get_UserID(_request);
+        aLine.UserID := _UserID;
 
+        Inc(FQueueNum);
         ConnectedUsersLock.Acquire;
         try
-          var _UserData: TConnectedUserData;
-          for var _i := 0 to ConnectedUsers.Count - 1 do
+          var _index: Integer := ConnectedUsers.IndexOf(_UserID);
+          if _index >= 0 then
           begin
-            _UserData := TConnectedUserData(ConnectedUsers.Objects[_i]);
-            if _UserData.Line = aLine then
-            begin
-              _UserData.Queue := FQueueNum;
-              Break;
-            end;
+            var _UserData := TConnectedUserData(ConnectedUsers.Objects[_index]);
+            if Assigned(_UserData) and (_UserData.Line = aLine) then
+            _UserData.Queue := FQueueNum;
           end;
         finally
           ConnectedUsersLock.Release;
         end;
 
-        var _data: TBytes := Get_Request2Bytes(_str, FQueueNum);
-        var _SocketList: TSocketList := FncServerSource_RM.Lines.LockList;
-        try
-          for var _j := 0 to _SocketList.Count - 1 do
-            if _SocketList.Lines[_j] = aLine then
-              begin
-                FncServerSource_RM.ExecCommand(_SocketList.Lines[_j], cmdCntRequest, _data, False, True);
-                Break;
-              end;
-        finally
-          FncServerSource_RM.Lines.UnlockList;
-        end;
-
+        var _data: TBytes := Get_Request2Bytes(_request, FQueueNum);
+        FncServerSource_RM.ExecCommand(aLine, cmdCntRequest, _data, False, True);
         // ------------------------------------------------------------------ //
-        Set_Request2Queues(_str, FQueueNum);
+        Set_Request2Queues(_request, FQueueNum);
         // ------------------------------------------------------------------ //
       end;
     cmdCntModellist:
       begin
-        Log_Chat2(8, StringOf(aData)+' / '+IntToStr(Form_RestOllama.ModelsList.Count));
-        InformClientsOfModels(0);
+        Log_Chat(WF_DM_REQUESTEX_FLAG, StringOf(aData)+' / '+IntToStr(Form_RestOllama.ModelsList.Count));
+        InformClientsOfModels(0, aLine);
       end;
   end;
 end;
@@ -539,33 +537,42 @@ begin
   end;
 end;
 
-function TDM_Server.Get_Logins(): string;
+procedure TDM_Server.InformClientsOfModels(const AFlag: Integer; ALine: TncLine);
 begin
-  ConnectedUsersLock.Acquire;
+  var _Models: TStrings := TStringList.Create;
   try
-    Result := ConnectedUsers.CommaText;
+    _Models.Assign(Form_RestOllama.ModelsList);
+    _Models.Add(Form_RestOllama.Model_Selected);
+    var _SocketList: TSocketList := FncServerSource_RM.Lines.LockList;
+    try
+      var _data: TBytes := TEncoding.UTF8.GetBytes(_Models.CommaText);
+      if ALine = nil then
+        for var _i := 0 to _SocketList.Count - 1 do
+        FncServerSource_RM.ExecCommand(_SocketList.Lines[_i], cmdSrvModellist, _data, False, True)
+      else
+        FncServerSource_RM.ExecCommand(ALine, cmdSrvModellist, _data, False, True)
+    finally
+      FncServerSource_RM.Lines.UnlockList;
+    end;
   finally
-    ConnectedUsersLock.Release;
+    _Models.Free;
   end;
 end;
 
-procedure TDM_Server.Response_ToClient(const AQueue, AModel, AResponse: string);
+procedure TDM_Server.Response_ToClient(const AUser, AQueue, AModel, AResponse: string);
 begin
   var _queueline: TncLine := nil;
-  var _UserData: TConnectedUserData;
   var _queue: Integer := StrToIntDef(AQueue, 0);
   ConnectedUsersLock.Acquire;
   try
-    for var _i := 0 to ConnectedUsers.Count - 1 do
-      begin
-        _UserData := TConnectedUserData(ConnectedUsers.Objects[_i]);
-        if _UserData.Queue = _queue then
-          begin
-            _queueline := _UserData.Line;
-            Break;
-          end;
-      end;
-  finally
+    var _index: Integer := ConnectedUsers.IndexOf(AUser);
+    if _index >= 0 then
+    begin
+      var _UserData := TConnectedUserData(ConnectedUsers.Objects[_index]);
+      if Assigned(_UserData) and (_UserData.Queue = _queue) then
+      _queueline := _UserData.Line;
+    end;
+   finally
     ConnectedUsersLock.Release;
   end;
 
@@ -576,48 +583,11 @@ begin
     _response := StringReplace(_response, '%model%', AModel, [rfIgnoreCase]);
     _response := StringReplace(_response, '%response%', AResponse, [rfIgnoreCase]);
     var _data: TBytes := TEncoding.UTF8.GetBytes(_response);
-    var _SocketList: TSocketList := FncServerSource_RM.Lines.LockList;
     try
-      for var _i := 0 to _SocketList.Count - 1 do
-        if _queueline = _SocketList.Lines[_i] then
-          begin
-            FncServerSource_RM.ExecCommand(_SocketList.Lines[_i], cmdSrvResponse, _data, False, True);
-            Break;
-          end;
+      FncServerSource_RM.ExecCommand(_queueline, cmdSrvResponse, _data, False, True);
     finally
-      FncServerSource_RM.Lines.UnlockList;
     end;
-  end;
-end;
-
-procedure TDM_Server.ResponseToClientsAll(const AResponse: string);
-begin
-  var _SocketList: TSocketList := FncServerSource_RM.Lines.LockList;
-  try
-    var _data: TBytes := TEncoding.UTF8.GetBytes(AResponse);
-    for var _i := 0 to _SocketList.Count - 1 do
-      FncServerSource_RM.ExecCommand(_SocketList.Lines[_i], cmdSrvUpdateUsers, _data, False, True);
-  finally
-    FncServerSource_RM.Lines.UnlockList;
-  end;
-end;
-
-// No encode to utf8  on the assumption that model name is english only ...
-procedure TDM_Server.InformClientsOfModels(const AFlag: Integer);
-begin
-  var _Models: TStrings := TStringList.Create;
-  try
-    var _SocketList: TSocketList := FncServerSource_RM.Lines.LockList;
-    _Models.Assign(Form_RestOllama.ModelsList);
-    _Models.Add(Form_RestOllama.Model_Selected);
-    try
-      for var _i := 0 to _SocketList.Count - 1 do
-        FncServerSource_RM.ExecCommand(_SocketList.Lines[_i], cmdSrvModellist, BytesOf(_Models.CommaText), False, True);
-    finally
-      FncServerSource_RM.Lines.UnlockList;
-    end;
-  finally
-    _Models.Free;
+    PostMessage(Form_RMBroker.Handle, WF_DM_MESSAGE, WF_DM_MESSAGE_RESPONSE, 0);
   end;
 end;
 

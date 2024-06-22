@@ -138,17 +138,17 @@ begin
 
   with VST_ChattingBox do
   begin
+    TextMargin := 20;
+    SelectionCurveRadius := 20;
     NodeDataSize := SizeOf(TMessageRec);
     NodeAlignment := TVTNodeAlignment.naFromTop;
     Header.Columns[0].Width := ClientWidth - FVST_ColumnOffset;
     TreeOptions.MiscOptions := TreeOptions.MiscOptions + [TVTMiscOption.toVariablenodeHeight];
     TreeOptions.AutoOptions := TreeOptions.AutoOptions + [TVTAutoOption.toAutoSpanColumns];
     TreeOptions.SelectionOptions := TreeOptions.SelectionOptions + [TVTSelectionOption.toSelectNextNodeOnRemoval]-[TVTSelectionOption.toMultiSelect];
-    TextMargin := 20;
-    SelectionCurveRadius := 20;
     {  Custom ... }
     OffsetWRMagin := 35;
-    NodeHeightOffSet := 15;// 52;
+    NodeHeightOffSet := 15;
     Images := VirtualImageList1;
     SelectedBrushColor := FVST_NSelectionColor;  // in TBaseVirtualTree.pas ...
     Node_HeaderColor :=   FVST_NHeaderColor;
@@ -247,9 +247,10 @@ end;
 
 procedure TFrame_ChattingBoxClass.PopupMenu1Popup(Sender: TObject);
 begin
-  pmn_CopyText.Enabled := VST_ChattingBox.SelectedCount > 0;
-  pmn_Delete.Enabled :=   VST_ChattingBox.SelectedCount > 0;
-  pmn_TextToSpeech.Enabled := VST_ChattingBox.SelectedCount > 0;
+  var _selbool: Boolean := VST_ChattingBox.SelectedCount > 0;
+  pmn_CopyText.Enabled :=     _selbool;
+  pmn_Delete.Enabled :=       _selbool;
+  pmn_TextToSpeech.Enabled := _selbool;
 end;
 
 procedure TFrame_ChattingBoxClass.SetVST_NBodyFontSize(const Value: Integer);

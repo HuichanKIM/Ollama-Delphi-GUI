@@ -49,6 +49,7 @@ implementation
 uses
   System.Net.HttpClient,
   System.Net.URLClient,
+  System.NetConsts,
   Vcl.Themes,
   Unit_Common,
   Unit_Main;
