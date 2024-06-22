@@ -1,9 +1,14 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.9 - 06.18.2024**
+**Latest Version 0.9.10 - 06.22.2024**
+- Add Broker/Server Functions
+- Avoid third-party components as much as possible and 
+- make the most of the basic Delphi library.
+- Use RESTClient, RESTRequest, RESTResponse as a substitute for OberBytes ICS
 
-If your computer has good performance, 
-use it as a server/broker to connect your Android smartphone
+- v0.9.9
+- If your computer has good performance, 
+- use it as a server/broker to connect your Android smartphone
 
 - v0.9.8
 - Fix the Incorrect operation of Topics list after Skin Change
