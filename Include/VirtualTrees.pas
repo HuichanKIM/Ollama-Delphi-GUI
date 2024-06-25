@@ -226,7 +226,7 @@ type
   TVTMeasureTextEvent = procedure(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string; var Extent: TDimension) of object;
   TVTDrawTextEvent = procedure(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string; const CellRect: TRect; var DefaultDraw: Boolean) of object;
   // Modified by ichin 2024-05-30 목 오전 6:04:46
-  TVTDrawTitleEvent = procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; var Title, TimeStamp: string; var Tag: Integer) of object;
+  TVTDrawTitleEvent = procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; var Title, TimeStamp: string; var Tag, LvTag: Integer) of object;
 
   /// Event arguments of the OnGetCellText event
   TVSTGetCellTextEventArgs = record
@@ -264,6 +264,7 @@ type
     FNode_HeaderColor: TColor;
     FNode_BodyColor: TColor;
     FNode_FooterColor: TColor;
+    FThumbLists: TImageList;
     /// Returns True if the property DefaultText has a value that differs from the default value, False otherwise.
     function IsDefaultTextStored(): Boolean;
     function GetImageText(Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex): string;
@@ -281,6 +282,7 @@ type
     procedure SetNode_BodyColor(const Value: TColor);
     procedure SetNode_FooterColor(const Value: TColor);
     procedure SetNode_HeaderColor(const Value: TColor);
+    function GetHeaderTextHeight(const Text: string): TSize;
   protected
     /// <summary>Contains the name of the string that should be restored as selection</summary>
     /// <seealso cref="TVTSelectionOption.toRestoreSelection">
@@ -360,6 +362,7 @@ type
     property Node_HeaderColor: TColor  read FNode_HeaderColor  write SetNode_HeaderColor;
     property Node_BodyColor: TColor    read FNode_BodyColor    write SetNode_BodyColor;
     property Node_FooterColor: TColor  read FNode_FooterColor  write SetNode_FooterColor;
+    property ThumbLists: TImageList    read FThumbLists        write FThumbLists;
   end;
 
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
@@ -380,6 +383,7 @@ type
     property Node_BodyColor;
     property Node_FooterColor;
     property OnDrawTitle;
+    property ThumbLists;
   published
     property AccessibleName;
     property Action;
@@ -631,7 +635,7 @@ uses
   VirtualTrees.Utils,
   VirtualTrees.Export,
   VirtualTrees.EditLink,
-  VirtualTrees.BaseAncestorVcl{to eliminate H2443 about inline expanding}
+  VirtualTrees.BaseAncestorVcl  {to eliminate H2443 about inline expanding}
   ;
 
 const
@@ -644,7 +648,7 @@ const
 procedure InitializeGlobalStructures();
 begin
   if (gInitialized > 0) or (AtomicIncrement(gInitialized) <> 1) then // Ensure threadsafe that this code is executed only once
-    exit;
+    Exit;
 
   // Clipboard format registration.
   // Specialized string tree formats.
@@ -870,8 +874,10 @@ begin
     Canvas.TextFlags := 0;
     InflateRect(R, -TextMargin, 0);
 
-    if (vsDisabled in Node.States) or not Enabled then
-      Canvas.Font.Color := Colors.DisabledColor;
+    // Modified by ichin 2024-06-23 일 오후 3:56:12
+    //if (vsDisabled in Node.States) or not Enabled then
+    //  Canvas.Font.Color := Colors.DisabledColor;
+
     // Multiline nodes don't need special font handling or text manipulation.
     // Note: multiline support requires the Unicode version of DrawText, which is able to do word breaking.
     //       The emulation in this unit does not support this so we have to use the OS version. However
@@ -1443,8 +1449,9 @@ begin
   var _Title: string := '';
   var _Tag: Integer := 0;
   var _TimeStamp: string := '';
+  var _LlavaTag: Integer := -1;
   if Assigned(FOnDrawTitle) then
-    FOnDrawTitle(Self, PaintInfo.Node,  _Title, _TimeStamp, _Tag);
+    FOnDrawTitle(Self, PaintInfo.Node,  _Title, _TimeStamp, _Tag, _LlavaTag);
 
   // ------------------------------------------------------------------------- //
   PaintInfo.Canvas.Font.Color := clBtnFace;
@@ -1458,22 +1465,23 @@ begin
   // Modified by ichin 2024-05-30 목 오전 5:16:27
   if DefaultDraw then
     begin
-      { Icon }
+      { Icon, Thumb }
       Images.Draw(PaintInfo.Canvas, CellRect.Left-13, 6, _Tag);  // Image Size = 16 x 16
+      if (_Tag = 0) and (_LlavaTag >= 0) then FThumbLists.Draw(PaintInfo.Canvas, CellRect.Right-70, 3, _LlavaTag);  // Image Size = 64 x 60
       { Header - Title / User / Ollama }
-      var _headrect: TRect := Rect(CellRect.Left+12, 5, CellRect.Right, 25);
+      var _headersize: TSize := GetHeaderTextHeight(_Title);
+      var _headrect: TRect := Rect(CellRect.Left+12, 5, CellRect.Right, _headersize.cy+6);
+      PaintInfo.Canvas.Font.Size := Self.Font.Size;
       PaintInfo.Canvas.Font.Color := FNode_HeaderColor;
-      PaintInfo.Canvas.Font.Size := 10;  { Fix ... }
       PaintInfo.Canvas.Font.Style := [TFontStyle.fsBold];
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(_Title), Length(_Title), _headrect, DrawFormat);
       { Body Content / Message }
-      var _bodyrect: TRect := Rect(CellRect.Left, _headrect.Bottom+5, CellRect.Right, CellRect.Bottom+5);
+      var _bodyrect: TRect := Rect(CellRect.Left, _headrect.Bottom+5, CellRect.Right, CellRect.Bottom-10);
       PaintInfo.Canvas.Font.Color := FNode_BodyColor;
-      PaintInfo.Canvas.Font.Size := Self.Font.Size;
       PaintInfo.Canvas.Font.Style := [];
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(lText), Length(lText), _bodyrect, DrawFormat);
       { Footer - TimeStamp }
-      var _footrect: TRect := Rect(CellRect.Right - 50, _bodyrect.Bottom+5, CellRect.Right+12, _bodyrect.Bottom+17);
+      var _footrect: TRect := Rect(CellRect.Right - 50, CellRect.Bottom-15, CellRect.Right+12, CellRect.Bottom-3);
       PaintInfo.Canvas.Font.Color := FNode_FooterColor;
       PaintInfo.Canvas.Font.Size := 7;   { Fix ... }
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(_TimeStamp), Length(_TimeStamp), _footrect, DrawFormat or DT_RIGHT);
@@ -1481,6 +1489,23 @@ begin
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
+
+// Modified by ichin 2024-06-12 수 오후 12:27:00
+function TCustomVirtualStringTree.GetHeaderTextHeight(const Text: string): TSize;
+var
+  R: TRect;
+  DrawFormat: Integer;
+begin
+  GetTextExtentPoint32W(Canvas.Handle, PWideChar(Text), Length(Text), Result);
+
+  DrawFormat := DT_CALCRECT or DT_NOPREFIX or DT_WORDBREAK or DT_END_ELLIPSIS or DT_EDITCONTROL or AlignmentToDrawFlag[Alignment];
+  if BiDiMode <> bdLeftToRight then
+    DrawFormat := DrawFormat or DT_RTLREADING;
+
+  R := Rect(0, 0, Result.cx, MaxInt);
+  Winapi.Windows.DrawTextW(Canvas.Handle, PWideChar(Text), Length(Text), R, DrawFormat);
+  Result.cx := R.Right - R.Left;
+end;
 
 function TCustomVirtualStringTree.DoTextMeasuring(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string): TSize;
 var
@@ -1688,6 +1713,8 @@ var
 begin
   if Length(S) = 0 then
     S := Text[Node, Column];
+  // Modified by ichin 2024-06-12 수 오후 12:17:24
+  var _SS: string := 'Ollama ...'+#13#10+S+#13#10+'00:00:00';
 
   if Column <= NoColumn then
   begin
@@ -1729,8 +1756,10 @@ begin
     DrawFormat := DrawFormat or DT_RIGHT or DT_RTLREADING
   else
     DrawFormat := DrawFormat or DT_LEFT;
-  Winapi.Windows.DrawTextW(Canvas.Handle, PWideChar(S), Length(S), PaintInfo.CellRect, DrawFormat);
+  Winapi.Windows.DrawTextW(Canvas.Handle, PWideChar(_SS), Length(_SS), PaintInfo.CellRect, DrawFormat);
   Result := PaintInfo.CellRect.Bottom - PaintInfo.CellRect.Top;
+  // Modified by ichin 2024-06-12 수 오후 1:04:17
+  Result := Result + FNodeHeightOffSet;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
