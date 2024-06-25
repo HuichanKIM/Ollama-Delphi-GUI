@@ -110,7 +110,7 @@ begin
   try
     _Responses.Position := 0;
     var _rbs: string := TEncoding.UTF8.GetString(_Responses.Bytes, 0, _Responses.Size);
-    Result := Get_DisplayJson(2, False, _rbs);
+    Result := Get_DisplayJson(TDIsplay_Type.disp_Trans, False, _rbs);
   finally
     _Responses.Free;
   end;

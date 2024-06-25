@@ -508,7 +508,7 @@ begin
         var _data: TBytes := Get_Request2Bytes(_request, FQueueNum);
         FncServerSource_RM.ExecCommand(aLine, cmdCntRequest, _data, False, True);
         // ------------------------------------------------------------------ //
-        Set_Request2Queues(_request, FQueueNum);
+        Set_Request2Queues(_request, FQueueNum);     // start Remote Request ...
         // ------------------------------------------------------------------ //
       end;
     cmdCntModellist:
@@ -572,7 +572,7 @@ begin
       if Assigned(_UserData) and (_UserData.Queue = _queue) then
       _queueline := _UserData.Line;
     end;
-   finally
+  finally
     ConnectedUsersLock.Release;
   end;
 

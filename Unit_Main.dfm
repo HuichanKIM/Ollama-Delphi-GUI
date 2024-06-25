@@ -93,7 +93,7 @@ object Form_RestOllama: TForm_RestOllama
         object CheckBox_AutoLoadTopic: TCheckBox
           Left = 0
           Top = 0
-          Width = 112
+          Width = 97
           Height = 26
           Margins.Left = 10
           Margins.Right = 100
@@ -148,7 +148,7 @@ object Form_RestOllama: TForm_RestOllama
         StyleElements = [seClient, seBorder]
         object SpeedButton_LoadModel: TSpeedButton
           Left = 182
-          Top = 22
+          Top = 20
           Width = 23
           Height = 25
           Hint = 'Request for Load Model'
@@ -159,7 +159,7 @@ object Form_RestOllama: TForm_RestOllama
         end
         object SpeedButton_ListModels: TSpeedButton
           Left = 5
-          Top = 22
+          Top = 20
           Width = 23
           Height = 25
           Hint = 'Request / Update for List Models'
@@ -192,7 +192,7 @@ object Form_RestOllama: TForm_RestOllama
         Left = 3
         Top = 134
         Width = 212
-        Height = 212
+        Height = 210
         Align = alTop
         Caption = 'Image / Model Llava'
         Enabled = False
@@ -202,7 +202,7 @@ object Form_RestOllama: TForm_RestOllama
           Left = 2
           Top = 17
           Width = 208
-          Height = 193
+          Height = 191
           Align = alClient
           BevelOuter = bvNone
           Ctl3D = True
@@ -214,7 +214,7 @@ object Form_RestOllama: TForm_RestOllama
             Left = 3
             Top = 3
             Width = 202
-            Height = 187
+            Height = 185
             Hint = 'Drop Image-file (*.jpg, *.jpeg, *.png, *.webp, *.gif)'
             Align = alClient
             Center = True
@@ -225,6 +225,7 @@ object Form_RestOllama: TForm_RestOllama
             ExplicitLeft = 4
             ExplicitTop = 8
             ExplicitWidth = 201
+            ExplicitHeight = 187
           end
           object SpeedButton_Llava: TSpeedButton
             Left = 0
@@ -241,9 +242,9 @@ object Form_RestOllama: TForm_RestOllama
       object GroupBox_Topics: TGroupBox
         AlignWithMargins = True
         Left = 3
-        Top = 352
+        Top = 350
         Width = 212
-        Height = 411
+        Height = 413
         Align = alClient
         Caption = 'Topics / Prompt'
         TabOrder = 5
@@ -253,7 +254,7 @@ object Form_RestOllama: TForm_RestOllama
           Left = 5
           Top = 46
           Width = 202
-          Height = 360
+          Height = 362
           Hint = 'Request Dialog'
           Align = alClient
           BorderStyle = bsNone
@@ -406,7 +407,7 @@ object Form_RestOllama: TForm_RestOllama
       object GroupBox_BaseURL: TGroupBox
         AlignWithMargins = True
         Left = 3
-        Top = 85
+        Top = 29
         Width = 235
         Height = 51
         Align = alTop
@@ -432,7 +433,7 @@ object Form_RestOllama: TForm_RestOllama
       object RadioGroup_PromptType: TRadioGroup
         AlignWithMargins = True
         Left = 3
-        Top = 29
+        Top = 86
         Width = 235
         Height = 50
         Align = alTop
@@ -526,14 +527,13 @@ object Form_RestOllama: TForm_RestOllama
           Images = SVGIconVirtualImageList1
           ExplicitLeft = 167
         end
-        object SpeedButton_Beep: TSpeedButton
+        object SpeedButton_TtsControl: TSpeedButton
           AlignWithMargins = True
           Left = 85
           Top = 3
           Width = 23
           Height = 19
-          Hint = 'Set Sound on'
-          Action = Action_BeepEffect
+          Action = Action_TTSControl
           Align = alLeft
           Images = SVGIconVirtualImageList1
           ExplicitLeft = 130
@@ -869,7 +869,7 @@ object Form_RestOllama: TForm_RestOllama
           StyleElements = [seClient, seBorder]
           OnChange = TrackBar_VolumeChange
         end
-        object ProgressBar: TProgressBar
+        object ProgressBar_TTS: TProgressBar
           Left = 96
           Top = 53
           Width = 92
@@ -987,7 +987,7 @@ object Form_RestOllama: TForm_RestOllama
         TabOrder = 9
         StyleElements = [seClient, seBorder]
       end
-      object GroupBox1: TGroupBox
+      object GroupBox_Memo: TGroupBox
         AlignWithMargins = True
         Left = 3
         Top = 488
@@ -1129,7 +1129,7 @@ object Form_RestOllama: TForm_RestOllama
         Top = 26
         Width = 722
         Height = 740
-        ActivePage = TabSheet_ChatLogs
+        ActivePage = Tabsheet_Chatting
         Align = alClient
         TabOrder = 1
         OnChange = PageControl_ChattingChange
@@ -1159,6 +1159,8 @@ object Form_RestOllama: TForm_RestOllama
             inherited VST_ChattingBox: TVirtualStringTree
               Width = 714
               Height = 710
+              DragOperations = [doCopy, doMove]
+              ExplicitTop = -1
               ExplicitWidth = 714
               ExplicitHeight = 710
             end
@@ -1944,11 +1946,12 @@ object Form_RestOllama: TForm_RestOllama
       ImageIndex = 58
       ImageName = 'ic_title_48px'
     end
-    object Action_BeepEffect: TAction
+    object Action_TTSControl: TAction
+      Hint = 'TTS Control'
       ImageIndex = 30
       ImageName = 'ic_surround_sound_48px'
       ShortCut = 32849
-      OnExecute = Action_BeepEffectExecute
+      OnExecute = Action_TTSControlExecute
     end
     object Action_HelpShortcuts: TAction
       Caption = 'Help-Shortcuts'
@@ -3243,8 +3246,8 @@ object Form_RestOllama: TForm_RestOllama
     SynchronizedEvents = False
     OnSendData = RESTClient_OllamaSendData
     OnReceiveData = RESTClient_OllamaReceiveData
-    Left = 496
-    Top = 424
+    Left = 448
+    Top = 440
   end
   object RESTRequest_Ollama: TRESTRequest
     Client = RESTClient_Ollama
@@ -3252,11 +3255,22 @@ object Form_RestOllama: TForm_RestOllama
     Params = <>
     Response = RESTResponse_Ollama
     SynchronizedEvents = False
-    Left = 608
-    Top = 422
+    Left = 448
+    Top = 502
   end
   object RESTResponse_Ollama: TRESTResponse
-    Left = 556
-    Top = 510
+    Left = 452
+    Top = 566
+  end
+  object ImageList_LLAVA: TImageList
+    ColorDepth = cd32Bit
+    DrawingStyle = dsTransparent
+    Height = 60
+    Masked = False
+    ShareImages = True
+    Width = 64
+    Scaled = True
+    Left = 646
+    Top = 458
   end
 end

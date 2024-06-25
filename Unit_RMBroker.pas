@@ -94,8 +94,7 @@ uses
 var
   V_RmStopWatch: TStopWatch;
   V_RmElapsedInterval: Int64;
-  V_RmBaseURL: string = GC_BaseURL_Chat;
-  V_RmBaseURLarray: array[TRequest_Type] of string = (GC_BaseURL_Generate, GC_BaseURL_Chat);
+  V_RmBaseURL: string = GC_BaseURL_Chat; { Fixed for Remote Request ... }
   V_RmDummyFlag: Integer = 0;
   V_RmBuffLogLines: string;
   V_RmRepeatFlag: Boolean = False;
@@ -118,8 +117,11 @@ procedure TForm_RMBroker.FormDestroy(Sender: TObject);
 begin
   if DM_ACTIVATECODE = 0 then Exit;
 
-  FRequesting_Flag := True;
-  Do_Abort(0);
+  FRequesting_Flag := True;  // Trick for prevent possible processing ...
+  FAborting_Flag := True;    // Trick for prevent possible processing ...
+  RESTRequest_RM.Cancel;
+  Application.ProcessMessages;
+  V_RmStopwatch.Stop;
 
   var _slog: string := Format('%s%s%s', ['Log_rm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
   Memo_Log_Rm.Lines.SaveToFile(CV_LogPath+_slog);
@@ -154,7 +156,7 @@ begin
   var _displen := Length(V_RmBuffLogLines);
   if _displen > 0 then
   try
-    SetLength(V_RmBuffLogLines, _displen - 2); // remove CRLF
+    SetLength(V_RmBuffLogLines, _displen - 2); // remove CRLF ...
     Memo_Log_Rm.Lines.Add(V_RmBuffLogLines);
     PostMessage(Memo_Log_Rm.Handle, EM_LINESCROLL, 0, 999999);
     V_RmBuffLogLines := '';
@@ -222,10 +224,10 @@ begin
   RESTResponse_RM.ResetToDefaults;
   RESTClient_RM.BaseURL := V_RmBaseURL;
   RESTClient_RM.ContentType := CONTENTTYPE_APPLICATION_JSON;
-  RESTClient_RM.SynchronizedEvents := True;
+  RESTClient_RM.SynchronizedEvents := True;  // ? need - default ???
   with RESTRequest_RM do
   begin
-    SynchronizedEvents := True;
+    SynchronizedEvents := True;              // ? need - default ???
     Method := rmPOST;
     Params.Clear;
     TransientParams.Clear;
@@ -255,20 +257,19 @@ begin
   end;
 
   var _requestjson: string := DM_Server.Get_Queue;
-  if _requestjson = '' then
-  begin
-    Exit;
-  end;
+  if _requestjson = '' then Exit;
 
   var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(_requestjson) as TJSONObject;
   try
     if Assigned(_JsonObj) then
-    begin
-      FUser_Rm :=   _JsonObj.Get('user').JsonValue.Value;
-      FQueue_Rm :=  _JsonObj.Get('queue').JsonValue.Value;
-      FMmodel_Rm := _JsonObj.Get('model').JsonValue.Value;
-      FPrompt_Rm:=  _JsonObj.Get('prompt').JsonValue.Value;
-    end;
+      begin
+        FUser_Rm :=   _JsonObj.Get('user').JsonValue.Value;
+        FQueue_Rm :=  _JsonObj.Get('queue').JsonValue.Value;
+        FMmodel_Rm := _JsonObj.Get('model').JsonValue.Value;
+        FPrompt_Rm:=  _JsonObj.Get('prompt').JsonValue.Value;
+      end
+    else
+      Exit;
   finally
     _JsonObj.Free;
   end;
@@ -280,11 +281,11 @@ begin
     FMmodel_Rm := Form_RestOllama.Model_Selected;
   if (FPrompt_Rm = '') or (FMmodel_Rm = '') then
   begin
-    DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, 'Empty Request');
+    DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, 'Empty Request/Model');
     Exit;
   end;
   // ------------------------------------------------------------------------ //
-  FPrompt_Rm := Get_ReplaceSpecialChar4Json(FPrompt_Rm);
+  FPrompt_Rm := Get_ReplaceSpecialChar4Json(FPrompt_Rm); // Duplicated from User ?
   // ------------------------------------------------------------------------ //
   Form_RestOllama.RemoteProcessingFlag := True;
   // ------------------------------------------------------------------------ //
@@ -292,24 +293,17 @@ begin
   if Is_LlavaModel(FMmodel_Rm) then
     begin
       DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, 'Not supported yet');
+      Form_RestOllama.RemoteProcessingFlag := False;
       Exit;
     end
   else
     begin
-      case Form_RestOllama.RadioGroup_PromptType.ItemIndex of
-        0: begin
-             _RawParams := StringReplace( GC_GeneratePrompt, '%model%',    FMmodel_Rm,   [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,        '%prompts%',  FPrompt_Rm,   [rfIgnoreCase]);
-           end;
-        1: begin
-             _RawParams := StringReplace( GC_ChatContent,    '%model%',    FMmodel_Rm,   [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,        '%content%',  FPrompt_Rm,   [rfIgnoreCase]);
-           end;
-      end;
+       _RawParams := StringReplace( GC_ChatContent,    '%model%',    FMmodel_Rm,   [rfIgnoreCase]);
+       _RawParams := StringReplace( _RawParams,        '%content%',  FPrompt_Rm,   [rfIgnoreCase]);
     end;
-  StatusBar_RM.SimpleText := '* Requesting';
+  StatusBar_RM.SimpleText := '* Requesting ...';
   FRequesting_Flag := True;
-  V_RmBaseURL := V_RmBaseURLarray[Form_RestOllama.Request_Type];
+  ProcessCntFlag := 1;
 
   Add_LogWin('Starting REST request for URL: ' + V_RmBaseURL);
   if CheckBox_Logoption.Checked then
@@ -354,7 +348,7 @@ begin
   TThread.Queue(nil,
     procedure
     begin
-      if AWriteCount mod 5 = 0 then
+      if AWriteCount mod 5 = 0 then   // Interval ...
         StatusBar_RM.SimpleText := StatusBar_RM.SimpleText + '.';
     end)
 end;
@@ -378,8 +372,8 @@ begin
   StatusBar_RM.SimpleText := '* '+_updown;
 
   { Core routine ------------------------------------------------------------- }
-    var _Responses := Unit_Common.Get_DisplayJson(Form_RestOllama.RadioGroup_PromptType.ItemIndex, False,
-                                                  string(RESTResponse_RM.Content));
+    var _Responses := Unit_Common.Get_DisplayJson(TDIsplay_Type.disp_Content, False,
+                                               string(RESTResponse_RM.Content));
     _Responses := Get_ReplaceSpecialChar4Json(_Responses);
     // ---------------------------------------------------------------------- //
     DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, _Responses);
@@ -400,6 +394,7 @@ end;
 
 procedure TForm_RMBroker.OnRESTRequest_RMError(Sender: TObject);
 begin
+  SimpleSound_Common(Form_RestOllama.DoneSoundFlag, 0);
   Do_Abort(1);
   Push_LogWin(1,  RESTResponse_RM.StatusText);
 end;

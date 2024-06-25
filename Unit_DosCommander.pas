@@ -65,9 +65,9 @@ type
     Label_Run: TLabel;
     Label_Pull: TLabel;
     Label_Show: TLabel;
+    procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure Label_ListClick(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure Edit_CommandFlagKeyPress(Sender: TObject; var Key: Char);
   private
     FShowPosition: TPoint;

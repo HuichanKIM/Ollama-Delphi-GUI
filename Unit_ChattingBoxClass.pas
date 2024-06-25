@@ -31,6 +31,7 @@ type
     FCaption: String;
     FTime: TDateTime;
     FTag: Integer;
+    FLvTag: Integer;
   end;
 
 type
@@ -57,7 +58,7 @@ type
     procedure VST_ChattingBoxFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure VST_ChattingBoxInitNode(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
     procedure VST_ChattingBoxMeasureItem(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: TDimension);
-    procedure VST_DrawTitle(Sender: TBaseVirtualTree; Node: PVirtualNode; var Title, TimeStamp: string; var Tag: Integer);
+    procedure VST_DrawTitle(Sender: TBaseVirtualTree; Node: PVirtualNode; var Title, TimeStamp: string; var Tag, LvTag: Integer);
     procedure VST_ChattingBoxResize(Sender: TObject);
     procedure VST_ChattingBoxKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure VST_ChattingBoxDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
@@ -88,8 +89,8 @@ type
     procedure InitializeEx(const AHeaderColor, ABodyColor, AFooterColor: TColor);
     procedure FinalizeEx(const AFlag: Integer);
     //
-    procedure Add_ChattingMessage(const AUser: string; const ALocation: Integer; const APrompt: string);
-    procedure Insert_ChattingMessage(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
+    procedure Add_Chatting_Message(const AUser: string; const ALocation, ALvTag: Integer; const APrompt: string);
+    procedure Insert_Chatting_Message(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
     //
     function Get_NodeText(): string;
     function Get_NodeTextLocation(var AIndex, ALocation: Integer): string;
@@ -167,7 +168,7 @@ begin
   end;
 end;
 
-procedure TFrame_ChattingBoxClass.Add_ChattingMessage(const AUser: string; const ALocation: Integer; const APrompt: string);
+procedure TFrame_ChattingBoxClass.Add_Chatting_Message(const AUser: string; const ALocation, ALvTag: Integer; const APrompt: string);
 begin
   with VST_ChattingBox do
   begin
@@ -178,6 +179,9 @@ begin
     _Data^.FCaption := APrompt;
     _Data^.FTime :=    Now;
     _Data^.FTag :=     ALocation;
+    _Data^.FLvTag :=   -1;
+      if ALocation = 0 then
+    _Data^.FLvTag :=   ALvTag;
 
     FocusedNode := _Node;
     Selected[_Node] := True;
@@ -187,7 +191,7 @@ begin
   end;
 end;
 
-procedure TFrame_ChattingBoxClass.Insert_ChattingMessage(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
+procedure TFrame_ChattingBoxClass.Insert_Chatting_Message(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
 begin
   var _bottomflag: Boolean := False;
   with VST_ChattingBox do
@@ -218,6 +222,7 @@ begin
     _Data^.FCaption := APrompt;
     _Data^.FTime :=    Now;
     _Data^.FTag :=     ALocation;
+    _Data^.FLvTag :=   -1;
 
     FocusedNode := _Node;
     Selected[_Node] := True;
@@ -401,14 +406,15 @@ begin
   end;
 end;
 
-procedure TFrame_ChattingBoxClass.VST_DrawTitle(Sender: TBaseVirtualTree; Node: PVirtualNode; var Title, TimeStamp: string; var Tag: Integer);
+procedure TFrame_ChattingBoxClass.VST_DrawTitle(Sender: TBaseVirtualTree; Node: PVirtualNode; var Title, TimeStamp: string; var Tag, LvTag: Integer);
 begin
   var _Data: PMessageRec := Sender.GetNodeData(Node);
   if Assigned(_Data) then
   begin
     Title := _Data^.FUser;
     TimeStamp := FormatDateTime('( hh:nn:ss )', _Data^.FTime);
-    Tag := _Data^.FTag;
+    Tag :=   _Data^.FTag;
+    LvTag := _Data^.FLvTag;
   end;
 end;
 
@@ -605,7 +611,7 @@ function TFrame_ChattingBoxClass.Do_SaveAllText(const AFile: string): Boolean;
 begin
   var _sourcelist: TStrings := TStringList.Create;
   var _Data: PMessageRec := nil;
-  var _index: Integer := 1;
+  var _index: Integer := 0;
   var _qtag: Integer := 0;
   var _prefix: string := '';
   var _AddString: string := '';
@@ -615,11 +621,13 @@ begin
     while Assigned(_Node) do
     begin
       _AddString := EmptyStr;
-      _prefix := Format('*%d* ', [_index]);
+      //_prefix := Format('*%d* ', [_index]);
       _Data := VST_ChattingBox.GetNodeData(_Node);
       if _Data <> nil then
       begin
         _qtag := _Data^.FTag;
+          if _qtag = 0 then Inc(_index);
+        _prefix := Format('*%d* ', [_index]);
         _CellText :=  _prefix + _Data^.FUser;
         _AddString := _AddString + _CellText +GC_CRLF;
         _CellText :=  _Data^.FCaption+ FormatDateTime('( hh:nn:ss )', _Data^.FTime);
@@ -629,7 +637,6 @@ begin
       end;
 
       _Node := _Node.NextSibling;
-      Inc(_index);
     end;
 
     _sourcelist.SaveToFile(AFile);

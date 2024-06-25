@@ -123,7 +123,7 @@ const
   C_Shortcut_Desc: array [0..26] of string = ('Show Request Dialog','Send Request','Goto Welcome.','Goto Chatting Room','Translation of Prompt',
                                               'Translation of Message','(Reserved)','(Reserved)','(Reserved)','Clear Chattings',
                                               'Ollama Alive ?','Scroll to Bottom','Copy the Message.','Delete the Message.','Skin / Colors',
-                                              'Load Image (llava)','Help - ShortCuts','Show Logs.','Show/Hide Option Panel','Beep Effect','Save All Messages to Text File',
+                                              'Load Image (llava)','Help - ShortCuts','Show Logs.','Show/Hide Option Panel','TTS Control View','Save All Messages to Text File',
                                               'Scroll to Top','TextToSpeech on Message','Show About',
                                               'Abort Connection.','Default / Refresh','Close / Exit.');
 

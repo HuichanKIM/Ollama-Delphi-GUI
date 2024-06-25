@@ -59,7 +59,7 @@ uses
   Unit_Common;
 
 { TMRU_Manager ... }
-{ getNextSibling - Returns the next node in the tree view at the same level as the calling node. }
+{ getNextSibling - Returns the next node in the tree view "at the same level" as the calling node. }
 
 function TMRU_Manager.AddInsertNode(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string): string;
 
@@ -513,7 +513,7 @@ end;
 function TMRU_Manager.Rename_TopicPrompt(const AOld, ANew: string): Integer;
 begin
   Result := -1;
-  var _index: Integer := FTopicList.IndexOf(AOld);
+  var _index: Integer :=  FTopicList.IndexOf(AOld);
   var _index2: Integer := FTopicList.IndexOf(ANew);
   if (_index >= 0) and (_index2 < 0) then
   begin

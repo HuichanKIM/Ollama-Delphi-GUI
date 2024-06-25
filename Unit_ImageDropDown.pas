@@ -12,8 +12,12 @@ Uses
   Vcl.Controls,
   Vcl.ExtCtrls,
   Vcl.Forms,
+  System.ImageList,
   Vcl.Imaging.jpeg,
   Vcl.Imaging.pngimage;
+
+type
+  TLoadImageEvent = procedure(Sender: TObject; const ALoadFile: string) of object;
 
 type
   TImageDropDown<T: TGraphic, constructor> = Class
@@ -23,6 +27,8 @@ type
     FFileName: string;
     FOriginalPanelWndProc: TWndMethod;
     FDropFlag: Integer;
+    //
+    FOnLoadImage: TLoadImageEvent;
     procedure ImageDrop(var Msg: TWMDROPFILES);
     procedure PanelWindowProc(var Msg: TMessage);
   public
@@ -30,8 +36,10 @@ type
     destructor Destroy; override;
     procedure LoadIMG(const ADropedFile: string);
     // property ...
+    property Image: TImage      read FImage;
     property FileName: string   read FFileName;
     property DropFlag: Integer  read FDropFlag   write FDropFlag;
+    property OnLoadImage: TLoadImageEvent  read FOnLoadImage  write FOnLoadImage;
   end;
 
 implementation
@@ -70,6 +78,8 @@ begin
         FImage.Picture.LoadFromFile(ADropedFile);
 
       FFileName := ExtractFileName(ADropedFile);
+      if Assigned(FOnLoadImage) then
+        FOnLoadImage(Self, ADropedFile);
     except
       Raise;
     end
@@ -85,6 +95,7 @@ begin
   FPanel := APanel;
   FFileName := '';
   FDropFlag := 0;
+  FImage.Picture.Graphic.EnableScaledDrawer(TWICScaledGraphicDrawer);
 
   FOriginalPanelWndProc := APanel.WindowProc;
   APanel.WindowProc := PanelWindowProc;
@@ -117,7 +128,7 @@ begin
   inherited;
 
   try
-    var _numFiles: Cardinal := DragQueryFile(Msg.Drop, $FFFFFFFF, NIL, 0);
+    var _numFiles: Cardinal := DragQueryFile(Msg.Drop, $FFFFFFFF, nil, 0);
     if _numFiles >= 1 then
     begin
       DragQueryFile(Msg.Drop, 0, @_buffer, SizeOf(_buffer));

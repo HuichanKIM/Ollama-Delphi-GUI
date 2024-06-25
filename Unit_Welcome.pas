@@ -31,6 +31,9 @@ type
 
 implementation
 
+uses
+  Unit_Common;
+
 {$R *.dfm}
 
 procedure TFrame_Welcome.FrameResize(Sender: TObject);
@@ -46,8 +49,7 @@ begin
   FAnimationFlag := Value;
   SkAnimatedImage_Alive.Animation.Enabled := Value;
   SkAnimatedImage_Alive.Visible := Value;
-  if not Value then
-  SkSvg_ICon.Opacity := 255;
+  SkSvg_ICon.Opacity := IIF.CastBool<Byte>(Value, 50, 200);
 end;
 
 end.

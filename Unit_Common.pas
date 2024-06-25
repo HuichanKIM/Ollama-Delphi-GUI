@@ -14,6 +14,21 @@ uses
   Vcl.Graphics,
   Vcl.ExtCtrls;
 
+{ TResourceStream_Ex - MultiLoad ... }
+type
+  TResourceStream_Ex = class(TCustomMemoryStream)
+  private
+    HResInfo: THandle;
+    HGlobal: THandle;
+    procedure Initialize(Instance: THandle; Name, ResType: PChar);
+  public
+    constructor Create(Instance: THandle; const ResName: string; ResType: PChar);
+    destructor Destroy; override;
+    //
+    procedure Re_Initialize(Instance: THandle; Name, ResType: PChar);
+  end;
+{ ... }
+
 type
   IIF = class
     class function CastBool<T>(AExpression: Boolean; const ATrue, AFalse: T): T; static;
@@ -57,9 +72,12 @@ const
     WM_NETHTTP_MESSAGE_ALIST = WM_NETHTTP_MESSAGE + 2;
 
 type
-  TTransCountryCode = (otcc_KO = 0, otcc_EN);
-type
   TRequest_Type = (ort_Generate=0, ort_Chat);
+  TDisplay_Type  = (disp_Response=0, disp_Content, disp_Trans);
+
+type
+  TTranlateMode = (otm_MessageView = 0, otm_PromptView, otm_MessagePush, otm_PromptPush);
+  TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
   GC_Version0     = 'ver. 0.9.10';
@@ -69,8 +87,9 @@ const
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
 
 const
-  GC_BTdivGB = 1073741824;
-  GC_BTdivMB = 1048576;
+  GC_BTdivKB = SizeOf(Byte) shl 10;
+  GC_BTdivMB = GC_BTdivKB shl 10;
+  GC_BTdivGB = GC_BTdivMB shl 10;
 
 const
   GC_LanguageCode: array [0 .. 10] of string = ('en','ko','ja','zh','hi','fr','de','it','pt','ru','es');
@@ -111,9 +130,9 @@ function Is_Hangul(const AText: string): Boolean;
 function Is_ExternalCmd(const AText: string): Boolean;
 
 function Is_LlavaModel(const AText: string): Boolean;
-function GetBase64Endoeings(const AImage: TImage): string;
+function GetBase64Endoeings(const AImage: TImage): AnsiString;
 
-function BytesToKMG(Value: Int64; ATailer: Boolean = False): string;
+function BytesToKMG(Value: Int64): string;
 function Get_ReplaceSpecialChar4Trans(const AText: string): string;
 function Get_ReplaceSpecialChar4Json(const AText: string): string;
 function GetUsersWindowsLanguage: string;
@@ -123,7 +142,8 @@ function WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
 function IOUtils_ReadAllText(const AFilePath: string=''): string;
 function IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
 function Get_SystemInfo(): string;
-function Get_DisplayJson(const RespType: Integer; const ModelsFlag: Boolean; const RespStr: string): string;
+
+function Get_DisplayJson(const Display_Type: TDisplay_Type; const ModelsFlag: Boolean; const RespStr: string): string;
 function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer; var AModelsList: TStringList): string;
 function MSecsToTime(const AMSec: Int64): string;
 function MSecsToSeconds(const AMSec: Int64): string;
@@ -197,16 +217,59 @@ uses
   Vcl.Forms,
   Unit_Main;
 
+{ TResourceStream_Ex - MultiLoad ... }
+
+constructor TResourceStream_Ex.Create(Instance: THandle; const ResName: string; ResType: PChar);
+begin
+  inherited Create;
+  Initialize(Instance, PChar(ResName), ResType);
+end;
+
+destructor TResourceStream_Ex.Destroy;
+begin
+  UnlockResource(HGlobal);
+  FreeResource(HGlobal);
+  inherited Destroy;
+end;
+
+procedure TResourceStream_Ex.Initialize(Instance: THandle; Name, ResType: PChar);
+begin
+  HResInfo := FindResource(Instance, Name, ResType);
+    if HResInfo = 0 then Abort;
+  HGlobal := LoadResource(Instance, HResInfo);
+    if HGlobal = 0 then Abort;
+  SetPointer(LockResource(HGlobal), SizeOfResource(Instance, HResInfo));
+end;
+
+procedure TResourceStream_Ex.Re_Initialize(Instance: THandle; Name, ResType: PChar);
+begin
+  try
+    UnlockResource(HGlobal);
+    FreeResource(HGlobal);
+    Size := 0;
+  except
+    Abort;
+  end;
+  //
+  HResInfo := FindResource(Instance, Name, ResType);
+    if HResInfo = 0 then Abort;
+  HGlobal := LoadResource(Instance, HResInfo);
+    if HGlobal = 0 then Abort;
+  SetPointer(LockResource(HGlobal), SizeOfResource(Instance, HResInfo));
+end;
+
+{ ... TResourceStream_Ex }
+
 procedure InitializePaths();
 begin
   CV_AppPath := ExtractFilePath(ParamStr(0));
   CV_AppPath := IncludeTrailingPathDelimiter(CV_AppPath);
   CV_TmpPath := CV_AppPath+'temp\';
-  if not DirectoryExists(CV_TmpPath) then
+    if not DirectoryExists(CV_TmpPath) then
     ForceDirectories(CV_TmpPath);
   CV_TmpPath := IncludeTrailingPathDelimiter(CV_TmpPath);
   CV_LogPath := CV_AppPath+'log\';
-  if not DirectoryExists(CV_LogPath) then
+    if not DirectoryExists(CV_LogPath) then
     ForceDirectories(CV_LogPath);
   CV_LogPath := IncludeTrailingPathDelimiter(CV_LogPath);
 end;
@@ -277,7 +340,7 @@ end;
 
 // TNetEncoding.Base64.EncodeBytesToString is failed to Encode Image.Picture ...
 // ? Unicode problem ...
-function GetBase64Endoeings(const AImage: TImage): string;
+function GetBase64Endoeings(const AImage: TImage): AnsiString;
 begin
   Result := '';
   var _Input  := TMemoryStream.Create;
@@ -338,74 +401,24 @@ begin
   Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Json, ' ');
 end;
 
-function BytesToKMG(Value: Int64; ATailer: Boolean = False): string;
-const
-  c_KBYTE = Sizeof(Byte) shl 10;
-  c_MBYTE = c_KBYTE shl 10;
-  c_GBYTE = c_MBYTE shl 10;
+function BytesToKMG(Value: Int64): string;
 begin
   var _mask: string := '%5.3f';
   var _suffix: string := '';
   var _float: Extended := Value;
   var _float2: Extended := _float;
 
-  if (_float / 100) >= c_GBYTE then
-    begin
-      _suffix := 'G';
-      _float2 := _float / c_GBYTE;
-    end else
-  if (_float / 10) >= c_GBYTE then
-    begin
-      _suffix := 'G';
-      _float2 := _float / c_GBYTE;
-    end else
-  if _float >= c_GBYTE then
-    begin
-      _suffix := 'G';
-      _float2 := _float / c_GBYTE;
-    end else
-  if _float >= (c_MBYTE * 100) then
-    begin
-      _suffix := 'M';
-      _float2 := _float / c_MBYTE;
-    end else
-  if _float >= (c_MBYTE * 10) then
-    begin
-      _suffix := 'M';
-      _float2 := _float / c_MBYTE;
-    end else
-  if _float >= c_MBYTE then
-    begin
-      _suffix := 'M';
-      _float2 := _float / c_MBYTE;
-    end else
-  if _float >= (c_KBYTE * 100) then
-    begin
-      _suffix := 'K';
-      _float2 := _float / c_KBYTE;
-    end else
-  if _float >= (c_KBYTE * 10) then
-    begin
-      _suffix := 'K';
-      _float2 := _float / c_KBYTE;
-    end else
-  if _float >= c_KBYTE then
-    begin
-      _suffix := 'K';
-      _float2 := _float / c_KBYTE;
-    end
-   else
+  if _float >= GC_BTdivGB then begin _suffix := 'G'; _float2 := _float / GC_BTdivGB; end else
+  if _float >= GC_BTdivMB then begin _suffix := 'M'; _float2 := _float / GC_BTdivMB; end else
+  if _float >= GC_BTdivKB then begin _suffix := 'K'; _float2 := _float / GC_BTdivKB; end
+  else
     begin
       _mask := '%5.0f';
       _suffix := '';
-      _float2 := _float;  // 123
-    end ;
+      _float2 := _float;
+    end;
 
-  Result := Trim(Format(_mask, [_float2]));
-  if ATailer then
-    Result := Result + ' ' + _suffix + 'bytes'
-  else
-    Result := Result + _suffix;
+  Result := Trim(Format(_mask, [_float2])) + _suffix;
 end;
 
 function IOUtils_ReadAllText(const AFilePath: string=''): string;
@@ -449,44 +462,30 @@ begin
   Result := FileExists(AFilePath);
 end;
 
-function LoadResource(const AIndex: Integer): TBytes;
-const
-  C_Wave: array [0 .. 1] of string = ('BEEP0', 'BEEP1');
-begin
-  var _stream: TStream := TResourceStream.Create(HInstance, C_Wave[AIndex], RT_RCDATA);
-  try
-    var _sz: Int64 := _stream.Size;
-    SetLength(Result, _sz);
-    _stream.Read(Result, 0, _sz)
-  finally
-    FreeAndNIL(_stream)
-  end;
-end;
-
 { Substitute for Reaplcae to the EllipsePosition of TLabel property ...}
 function Get_TextWithEllipsis(const AMiddle: Boolean;  ACanvas: TCanvas; ARect: TRect; const AText: string): string;
 begin
   Result := AText;
-  var _Ss := AText;
+  var _Es := AText;
   var _Sz: TSize;
-  if GetTextExtentPoint32W(ACanvas.Handle, _Ss, Length(_Ss), _Sz) then
+  if GetTextExtentPoint32W(ACanvas.Handle, _Es, Length(_Es), _Sz) then
   begin
     var _RectWidth := ARect.Right - ARect.Left;
     if _Sz.cx > _RectWidth then
     begin
-      _Ss := '...';
+      _Es := '...';
       var _LastS: string := AText;
       var _length: Integer := Length(AText);
       if AMiddle then _length := Length(AText) div 2;
       for var _i := 1 to _length do
       begin
-        _LastS := _Ss;
+        _LastS := _Es;
         if AMiddle then
-           _Ss := Copy(AText, 1, _i) + ' ... ' + Copy(AText, Length(AText) - _i + 1, _i)
+           _Es := Copy(AText, 1, _i) + ' ... ' + Copy(AText, Length(AText) - _i + 1, _i)
          else
-           _Ss := Copy(AText, 1, _i) + ' ...';
+           _Es := Copy(AText, 1, _i) + ' ...';
 
-        GetTextExtentPoint32W(ACanvas.Handle, _Ss, Length(_Ss), _Sz);
+        GetTextExtentPoint32W(ACanvas.Handle, _Es, Length(_Es), _Sz);
         if _Sz.cx > _RectWidth then
           Break;
       end;
@@ -496,21 +495,59 @@ begin
   end;
 end;
 
+var
+  V_Sounds: array [0 .. 1] of TBytes;
+
+procedure LoadSoundResourceAll();
+const
+  C_Wave: array [0 .. 1] of string = ('BEEP0', 'BEEP1');
+begin
+  var _stream := TResourceStream_Ex.Create(HInstance, C_Wave[0], RT_RCDATA);
+  if _stream.Size > 1 then
+  try
+    var _sz: Int64 := _stream.Size;
+    SetLength(V_Sounds[0], _sz);
+    _stream.Position := 0;
+    _stream.Read(V_Sounds[0], 0, _sz);
+    _stream.Re_Initialize(HInstance, PChar(C_Wave[1]), RT_RCDATA);
+    _sz := _stream.Size;
+    SetLength(V_Sounds[1], _sz);
+    _stream.Position := 0;
+    _stream.Read(V_Sounds[1], 0, _sz);
+  finally
+    FreeAndNil(_stream);
+  end;
+end;
+
+function LoadResource_Index(const AIndex: Integer): TBytes;
+const
+  C_Wave: array [0 .. 1] of string = ('BEEP0', 'BEEP1');
+begin
+  var _stream: TStream := TResourceStream.Create(HInstance, C_Wave[AIndex], RT_RCDATA);
+  try
+    var _sz: Int64 := _stream.Size;
+    SetLength(Result, _sz);
+    _stream.Read(Result, 0, _sz);
+  finally
+    FreeAndNIL(_stream)
+  end;
+end;
+
 procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
 begin
-  if AIndex < 0 then
+  if (AIndex < 0) or (AIndex > 1) then
   begin
-    PlaySound(nil, 0, SND_NODEFAULT or SND_ASYNC);
+    PlaySound(nil, 0, SND_ASYNC or SND_NODEFAULT );
     Exit;
   end;
 
   if AFlag then
   TTask.Run(
-  procedure
-  begin
-    var _wdata: TBytes := LoadResource(AIndex);
-    PlaySound(PChar(_wdata), 0, SND_NODEFAULT or SND_ASYNC or SND_MEMORY);
-  end);
+    procedure
+    begin
+      var _wdata: TBytes := V_Sounds[AIndex];
+      PlaySound(PChar(_wdata), 0, SND_ASYNC or SND_NODEFAULT or SND_MEMORY);
+    end);
 end;
 
 function Get_SystemInfo(): string;
@@ -519,41 +556,52 @@ const
 
 begin
   Result := '';
+  var _Resultlist := TStringList.Create;
+  _Resultlist.BeginUpdate;
+  try
+    with TPJComputerInfo do
+    begin
+      _Resultlist.Add('  Computer Name: '+ ComputerName);
+      _Resultlist.Add('  - User Name: '+ Username);
+      _Resultlist.Add('  - Processor Name: '+ ProcessorName);
+      _Resultlist.Add('  - Processor Speed (GHz): '+ Format('%.3f', [ProcessorSpeedMHz / GC_BTdivKB]));
+      _Resultlist.Add('  - Processor Count: '+ Integer(ProcessorCount).ToString);
+      _Resultlist.Add('  - Processor Architecture: '+ c_Processors[Processor]);
+     end;
 
-  with TPJComputerInfo do
-  begin
-    Result := Result+'  Computer Name: '+ ComputerName +GC_CRLF;
-    Result := Result+'  - User Name: '+ Username +GC_CRLF;
-    Result := Result+'  - Processor Name: '+ ProcessorName +GC_CRLF;
-    Result := Result+'  - Processor Speed (GHz): '+ Format('%.3f', [ProcessorSpeedMHz / 1024]) +GC_CRLF;
-    Result := Result+'  - Processor Count: '+ Integer(ProcessorCount).ToString +GC_CRLF;
-    Result := Result+'  - Processor Architecture: '+ c_Processors[Processor] +GC_CRLF;
-   end;
+    var _totalmem: string := '';
+    var _availmem: string := '';
+    var _usagepct: DWord := GetGlobalMemoryUsed2GB(_totalmem, _availmem);
+    _Resultlist.Add('');
+    _Resultlist.Add('  Memory status at present');
+    _Resultlist.Add('  _ Total Memory: '+ _totalmem);
+    _Resultlist.Add('  - Available Memory: '+ _availmem);
+    _Resultlist.Add('  - Usage percent: '+ _usagepct.ToString +' %');
+    _Resultlist.Add('');
 
-  var _totalmem: string := '';
-  var _availmem: string := '';
-  var _usagepct: DWord := GetGlobalMemoryUsed2GB(_totalmem, _availmem);
-  Result := Result+GC_CRLF;
-  Result := Result+'  Memory status at present'+GC_CRLF;
-  Result := Result+'  _ Total Memory: '+ _totalmem +GC_CRLF;
-  Result := Result+'  - Available Memory: '+ _availmem +GC_CRLF;
-  Result := Result+'  - Usage percent: '+ _usagepct.ToString +' %'+GC_CRLF+GC_CRLF;
+    var _LocaleID: string := Get_LocaleIDString();
+    var _WinLangusage := GetUsersWindowsLanguage;
+    _Resultlist.Add('  OS Language: '+_WinLangusage + '  ISO Code ['+_LocaleID+']');
+    _Resultlist.EndUpdate;
 
-  var _LocaleID: string := Get_LocaleIDString();
-  var _WinLangusage := GetUsersWindowsLanguage;
-  Result := Result+'  OS Language: '+_WinLangusage + '  ISO Code ['+_LocaleID+']';
+    Result := _Resultlist.Text;
+  finally
+    _Resultlist.Free;
+  end;
 end;
 
-function Get_DisplayJson(const RespType: Integer; const ModelsFlag: Boolean; const RespStr: string): string;
+{ Display JSon ... }
+
+function Get_DisplayJson(const Display_Type: TDisplay_Type; const ModelsFlag: Boolean; const RespStr: string): string;
 const
-  c_MSGType: array [0 .. 2] of string = ('response', 'content', 'trans');
+  c_Displat_Type: array [TDisplay_Type] of string = ('response', 'content', 'trans');
 begin
   Result := '';
   var _parsingsrc_0 := StringReplace(RespStr, GC_UTF8_LF, ',',[rfReplaceAll]);
   var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';
   var _acceptflag: Boolean := False;
   var _firstflag: Boolean := True;
-  var _key: String := c_MSGType[RespType];
+  var _key: String := c_Displat_Type[Display_Type];
   if ModelsFlag then
   begin
     Result := '* Model in loaded : ';
@@ -634,8 +682,7 @@ begin
                 Result := Result + 'Models ['+Vindex.ToString+'] : ';
                 _modelflag := True;
                 Continue;
-              end
-            else
+              end else
             if SameText(_firstname, 'details') then
               begin
                 Result := Result + _prefix +  _JsonReader.Value.ToString+' : '+ GC_CRLF;
@@ -691,6 +738,8 @@ begin
     FreeAndNil(_StringReader);
   end;
 end;
+
+{ ... JSon }
 
 function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
 begin
@@ -899,48 +948,18 @@ begin
   end;
 end;
 
-
-
-{ Help codes ...
-
-*
-ShellExecute(0, nil, 'cmd.exe', PChar('/C ' + AnsiQuotedStr(program_path, Char(34))+ ' -fg'), PChar(program_path), SW_HIDE);
-
-Result := MyString;
-StartPos := Pos('<', Result);
-if StartPos > 0 then begin
-  SetLength(Result, StartPos - 1);
-  Result := TrimRight(Result);
-end;
-
-to ...
-Result := MyStr.Remove(MyStr.IndexOf('<')).Trim;
-
-* ellipsis character
-ex 1.
-function StrMaxLen(const S: string; MaxLen: integer): string;
-var
-  i: Integer;
-begin
-  result := S;
-  if Length(result) <= MaxLen then Exit;
-  SetLength(result, MaxLen);
-  result[MaxLen] := '¡¦';
-end;
-
-ex 2. from TVirtualTrees.pas
-procedure TCustomVirtualStringTree.WMSetFont(var Msg: TWMSetFont);
-
-}
-
 initialization
-  CV_LocaleID := Get_LocaleIDString(1);
+
+CV_LocaleID := Get_LocaleIDString(1);
   GV_RemoteBanList := TStringList.Create;
   GV_RemoteBanList.Sorted := True;
   GV_RemoteBanList.Duplicates := dupIgnore;
   GV_RemoteBanList.CaseSensitive := False;
+  LoadSoundResourceAll();
 
 finalization
   GV_RemoteBanList.Free;
+  SetLength(V_Sounds[0], 0);
+  SetLength(V_Sounds[1], 0);
 
 end.

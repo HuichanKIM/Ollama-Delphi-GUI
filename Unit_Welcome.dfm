@@ -19,7 +19,7 @@ object Frame_Welcome: TFrame_Welcome
     TextSettings.HorzAlign = Center
     Words = <
       item
-        Caption = '* click to chatting room'
+        Caption = '* click to chatting room *'
       end>
     ExplicitTop = 607
   end
@@ -34,7 +34,7 @@ object Frame_Welcome: TFrame_Welcome
     TextSettings.HorzAlign = Center
     Words = <
       item
-        Caption = 'Welcome to Ollama GUI'
+        Caption = 'Welcome to Ollama'
         Font.Size = 22.000000000000000000
         Font.Weight = Bold
         Name = 'Item 0'

@@ -31,6 +31,7 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     Ctl3D = False
     DefaultNodeHeight = 21
     DragMode = dmAutomatic
+    DragOperations = []
     DragType = dtVCL
     Header.AutoSizeIndex = -1
     Header.Height = 21
