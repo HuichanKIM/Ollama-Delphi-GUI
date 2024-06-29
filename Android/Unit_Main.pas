@@ -31,14 +31,17 @@ uses
   FMX.TextLayout,
   FMX.ListBox,
   FMX.ImgList,
-  ncSources,
   FMX.Gestures,
   DW.Androidapi.JNI.Widget.Toast,
   DW.Toast.Android,
   FMX.ListView.Types,
   FMX.ListView.Appearances,
   FMX.ListView.Adapters.Base,
-  FMX.ListView, FMX.Ani, FMX.ExtCtrls;
+  FMX.ListView,
+  FMX.Ani,
+  FMX.ExtCtrls,
+  //
+  ncSources;
 
 type
   TMainForm = class(TForm)
@@ -102,6 +105,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormVirtualKeyboardHidden(Sender: TObject; KeyboardVisible: Boolean; const Bounds: TRect);
+    procedure FormVirtualKeyboardShown(Sender: TObject; KeyboardVisible: Boolean; const Bounds: TRect);
     procedure FClient_SourceConnected(Sender: TObject; aLine: TncLine);
     procedure FClient_SourceDisconnected(Sender: TObject; aLine: TncLine);
     function FClient_SourceHandleCommand(Sender: TObject; aLine: TncLine; aCmd: Integer; const aData: TBytes; aRequiresResult: Boolean; const aSenderComponent, aReceiverComponent: string): TBytes;
@@ -109,8 +114,6 @@ type
     procedure Edit_PromptEnter(Sender: TObject);
     procedure Edit_PromptExit(Sender: TObject);
     procedure Button_ModelUserClick(Sender: TObject);
-    procedure FormVirtualKeyboardHidden(Sender: TObject; KeyboardVisible: Boolean; const Bounds: TRect);
-    procedure FormVirtualKeyboardShown(Sender: TObject; KeyboardVisible: Boolean; const Bounds: TRect);
     procedure Button_RequestClick(Sender: TObject);
     procedure Button_SettingClick(Sender: TObject);
     procedure SpeedButton_RestoreClick(Sender: TObject);
@@ -156,12 +159,15 @@ type
     FDWToast: TToast;
     procedure Load_ConfigIni(const AFlag: Integer);
     procedure Save_ConfigIni(const AFlag: Integer);
+    //
     procedure SetConnectionFlag(const Value: Boolean);
+    procedure SetLogonFlag(const Value: Boolean);
     procedure SetServerHost(const Value: string);
     procedure SetServerPort(const Value: Integer);
     procedure SetUserName(const Value: string);
     procedure SetFont_Size(const Value: Single);
     procedure SetProcessingFlag(const Value: Integer);
+    //
     procedure AddUpdate_Message(const AFlag: Integer; const AUser, AQueue,AModel, AText: String);
     procedure SetItemsBitmap;
     procedure Do_Request(const ARequest: string);
@@ -172,7 +178,6 @@ type
     function GetTextHeight(const AFlag: Integer; const  D: TListItemText; const Width: Single; const Text: string): Integer;
     procedure Get_ModelList(const AFlag: Integer = 0);
     function GetLogonFlag: Boolean;
-    procedure SetLogonFlag(const Value: Boolean);
     function Get_CopyText: string;
   public
     procedure UpdateClientLogon(const AFlag: Integer = 0);
@@ -235,9 +240,10 @@ const
   C_SectionOptions = 'Options';
   C_WaitingToast   = 'Waiting for a response from the server ...';
 
-const  // Syncronized with Ollama_Client Broker/Server ...
+// Syncronized with Ollama_Client Broker/Server ...
+// C_JsonFmt2 = '{"user": "%user%","queue": "%queue%","model": "%model%","response": "%response%"}';
+const
   C_JsonFmt  = '{"user": "%user%","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
-  //C_JsonFmt2 = '{"user": "%user%","queue": "%queue%","model": "%model%","response": "%response%"}';
 
 const
   C_LogonColor: array [Boolean] of TAlphaColor = (TAlphaColorRec.Black, TAlphaColorRec.Chartreuse);
@@ -273,7 +279,7 @@ end;
 const
   C_RegEx_Rep2: string = '["\{\}:;\[\]]';  // - json reserved only / all special char - '[^\w]';
 
-function Get_ReplaceSpecialChar_2(const AText: string): string;
+function Get_ReplaceSpecialChar4Json(const AText: string): string;
 begin
   Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Rep2, ' ');
 end;
@@ -306,16 +312,16 @@ begin
   FClient_Source := TncClientSource.Create(Self);
   with FClient_Source do
   begin
-    EncryptionKey := 'SetEncryptionKey';
-    KeepAlive := True;
-    NoDelay := True;
-    Reconnect := True;
+    EncryptionKey :=    'SetEncryptionKey';
+    KeepAlive :=         True;
+    NoDelay :=           True;
+    Reconnect :=         True;
     ReconnectInterval := 1000;
-    Host := C_BaseURL;
-    Port := C_BasePort;
-    OnConnected := FClient_SourceConnected;
-    OnDisconnected := FClient_SourceDisconnected;
-    OnHandleCommand := FClient_SourceHandleCommand;
+    Host :=              C_BaseURL;
+    Port :=              C_BasePort;
+    OnConnected :=       FClient_SourceConnected;
+    OnDisconnected :=    FClient_SourceDisconnected;
+    OnHandleCommand :=   FClient_SourceHandleCommand;
   end;
   SetProcessingFlag(0);
   // ------------------------------------------------------------------------ //
@@ -358,7 +364,7 @@ begin
   Save_ConfigIni(0);
   FClosingFlag := True;
   if FClient_Source.Active then
-     FClient_Source.Active := False;
+    FClient_Source.Active := False;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
@@ -483,6 +489,8 @@ begin
   end;
 end;
 
+{ From Broker / Server ... }
+
 procedure TMainForm.FClient_SourceConnected(Sender: TObject; aLine: TncLine);
 begin
   if FUserName = '' then
@@ -523,7 +531,6 @@ begin
         cmdSrvUpdateUsers:
           begin
             ProcessingFlag := 0;
-            FUpdateFlag := C_UpdateFlag_None;
             var _data: string := TEncoding.UTF8.GetString(aData);
             with ListBox_Users do
             begin
@@ -540,9 +547,10 @@ begin
             if (ListBox_Users.items.Count > 0) and
                (ListBox_Users.items.Indexof(FUserName) >= 0) then
               begin
+                LogonFlag := True;
                 Text_Logon.Text := 'Logon - '+FUserName;
                 FDWToast.Make('Success 1 : Logon to Broker.');
-                FUpdateFlag := C_UpdateFlag_Models;
+                FUpdateFlag := C_UpdateFlag_Models;   // -> cmdCntModellist  in Timer ...
               end
             else
               FDWToast.Make('Failed 0 : Logon to Broker.');
@@ -583,12 +591,12 @@ begin
             var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(_data) as TJSONObject;
             if Assigned(_JsonObj) then
             try
-              var _Name: string :=   _JsonObj.Get('user').JsonValue.Value;
-              var _Queue: string :=  _JsonObj.Get('queue').JsonValue.Value;
-              var _Model: string :=  _JsonObj.Get('model').JsonValue.Value;
-              var _Prompt: string := _JsonObj.Get('response').JsonValue.Value;
+              var _Name: string :=     _JsonObj.Get('user').JsonValue.Value;
+              var _Queue: string :=    _JsonObj.Get('queue').JsonValue.Value;
+              var _Model: string :=    _JsonObj.Get('model').JsonValue.Value;
+              var _Response: string := _JsonObj.Get('response').JsonValue.Value;
 
-              AddUpdate_Message(1, _Name, _Queue, _Model, _Prompt);
+              AddUpdate_Message(1, _Name, _Queue, _Model, _Response);
             finally
               _JsonObj.Free;
             end;
@@ -669,10 +677,17 @@ begin
   case _menubutton.Tag of
     C_PMN_GotoTop:
        if ListView_ChatBox.ItemCount > 0 then
-         ListView_ChatBox.Selected := ListView_ChatBox.Items[0];
+         begin
+           ListView_ChatBox.Selected := ListView_ChatBox.Items[0];
+           ListView_ChatBox.ScrollViewPos := 0;
+         end;
     C_PMN_GotoBottom:
        if ListView_ChatBox.ItemCount > 0 then
-         ListView_ChatBox.Selected := ListView_ChatBox.Items[ListView_ChatBox.ItemCount-1];
+         begin
+           ListView_ChatBox.Selected := ListView_ChatBox.Items[ListView_ChatBox.ItemCount-1];
+           var _itemRect := ListView_ChatBox.GetItemRect(ListView_ChatBox.Selected.Index);
+           ListView_ChatBox.ScrollViewPos := ListView_ChatBox.ScrollViewPos + _itemRect.Bottom;
+         end;
     C_PMN_Clear:
        begin
          ListView_ChatBox.Items.Clear;
@@ -742,8 +757,6 @@ begin
     var _MimeType: string := 'image/jpg';  // Default - *.jpg
     try
       _Base64Encoder.Encode(MemoryStream, _OutputStringStream);
-      if Atype <> 0 then
-        _MimeType := 'image/png';
       Result := 'data:' + _MimeType + ';base64,' + _OutputStringStream.DataString.Replace(#13#10,'');
     finally
       _Base64Encoder.Free;
@@ -789,11 +802,10 @@ procedure TMainForm.Button_RequestClick(Sender: TObject);
 begin
   if FClosingFlag then Exit;
 
-  if ListBox_Users.Count < 1 then
+  if (not FLogonFlag) or (ListBox_Users.Count < 1) then
   begin
     FDWToast.Make('Let''s go to Logon ...');
     Button_LogonClick(Self);
-
     Exit;
   end;
 
@@ -813,7 +825,7 @@ begin
   FCurrentMessage.Text := _request;
   Memo_Prompt.Lines.Text := '';
 
-  _request := Get_ReplaceSpecialChar_2(_request);  // *** //
+  _request := Get_ReplaceSpecialChar4Json(_request);  // *** //
   Do_Request(_request);
 end;
 
@@ -955,15 +967,6 @@ begin
     var _req: TBytes := BytesOf('Request Model List');
     FClient_Source.ExecCommand(cmdCntModellist, _req, False, True);
   end;
-  if FUpdateFlag = C_UpdateFlag_Scroll then    // Trick ? The Update Speed of Customized ListView is too slow ....
-  begin
-    FUpdateFlag := C_UpdateFlag_None;
-    if ListView_ChatBox.Selected <> nil then
-      begin
-        ListView_ChatBox.Resize;
-        ListView_ChatBox.ScrollViewPos := 99999;
-      end;
-  end;
   if FUpdateFlag = C_UpdateFlag_Keybrd then
   begin
     FUpdateFlag := C_UpdateFlag_None;
@@ -1010,8 +1013,8 @@ begin
   end;
 
   ListView_ChatBox.Selected := ListView_ChatBox.Items[_item.Index];
-  Application.ProcessMessages;
-  FUpdateFlag := C_UpdateFlag_Scroll;
+  var _itemRect := ListView_ChatBox.GetItemRect(_item.Index);
+  ListView_ChatBox.ScrollViewPos := ListView_ChatBox.ScrollViewPos + _itemRect.Bottom;
 end;
 
 function TMainForm.GetTextHeight(const AFlag: Integer; const  D: TListItemText; const Width: Single; const Text: string): Integer;
@@ -1192,7 +1195,7 @@ begin
       if AResult = mrOK then
       begin
         Self.ServerHost :=   Form_Setting.Edit_Host.Text.Trim;
-        Self.ServerPort :=   StrToIntDef(Form_Setting.Edit_Port.text.Trim, C_BasePort);
+        Self.ServerPort :=   StrToIntDef(Form_Setting.Edit_Port.Text.Trim, C_BasePort);
         Self.UserName :=     Form_Setting.Edit_UserName.Text;
 
         Self.FColorHeader := Form_Setting.ColorComboBox_Header.Color;
