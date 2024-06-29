@@ -279,6 +279,7 @@ type
     procedure SetText(Node: PVirtualNode; Column: TColumnIndex; const Value: string);
     procedure WMSetFont(var Msg: TWMSetFont); message WM_SETFONT;
     procedure GetDataFromGrid(const AStrings : TStringList; const IncludeHeading : Boolean = True);
+    // Modified by ichin 2024-06-26 수 오전 11:01:44
     procedure SetNode_BodyColor(const Value: TColor);
     procedure SetNode_FooterColor(const Value: TColor);
     procedure SetNode_HeaderColor(const Value: TColor);
@@ -677,7 +678,7 @@ begin
   FNode_BodyColor := TColor($7FFF00);
   FNode_FooterColor := TColors.Silver;
   FOffsetWRMagin := 35;
-  FNodeHeightOffSet := 50;
+  FNodeHeightOffSet := 15;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1471,7 +1472,7 @@ begin
       { Header - Title / User / Ollama }
       var _headersize: TSize := GetHeaderTextHeight(_Title);
       var _headrect: TRect := Rect(CellRect.Left+12, 5, CellRect.Right, _headersize.cy+6);
-      PaintInfo.Canvas.Font.Size := Self.Font.Size;
+      PaintInfo.Canvas.Font.Size  := Self.Font.Size;
       PaintInfo.Canvas.Font.Color := FNode_HeaderColor;
       PaintInfo.Canvas.Font.Style := [TFontStyle.fsBold];
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(_Title), Length(_Title), _headrect, DrawFormat);
@@ -1483,7 +1484,7 @@ begin
       { Footer - TimeStamp }
       var _footrect: TRect := Rect(CellRect.Right - 50, CellRect.Bottom-15, CellRect.Right+12, CellRect.Bottom-3);
       PaintInfo.Canvas.Font.Color := FNode_FooterColor;
-      PaintInfo.Canvas.Font.Size := 7;   { Fix ... }
+      PaintInfo.Canvas.Font.Size  := 7;   { Fix ... }
       Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(_TimeStamp), Length(_TimeStamp), _footrect, DrawFormat or DT_RIGHT);
     end;
 end;

@@ -64,7 +64,7 @@ type
   {$ELSE}
     TVTBaseAncestor        = TVTBaseAncestorVcl;
     TCanvas                = Vcl.Graphics.TCanvas;
-    TFormatEtcArray        = VirtualTrees.Types.TFormatEtcArray;											  
+    TFormatEtcArray        = VirtualTrees.Types.TFormatEtcArray;
   {$ENDIF}
 
   // Alias defintions for convenience
@@ -745,10 +745,8 @@ type
     function CalculateCacheEntryCount: Integer;
     procedure CalculateVerticalAlignments(var PaintInfo: TVTPaintInfo; var VButtonAlign: TDimension);
     function ChangeCheckState(Node: PVirtualNode; Value: TCheckState): Boolean;
-    function CollectSelectedNodesLTR(MainColumn: Integer; NodeLeft, NodeRight: TDimension; Alignment: TAlignment; OldRect,
-      NewRect: TRect): Boolean;
-    function CollectSelectedNodesRTL(MainColumn: Integer; NodeLeft, NodeRight: TDimension; Alignment: TAlignment; OldRect,
-      NewRect: TRect): Boolean;
+    function CollectSelectedNodesLTR(MainColumn: Integer; NodeLeft, NodeRight: TDimension; Alignment: TAlignment; OldRect, NewRect: TRect): Boolean;
+    function CollectSelectedNodesRTL(MainColumn: Integer; NodeLeft, NodeRight: TDimension; Alignment: TAlignment; OldRect, NewRect: TRect): Boolean;
     procedure ClearNodeBackground(const PaintInfo: TVTPaintInfo; UseBackground, Floating: Boolean; R: TRect);
     function CompareNodePositions(Node1, Node2: PVirtualNode; ConsiderChildrenAbove: Boolean = False): Integer;
     procedure DrawLineImage(const PaintInfo: TVTPaintInfo; X, Y, H, VAlign: TDimension; Style: TVTLineType; Reverse: Boolean);
@@ -959,16 +957,13 @@ type
     procedure DoAfterPaint(Canvas: TCanvas); virtual;
     procedure DoAutoScroll(X, Y: TDimension); virtual;
     function DoBeforeDrag(Node: PVirtualNode; Column: TColumnIndex): Boolean; virtual;
-    procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-      CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect); virtual;
-    procedure DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; ItemRect: TRect; var Color: TColor;
-      var EraseAction: TItemEraseAction); virtual;
+    procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect); virtual;
+    procedure DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; ItemRect: TRect; var Color: TColor; var EraseAction: TItemEraseAction); virtual;
     function DoBeforeItemPaint(Canvas: TCanvas; Node: PVirtualNode; ItemRect: TRect): Boolean; virtual;
     procedure DoBeforePaint(Canvas: TCanvas); virtual;
     function DoCancelEdit: Boolean; virtual;
     procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean); virtual;
-    procedure DoCanSplitterResizeNode(P: TPoint; Node: PVirtualNode; Column: TColumnIndex;
-      var Allowed: Boolean); virtual;
+    procedure DoCanSplitterResizeNode(P: TPoint; Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean); virtual;
     procedure DoChange(Node: PVirtualNode); virtual;
     procedure DoCheckClick(Node: PVirtualNode; NewCheckState: TCheckState); virtual;
     procedure DoChecked(Node: PVirtualNode); virtual;
@@ -988,12 +983,9 @@ type
     procedure DoDragging(P: TPoint); virtual;
     procedure DoDragExpand; virtual;
     procedure DoBeforeDrawLineImage(Node: PVirtualNode; Level: Integer; var XPos: TDimension); virtual;
-    function DoDragOver(Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode;
-      var Effect: Integer): Boolean; virtual;
-    procedure DoDragDrop(Source: TObject; const DataObject: TVTDragDataObject; const Formats: TFormatArray; Shift: TShiftState; Pt: TPoint;
-      var Effect: Integer; Mode: TDropMode); virtual;
-    procedure DoDrawHint(Canvas: TCanvas; Node: PVirtualNode; R: TRect; Column:
-        TColumnIndex);
+    function DoDragOver(Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer): Boolean; virtual;
+    procedure DoDragDrop(Source: TObject; const DataObject: TVTDragDataObject; const Formats: TFormatArray; Shift: TShiftState; Pt: TPoint; var Effect: Integer; Mode: TDropMode); virtual;
+    procedure DoDrawHint(Canvas: TCanvas; Node: PVirtualNode; R: TRect; Column: TColumnIndex);
     procedure DoEdit; virtual;
     procedure DoEndDrag(Target: TObject; X, Y: TDimension); override;
     function DoEndEdit(pCancel: Boolean = False): Boolean; virtual;
@@ -1005,16 +997,12 @@ type
     function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex): Boolean; virtual;
     procedure DoFocusNode(Node: PVirtualNode; Ask: Boolean); virtual;
     procedure DoFreeNode(Node: PVirtualNode); virtual;
-    function DoGetCellContentMargin(Node: PVirtualNode; Column: TColumnIndex;
-      CellContentMarginType: TVTCellContentMarginType = ccmtAllSides; Canvas: TCanvas = nil): TPoint; virtual;
+    function DoGetCellContentMargin(Node: PVirtualNode; Column: TColumnIndex; CellContentMarginType: TVTCellContentMarginType = ccmtAllSides; Canvas: TCanvas = nil): TPoint; virtual;
     procedure DoGetCursor(var Cursor: TCursor); virtual;
     procedure DoGetHeaderCursor(var Cursor: TVTCursor); virtual;
-    procedure DoGetHintSize(Node: PVirtualNode; Column: TColumnIndex; var R:
-        TRect); virtual;
-    procedure DoGetHintKind(Node: PVirtualNode; Column: TColumnIndex; var Kind:
-        TVTHintKind);
-    function DoGetImageIndex(Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
-      var Ghosted: Boolean; var Index: TImageIndex): TCustomImageList; virtual;
+    procedure DoGetHintSize(Node: PVirtualNode; Column: TColumnIndex; var R: TRect); virtual;
+    procedure DoGetHintKind(Node: PVirtualNode; Column: TColumnIndex; var Kind: TVTHintKind);
+    function DoGetImageIndex(Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean; var Index: TImageIndex): TCustomImageList; virtual;
     procedure DoGetImageText(Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex; var ImageText: string); virtual;
     procedure DoGetLineStyle(var Bits: Pointer); virtual;
     function DoGetNodeHint(Node: PVirtualNode; Column: TColumnIndex; var LineBreakStyle: TVTTooltipLineBreakStyle): string; virtual;
@@ -1029,8 +1017,7 @@ type
     procedure DoHeaderDragged(Column: TColumnIndex; OldPosition: TColumnPosition); virtual;
     procedure DoHeaderDraggedOut(Column: TColumnIndex; DropPosition: TPoint); virtual;
     function DoHeaderDragging(Column: TColumnIndex): Boolean; virtual;
-    procedure DoHeaderDraw(Canvas: TCanvas; Column: TVirtualTreeColumn; R: TRect; Hover, Pressed: Boolean;
-      DropMark: TVTDropMarkMode); virtual;
+    procedure DoHeaderDraw(Canvas: TCanvas; Column: TVirtualTreeColumn; R: TRect; Hover, Pressed: Boolean; DropMark: TVTDropMarkMode); virtual;
     procedure DoHeaderDrawQueryElements(var PaintInfo: THeaderPaintInfo; var Elements: THeaderPaintElements); virtual;
     procedure DoHeaderMouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: TDimension); virtual;
     procedure DoHeaderMouseMove(Shift: TShiftState; X, Y: TDimension); virtual;
@@ -1048,10 +1035,8 @@ type
     function DoNodeCopying(Node, NewParent: PVirtualNode): Boolean; virtual;
     procedure DoNodeClick(const HitInfo: THitInfo); virtual;
     procedure DoNodeDblClick(const HitInfo: THitInfo); virtual;
-    function DoNodeHeightDblClickResize(Node: PVirtualNode; Column: TColumnIndex; Shift: TShiftState;
-      P: TPoint): Boolean; virtual;
-    function DoNodeHeightTracking(Node: PVirtualNode; Column: TColumnIndex;  Shift: TShiftState;
-      var TrackPoint: TPoint; P: TPoint): Boolean; virtual;
+    function DoNodeHeightDblClickResize(Node: PVirtualNode; Column: TColumnIndex; Shift: TShiftState; P: TPoint): Boolean; virtual;
+    function DoNodeHeightTracking(Node: PVirtualNode; Column: TColumnIndex; Shift: TShiftState; var TrackPoint: TPoint; P: TPoint): Boolean; virtual;
     procedure DoNodeMoved(Node: PVirtualNode); virtual;
     function DoNodeMoving(Node, NewParent: PVirtualNode): Boolean; virtual;
     function DoPaintBackground(Canvas: TCanvas; R: TRect): Boolean; virtual;
@@ -1074,13 +1059,11 @@ type
     function DoValidateCache: Boolean; virtual;
     procedure DragAndDrop(AllowedEffects: DWord; const DataObject: TVTDragDataObject; var DragEffect: Integer); virtual;
     procedure DragCanceled; override;
-    function DragDrop(const DataObject: TVTDragDataObject; KeyState: Integer; Pt: TPoint;
-      var Effect: Integer): HResult; reintroduce; virtual;
+    function DragDrop(const DataObject: TVTDragDataObject; KeyState: Integer; Pt: TPoint; var Effect: Integer): HResult; reintroduce; virtual;
     function DragEnter(KeyState: Integer; Pt: TPoint; var Effect: Integer): HResult; virtual;
     procedure DragFinished; virtual;
     procedure DragLeave; virtual;
-    function DragOver(Source: TObject; KeyState: Integer; DragState: TDragState; Pt: TPoint;
-      var Effect: Integer): HResult; reintroduce; virtual;
+    function DragOver(Source: TObject; KeyState: Integer; DragState: TDragState; Pt: TPoint; var Effect: Integer): HResult; reintroduce; virtual;
     procedure DrawDottedHLine(const PaintInfo: TVTPaintInfo; Left, Right, Top: TDimension); virtual;
     procedure DrawDottedVLine(const PaintInfo: TVTPaintInfo; Top, Bottom, Left: TDimension); virtual;
     procedure DrawGridHLine(const PaintInfo: TVTPaintInfo; Left, Right, Top: TDimension); virtual;
@@ -1092,8 +1075,7 @@ type
     procedure FontChanged(AFont: TObject); virtual;
     function GetBorderDimensions: TSize; virtual;
     function GetCheckedCount: Integer;
-    function GetCheckImage(Node: PVirtualNode; ImgCheckType: TCheckType = ctNone;
-      ImgCheckState: TCheckState = csUncheckedNormal; ImgEnabled: Boolean = True): Integer; virtual;
+    function GetCheckImage(Node: PVirtualNode; ImgCheckType: TCheckType = ctNone; ImgCheckState: TCheckState = csUncheckedNormal; ImgEnabled: Boolean = True): Integer; virtual;
     function GetColumnClass: TVirtualTreeColumnClass; virtual;
     function GetDefaultHintKind: TVTHintKind; virtual;
     function GetDoubleBuffered: Boolean; {$if CompilerVersion >= 36}override;{$ifend}
@@ -1121,8 +1103,7 @@ type
     procedure InitNode(Node: PVirtualNode); virtual;
     procedure InternalAddFromStream(Stream: TStream; Version: Integer; Node: PVirtualNode); virtual;
     function InternalAddToSelection(Node: PVirtualNode; ForceInsert: Boolean): Boolean; overload;
-    function InternalAddToSelection(const NewItems: TNodeArray; NewLength: Integer;
-      ForceInsert: Boolean): Boolean; overload;
+    function InternalAddToSelection(const NewItems: TNodeArray; NewLength: Integer; ForceInsert: Boolean): Boolean; overload;
     procedure InternalCacheNode(Node: PVirtualNode); virtual;
     procedure InternalClearSelection; virtual;
     procedure InternalConnectNode(Node, Destination: PVirtualNode; Target: TBaseVirtualTree; Mode: TVTNodeAttachMode); virtual;
@@ -1141,16 +1122,13 @@ type
     procedure Paint; override;
     procedure PaintCheckImage(Canvas: TCanvas; const ImageInfo: TVTImageInfo; Selected: Boolean); virtual;
     procedure PaintImage(var PaintInfo: TVTPaintInfo; ImageInfoIndex: TVTImageInfoIndex; DoOverlay: Boolean); virtual;
-    procedure PaintNodeButton(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const R: TRect; ButtonX,
-      ButtonY: TDimension; BidiMode: TBiDiMode); virtual;
+    procedure PaintNodeButton(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const R: TRect; ButtonX, ButtonY: TDimension; BidiMode: TBidiMode); virtual;
     procedure PaintTreeLines(const PaintInfo: TVTPaintInfo; IndentSize: TDimension; const LineImage: TLineImage); virtual;
-    procedure PaintSelectionRectangle(Target: TCanvas; WindowOrgX: TDimension; const SelectionRect: TRect;
-      TargetRect: TRect); virtual;
+    procedure PaintSelectionRectangle(Target: TCanvas; WindowOrgX: TDimension; const SelectionRect: TRect; TargetRect: TRect); virtual;
     procedure PanningWindowProc(var Message: TMessage); virtual;
     procedure PrepareBitmaps(NeedButtons, NeedLines: Boolean);
     procedure PrepareCell(var PaintInfo: TVTPaintInfo; WindowOrgX, MaxWidth: TDimension); virtual;
-    function ReadChunk(Stream: TStream; Version: Integer; Node: PVirtualNode; ChunkType,
-      ChunkSize: Integer): Boolean; virtual;
+    function ReadChunk(Stream: TStream; Version: Integer; Node: PVirtualNode; ChunkType, ChunkSize: Integer): Boolean; virtual;
     procedure ReadNode(Stream: TStream; Version: Integer; Node: PVirtualNode); virtual;
     procedure RedirectFontChangeEvent(Canvas: TCanvas); virtual;
     procedure RemoveFromSelection(Node: PVirtualNode); virtual;
@@ -1178,8 +1156,7 @@ type
     procedure UpdateEditBounds; virtual;
     procedure UpdateHeaderRect; virtual;
     procedure UpdateStyleElements; override;
-    procedure UpdateWindowAndDragImage(const Tree: TBaseVirtualTree; TreeRect: TRect; UpdateNCArea,
-      ReshowDragImage: Boolean); virtual;
+    procedure UpdateWindowAndDragImage(const Tree: TBaseVirtualTree; TreeRect: TRect; UpdateNCArea, ReshowDragImage: Boolean); virtual;
     procedure ValidateCache; virtual;
     procedure ValidateNodeDataSize(var Size: Integer); virtual;
     procedure WndProc(var Message: TMessage); override;
@@ -1220,8 +1197,7 @@ type
     property LastDragEffect: Integer read FLastDragEffect;
     property DragType: TVTDragType read FDragType write FDragType default dtOLE;
     property DragWidth: Integer read FDragWidth write FDragWidth default 200;
-    property DrawSelectionMode: TVTDrawSelectionMode read FDrawSelectionMode write FDrawSelectionMode
-      default smDottedRectangle;
+    property DrawSelectionMode: TVTDrawSelectionMode read FDrawSelectionMode write FDrawSelectionMode default smDottedRectangle;
     property EditColumn: TColumnIndex read FEditColumn write FEditColumn;
     property EditDelay: Cardinal read FEditDelay write FEditDelay default 1000;
     property EffectiveOffsetX: TDimension read FEffectiveOffsetX;
@@ -1266,12 +1242,11 @@ type
     property OnAfterAutoFitColumn: TVTAfterAutoFitColumnEvent read FOnAfterAutoFitColumn write FOnAfterAutoFitColumn;
     property OnAfterAutoFitColumns: TVTAfterAutoFitColumnsEvent read FOnAfterAutoFitColumns write FOnAfterAutoFitColumns;
     property OnAfterCellPaint: TVTAfterCellPaintEvent read FOnAfterCellPaint write FOnAfterCellPaint;
-    property OnAfterColumnExport : TVTColumnExportEvent read FOnAfterColumnExport write FOnAfterColumnExport;
+    property OnAfterColumnExport: TVTColumnExportEvent read FOnAfterColumnExport write FOnAfterColumnExport;
     property OnAfterColumnWidthTracking: TVTAfterColumnWidthTrackingEvent read FOnAfterColumnWidthTracking write FOnAfterColumnWidthTracking;
     property OnAfterGetMaxColumnWidth: TVTAfterGetMaxColumnWidthEvent read FOnAfterGetMaxColumnWidth write FOnAfterGetMaxColumnWidth;
     property OnAfterHeaderExport: TVTTreeExportEvent read FOnAfterHeaderExport write FOnAfterHeaderExport;
-    property OnAfterHeaderHeightTracking: TVTAfterHeaderHeightTrackingEvent read FOnAfterHeaderHeightTracking
-      write FOnAfterHeaderHeightTracking;
+    property OnAfterHeaderHeightTracking: TVTAfterHeaderHeightTrackingEvent read FOnAfterHeaderHeightTracking write FOnAfterHeaderHeightTracking;
     property OnAfterItemErase: TVTAfterItemEraseEvent read FOnAfterItemErase write FOnAfterItemErase;
     property OnAfterItemPaint: TVTAfterItemPaintEvent read FOnAfterItemPaint write FOnAfterItemPaint;
     property OnAfterNodeExport: TVTNodeExportEvent read FOnAfterNodeExport write FOnAfterNodeExport;
@@ -1281,13 +1256,11 @@ type
     property OnBeforeAutoFitColumns: TVTBeforeAutoFitColumnsEvent read FOnBeforeAutoFitColumns write FOnBeforeAutoFitColumns;
     property OnBeforeCellPaint: TVTBeforeCellPaintEvent read FOnBeforeCellPaint write FOnBeforeCellPaint;
     property OnBeforeColumnExport: TVTColumnExportEvent read FOnBeforeColumnExport write FOnBeforeColumnExport;
-    property OnBeforeColumnWidthTracking: TVTBeforeColumnWidthTrackingEvent read FOnBeforeColumnWidthTracking
-      write FOnBeforeColumnWidthTracking;
+    property OnBeforeColumnWidthTracking: TVTBeforeColumnWidthTrackingEvent read FOnBeforeColumnWidthTracking write FOnBeforeColumnWidthTracking;
     property OnBeforeDrawTreeLine: TVTBeforeDrawLineImageEvent read FOnBeforeDrawLineImage write FOnBeforeDrawLineImage;
     property OnBeforeGetMaxColumnWidth: TVTBeforeGetMaxColumnWidthEvent read FOnBeforeGetMaxColumnWidth write FOnBeforeGetMaxColumnWidth;
     property OnBeforeHeaderExport: TVTTreeExportEvent read FOnBeforeHeaderExport write FOnBeforeHeaderExport;
-    property OnBeforeHeaderHeightTracking: TVTBeforeHeaderHeightTrackingEvent read FOnBeforeHeaderHeightTracking
-      write FOnBeforeHeaderHeightTracking;
+    property OnBeforeHeaderHeightTracking: TVTBeforeHeaderHeightTrackingEvent read FOnBeforeHeaderHeightTracking write FOnBeforeHeaderHeightTracking;
     property OnBeforeItemErase: TVTBeforeItemEraseEvent read FOnBeforeItemErase write FOnBeforeItemErase;
     property OnBeforeItemPaint: TVTBeforeItemPaintEvent read FOnBeforeItemPaint write FOnBeforeItemPaint;
     property OnBeforeNodeExport: TVTNodeExportEvent read FOnBeforeNodeExport write FOnBeforeNodeExport;
@@ -1308,8 +1281,7 @@ type
     property OnColumnExport : TVTColumnExportEvent read FOnColumnExport write FOnColumnExport;
     property OnColumnResize: TVTHeaderNotifyEvent read FOnColumnResize write FOnColumnResize;
     property OnColumnVisibilityChanged: TColumnChangeEvent read fOnColumnVisibilityChanged write fOnColumnVisibilityChanged;
-    property OnColumnWidthDblClickResize: TVTColumnWidthDblClickResizeEvent read FOnColumnWidthDblClickResize
-      write FOnColumnWidthDblClickResize;
+    property OnColumnWidthDblClickResize: TVTColumnWidthDblClickResizeEvent read FOnColumnWidthDblClickResize write FOnColumnWidthDblClickResize;
     property OnColumnWidthTracking: TVTColumnWidthTrackingEvent read FOnColumnWidthTracking write FOnColumnWidthTracking;
     property OnCompareNodes: TVTCompareEvent read FOnCompareNodes write FOnCompareNodes;
     property OnCreateDataObject: TVTCreateDataObjectEvent read FOnCreateDataObject write FOnCreateDataObject;
@@ -1332,18 +1304,15 @@ type
     property OnGetCursor: TVTGetCursorEvent read FOnGetCursor write FOnGetCursor;
     property OnGetHeaderCursor: TVTGetHeaderCursorEvent read FOnGetHeaderCursor write FOnGetHeaderCursor;
     property OnGetHelpContext: TVTHelpContextEvent read FOnGetHelpContext write FOnGetHelpContext;
-    property OnGetHintSize: TVTGetHintSizeEvent read FOnGetHintSize write
-        FOnGetHintSize;
-    property OnGetHintKind: TVTHintKindEvent read FOnGetHintKind write
-        FOnGetHintKind;
+    property OnGetHintSize: TVTGetHintSizeEvent read FOnGetHintSize write FOnGetHintSize;
+    property OnGetHintKind: TVTHintKindEvent read FOnGetHintKind write FOnGetHintKind;
     property OnGetImageIndex: TVTGetImageEvent read FOnGetImage write FOnGetImage;
     property OnGetImageIndexEx: TVTGetImageExEvent read FOnGetImageEx write FOnGetImageEx;
     property OnGetImageText: TVTGetImageTextEvent read FOnGetImageText write FOnGetImageText;
     property OnGetLineStyle: TVTGetLineStyleEvent read FOnGetLineStyle write FOnGetLineStyle;
     property OnGetNodeDataSize: TVTGetNodeDataSizeEvent read FOnGetNodeDataSize write FOnGetNodeDataSize;
     property OnGetPopupMenu: TVTPopupEvent read FOnGetPopupMenu write FOnGetPopupMenu;
-    property OnGetUserClipboardFormats: TVTGetUserClipboardFormatsEvent read FOnGetUserClipboardFormats
-      write FOnGetUserClipboardFormats;
+    property OnGetUserClipboardFormats: TVTGetUserClipboardFormatsEvent read FOnGetUserClipboardFormats write FOnGetUserClipboardFormats;
     property OnHeaderAddPopupItem: TVTHeaderAddPopupItemEvent read FOnHeaderAddPopupItem write FOnHeaderAddPopupItem;
     property OnHeaderClick: TVTHeaderClickEvent read FOnHeaderClick write FOnHeaderClick;
     property OnHeaderDblClick: TVTHeaderClickEvent read FOnHeaderDblClick write FOnHeaderDblClick;
@@ -1351,12 +1320,9 @@ type
     property OnHeaderDraggedOut: TVTHeaderDraggedOutEvent read FOnHeaderDraggedOut write FOnHeaderDraggedOut;
     property OnHeaderDragging: TVTHeaderDraggingEvent read FOnHeaderDragging write FOnHeaderDragging;
     property OnHeaderDraw: TVTHeaderPaintEvent read FOnHeaderDraw write FOnHeaderDraw;
-    property OnHeaderDrawQueryElements: TVTHeaderPaintQueryElementsEvent read FOnHeaderDrawQueryElements
-      write FOnHeaderDrawQueryElements;
-    property OnHeaderHeightTracking: TVTHeaderHeightTrackingEvent read FOnHeaderHeightTracking
-      write FOnHeaderHeightTracking;
-    property OnHeaderHeightDblClickResize: TVTHeaderHeightDblClickResizeEvent read FOnHeaderHeightDblClickResize
-      write FOnHeaderHeightDblClickResize;
+    property OnHeaderDrawQueryElements: TVTHeaderPaintQueryElementsEvent read FOnHeaderDrawQueryElements write FOnHeaderDrawQueryElements;
+    property OnHeaderHeightTracking: TVTHeaderHeightTrackingEvent read FOnHeaderHeightTracking write FOnHeaderHeightTracking;
+    property OnHeaderHeightDblClickResize: TVTHeaderHeightDblClickResizeEvent read FOnHeaderHeightDblClickResize write FOnHeaderHeightDblClickResize;
     property OnHeaderMouseDown: TVTHeaderMouseEvent read FOnHeaderMouseDown write FOnHeaderMouseDown;
     property OnHeaderMouseMove: TVTHeaderMouseMoveEvent read FOnHeaderMouseMove write FOnHeaderMouseMove;
     property OnHeaderMouseUp: TVTHeaderMouseEvent read FOnHeaderMouseUp write FOnHeaderMouseUp;
@@ -1376,8 +1342,7 @@ type
     property OnNodeDblClick: TVTNodeClickEvent read FOnNodeDblClick write FOnNodeDblClick;
     property OnNodeExport: TVTNodeExportEvent read FOnNodeExport write FOnNodeExport;
     property OnNodeHeightTracking: TVTNodeHeightTrackingEvent read FOnNodeHeightTracking write FOnNodeHeightTracking;
-    property OnNodeHeightDblClickResize: TVTNodeHeightDblClickResizeEvent read FOnNodeHeightDblClickResize
-      write FOnNodeHeightDblClickResize;
+    property OnNodeHeightDblClickResize: TVTNodeHeightDblClickResizeEvent read FOnNodeHeightDblClickResize write FOnNodeHeightDblClickResize;
     property OnNodeMoved: TVTNodeMovedEvent read FOnNodeMoved write FOnNodeMoved;
     property OnNodeMoving: TVTNodeMovingEvent read FOnNodeMoving write FOnNodeMoving;
     property OnPaintBackground: TVTBackgroundPaintEvent read FOnPaintBackground write FOnPaintBackground;
@@ -1416,10 +1381,8 @@ type
     procedure Clear; virtual;
     procedure ClearChecked;
     procedure ClearSelection(); overload; inline;
-    function CopyTo(Source: PVirtualNode; Tree: TBaseVirtualTree; Mode: TVTNodeAttachMode;
-      ChildrenOnly: Boolean): PVirtualNode; overload;
-    function CopyTo(Source, Target: PVirtualNode; Mode: TVTNodeAttachMode;
-      ChildrenOnly: Boolean): PVirtualNode; overload;
+    function CopyTo(Source: PVirtualNode; Tree: TBaseVirtualTree; Mode: TVTNodeAttachMode; ChildrenOnly: Boolean): PVirtualNode; overload;
+    function CopyTo(Source, Target: PVirtualNode; Mode: TVTNodeAttachMode; ChildrenOnly: Boolean): PVirtualNode; overload;
     procedure CutToClipboard(); override;
     procedure DeleteChildren(Node: PVirtualNode; ResetHasChildren: Boolean = False);
     procedure DeleteNode(Node: PVirtualNode; pReIndex: Boolean = True); overload; inline;
@@ -1435,11 +1398,10 @@ type
     function ExecuteAction(Action: TBasicAction): Boolean; override;
     procedure FinishCutOrCopy;
     procedure FlushClipboard;
-    procedure FullCollapse(Node: PVirtualNode = nil);  virtual;
+    procedure FullCollapse(Node: PVirtualNode = nil); virtual;
     procedure FullExpand(Node: PVirtualNode = nil); virtual;
     function GetControlsAlignment: TAlignment; override;
-    function GetDisplayRect(Node: PVirtualNode; Column: TColumnIndex; TextOnly: Boolean; Unclipped: Boolean = False;
-      ApplyCellContentMargin: Boolean = False): TRect;
+    function GetDisplayRect(Node: PVirtualNode; Column: TColumnIndex; TextOnly: Boolean; Unclipped: Boolean = False; ApplyCellContentMargin: Boolean = False): TRect;
     function GetEffectivelyFiltered(Node: PVirtualNode): Boolean;
     function GetEffectivelyVisible(Node: PVirtualNode): Boolean;
     function GetFirst(ConsiderChildrenAbove: Boolean = False): PVirtualNode;
@@ -1452,29 +1414,24 @@ type
     function GetFirstLevel(NodeLevel: Cardinal): PVirtualNode;
     function GetFirstNoInit(ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetFirstSelected(ConsiderChildrenAbove: Boolean = False): PVirtualNode;
-    function GetFirstVisible(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True;
-      IncludeFiltered: Boolean = False): PVirtualNode;
+    function GetFirstVisible(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True; IncludeFiltered: Boolean = False): PVirtualNode;
     function GetFirstVisibleChild(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
     function GetFirstVisibleChildNoInit(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
-    function GetFirstVisibleNoInit(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True;
-      IncludeFiltered: Boolean = False): PVirtualNode;
-    procedure GetHitTestInfoAt(X, Y: TDimension; Relative: Boolean; var HitInfo: THitInfo; ShiftState: TShiftState=[]); virtual;
+    function GetFirstVisibleNoInit(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True; IncludeFiltered: Boolean = False): PVirtualNode;
+    procedure GetHitTestInfoAt(X, Y: TDimension; relative: Boolean; var HitInfo: THitInfo; ShiftState: TShiftState = []); virtual;
     function GetLast(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetLastInitialized(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetLastNoInit(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetLastChild(Node: PVirtualNode): PVirtualNode;
     function GetLastChildNoInit(Node: PVirtualNode): PVirtualNode;
     function GetLastSelected(ConsiderChildrenAbove: Boolean = False): PVirtualNode;
-    function GetLastVisible(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True;
-      IncludeFiltered: Boolean = False): PVirtualNode;
+    function GetLastVisible(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True; IncludeFiltered: Boolean = False): PVirtualNode;
     function GetLastVisibleChild(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
     function GetLastVisibleChildNoInit(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
-    function GetLastVisibleNoInit(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True;
-      IncludeFiltered: Boolean = False): PVirtualNode;
+    function GetLastVisibleNoInit(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True; IncludeFiltered: Boolean = False): PVirtualNode;
     function GetMaxColumnWidth(Column: TColumnIndex; UseSmartColumnWidth: Boolean = False): TDimension; virtual;
     function GetNext(Node: PVirtualNode; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
-    function GetNextChecked(Node: PVirtualNode; State: TCheckState = csCheckedNormal;
-      ConsiderChildrenAbove: Boolean = False): PVirtualNode; overload;
+    function GetNextChecked(Node: PVirtualNode; State: TCheckState = csCheckedNormal; ConsiderChildrenAbove: Boolean = False): PVirtualNode; overload;
     function GetNextChecked(Node: PVirtualNode; ConsiderChildrenAbove: Boolean): PVirtualNode; overload;
     function GetNextCutCopy(Node: PVirtualNode; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetNextInitialized(Node: PVirtualNode; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
@@ -1502,8 +1459,7 @@ type
     function GetOffset(pElement: TVTElement; pNode: PVirtualNode): TDimension;
     procedure GetOffsets(pNode: PVirtualNode; out pOffsets: TVTOffsets; pElement: TVTElement = TVTElement.ofsEndOfClientArea; pColumn: Integer = NoColumn);
     function GetPrevious(Node: PVirtualNode; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
-    function GetPreviousChecked(Node: PVirtualNode; State: TCheckState = csCheckedNormal;
-      ConsiderChildrenAbove: Boolean = False): PVirtualNode;
+    function GetPreviousChecked(Node: PVirtualNode; State: TCheckState = csCheckedNormal; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetPreviousCutCopy(Node: PVirtualNode; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetPreviousInitialized(Node: PVirtualNode; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetPreviousLeaf(Node: PVirtualNode): PVirtualNode;
@@ -1518,8 +1474,7 @@ type
     function GetPreviousVisibleSiblingNoInit(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
     function GetSortedCutCopySet(Resolve: Boolean): TNodeArray; override;
     function GetSortedSelection(Resolve: Boolean): TNodeArray; override;
-    procedure GetTextInfo(Node: PVirtualNode; Column: TColumnIndex; const AFont: TFont; var R: TRect;
-      var Text: string); virtual;
+    procedure GetTextInfo(Node: PVirtualNode; Column: TColumnIndex; const AFont: TFont; var R: TRect; var Text: string); virtual;
     function GetTreeRect: TRect;
     function GetVisibleParent(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
     function HasAsParent(Node, PotentialParent: PVirtualNode): Boolean;
@@ -1533,22 +1488,17 @@ type
     function IsMouseSelecting: Boolean;
     function IsEmpty: Boolean; inline;
     function IsUpdating(): Boolean;
-    function IterateSubtree(Node: PVirtualNode; Callback: TVTGetNodeProc; Data: Pointer; Filter: TVirtualNodeStates = [];
-      DoInit: Boolean = False; ChildNodesOnly: Boolean = False): PVirtualNode;
+    function IterateSubtree(Node: PVirtualNode; Callback: TVTGetNodeProc; Data: Pointer; Filter: TVirtualNodeStates = []; DoInit: Boolean = False; ChildNodesOnly: Boolean = False): PVirtualNode;
     procedure LoadFromFile(const FileName: TFileName); virtual;
     procedure LoadFromStream(Stream: TStream); virtual;
     procedure MeasureItemHeight(const Canvas: TCanvas; Node: PVirtualNode); virtual;
     procedure MoveTo(Source, Target: PVirtualNode; Mode: TVTNodeAttachMode; ChildrenOnly: Boolean); overload;
-    procedure MoveTo(Node: PVirtualNode; Tree: TBaseVirtualTree; Mode: TVTNodeAttachMode;
-      ChildrenOnly: Boolean); overload;
-    procedure PaintTree(TargetCanvas: TCanvas; Window: TRect; Target: TPoint; PaintOptions: TVTInternalPaintOptions;
-      PixelFormat: TPixelFormat = pfDevice); virtual;
+    procedure MoveTo(Node: PVirtualNode; Tree: TBaseVirtualTree; Mode: TVTNodeAttachMode; ChildrenOnly: Boolean); overload;
+    procedure PaintTree(TargetCanvas: TCanvas; Window: TRect; Target: TPoint; PaintOptions: TVTInternalPaintOptions; PixelFormat: TPixelFormat = pfDevice); virtual;
     procedure PrepareDragImage(HotSpot: TPoint; const DataObject: TVTDragDataObject);
     procedure Print(Printer: TPrinter; PrintHeader: Boolean);
-    function ProcessDrop(const DataObject: TVTDragDataObject; TargetNode: PVirtualNode; var Effect: Integer; Mode:
-      TVTNodeAttachMode): Boolean;
-    function ProcessOLEData(Source: TBaseVirtualTree; const DataObject: IDataObject; TargetNode: PVirtualNode;
-                            Mode: TVTNodeAttachMode; Optimized: Boolean): Boolean;
+    function ProcessDrop(const DataObject: TVTDragDataObject; TargetNode: PVirtualNode; var Effect: Integer; Mode: TVTNodeAttachMode): Boolean;
+    function ProcessOLEData(Source: TBaseVirtualTree; const DataObject: IDataObject; TargetNode: PVirtualNode; Mode: TVTNodeAttachMode; Optimized: Boolean): Boolean;
     procedure RepaintNode(Node: PVirtualNode);
     procedure ReinitChildren(Node: PVirtualNode; Recursive: Boolean; ForceReinit: Boolean = False); virtual;
     procedure InitRecursive(Node: PVirtualNode; Levels: Cardinal = MaxInt; pVisibleOnly: Boolean = True);
@@ -1588,12 +1538,10 @@ type
     function LevelNodes(NodeLevel: Cardinal): TVTVirtualNodeEnumeration;
     function NoInitNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
     function SelectedNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
-    function VisibleNodes(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True;
-      IncludeFiltered: Boolean = False): TVTVirtualNodeEnumeration;
+    function VisibleNodes(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True; IncludeFiltered: Boolean = False): TVTVirtualNodeEnumeration;
     function VisibleChildNodes(Node: PVirtualNode; IncludeFiltered: Boolean = False): TVTVirtualNodeEnumeration;
     function VisibleChildNoInitNodes(Node: PVirtualNode; IncludeFiltered: Boolean = False): TVTVirtualNodeEnumeration;
-    function VisibleNoInitNodes(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True;
-      IncludeFiltered: Boolean = False): TVTVirtualNodeEnumeration;
+    function VisibleNoInitNodes(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True; IncludeFiltered: Boolean = False): TVTVirtualNodeEnumeration;
     property BottomNode: PVirtualNode read GetBottomNode write SetBottomNode;
     property CheckedCount: Integer read GetCheckedCount;
     property CheckImages: TCustomImageList read FCheckImages;
@@ -1703,7 +1651,7 @@ type
   //These allow us access to protected members in the classes
   TVirtualTreeColumnsCracker = class(TVirtualTreeColumns);
   TVTHeaderCracker = class(TVTHeader);
-  TVirtualTreeColumnCracker = class(TVirtualTreeColumn);												 
+  TVirtualTreeColumnCracker = class(TVirtualTreeColumn);
   TBaseVirtualTreeCracker = class(TBaseVirtualTree);
 
   // streaming support
