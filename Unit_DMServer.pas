@@ -52,6 +52,7 @@ type
     procedure Lock_List;
     procedure Unlock_List;
     procedure InformClientsOfLogins(aDontSendToLine: TncLine = nil);
+    procedure InformClientsOfModels(const AFlag: Integer; ALine: TncLine = nil);
     //
     procedure Lock_Queue;
     procedure Unlock_Queue;
@@ -66,7 +67,6 @@ type
     function Get_Queue(): string;
     function Get_Queue_Count: Integer;
     procedure Response_ToClient(const AUser, AQueue, AModel, AResponse: string);
-    procedure InformClientsOfModels(const AFlag: Integer; ALine: TncLine = nil);
   end;
 
 var
@@ -110,8 +110,10 @@ const
 
 const
   C_CMD_TYPE_STR: array [C_CMD_TYPE] of string = ('Request','Response');
-const  // Common with OllamaClient Android ...
-  //C_JsonFmt  = '{"user": "Ollama","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
+
+// Common with OllamaClient Android ...
+//C_JsonFmt  = '{"user": "Ollama","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
+const
   C_JsonFmt2 = '{"user": "Ollama","queue": "%queue%","model": "%model%","response": "%response%"}';
 
 function GetLocalIP_Winsock: string;
@@ -146,19 +148,19 @@ begin
     procedure()
     begin
       const c_IpDomain: string = 'http://ipinfo.io/json';
-      var _HTTP: THTTPClient := THTTPClient.Create;
+      var _HTTP := THTTPClient.Create;
       with _HTTP do
       begin
         ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
-        Accept := 'application/json, text/javascript, */*; q=0.01';
-        ContentType := 'application/json';
+        Accept := 'application/json';
+        ContentType := 'application/json; charset=UTF-8';
       end;
       try
-        var _HttpResponse: IHttpResponse := _HTTP.Get(c_IpDomain);
+        var _HttpResponse := _HTTP.Get(c_IpDomain);
         if _HttpResponse.StatusCode = 200 then
           begin
             var _response := _HttpResponse.ContentAsString();
-            var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(_response), 0) as TJSONObject;
+            var _JsonObj := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(_response), 0) as TJSONObject;
             if Assigned(_JsonObj) then
               DM_PublicIP := _JsonObj.Get('ip').JsonValue.Value;
             _JsonObj.Free;
@@ -235,7 +237,7 @@ begin
   FCLoseFlag := True;
   Do_ShutDownBroker(0);
 
-  var _slog: string := Format('%s%s%s', ['Log_dm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+  var _slog := Format('%s%s%s', ['Log_dm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
   FLogList.SaveToFile(CV_LogPath+_slog);
 
   FLogList.Free;
@@ -378,6 +380,7 @@ end;
 procedure TDM_Server.ncServerSource_RMConnected(Sender: TObject; aLine: TncLine);
 begin
   Log_Chat(WF_DM_CONNECT_FLAG, 'Client connected /' + aLine.PeerIP);
+  PostMessage(Form_RMBroker.Handle, WF_DM_MESSAGE, WF_DM_MESSAGE_CONNECT, 1);
 end;
 
 procedure TDM_Server.ncServerSource_RMDisconnected(Sender: TObject; aLine: TncLine);
@@ -386,6 +389,7 @@ begin
 
   ConnectedUsersLock.Acquire;
   var UserData: TConnectedUserData;
+  var _cntbool: Integer := ConnectedUsers.Count;;
   try
     for var _i := 0 to ConnectedUsers.Count - 1 do  // Substitute for aLine.UserID ?
     begin
@@ -397,16 +401,19 @@ begin
         Break;
       end;
     end;
+    _cntbool := ConnectedUsers.Count;
   finally
     ConnectedUsersLock.Release;
   end;
+  if _cntbool < 1 then
+  PostMessage(Form_RMBroker.Handle, WF_DM_MESSAGE, WF_DM_MESSAGE_DISCONNECT, 0);
 
   InformClientsOfLogins(aLine);
 end;
 
 procedure TDM_Server.Set_Request2Queues(const ARequestsJson: string; const AQueue: Integer);
 begin
-  var _queuenum: string := IntToStr(AQueue);
+  var _queuenum := IntToStr(AQueue);
   var _Result := ARequestsJson.Replace('%queue%', _queuenum, [rfIgnoreCase]);
 
   Set_Queue(_Result);
@@ -415,7 +422,7 @@ end;
 
 function TDM_Server.Get_Request2Bytes(const ARequestsJson: string; const AQueue: Integer): TBytes;
 begin
-  var _queuenum: string := Format('%.3d', [AQueue]);
+  var _queuenum := Format('%.3d', [AQueue]);
   var _Result := ARequestsJson.Replace('%queue%', _queuenum, [rfIgnoreCase]);
   Result := TEncoding.UTF8.GetBytes(_Result);
 end;
@@ -457,9 +464,9 @@ begin
       begin
         ConnectedUsersLock.Acquire;
         try
-          var _UserID: string := TEncoding.UTF8.GetString(aData);
+          var _UserID := TEncoding.UTF8.GetString(aData);
           var _UserData: TConnectedUserData;
-          var _index: Integer := ConnectedUsers.IndexOf(_UserID);
+          var _index := ConnectedUsers.IndexOf(_UserID);
           if _index < 0 then
             begin
               _UserData := TConnectedUserData.Create;
@@ -494,7 +501,7 @@ begin
         Inc(FQueueNum);
         ConnectedUsersLock.Acquire;
         try
-          var _index: Integer := ConnectedUsers.IndexOf(_UserID);
+          var _index := ConnectedUsers.IndexOf(_UserID);
           if _index >= 0 then
           begin
             var _UserData := TConnectedUserData(ConnectedUsers.Objects[_index]);
@@ -523,7 +530,7 @@ procedure TDM_Server.InformClientsOfLogins(aDontSendToLine: TncLine = nil);
 begin
   ConnectedUsersLock.Acquire;
   try
-    var _SocketList: TSocketList := FncServerSource_RM.Lines.LockList;
+    var _SocketList := FncServerSource_RM.Lines.LockList;
     try
       var _data: TBytes := TEncoding.UTF8.GetBytes(ConnectedUsers.CommaText);
       for var _i := 0 to _SocketList.Count - 1 do
@@ -543,7 +550,7 @@ begin
   try
     _Models.Assign(Form_RestOllama.ModelsList);
     _Models.Add(Form_RestOllama.Model_Selected);
-    var _SocketList: TSocketList := FncServerSource_RM.Lines.LockList;
+    var _SocketList := FncServerSource_RM.Lines.LockList;
     try
       var _data: TBytes := TEncoding.UTF8.GetBytes(_Models.CommaText);
       if ALine = nil then
@@ -562,10 +569,10 @@ end;
 procedure TDM_Server.Response_ToClient(const AUser, AQueue, AModel, AResponse: string);
 begin
   var _queueline: TncLine := nil;
-  var _queue: Integer := StrToIntDef(AQueue, 0);
+  var _queue := StrToIntDef(AQueue, 0);
   ConnectedUsersLock.Acquire;
   try
-    var _index: Integer := ConnectedUsers.IndexOf(AUser);
+    var _index := ConnectedUsers.IndexOf(AUser);
     if _index >= 0 then
     begin
       var _UserData := TConnectedUserData(ConnectedUsers.Objects[_index]);
@@ -578,8 +585,8 @@ begin
 
   if _queueline <> nil then
   begin
-    var _qunumber: string := Format('%.3d', [_queue]);
-    var _response: string := StringReplace(C_JsonFmt2, '%queue%', _qunumber, [rfIgnoreCase]);
+    var _qunumber := Format('%.3d', [_queue]);
+    var _response := StringReplace(C_JsonFmt2, '%queue%', _qunumber, [rfIgnoreCase]);
     _response := StringReplace(_response, '%model%', AModel, [rfIgnoreCase]);
     _response := StringReplace(_response, '%response%', AResponse, [rfIgnoreCase]);
     var _data: TBytes := TEncoding.UTF8.GetBytes(_response);

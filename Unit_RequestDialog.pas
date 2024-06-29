@@ -89,15 +89,15 @@ end;
 
 procedure TForm_RequestDialog.SpeedButton_TransClick(Sender: TObject);
 begin
-  var _ItemStr: string := Trim(Memo_Request.Lines.Text);
+  var _ItemStr := Trim(Memo_Request.Lines.Text);
   if _ItemStr = '' then
   begin
     ShowMessage('Can not translate for empty string');
     Exit;
   end;
 
-  var _codefrom: Integer := FCode_From;
-  var _codeto: Integer := FCode_to;
+  var _codefrom := FCode_From;
+  var _codeto := FCode_to;
   if Is_Hangul(_ItemStr) then
   begin
     _codefrom := 1;

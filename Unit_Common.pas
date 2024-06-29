@@ -72,7 +72,7 @@ const
     WM_NETHTTP_MESSAGE_ALIST = WM_NETHTTP_MESSAGE + 2;
 
 type
-  TRequest_Type = (ort_Generate=0, ort_Chat);
+  TRequest_Type  = (ort_Generate=0, ort_Chat);
   TDisplay_Type  = (disp_Response=0, disp_Content, disp_Trans);
 
 type
@@ -130,7 +130,7 @@ function Is_Hangul(const AText: string): Boolean;
 function Is_ExternalCmd(const AText: string): Boolean;
 
 function Is_LlavaModel(const AText: string): Boolean;
-function GetBase64Endoeings(const AImage: TImage): AnsiString;
+function Get_Base64Endoeings(const AImage: TImage): string;
 
 function BytesToKMG(Value: Int64): string;
 function Get_ReplaceSpecialChar4Trans(const AText: string): string;
@@ -189,6 +189,7 @@ var
   MRU_MAX_CHILD: Integer = 30;
 
 var
+  GV_AppCloseFlag: Boolean = False;
   GV_CheckingAliveStart: Boolean = True;
   GV_ReservedColor: array [0..3] of TColor;
   GV_AliveOllamaFlag: Boolean = False;
@@ -209,7 +210,6 @@ uses
   System.JSON.Types,
   System.RegularExpressions,
   System.Threading,
-  System.NetEncoding,
   Unit_SysInfo,
   Vcl.Styles,
   Vcl.StyleAPI,
@@ -250,15 +250,11 @@ begin
   except
     Abort;
   end;
-  //
-  HResInfo := FindResource(Instance, Name, ResType);
-    if HResInfo = 0 then Abort;
-  HGlobal := LoadResource(Instance, HResInfo);
-    if HGlobal = 0 then Abort;
-  SetPointer(LockResource(HGlobal), SizeOfResource(Instance, HResInfo));
+
+  Initialize(Instance, Name, ResType);
 end;
 
-{ ... TResourceStream_Ex }
+{ InitializePaths ... }
 
 procedure InitializePaths();
 begin
@@ -292,62 +288,62 @@ const
 
 function ICS_Base64Encode(const Input : PAnsiChar; Len: Integer) : AnsiString;
 begin
-    var _Count := 0;
-    var _I := Len;
-    while (_I mod 3) > 0 do
-        Inc(_I);
-    _I := (_I div 3) * 4;
-    SetLength(Result, _I);
-    _I := 0;
-    while _Count < Len do
-    begin
+  var _Count := 0;
+  var _I := Len;
+  while (_I mod 3) > 0 do
       Inc(_I);
-      Result[_I] := ICS_Base64OutA[(Byte(Input[_Count]) and $FC) shr 2];
-      if (_Count + 1) < Len then
-        begin
-          Inc(_I);
-          Result[_I] := ICS_Base64OutA[((Byte(Input[_Count]) and $03) shl 4) +
-                                       ((Byte(Input[_Count + 1]) and $F0) shr 4)];
-          if (_Count + 2) < Len then
-            begin
-              Inc(_I);
-              Result[_I] := ICS_Base64OutA[((Byte(Input[_Count + 1]) and $0F) shl 2) +
-                                           ((Byte(Input[_Count + 2]) and $C0) shr 6)];
-              Inc(_I);
-              Result[_I] := ICS_Base64OutA[(Byte(Input[_Count + 2]) and $3F)];
-            end
-          else
-            begin
-              Inc(_I);
-              Result[_I] := ICS_Base64OutA[(Byte(Input[_Count + 1]) and $0F) shl 2];
-              Inc(_I);
-              Result[_I] := '=';
-            end
-        end
-      else
-        begin
-          Inc(_I);
-          Result[_I] := ICS_Base64OutA[(Byte(Input[_Count]) and $03) shl 4];
-          Inc(_I);
-          Result[_I] := '=';
-          Inc(_I);
-          Result[_I] := '=';
-        end;
+  _I := (_I div 3) * 4;
+  SetLength(Result, _I);
+  _I := 0;
+  while _Count < Len do
+  begin
+    Inc(_I);
+    Result[_I] := ICS_Base64OutA[(Byte(Input[_Count]) and $FC) shr 2];
+    if (_Count + 1) < Len then
+      begin
+        Inc(_I);
+        Result[_I] := ICS_Base64OutA[((Byte(Input[_Count]) and $03) shl 4) +
+                                     ((Byte(Input[_Count + 1]) and $F0) shr 4)];
+        if (_Count + 2) < Len then
+          begin
+            Inc(_I);
+            Result[_I] := ICS_Base64OutA[((Byte(Input[_Count + 1]) and $0F) shl 2) +
+                                         ((Byte(Input[_Count + 2]) and $C0) shr 6)];
+            Inc(_I);
+            Result[_I] := ICS_Base64OutA[(Byte(Input[_Count + 2]) and $3F)];
+          end
+        else
+          begin
+            Inc(_I);
+            Result[_I] := ICS_Base64OutA[(Byte(Input[_Count + 1]) and $0F) shl 2];
+            Inc(_I);
+            Result[_I] := '=';
+          end
+      end
+    else
+      begin
+        Inc(_I);
+        Result[_I] := ICS_Base64OutA[(Byte(Input[_Count]) and $03) shl 4];
+        Inc(_I);
+        Result[_I] := '=';
+        Inc(_I);
+        Result[_I] := '=';
+      end;
 
-      Inc(_Count, 3);
-    end;
+    Inc(_Count, 3);
+  end;
 end;
 
 // TNetEncoding.Base64.EncodeBytesToString is failed to Encode Image.Picture ...
 // ? Unicode problem ...
-function GetBase64Endoeings(const AImage: TImage): AnsiString;
+function Get_Base64Endoeings(const AImage: TImage): string;
 begin
   Result := '';
   var _Input  := TMemoryStream.Create;
   try
     AImage.Picture.SaveToStream(_Input);
     _Input.Position := 0;
-    Result := ICS_Base64Encode(_Input.Memory, _Input.Size);
+    Result := string(ICS_Base64Encode(_Input.Memory, _Input.Size));
   finally
     _Input.Free;
   end;
@@ -372,7 +368,7 @@ begin
     else Result := AFalse;
 end;
 
-{ ... }
+{ RegularExpressions ... }
 
 const
   C_RegEx_Trans: string = '[#$%&]';
@@ -382,7 +378,7 @@ const
 
 function Is_Hangul(const AText: string): Boolean;
 begin
-  var _prestr: string := Copy(AText, 1, Min(64, Length(AText)));
+  var _prestr := Copy(AText, 1, Min(64, Length(AText)));
   Result := System.RegularExpressions.TRegEx.IsMatch(_prestr, C_RegEx_Han0);
 end;
 
@@ -400,6 +396,8 @@ function Get_ReplaceSpecialChar4Json(const AText: string): string;
 begin
   Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Json, ' ');
 end;
+
+{ ... }
 
 function BytesToKMG(Value: Int64): string;
 begin
@@ -474,8 +472,8 @@ begin
     if _Sz.cx > _RectWidth then
     begin
       _Es := '...';
-      var _LastS: string := AText;
-      var _length: Integer := Length(AText);
+      var _LastS := AText;
+      var _length := Length(AText);
       if AMiddle then _length := Length(AText) div 2;
       for var _i := 1 to _length do
       begin
@@ -500,16 +498,16 @@ var
 
 procedure LoadSoundResourceAll();
 const
-  C_Wave: array [0 .. 1] of string = ('BEEP0', 'BEEP1');
+  c_Wave: array [0 .. 1] of string = ('BEEP0', 'BEEP1');
 begin
-  var _stream := TResourceStream_Ex.Create(HInstance, C_Wave[0], RT_RCDATA);
+  var _stream := TResourceStream_Ex.Create(HInstance, c_Wave[0], RT_RCDATA);
   if _stream.Size > 1 then
   try
     var _sz: Int64 := _stream.Size;
     SetLength(V_Sounds[0], _sz);
     _stream.Position := 0;
     _stream.Read(V_Sounds[0], 0, _sz);
-    _stream.Re_Initialize(HInstance, PChar(C_Wave[1]), RT_RCDATA);
+    _stream.Re_Initialize(HInstance, PChar(c_Wave[1]), RT_RCDATA);
     _sz := _stream.Size;
     SetLength(V_Sounds[1], _sz);
     _stream.Position := 0;
@@ -521,9 +519,9 @@ end;
 
 function LoadResource_Index(const AIndex: Integer): TBytes;
 const
-  C_Wave: array [0 .. 1] of string = ('BEEP0', 'BEEP1');
+  c_Wave: array [0 .. 1] of string = ('BEEP0', 'BEEP1');
 begin
-  var _stream: TStream := TResourceStream.Create(HInstance, C_Wave[AIndex], RT_RCDATA);
+  var _stream := TResourceStream.Create(HInstance, c_Wave[AIndex], RT_RCDATA);
   try
     var _sz: Int64 := _stream.Size;
     SetLength(Result, _sz);
@@ -567,7 +565,7 @@ begin
       _Resultlist.Add('  - Processor Speed (GHz): '+ Format('%.3f', [ProcessorSpeedMHz / GC_BTdivKB]));
       _Resultlist.Add('  - Processor Count: '+ Integer(ProcessorCount).ToString);
       _Resultlist.Add('  - Processor Architecture: '+ c_Processors[Processor]);
-     end;
+    end;
 
     var _totalmem: string := '';
     var _availmem: string := '';
@@ -579,7 +577,7 @@ begin
     _Resultlist.Add('  - Usage percent: '+ _usagepct.ToString +' %');
     _Resultlist.Add('');
 
-    var _LocaleID: string := Get_LocaleIDString();
+    var _LocaleID := Get_LocaleIDString();
     var _WinLangusage := GetUsersWindowsLanguage;
     _Resultlist.Add('  OS Language: '+_WinLangusage + '  ISO Code ['+_LocaleID+']');
     _Resultlist.EndUpdate;
@@ -591,6 +589,20 @@ begin
 end;
 
 { Display JSon ... }
+{TStringHelper.TrimRight -> ZEROBASEDSTRINGS ON }
+function TrimRight_Ex(const ASource: string): string;
+begin
+  Result := ASource;
+  var _I := Length(ASource);
+  if _I < 1 then Exit;
+
+  if (_I >= 1) and (ASource[_I] > ' ') then Result := ASource
+  else
+    begin
+      while (_I >= 1) and (ASource[_I] <= ' ') do Dec(_I);
+      Result := System.Copy(ASource, 1, _I);
+    end;
+end;
 
 function Get_DisplayJson(const Display_Type: TDisplay_Type; const ModelsFlag: Boolean; const RespStr: string): string;
 const
@@ -601,17 +613,17 @@ begin
   var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';
   var _acceptflag: Boolean := False;
   var _firstflag: Boolean := True;
-  var _key: String := c_Displat_Type[Display_Type];
+  var _key := c_Displat_Type[Display_Type];
   if ModelsFlag then
   begin
     Result := '* Model in loaded : ';
     _key := 'model';
   end;
 
-  var _StringReader: TStringReader := TStringReader.Create(_parsingsrc_1);
-  var _JsonReader: TJsonTextReader := TJsonTextReader.Create(_StringReader);
+  var _StringReader := TStringReader.Create(_parsingsrc_1);
+  var _JsonReader := TJsonTextReader.Create(_StringReader);
   try
-    while _JsonReader.read do
+    while _JsonReader.Read do
       case _JsonReader.TokenType of
         TJsonToken.PropertyName:
           begin
@@ -634,6 +646,7 @@ begin
             end;
           end;
       end;
+    Result := TrimRight_Ex(Result);
   finally
     FreeAndNil(_JsonReader);
     FreeAndNil(_StringReader);
@@ -644,8 +657,8 @@ function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer; var 
 begin
   Result := 'Models List at '+FormatDateTime('yyyy-mm-dd HH:NN:SS', Now) +GC_CRLF+GC_CRLF;
 
-  var _StringReader: TStringReader := TStringReader.Create(RespStr);
-  var _JsonReader: TJsonTextReader := TJsonTextReader.Create(_StringReader);
+  var _StringReader := TStringReader.Create(RespStr);
+  var _JsonReader := TJsonTextReader.Create(_StringReader);
   var _firstflag: Boolean := True;
   var _childflag: Boolean := False;
   var _sizeflag: Boolean := False;
@@ -655,9 +668,10 @@ begin
   var _arrayflag: Boolean := False;
   var _key: string := 'name';
   var _fstobject: string := 'models';
+  var _newvalue: string := '';
   AModelsList.Clear;
   try
-    while _JsonReader.read do
+    while _JsonReader.Read do
       case _JsonReader.TokenType of
         TJsonToken.StartObject:;
         TJsonToken.Startarray:
@@ -708,7 +722,7 @@ begin
                 AModelsList.Add(_JsonReader.Value.ToString);
               _modelflag := False;
               Result := Result + _JsonReader.Value.ToString+ GC_CRLF;
-            end;
+             end;
         TJsonToken.Float, TJsonToken.Boolean:
           if _arrayflag then
             Result := Result + _JsonReader.Value.ToString +', '
@@ -717,7 +731,7 @@ begin
         TJsonToken.Integer:
           if _sizeflag then
             begin
-              var _newvalue: string := BytesToKMG(_JsonReader.Value.AsInt64);
+              _newvalue := BytesToKMG(_JsonReader.Value.AsInt64);
               Result := Result + _newvalue+ GC_CRLF;
               _sizeflag := False;
             end;
@@ -801,7 +815,7 @@ begin
   Result := '';
 
   var _UserLCID: LCID := GetUserDefaultLCID;
-  var _BufLen: Integer := GetLocaleInfo(_UserLCID, LOCALE_SISO639LANGNAME, nil, 0);
+  var _BufLen := GetLocaleInfo(_UserLCID, LOCALE_SISO639LANGNAME, nil, 0);
   var _buffer: PChar := StrAlloc(_BufLen);
   try
     if GetLocaleInfo(_UserLCID, LOCALE_SISO639LANGNAME, _buffer, _BufLen) <> 0 then
@@ -823,7 +837,7 @@ function GetUserDefaultUILanguage: LANGID; stdcall; external 'kernel32';
 
 function GetUsersWindowsLanguage: string;
 var
-  _WinLanguage: array [0..50] of char;
+  _WinLanguage: array [0..50] of Char;
 begin
   VerLanguageName(GetUserDefaultUILanguage, _WinLanguage, 50);
   Result := _WinLanguage;
@@ -857,7 +871,7 @@ function Kill_Process_MPV(AProcess: string): Boolean;
 begin
   Result := False;
 
-  var _ProcessID: Cardinal := GetProcessID('mpv.exe');
+  var _ProcessID := GetProcessID('mpv.exe');
   if _ProcessID <> 0 then
   try
     var _Killer: THandle := OpenProcess(PROCESS_TERMINATE, False, _ProcessID);
@@ -873,14 +887,14 @@ end;
 function IS_Running_MPV(AProcess: string): Boolean;
 begin
   Result := False;
-  var _ProcessID: Cardinal := GetProcessID('mpv.exe');
+  var _ProcessID := GetProcessID('mpv.exe');
   Result := _ProcessID <> 0;
 end;
 
 function IS_ProcessRunning_Ollama(): Boolean;
 begin
   Result := False;
-  var _ProcessID: Cardinal := GetProcessID('ollama.exe');
+  var _ProcessID := GetProcessID('ollama.exe');
   Result := _ProcessID <> 0;
 end;
 
@@ -907,7 +921,7 @@ end;
 
 procedure SleepWithoutFreeze(msec: Cardinal);
 begin
-  var _Start: DWORD := GetTickCount;
+  var _Start := GetTickCount;
   var _Elapsed: DWORD := 0;
   repeat
     // (WAIT_OBJECT_0+nCount) is returned when a message is in the queue.
@@ -921,8 +935,8 @@ end;
 
 function LoadFromFileBuffered_String(const AFileName: string): string;
 begin
-  var _Stream: TBufferedFileStream := TBufferedFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
-  var _Strings: TStrings := TStringList.Create;
+  var _Stream := TBufferedFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
+  var _Strings := TStringList.Create;
   _Strings.BeginUpdate;
   try
     _Stream.Position := 0;
@@ -936,7 +950,7 @@ end;
 
 procedure Strings_LoadFromFileBuffered(const AFileName: string; AStrings: TStrings);
 begin
-  var _Stream: TBufferedFileStream := TBufferedFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
+  var _Stream := TBufferedFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
   AStrings.BeginUpdate;
   try
     AStrings.Clear;
@@ -949,8 +963,7 @@ begin
 end;
 
 initialization
-
-CV_LocaleID := Get_LocaleIDString(1);
+  CV_LocaleID := Get_LocaleIDString(1);
   GV_RemoteBanList := TStringList.Create;
   GV_RemoteBanList.Sorted := True;
   GV_RemoteBanList.Duplicates := dupIgnore;

@@ -88,7 +88,6 @@ uses
 
 {$R *.dfm}
 
-
 { TG_DosCommand ... }
 
 constructor TG_DosCommand.Create;
@@ -125,14 +124,14 @@ begin
 
   if FDosCommand.IsRunning then
     FDosCommand.Stop;
-  var _batchfile: string := CV_AppPath+'ollamarun.bat';
-  var _commands: TStrings := TStringList.Create;
+  var _batchfile := CV_AppPath+'ollamarun.bat';
+  var _commands := TStringList.Create;
   var _success: Boolean := False;
   with _commands do
   try
     Add('@echo off');
     Add('rem Ollama Delphi GUI');
-    Add('cd ' + CV_AppPath);
+    Add('cd "' + CV_AppPath+'"');
     Add('@echo on');
     Add(Acmd);
     Add('pause');
@@ -157,14 +156,14 @@ begin
   if FDosCommand.IsRunning then
     FDosCommand.Stop;
 
-  var _batchfile: string := CV_AppPath+'ollamarun2.bat';
-  var _commands: TStrings := TStringList.Create;
+  var _batchfile := CV_AppPath+'ollamarun2.bat';
+  var _commands := TStringList.Create;
   var _success: Boolean := False;
   with _commands do
   try
     Add('@echo off');
     Add('rem Ollama Delphi GUI');
-    Add('cd ' + CV_AppPath);
+    Add('cd "' + CV_AppPath+'"');
     Add('@echo on');
     Add(Acmd);
 

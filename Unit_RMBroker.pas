@@ -53,7 +53,6 @@ type
     FRequesting_Flag: Boolean;
     FRemoteCntFlag: Integer;
     FResponseSize: Int64;
-    FProcessCntFlag: Integer;
     //
     FUser_Rm: string;
     FQueue_Rm: string;
@@ -65,7 +64,6 @@ type
     procedure Rm_StartRequest();
     procedure Add_LogWin (const ALog: string) ;
     procedure Push_LogWin(const AFlag: Integer = 0; const ALog: string = '');
-    procedure SetProcessCntFlag(const Value: Integer);
     procedure Reset_RESTComponentsToDefaults;
   public
     property User_Rm: string            read FUser_Rm           write FUser_Rm;
@@ -73,7 +71,6 @@ type
     property Mmodel_Rm: string          read FMmodel_Rm         write FMmodel_Rm;
     property Prompt_Rm: string          read FPrompt_Rm         write FPrompt_Rm;
     property Requesting_Flag: Boolean   read FRequesting_Flag   write FRequesting_Flag;
-    property ProcessCntFlag: Integer    read FProcessCntFlag    write SetProcessCntFlag;
   end;
 
 var
@@ -110,7 +107,7 @@ begin
   FMmodel_Rm := 'phi3';
   FPrompt_Rm:=  'Who are you ?';
   Memo_Log_Rm.Lines.Clear;
-  SkSvg_RMBroker.Svg.Source := C_RemoteConn_Svg1;
+  SkSvg_RMBroker.Svg.Source := C_RemoteConn_Svg0;
 end;
 
 procedure TForm_RMBroker.FormDestroy(Sender: TObject);
@@ -123,7 +120,7 @@ begin
   Application.ProcessMessages;
   V_RmStopwatch.Stop;
 
-  var _slog: string := Format('%s%s%s', ['Log_rm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+  var _slog := Format('%s%s%s', ['Log_rm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
   Memo_Log_Rm.Lines.SaveToFile(CV_LogPath+_slog);
 end;
 
@@ -170,8 +167,14 @@ begin
     WF_DM_MESSAGE_ADDRESS:;
     WF_DM_MESSAGE_SERVERON:;
     WF_DM_MESSAGE_SERVEROFF:;
-    WF_DM_MESSAGE_CONNECT:;
-    WF_DM_MESSAGE_DISCONNECT:;
+    WF_DM_MESSAGE_CONNECT:
+      begin
+        SkSvg_RMBroker.Svg.Source := IIF.CastBool<string>(True, C_RemoteConn_Svg1, C_RemoteConn_Svg0);
+      end;
+    WF_DM_MESSAGE_DISCONNECT:
+      begin
+        SkSvg_RMBroker.Svg.Source := IIF.CastBool<string>(False, C_RemoteConn_Svg1, C_RemoteConn_Svg0);
+      end;
     WF_DM_MESSAGE_LOGON:;
     WF_DM_MESSAGE_REQUEST:
       begin
@@ -193,19 +196,12 @@ begin
   Msg.Result := 0;
 end;
 
-procedure TForm_RMBroker.SetProcessCntFlag(const Value: Integer);
-begin
-  FProcessCntFlag := Value;
-  var _cntflag: Boolean := ((Value mod 2) = 1);
-  if Self.Visible then
-    SkSvg_RMBroker.Svg.Source := IIF.CastBool<string>(_cntflag, C_RemoteConn_Svg1, C_RemoteConn_Svg0);
-end;
-
 procedure TForm_RMBroker.SpeedButton_GetUsersClick(Sender: TObject);
 begin
   var _logins: string := DM_Server.Get_Logins();
-  var _pos: TPoint := SpeedButton_GetUsers.ClientToScreen(Point(0, 25));
-  ShowMessagePos(_logins, _pos.X, _pos.Y);
+  Add_LogWin('* Users ...');
+  Add_LogWin(_logins);
+  Push_LogWin(1);
 end;
 
 { Remote Control ... }
@@ -256,10 +252,10 @@ begin
     Exit;
   end;
 
-  var _requestjson: string := DM_Server.Get_Queue;
+  var _requestjson := DM_Server.Get_Queue;
   if _requestjson = '' then Exit;
 
-  var _JsonObj: TJSONObject := TJSONObject.ParseJSONValue(_requestjson) as TJSONObject;
+  var _JsonObj := TJSONObject.ParseJSONValue(_requestjson) as TJSONObject;
   try
     if Assigned(_JsonObj) then
       begin
@@ -275,7 +271,7 @@ begin
   end;
 
   Push_LogWin(1, 'New Remote Request Arrived : '+FQueue_Rm);
-  var _queue: Integer := StrToIntDef(FQueue_Rm, 1);
+  var _queue := StrToIntDef(FQueue_Rm, 1);
   Label_Connection.Caption := Format('U-%s Qn-%.3d M-%s', [ FUser_Rm, _queue, FMmodel_Rm]);
   if (FMmodel_Rm = '') then
     FMmodel_Rm := Form_RestOllama.Model_Selected;
@@ -287,13 +283,10 @@ begin
   // ------------------------------------------------------------------------ //
   FPrompt_Rm := Get_ReplaceSpecialChar4Json(FPrompt_Rm); // Duplicated from User ?
   // ------------------------------------------------------------------------ //
-  Form_RestOllama.RemoteProcessingFlag := True;
-  // ------------------------------------------------------------------------ //
   var _RawParams: string := '';
   if Is_LlavaModel(FMmodel_Rm) then
     begin
       DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, 'Not supported yet');
-      Form_RestOllama.RemoteProcessingFlag := False;
       Exit;
     end
   else
@@ -303,7 +296,6 @@ begin
     end;
   StatusBar_RM.SimpleText := '* Requesting ...';
   FRequesting_Flag := True;
-  ProcessCntFlag := 1;
 
   Add_LogWin('Starting REST request for URL: ' + V_RmBaseURL);
   if CheckBox_Logoption.Checked then
@@ -329,7 +321,7 @@ procedure TForm_RMBroker.RESTClient_RMReceiveData(const Sender: TObject; AConten
 begin
   FResponseSize := AReadCount;
   Inc(FRemoteCntFlag);
-  var _elapsed: Int64 := V_RmStopWatch.ElapsedMilliseconds;
+  var _elapsed := V_RmStopWatch.ElapsedMilliseconds;
   if (_elapsed - V_RmElapsedInterval) > 500 then    // 0.5 sec ...
   begin
     V_RmElapsedInterval := _elapsed;
@@ -337,8 +329,6 @@ begin
       procedure
       begin
         StatusBar_RM.SimpleText := Format('* Response Read Count : %s', [BytesToKMG(AReadCount)]);
-        ProcessCntFlag := FRemoteCntFlag;
-        Form_RestOllama.RemoteProcessCntFlag := FRemoteCntFlag;
       end);
   end;
 end;
@@ -364,9 +354,9 @@ begin
   V_RmRepeatFlag := False;
 
   V_RmStopWatch.Stop;
-  var _elapsed: Int64 := V_RmStopWatch.ElapsedMilliseconds;
-  var _elapstr: string := MSecsToSeconds(_elapsed);
-  var _updown: string := Format('Response Size : %s', [BytesToKMG(FResponseSize)]);
+  var _elapsed := V_RmStopWatch.ElapsedMilliseconds;
+  var _elapstr := MSecsToSeconds(_elapsed);
+  var _updown := Format('Response Size : %s', [BytesToKMG(FResponseSize)]);
   Add_LogWin(_updown);
   Add_LogWin('Elapsed Time after request : '+_elapstr);
   StatusBar_RM.SimpleText := '* '+_updown;
@@ -385,8 +375,6 @@ begin
     FRequesting_Flag := False;
     Push_LogWin();
   { -------------------------------------------------------------------------- }
-  ProcessCntFlag := 1;
-  Form_RestOllama.RemoteProcessingFlag := False;
 
   if DM_Server.Get_Queue_Count > 0 then
     Rm_StartRequest();

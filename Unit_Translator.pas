@@ -37,9 +37,9 @@ type
   public
     procedure Get_GoogleTranslator(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string);
     // property ...
-    property TransResult: string  read FTransResult  write FTransResult;
-    property Request: string  read FRequest  write SetFRequest;
-    property PushFlag: Boolean  read FPushFlag write SetPushFlag;
+    property TransResult: string  read FTransResult     write FTransResult;
+    property Request: string      read FRequest         write SetFRequest;
+    property PushFlag: Boolean    read FPushFlag        write SetPushFlag;
   end;
 
 function Get_GoogleTranslatorEx(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string): string;
@@ -68,9 +68,9 @@ begin
     Exit;
   end;
 
-  var _LangSource: string := GC_LanguageCode[ ACodeFrom ];
-  var _LangTarget: string := GC_LanguageCode[ ACodeTo ];
-  var _Head: string := 'https://translate.googleapis.com/translate_a/single';
+  var _LangSource := GC_LanguageCode[ ACodeFrom ];
+  var _LangTarget := GC_LanguageCode[ ACodeTo ];
+  var _Head := 'https://translate.googleapis.com/translate_a/single';
   var _URI := TURI.Create(_Head);
   var _query := Trim(AText);
   with _URI do
@@ -90,12 +90,12 @@ begin
 
   var _Responses := TBytesStream.Create();
   var _getflag: Boolean := False;
-  var _HTTP: THTTPClient := THTTPClient.Create;  // To DO : Async - Case of Poor Networking Speed ...
+  var _HTTP := THTTPClient.Create;  // To DO : Async - Case of Poor Networking Speed ...
   _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
-  _HTTP.ContentType := 'application/json';
+  _HTTP.Accept := 'application/json';
+  _HTTP.ContentType := 'application/json; charset=UTF-8';
   _HTTP.CustomHeaders['Authorization'] := '';
   try
-    _HTTP.ContentType := 'application/json';
     _getflag := _HTTP.Get(_URI.Encode, _Responses).StatusCode = 200;
     _getflag := _getflag and (_Responses.Size > 10);
     if not _getflag then
@@ -109,7 +109,7 @@ begin
   if _getflag then
   try
     _Responses.Position := 0;
-    var _rbs: string := TEncoding.UTF8.GetString(_Responses.Bytes, 0, _Responses.Size);
+    var _rbs := TEncoding.UTF8.GetString(_Responses.Bytes, 0, _Responses.Size);
     Result := Get_DisplayJson(TDIsplay_Type.disp_Trans, False, _rbs);
   finally
     _Responses.Free;

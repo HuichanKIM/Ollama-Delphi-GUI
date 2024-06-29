@@ -68,7 +68,7 @@ LABEL L_Finish;
 begin
   Result := '';
   var _nodedata: PTopicData := nil;
-  var _firstnode: TTreeNode := FTreeView.Items.GetFirstNode;
+  var _firstnode := FTreeView.Items.GetFirstNode;
   if _firstnode <> nil then
    _firstnode := _firstnode.getNextSibling;
 
@@ -163,7 +163,7 @@ end;
 
 procedure TMRU_Manager.DeleteNode(const AFlag: Integer);
 begin
-  var _node: TTreeNode := FTreeView.Selected;
+  var _node := FTreeView.Selected;
 
   if Assigned(_node) and (_node <> FTreeView.Items.GetFirstNode) then
   begin
@@ -171,7 +171,7 @@ begin
     if _node.HasChildren then
     begin
       var _TopicData: PTopicData;
-      var _Sub: TTreeNode := _node.getFirstChild;
+      var _Sub := _node.getFirstChild;
       while _Sub <> nil do
       begin
         _index :=  FTopicList.IndexOf(_Sub.Text);
@@ -216,14 +216,17 @@ begin
   FTreeView := ATreeView;
   FSeedList := TStringList.Create;
   FSeedList.Sorted := True;
+  FSeedList.Duplicates := TDuplicates.dupIgnore;   //
+  FSeedList.CaseSensitive := False;                //
   FTopicList := TStringList.Create();
   FTopicList.Sorted := True;
-  FTopicList.CaseSensitive := False;
+  FTopicList.Duplicates := TDuplicates.dupIgnore;  //
+  FTopicList.CaseSensitive := False;               //
 
   with FDefaultTopic do
   begin
     td_Topic := 'Hello';
-    td_Topic := '';
+    td_Seed  := '';
     td_Level := 0;
   end;
 end;
@@ -237,7 +240,7 @@ begin
   FTopicList.Sorted := False;
   FTopicList.BeginUpdate;
   FTreeView.Items.BeginUpdate;
-  var _node: TTreeNode := FTreeView.Items.GetFirstNode;
+  var _node := FTreeView.Items.GetFirstNode;
   while _node <> nil do
     begin
       FTopicList.AddObject(_node.Text, TObject(_node));
@@ -247,12 +250,14 @@ begin
   FTreeView.Update;                         // Invalidate + Update = Repaint ...
   FTopicList.EndUpdate;
   FTopicList.Sorted := True;
+  FTopicList.Duplicates := TDuplicates.dupIgnore;  //
+  FTopicList.CaseSensitive := False;               //
 end;
 
 procedure TMRU_Manager.Clear_TreeData(const AFalg: Integer);
 begin
   var _TopicData: PTopicData;
-  var _node: TTreeNode := FTreeView.Items.GetFirstNode;
+  var _node := FTreeView.Items.GetFirstNode;
 
   while _node <> nil do
     begin
@@ -270,18 +275,18 @@ end;
 procedure TMRU_Manager.Clear_All(const AFalg: Integer);
 begin
   Write_TreeViewToJSON();
-  var _backupfile: string := CV_TmpPath+ExtractFileName(FMruJsonFile);
-  var _success: Boolean := CopyFile(PChar(FMruJsonFile), PChar(_backupfile), False);
+  var _backupfile := CV_TmpPath+ExtractFileName(FMruJsonFile);
+  var _success := CopyFile(PChar(FMruJsonFile), PChar(_backupfile), False);
 
   Clear_TreeData();
-  AddInsertNode(0, nil, '');
+  AddInsertNode(GC_MRU_NewRoot, nil, '');
 end;
 
 destructor TMRU_Manager.Destroy;
 begin
   // Backup previous list file
-  var _backupfile: string := CV_TmpPath+ExtractFileName(FMruJsonFile);
-  var _success: Boolean := CopyFile(PChar(FMruJsonFile), PChar(_backupfile), False);
+  var _backupfile := CV_TmpPath+ExtractFileName(FMruJsonFile);
+  var _success := CopyFile(PChar(FMruJsonFile), PChar(_backupfile), False);
   // ...
   Write_TreeViewToJSON();
 
@@ -294,7 +299,7 @@ end;
 function TMRU_Manager.GetSeedRandom(): string;
 begin
   Result := '';
-  var _seed: Integer := RandomRange(10000, 99999);
+  var _seed := RandomRange(10000, 99999);
   var _dummy: Integer := 0;
   while True do
   begin
@@ -338,8 +343,8 @@ begin
   end;
 
   _counts := 0;
-  var _StringWriter: TStringWriter := TStringWriter.Create();
-  var _Writer: TJsonTextWriter := TJsonTextWriter.Create(_StringWriter);
+  var _StringWriter := TStringWriter.Create();
+  var _Writer := TJsonTextWriter.Create(_StringWriter);
   try
     _Writer.Formatting := TJsonFormatting.Indented;
 
@@ -349,7 +354,7 @@ begin
 
         var _TopicData: PTopicData;
         var _PromptData: PTopicData;
-        var _Node: TTreeNode := FTreeView.Items.GetFirstNode;
+        var _Node := FTreeView.Items.GetFirstNode;
         var _Sub:  TTreeNode := nil;
         var _countroot: Integer := 0;
         while _Node <> nil do
@@ -401,11 +406,11 @@ end;
 procedure TMRU_Manager.Read_JsonToTreeView();
 begin
   if not FileExists(FMruJsonFile) then Exit;
-  var _ReadStr: string := LoadFromFileBuffered_String(FMruJsonFile);
+  var _ReadStr := LoadFromFileBuffered_String(FMruJsonFile);
   if Length(_ReadStr) < 10 then Exit;
 
-  var _StringReader: TStringReader := TStringReader.Create(_ReadStr);
-  var _JsonReader: TJsonTextReader := TJsonTextReader.Create(_StringReader);
+  var _StringReader := TStringReader.Create(_ReadStr);
+  var _JsonReader := TJsonTextReader.Create(_StringReader);
   var _firstflag: Boolean := True;
   var _childflag: Boolean := False;
   var _pname: string := '';
@@ -495,8 +500,8 @@ begin
       end;
   finally
     FTreeView.Items.EndUpdate;
-    FTopicList.EndUpdate;
     FSeedList.EndUpdate;
+    FTopicList.EndUpdate;
     FreeAndNil(_JsonReader);
     FreeAndNil(_StringReader);
   end;
@@ -513,11 +518,11 @@ end;
 function TMRU_Manager.Rename_TopicPrompt(const AOld, ANew: string): Integer;
 begin
   Result := -1;
-  var _index: Integer :=  FTopicList.IndexOf(AOld);
-  var _index2: Integer := FTopicList.IndexOf(ANew);
-  if (_index >= 0) and (_index2 < 0) then
+  var _index1 := FTopicList.IndexOf(AOld);
+  var _index2 := FTopicList.IndexOf(ANew);
+  if (_index1 >= 0) and (_index2 < 0) then
   begin
-    FTopicList.Delete(_index);
+    FTopicList.Delete(_index1);
     var _dummy: Boolean := FTopicList.Find(ANew, Result);
   end;
 end;

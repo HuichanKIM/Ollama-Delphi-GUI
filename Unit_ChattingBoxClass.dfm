@@ -35,6 +35,7 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     DragType = dtVCL
     Header.AutoSizeIndex = -1
     Header.Height = 21
+    Header.Options = [hoColumnResize]
     Images = VirtualImageList1
     IncrementalSearch = isAll
     NodeAlignment = naFromTop

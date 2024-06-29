@@ -132,7 +132,7 @@ begin
   FVST_NFooterColor :=    AFooterColor;
   FVST_NSelectionColor := GC_SkinSelColor;
   FVST_NBodyFontSize :=   GC_SkinFontSize;
-  FVST_ColumnOffset :=    15;
+  FVST_ColumnOffset :=    15;    // Local ...
   FVST_SecondIndent :=    35;    // Reference of Indent for Ollama Response ...
   FVST_FontName :=        VST_ChattingBox.Font.Name;
   FVST_FontSize :=        GC_SkinFontSize;;
@@ -173,15 +173,16 @@ begin
   with VST_ChattingBox do
   begin
     ClearSelection;
-    var _Node: PVirtualNode := AddChild(nil);
+    var _Node := AddChild(nil);
     var _Data: PMessageRec := GetNodeData(_Node);
-    _Data^.FUser :=    AUser;
-    _Data^.FCaption := APrompt;
-    _Data^.FTime :=    Now;
-    _Data^.FTag :=     ALocation;
-    _Data^.FLvTag :=   -1;
-      if ALocation = 0 then
-    _Data^.FLvTag :=   ALvTag;
+    with _Data^ do
+    begin
+      FUser :=    AUser;
+      FCaption := APrompt;
+      FTime :=    Now;
+      FTag :=     ALocation;
+      FLvTag :=   IIF.CastBool<Integer>(ALocation = 0, ALvTag, -1);
+    end;
 
     FocusedNode := _Node;
     Selected[_Node] := True;
@@ -196,7 +197,7 @@ begin
   var _bottomflag: Boolean := False;
   with VST_ChattingBox do
   begin
-    var _Node: PVirtualNode := GetFirstSelected();
+    var _Node := FocusedNode;
     if _Node <> nil then
       begin
         var _next: PVirtualNode := _Node.NextSibling;
@@ -218,11 +219,14 @@ begin
 
     ClearSelection;
     var _Data: PMessageRec := GetNodeData(_Node);
-    _Data^.FUser :=    AUser;
-    _Data^.FCaption := APrompt;
-    _Data^.FTime :=    Now;
-    _Data^.FTag :=     ALocation;
-    _Data^.FLvTag :=   -1;
+    with _Data^ do
+    begin
+      FUser :=    AUser;
+      FCaption := APrompt;
+      FTime :=    Now;
+      FTag :=     ALocation;
+      FLvTag :=   -1;
+    end;
 
     FocusedNode := _Node;
     Selected[_Node] := True;
@@ -398,9 +402,12 @@ begin
   with VST_ChattingBox do
   begin
     Header.Columns[0].Width := ClientWidth - FVST_ColumnOffset;
-    var _node := GetFirstSelected();
+    var _node := FocusedNode;
     if Assigned(_node) then
-    IsVisible[_node] := True;
+    begin
+      IsVisible[_node] := True;
+      FocusedNode := _node;
+    end;
     UpdateScrollBars(True);
     Invalidate;
   end;
@@ -431,7 +438,7 @@ begin
   Result := '';
   with VST_ChattingBox do
   begin
-    var _node := GetFirstSelected();
+    var _node := FocusedNode;
     if Assigned(_node) then
     begin
       _node := _node.PrevSibling;
@@ -450,7 +457,7 @@ begin
   Result := '';
   with VST_ChattingBox do
   begin
-    var _node := GetFirstSelected();
+    var _node := FocusedNode;
     if Assigned(_node) then
     begin
       var _Data: PMessageRec := GetNodeData(_node);
@@ -465,7 +472,7 @@ begin
   Result := '';
   with VST_ChattingBox do
   begin
-    var _node := GetFirstSelected();
+    var _node := FocusedNode;
     if Assigned(_node) then
     begin
       AIndex := _node.Index;
@@ -497,9 +504,6 @@ end;
 
 procedure TFrame_ChattingBoxClass.pmn_CopyTextClick(Sender: TObject);
 begin
-  //with VST_ChattingBox do
-  //ContentToClipboard(CF_UNICODETEXT, TVSTTextSourceType.tstSelected);
-  //
   var _ItemStr := Get_NodeText;
   if _ItemStr <> '' then
   begin
@@ -513,7 +517,7 @@ begin
   Result := False;
   with VST_ChattingBox do
   begin
-    var _node := GetFirstSelected();
+    var _node := FocusedNode;
     if Assigned(_node) then
     begin
       DeleteNode(_node);
@@ -609,7 +613,7 @@ end;
 
 function TFrame_ChattingBoxClass.Do_SaveAllText(const AFile: string): Boolean;
 begin
-  var _sourcelist: TStrings := TStringList.Create;
+  var _sourcelist := TStringList.Create;
   var _Data: PMessageRec := nil;
   var _index: Integer := 0;
   var _qtag: Integer := 0;
@@ -657,6 +661,7 @@ begin
       ClearSelection;
       IsVisible[_node] := True;
       Selected[_node] := True;
+      FocusedNode := _node;
     end;
     UpdateScrollBars(True);
     Invalidate;
@@ -675,6 +680,7 @@ begin
       ClearSelection;
       IsVisible[_node] := True;
       Selected[_node] := True;
+      FocusedNode := _node;
     end;
     UpdateScrollBars(True);
     Invalidate;

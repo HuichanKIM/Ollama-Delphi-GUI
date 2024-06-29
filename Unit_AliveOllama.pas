@@ -57,10 +57,10 @@ begin
   procedure    // When Ollama_server(ollama_llama_server.exe) not started, Yet.
   begin
     var _response: string := '';
-    var _HTTP: THTTPClient := THTTPClient.Create;
+    var _HTTP := THTTPClient.Create;
     _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
     try
-      var _HttpResponse: IHttpResponse := _HTTP.Get(C_OllamaAddress);
+      var _HttpResponse := _HTTP.Get(C_OllamaAddress);
       if  _HttpResponse.StatusCode = 200 then
       begin
         _response := LowerCase(_HttpResponse.ContentAsString());
@@ -79,12 +79,12 @@ begin
   Result := '';
   if GV_AliveOllamaFlag then
   try
-    var _HTTP: THTTPClient := THTTPClient.Create;
+    var _HTTP := THTTPClient.Create;
     _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
     _HTTP.Accept := 'application/json, text/javascript, */*; q=0.01';
     _HTTP.ContentType := 'application/json';
     try
-      var _HttpResponse: IHttpResponse := _HTTP.Get(ARequestURI);
+      var _HttpResponse := _HTTP.Get(ARequestURI);
       if _HttpResponse.StatusCode = 200 then
         begin
           Result := _HttpResponse.ContentAsString();
@@ -137,10 +137,10 @@ begin
 
   try
     var _response: string := '';
-    var _HTTP: THTTPClient := THTTPClient.Create;
+    var _HTTP := THTTPClient.Create;
     _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
     try
-      var _HttpResponse: IHttpResponse := _HTTP.Get(C_OllamaAddress);
+      var _HttpResponse := _HTTP.Get(C_OllamaAddress);
       if  _HttpResponse.StatusCode = 200 then
       begin
         _response := LowerCase(_HttpResponse.ContentAsString());

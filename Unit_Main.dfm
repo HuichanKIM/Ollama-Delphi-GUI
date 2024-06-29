@@ -218,24 +218,44 @@ object Form_RestOllama: TForm_RestOllama
             Hint = 'Drop Image-file (*.jpg, *.jpeg, *.png, *.webp, *.gif)'
             Align = alClient
             Center = True
-            DragMode = dmAutomatic
             Proportional = True
             Stretch = True
-            OnDblClick = SpeedButton_LlavaClick
+            OnDblClick = Image_LlvaDblClick
             ExplicitLeft = 4
             ExplicitTop = 8
             ExplicitWidth = 201
             ExplicitHeight = 187
           end
-          object SpeedButton_Llava: TSpeedButton
+          object SpeedButton_LlavaLoad: TSpeedButton
             Left = 0
             Top = 0
             Width = 23
             Height = 22
-            ImageIndex = 14
-            ImageName = 'ic_add_48px'
+            Cursor = crHandPoint
+            Action = Action_LoadImageLlava
             Images = SVGIconVirtualImageList1
-            OnClick = SpeedButton_LlavaClick
+          end
+          object SpeedButton_LavaPrev: TSpeedButton
+            Left = 165
+            Top = 0
+            Width = 20
+            Height = 22
+            Cursor = crHandPoint
+            Hint = 'Prev Source'
+            ImageIndex = 19
+            ImageName = 'ic_chevron_left_48px'
+            Images = SVGIconVirtualImageList1
+          end
+          object SpeedButton_LavaNext: TSpeedButton
+            Left = 188
+            Top = 0
+            Width = 20
+            Height = 22
+            Cursor = crHandPoint
+            Hint = 'Next Source'
+            ImageIndex = 20
+            ImageName = 'ic_chevron_right_48px'
+            Images = SVGIconVirtualImageList1
           end
         end
       end
@@ -653,13 +673,16 @@ object Form_RestOllama: TForm_RestOllama
         Caption = 'Topic Option'
         TabOrder = 5
         StyleElements = [seClient, seBorder]
-        object Label_Seed000: TLabel
-          Left = 126
+        object Label_SeedGet: TLabel
+          Left = 127
           Top = 20
           Width = 32
           Height = 15
+          Cursor = crHandPoint
+          Hint = 'Get Random Seed'
           Caption = '/ seed'
           StyleElements = [seClient, seBorder]
+          OnClick = Label_SeedGetClick
         end
         object CheckBox_UseTopicSeed: TCheckBox
           Left = 16
@@ -1160,7 +1183,6 @@ object Form_RestOllama: TForm_RestOllama
               Width = 714
               Height = 710
               DragOperations = [doCopy, doMove]
-              ExplicitTop = -1
               ExplicitWidth = 714
               ExplicitHeight = 710
             end
@@ -1172,6 +1194,7 @@ object Form_RestOllama: TForm_RestOllama
             Height = 50
             Anchors = [akRight, akBottom]
             Opacity = 200
+            Animation.Enabled = False
             Animation.Speed = 0.500000000000000000
           end
           object SkAnimatedImage_Chat: TSkAnimatedImage
@@ -1326,7 +1349,7 @@ object Form_RestOllama: TForm_RestOllama
                 Height = 20
                 Align = alTop
                 AutoSize = False
-                Caption = '* Ban List'
+                Caption = '* Checked -> Ban'
                 StyleElements = [seClient, seBorder]
                 ExplicitWidth = 130
               end
@@ -1783,15 +1806,15 @@ object Form_RestOllama: TForm_RestOllama
     end
     object Action_Home: TAction
       Hint = 'Got o Welcome'
-      ImageIndex = 44
-      ImageName = 'ic_border_all_24px'
+      ImageIndex = 65
+      ImageName = 'llama-svgrepo-com'
       ShortCut = 114
       OnExecute = Action_HomeExecute
     end
     object Action_Chatting: TAction
       Hint = 'Chatting Window'
-      ImageIndex = 65
-      ImageName = 'llama-svgrepo-com'
+      ImageIndex = 44
+      ImageName = 'ic_border_all_24px'
       ShortCut = 115
       OnExecute = Action_ChattingExecute
     end
@@ -1916,8 +1939,8 @@ object Form_RestOllama: TForm_RestOllama
     end
     object Action_LoadImageLlava: TAction
       Hint = 'Image for Llava'
-      ImageIndex = 60
-      ImageName = 'ic_insert_photo_48px'
+      ImageIndex = 14
+      ImageName = 'ic_add_48px'
       ShortCut = 32839
       OnExecute = Action_LoadImageLlavaExecute
     end
@@ -1961,6 +1984,10 @@ object Form_RestOllama: TForm_RestOllama
     object Action_ApplyChange: TAction
       Caption = 'Action_ApplyChange'
       OnExecute = Action_ApplyChangeExecute
+    end
+    object Action_SHowBroker: TAction
+      Caption = 'Action_SHowBroker'
+      OnExecute = Action_SHowBrokerExecute
     end
   end
   object SVGIconVirtualImageList1: TSVGIconVirtualImageList
@@ -2315,6 +2342,11 @@ object Form_RestOllama: TForm_RestOllama
         CollectionIndex = 69
         CollectionName = 'All\Connection'
         Name = 'All\Connection'
+      end
+      item
+        CollectionIndex = 70
+        CollectionName = 'ic_record_voice2'
+        Name = 'ic_record_voice2'
       end>
     ImageCollection = SVGIconImageCollection1
     PreserveItems = True
@@ -3179,6 +3211,18 @@ object Form_RestOllama: TForm_RestOllama
           '4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 5.5c-.55 0-1-.45-1-' +
           '1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>'#13#10'</svg>'
         FixedColor = cl3DLight
+      end
+      item
+        IconName = 'ic_record_voice2'
+        SVGText = 
+          '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" v' +
+          'iewBox="0 0 48 48">'#13#10'    <circle cx="18" cy="18" r="8"/>'#13#10'    <p' +
+          'ath d="M18 30c-5.34 0-16 2.68-16 8v4h32v-4c0-5.32-10.66-8-16-8zm' +
+          '15.52-19.27l-3.37 3.38c1.68 2.37 1.68 5.41 0 7.78l3.37 3.38c4.04' +
+          '-4.06 4.04-10.15 0-14.54zM40.15 4l-3.26 3.26c5.54 6.05 5.54 15.1' +
+          '1-.01 21.47L40.15 32c7.8-7.77 7.8-19.91 0-28z"/>'#13#10'    <path fill' +
+          '="none" d="M0 0h48v48H0z"/>'#13#10'</svg>'#13#10
+        FixedColor = clGold
       end>
     Left = 660
     Top = 119

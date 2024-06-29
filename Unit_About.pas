@@ -144,7 +144,7 @@ const
 
 function Get_HelpShortcuts(): string;
 begin
-  var _list: TStrings := TStringList.Create;
+  var _list := TStringList.Create;
   try
     _list.Add('* Shortcuts -------------------------' + #13#10);
     for var _i := 0 to Length(C_Shortcut_Keys) - 1 do
@@ -273,7 +273,7 @@ procedure TForm_About.Label_GitHubClick(Sender: TObject);
 var
   _LabelSender: TLabel absolute Sender;
 begin
-  var _addr: string := _LabelSender.Caption;
+  var _addr := _LabelSender.Caption;
   ShellExecute(0, PChar('Open'), PChar(_addr), nil, nil, SW_SHOW);
 end;
 
@@ -292,8 +292,8 @@ begin
       if not SameText('Windows', _stylename) then
       ComboBox_VclStyles.Items.Add(_stylename);
     end;
-  var _default: string := TStyleManager.ActiveStyle.Name;
-  var _index: Integer := ComboBox_VclStyles.Items.IndexOf(_default);
+  var _default := TStyleManager.ActiveStyle.Name;
+  var _index := ComboBox_VclStyles.Items.IndexOf(_default);
   if _index >= 0 then
     ComboBox_VclStyles.ItemIndex := _index;
 end;
@@ -311,7 +311,7 @@ end;
 
 procedure TForm_About.SpeedButton_ApplySkinClick(Sender: TObject);
 begin
-  var _style: string := ComboBox_VclStyles.Items[ComboBox_VclStyles.ItemIndex];
+  var _style := ComboBox_VclStyles.Items[ComboBox_VclStyles.ItemIndex];
   if not SameText(_style, TStyleManager.ActiveStyle.Name) then
   begin
     TStyleManager.TrySetStyle(_style);
