@@ -11,22 +11,6 @@
 - If your computer has good performance, 
 - use it as a server/broker to connect your Android smartphone
 
-- v0.9.8
-- Fix the Incorrect operation of Topics list after Skin Change
-
-- v0.9.7 ...
-- Some slight extension of the option
-- Without Checking Ollama alive on start,Use Beep sound, Save logs on close,
-- MRU Topic Max, MRU prompt Max, Add Popup Menu to ChattingBox,
-- v.0.9.6 ...
-- Change Default Skin/Style
-- Windows10 SlateGray to Windows11 Impressive Dark
-- Replace Indy Socket to System.Net.HttpClient (emb.) for Slim.
-- Replace Commercial Library to Free Component for ChattingBox
-- Support Multilingual Translation (by MS SAPI)
-- Support 3 Dark style Skin for UI
-- (Windows10 SlateGray, Windows11 Impressive Dark, Windows11 Modern Dark)
-
 ### Features
 
 - Supports Windows 10 and 11 (for 64 bits).
@@ -36,7 +20,7 @@
 ### Prerequisites
 
  1. Ollama Install ( https://ollama.com/ )
- 2. Pull Models (phi3, llama3, gemma, llava, codegemma, dolphin-mistral)
+ 2. Pull Models (phi3, llama3, gemma, llava, codegemma ...)
  3. Delphi Athens 12.0. over
 
 
@@ -45,6 +29,7 @@
 - SVGIconImageList by EtheaDev <https://github.com/EtheaDev/SVGIconImageList>
 - DOSCommand by TurboPack <https://github.com/TurboPack/DOSCommand>
 - Virtual-TreeView by JAM-Software <https://github.com/JAM-Software/Virtual-TreeView>
+- NetCom7 <https://github.com/DelphiBuilder/NetCom7>
 
 
 ### About / Skin / Colors (Screenshot)
@@ -73,4 +58,5 @@
 
 ![Chattings 8: Preview page](./Images/O_chattings7.png)
 
+(Model Llava - Thumbnail view  )
 ![Chattings 9: Preview page](./Images/O_chattings10.png)
