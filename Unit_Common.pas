@@ -96,8 +96,8 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  GC_Version0     = 'ver. 0.9.10';
-  GC_Version1     = 'ver. 0.9.10 (2024.06.20)';
+  GC_Version0     = 'ver. 0.9.11';
+  GC_Version1     = 'ver. 0.9.11 (2024.07.01)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';

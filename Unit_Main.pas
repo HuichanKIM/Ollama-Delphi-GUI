@@ -6,6 +6,9 @@ unit Unit_Main;
 {$H+}    { Use long strings                    }
 {$J+}    { Allow typed constant to be modified }
 
+// Modified by ichin 2024-07-01 ¿ù ¿ÀÀü 3:16:11
+// Fix Update Topic/Prompt List up ...
+
 interface
 
 uses
