@@ -838,16 +838,16 @@ begin
 
     StatusBar1.Panels[0].Width := Self.Width div 2;
 
-    Do_ListUpTopic(GC_MRU_NewRoot, nil, '');    { Topic Initilization  }
+    Do_ListUpTopic(GC_MRU_NewRoot, nil, 'Hello');    { Topic Initilization  }
     FTopicsMRU.Read_JsonToTreeView;
 
-    for var _i := 0 to 10 do
+    for var _i := 0 to GC_LanguageCnt-1 do
       begin
         ComboBox_TransSource.Items[_i] := GC_LanguageCode[_i];
         ComboBox_TransTarget.Items[_i] := GC_LanguageCode[_i];
       end;
     ComboBox_TransSource.ItemIndex := 0;
-    ComboBox_TransTarget.ItemIndex := 1;
+    ComboBox_TransTarget.ItemIndex := 0;
 
     SpeedButton_ShowRmBroker.Enabled := (DM_ACTIVATECODE = 1);
     SkSvg_Broker.Enabled := (DM_ACTIVATECODE = 1);
@@ -1057,7 +1057,8 @@ begin
 
   Panel_ChattingButtons.Enabled :=      _visflag_3;
   Panel_ChatRequestBox.Enabled :=       _visflag_3;
-  Panel_TopicButtons.Enabled :=         _visflag_3;
+  GroupBox_Topics.Enabled :=            _visflag_3;
+  //Panel_TopicButtons.Enabled :=         _visflag_3;
   Frame_ChattingBox.pmn_ColorSettings.Enabled :=
                                         _visflag_3;
   Action_InetAlive.Enabled :=           _visflag_3;
@@ -1489,7 +1490,7 @@ begin
   if Is_LlavaModel(V_MyModel) then
     begin
       _LvTag := FLavaFlag;
-      var _ImageData := Get_Base64Endoeings(Image_Llva);
+      var _ImageData := Get_Base64Endoeings1(Image_Llva);
       if _ImageData = '' then Exit;
       case Request_Type of
         ort_Generate: begin
@@ -1927,7 +1928,7 @@ end;
 
 procedure TForm_RestOllama.Do_DisplayJson_Models(const RespStr: string);
 begin
-  var _parsingsrc := StringReplace(RespStr, GC_UTF8_LF, ',',[rfReplaceAll]);
+  var _parsingsrc := StringReplace(RespStr, GC_UTF8_LFA, ',',[rfReplaceAll]);
   var _mcount: Integer := 0;
   var _modelname := ComboBox_Models.Items[ComboBox_Models.ItemIndex];
   var _ParseJson := Unit_Common.Get_DisplayJson_Models(_parsingsrc, _mcount, FModelsList);
@@ -1977,10 +1978,10 @@ begin
   case Msg.WParam of
     WM_NETHTTP_MESSAGE_ALIVE:
       begin
-        GV_AliveOllamaFlag := Msg.LParam = 1;
+        GV_AliveOllamaFlag := (Msg.LParam = 1);
         Set_OllamaAlive(GV_AliveOllamaFlag);
         FFrameWelcome.AnimationFlag := False;
-        FFrameWelcome.SkSvg_ICon.Opacity := 255;
+        FFrameWelcome.SkSvg_ICon.Opacity := 200;
       end;
     WM_NETHTTP_MESSAGE_ALIST:;
   end;
@@ -2117,7 +2118,7 @@ begin
   V_StopWatch := TStopwatch.StartNew;
   V_MyContentPrompt := '';
   // ------------------------------------------------------------------------ //
-  var _responses := Get_ListModels_Ollama(_BaseURL);                  // from Unit_AliveOllama.pas
+  var _responses := Get_ListModels_Ollama(_BaseURL); // from Unit_AliveOllama.pas
   // ------------------------------------------------------------------------ //
   V_StopWatch.Stop;
   var _elapsed := V_StopWatch.ElapsedMilliseconds;
@@ -2318,19 +2319,16 @@ end;
 
 procedure TForm_RestOllama.Do_ListUpTopic(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string);
 begin
-  if APrompt = '' then Exit;
-
   var _seed := FTopicsMRU.AddInsertNode(AFlag, ANode, APrompt);
   Edit_TopicSeed.Text := _seed;
-  if APrompt <> '' then
-    V_LastInput := APrompt;
+  V_LastInput := APrompt;
 end;
 
 procedure TForm_RestOllama.SpeedButton_NewRootnodeClick(Sender: TObject);
 begin
   if TreeView_Topics.Items.Count < 1 then
     begin
-      Do_ListUpTopic(GC_MRU_NewRoot, nil, '');
+      Do_ListUpTopic(GC_MRU_NewRoot, nil, 'Hello');
     end
   else
     begin
@@ -2352,7 +2350,7 @@ procedure TForm_RestOllama.SpeedButton_AddTopicClick(Sender: TObject);
 begin
   if TreeView_Topics.Items.Count < 1 then
     begin
-      Do_ListUpTopic(GC_MRU_NewRoot, nil, '');
+      Do_ListUpTopic(GC_MRU_NewRoot, nil, 'Hello');
     end
   else
     begin
@@ -2373,7 +2371,7 @@ end;
 
 procedure TForm_RestOllama.pmn_ClearAllClick(Sender: TObject);
 begin
-  if MessageDlg('All topics and prompts will be erased. Continue ?', mtConfirmation, [mbOK, mbCancel], 0) = mrOk then
+  if MessageDlg('All topics and prompts will be erased. Continue ?', mtConfirmation, [mbOK, mbCancel], 0, mbCancel) = mrOk then
   FTopicsMRU.Clear_All();
 end;
 
@@ -2389,6 +2387,7 @@ begin
     begin
       _node.Text := _newtext;
       PTopicData(_node.Data).td_Topic := _newtext;
+      FTopicsMRU.Rename_TopicPrompt(_text, _newtext);
     end;
   end;
 end;
@@ -2421,6 +2420,12 @@ end;
 
 procedure TForm_RestOllama.TreeView_TopicsClick(Sender: TObject);
 begin
+  if RequestingFlag then
+  begin
+    SimpleSound_Common(DoneSoundFlag, 0);
+    Exit;
+  end;
+
   Do_AddToRequest(C_TOPIC_Add);
 end;
 
@@ -2438,6 +2443,12 @@ end;
 
 procedure TForm_RestOllama.TreeView_TopicsDblClick(Sender: TObject);
 begin
+  if RequestingFlag then
+  begin
+    SimpleSound_Common(DoneSoundFlag, 0);
+    Exit;
+  end;
+
   // var _aIndex := Selected.AbsoluteIndex;
   var _node := TreeView_Topics.Selected;
   if Assigned(_node) and (_node.Level <> 0) then

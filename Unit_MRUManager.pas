@@ -39,8 +39,8 @@ type
     procedure Update_Topics(const AFlag: Integer=0);
     function GetSeedRandom(): string;
     function AddInsertNode(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string): string;
-    procedure DeleteNode(const AFlag: Integer);
     function Rename_TopicPrompt(const AOld, ANew: string): Integer;
+    procedure DeleteNode(const AFlag: Integer);
     procedure Clear_All(const AFalg: Integer = 0);
     procedure Clear_TreeData(const AFalg: Integer = 0);
     // Property ...
@@ -522,7 +522,9 @@ begin
   var _index2 := FTopicList.IndexOf(ANew);
   if (_index1 >= 0) and (_index2 < 0) then
   begin
+    var _Node := TTreeNode(FTopicList.Objects[_index1]);
     FTopicList.Delete(_index1);
+    FTopicList.AddObject(ANew, TObject(_Node)) ;
     var _dummy: Boolean := FTopicList.Find(ANew, Result);
   end;
 end;

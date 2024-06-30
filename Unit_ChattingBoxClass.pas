@@ -373,7 +373,7 @@ end;
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxInitNode(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
 begin
   VST_ChattingBox.Header.Columns[0].Width := VST_ChattingBox.ClientWidth - FVST_ColumnOffset;
-  Include(InitialStates, ivsMultiline);
+  Include(InitialStates, ivsMultiline);   // *** //
   Node.States := Node.States + [vsMultiline, vsHeightMeasured];
 end;
 

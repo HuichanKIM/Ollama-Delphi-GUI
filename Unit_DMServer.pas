@@ -160,7 +160,7 @@ begin
         if _HttpResponse.StatusCode = 200 then
           begin
             var _response := _HttpResponse.ContentAsString();
-            var _JsonObj := TJSONObject.ParseJSONValue(TEncoding.ASCII.GetBytes(_response), 0) as TJSONObject;
+            var _JsonObj := TJSONObject.ParseJSONValue(_response) as TJSONObject;
             if Assigned(_JsonObj) then
               DM_PublicIP := _JsonObj.Get('ip').JsonValue.Value;
             _JsonObj.Free;
@@ -462,6 +462,7 @@ begin
   case aCmd of
     cmdCntUserLogin:
       begin
+        var _loginflag: Boolean := True;
         ConnectedUsersLock.Acquire;
         try
           var _UserID := TEncoding.UTF8.GetString(aData);
@@ -478,15 +479,26 @@ begin
             begin
               _UserData := TConnectedUserData(ConnectedUsers.Objects[_index]);
               if Assigned(_UserData) then
-                 _UserData.Line := aLine;
+                begin
+                  if _UserData.Line <> aLine then
+                  begin
+                    var _data: TBytes := BytesOf('The name is already logged in.');
+                    FncServerSource_RM.ExecCommand(aLine, cmdSrvRefused, _data, False, True);
+                    _loginflag := False;
+                  end;
+                end;
             end;
 
-          aLine.UserID := _UserID;
-          Log_Chat(WF_DM_LOGON_FLAG, 'Client login: ' + _UserID +' ('+ aLine.PeerIP+')');
+          if _loginflag then
+          begin
+            aLine.UserID := _UserID;
+            Log_Chat(WF_DM_LOGON_FLAG, 'Client login: ' + _UserID +' ('+ aLine.PeerIP+')');
+          end;
         finally
           ConnectedUsersLock.Release;
         end;
 
+        if _loginflag then
         InformClientsOfLogins;
       end;
     cmdCntLlavaImage:

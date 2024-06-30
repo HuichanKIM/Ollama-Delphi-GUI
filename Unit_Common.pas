@@ -35,6 +35,22 @@ type
     class function CastInteger<T>(AExpression: Integer; const ATrue, AFalse: T): T; static;
   end;
 
+type
+  TUtils = class
+    private
+    public
+      class procedure OpenLink(ALink: string);
+      class procedure ShellExecuteC4D(AFileName: string); overload;
+      class procedure ShellExecuteC4D(AFileName: string; AParameters: string); overload;
+      class procedure ShellExecuteC4D(AFileName: string; AShowCmd: Integer); overload;
+      class procedure ShellExecuteC4D(AFileName: string; AParameters: string; AShowCmd: Integer); overload;
+      class function SelectFolder(const ADefaultFolder: string; const ADefaultFolderIfCancel: Boolean = True): string;
+      class function GetGuidStr: string;
+      class function UTF8ToStr(AValue: string): string;
+      class function CopyReverse(S: string; Index, Count : Integer): string;
+      class procedure MemoFocusOnTheEnd(const AMemo: TMemo);
+  end;
+
 const
   // Acivate Remote Broker/Server ------------------------------------------  //
   DM_ACTIVATECODE = 1;                           { 0 - Deactivate  1- Activate }
@@ -92,8 +108,11 @@ const
   GC_BTdivGB = GC_BTdivMB shl 10;
 
 const
-  GC_LanguageCode: array [0 .. 10] of string = ('en','ko','ja','zh','hi','fr','de','it','pt','ru','es');
-  GC_UTF8_LF = #10;
+  GC_LanguageCnt = 13;
+  GC_LanguageCode: array [0 .. GC_LanguageCnt-1] of string = ('en','ko','ja','zh','hi','fr','de','it','pt','hi','ru','es','ar');
+  GC_UTF8_LFA = #10;
+  GC_UTF8_LFH = #$0A;
+  GC_UTF8_CRLFH = #$0D#$0A;
   GC_CRLF = #13#10;
 
 const
@@ -130,7 +149,7 @@ function Is_Hangul(const AText: string): Boolean;
 function Is_ExternalCmd(const AText: string): Boolean;
 
 function Is_LlavaModel(const AText: string): Boolean;
-function Get_Base64Endoeings(const AImage: TImage): string;
+function Get_Base64Endoeings1(const AImage: TImage): string;
 
 function BytesToKMG(Value: Int64): string;
 function Get_ReplaceSpecialChar4Trans(const AText: string): string;
@@ -145,6 +164,7 @@ function Get_SystemInfo(): string;
 
 function Get_DisplayJson(const Display_Type: TDisplay_Type; const ModelsFlag: Boolean; const RespStr: string): string;
 function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer; var AModelsList: TStringList): string;
+
 function MSecsToTime(const AMSec: Int64): string;
 function MSecsToSeconds(const AMSec: Int64): string;
 procedure Global_TrimAppMemorySizeEx(const AStrategy: Integer);
@@ -203,7 +223,10 @@ uses
   Winapi.PsAPI,
   Winapi.MMSystem,
   WinApi.UxTheme,
+  WinAPi.ShellAPI,
   System.Math,
+  System.StrUtils,
+  System.NetEncoding,
   System.JSON,
   System.JSON.Readers,
   System.JSON.Writers,
@@ -215,7 +238,97 @@ uses
   Vcl.StyleAPI,
   Vcl.Themes,
   Vcl.Forms,
+  Vcl.Dialogs,
   Unit_Main;
+
+{ TUtils ... }
+
+{$WARN SYMBOL_PLATFORM OFF}
+class function TUtils.SelectFolder(const ADefaultFolder: string; const ADefaultFolderIfCancel: Boolean = True): string;
+begin
+  Result := '';
+  var LFileOpenDialog := TFileOpenDialog.Create(nil);
+  try
+    LFileOpenDialog.Title := 'Ollama Client GUI -  Select a folder';
+    LFileOpenDialog.Options := [fdoPickFolders];
+
+    if(not ADefaultFolder.Trim.IsEmpty)and(System.SysUtils.DirectoryExists(ADefaultFolder))then
+      LFileOpenDialog.DefaultFolder := ADefaultFolder;
+
+    if(not LFileOpenDialog.Execute)then
+    begin
+      if(ADefaultFolderIfCancel)then
+        Result := ADefaultFolder;
+      Exit;
+    end;
+
+    Result := IncludeTrailingPathDelimiter(LFileOpenDialog.FileName).Trim;
+  finally
+    LFileOpenDialog.Free;
+  end;
+end;
+{$WARN SYMBOL_PLATFORM ON}
+
+class procedure TUtils.ShellExecuteC4D(AFileName: string);
+begin
+  Self.ShellExecuteC4D(AFileName, '', SW_SHOWNORMAL);
+end;
+
+class procedure TUtils.ShellExecuteC4D(AFileName, AParameters: string);
+begin
+  Self.ShellExecuteC4D(AFileName, AParameters, SW_SHOWNORMAL);
+end;
+
+class procedure TUtils.ShellExecuteC4D(AFileName: string; AShowCmd: Integer);
+begin
+  Self.ShellExecuteC4D(AFileName, '', AShowCmd);
+end;
+
+class procedure TUtils.ShellExecuteC4D(AFileName: string; AParameters: string; AShowCmd: Integer);
+begin
+  ShellExecute(Application.Handle, nil, PWideChar(AFileName), PWideChar(AParameters), nil, AShowCmd);
+end;
+
+class procedure TUtils.OpenLink(ALink: string);
+begin
+  Self.ShellExecuteC4D(ALink);
+end;
+
+class function TUtils.UTF8ToStr(AValue: string): string;
+begin
+  Result := UTF8Tostring(RawBytestring(AValue));
+end;
+
+class function TUtils.GetGuidStr: string;
+begin
+  Result := '';
+  var LGUID1: TGUID;
+  CreateGUID(LGUID1);
+  Result := GUIDTostring(LGUID1).Replace('{', EmptyStr).Replace('}', EmptyStr);
+end;
+
+class function TUtils.CopyReverse(S: string; Index, Count : Integer): string;
+begin
+  Result := ReverseString(S);
+  Result := Copy(Result, Index, Count);
+  Result := ReverseString(Result);
+end;
+
+class procedure TUtils.MemoFocusOnTheEnd(const AMemo: TMemo);
+begin
+  TThread.CreateAnonymousThread(
+    procedure
+    begin
+      TThread.Synchronize(nil,
+        procedure
+        begin
+          AMemo.SelStart := Length(AMemo.Text);
+          AMemo.SelLength := 0;
+          AMemo.SetFocus;
+        end);
+    end).Start;
+end;
+
 
 { TResourceStream_Ex - MultiLoad ... }
 
@@ -334,9 +447,7 @@ begin
   end;
 end;
 
-// TNetEncoding.Base64.EncodeBytesToString is failed to Encode Image.Picture ...
-// ? Unicode problem ...
-function Get_Base64Endoeings(const AImage: TImage): string;
+function Get_Base64Endoeings1(const AImage: TImage): string;
 begin
   Result := '';
   var _Input  := TMemoryStream.Create;
@@ -345,6 +456,22 @@ begin
     _Input.Position := 0;
     Result := string(ICS_Base64Encode(_Input.Memory, _Input.Size));
   finally
+    _Input.Free;
+  end;
+end;
+
+{ Overhead ... }
+function Get_Base64Endoeings2(const AImage: TImage): string;
+begin
+  Result := '';
+  var _Input  := TMemoryStream.Create;
+  var _Base64 := System.NetEncoding.TBase64Encoding.Create(0);  // CharsPerLine = 0 means no line breaks
+  try
+    AImage.Picture.SaveToStream(_Input);
+    _Input.Position := 0;
+    Result := _Base64.EncodeBytesToString(_Input.Memory, _Input.Size);
+  finally
+    _Base64.Free;
     _Input.Free;
   end;
 end;
@@ -609,7 +736,7 @@ const
   c_Displat_Type: array [TDisplay_Type] of string = ('response', 'content', 'trans');
 begin
   Result := '';
-  var _parsingsrc_0 := StringReplace(RespStr, GC_UTF8_LF, ',',[rfReplaceAll]);
+  var _parsingsrc_0 := StringReplace(RespStr, GC_UTF8_LFH, ',',[rfReplaceAll]);
   var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';
   var _acceptflag: Boolean := False;
   var _firstflag: Boolean := True;

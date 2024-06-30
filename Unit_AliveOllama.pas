@@ -151,7 +151,7 @@ begin
     end;
 
     PostMessage(Form_RestOllama.Handle, WM_NETHTTP_MESSAGE, WM_NETHTTP_MESSAGE_ALIVE, Ord(GV_AliveOllamaFlag));
-    LogReturn(_response+#13#10+ IIF.CastBool<string>(GV_AliveOllamaFlag, 'Alive On', 'Not Alive'));
+    LogReturn(_response+GC_CRLF+ IIF.CastBool<string>(GV_AliveOllamaFlag, 'Alive On', 'Not Alive'));
     if not GV_AliveOllamaFlag then
       begin
         Memo_Alive.lines.Add(c_Warning);

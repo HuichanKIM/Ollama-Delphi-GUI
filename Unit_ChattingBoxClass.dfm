@@ -36,6 +36,7 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     Header.AutoSizeIndex = -1
     Header.Height = 21
     Header.Options = [hoColumnResize]
+    Header.Style = hsPlates
     Images = VirtualImageList1
     IncrementalSearch = isAll
     NodeAlignment = naFromTop
@@ -65,8 +66,9 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
     Columns = <
       item
+        Options = [coEnabled, coParentBidiMode, coParentColor, coResizable, coVisible, coAllowFocus, coStyleColor]
         Position = 0
-        Text = 'Name'
+        Text = 'Chatting'
         Width = 300
       end>
   end
