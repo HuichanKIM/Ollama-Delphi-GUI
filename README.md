@@ -1,6 +1,6 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.10 - 06.29.2024**
+**Latest Version 0.9.11 - 07.01.2024**
 - Add a Thumbnail Image to ChattingBox on Llava Model
 - Add Broker/Server Functions
 - Avoid third-party components as much as possible and 
