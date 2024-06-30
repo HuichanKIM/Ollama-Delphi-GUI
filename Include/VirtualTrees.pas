@@ -891,7 +891,7 @@ begin
 
         // The edit control flag will ensure that no partial line is displayed, that is, only lines
         // which are (vertically) fully visible are drawn.
-        DrawFormat := DT_NOPREFIX or DT_WORDBREAK or DT_END_ELLIPSIS or DT_EDITCONTROL or AlignmentToDrawFlag[Alignment];
+        DrawFormat := DT_NOPREFIX or DT_WORDBREAK {or DT_END_ELLIPSIS or DT_EDITCONTROL} or AlignmentToDrawFlag[Alignment];
         if BidiMode <> bdLeftToRight then
           DrawFormat := DrawFormat or DT_RTLREADING;
 
@@ -1499,7 +1499,7 @@ var
 begin
   GetTextExtentPoint32W(Canvas.Handle, PWideChar(Text), Length(Text), Result);
 
-  DrawFormat := DT_CALCRECT or DT_NOPREFIX or DT_WORDBREAK or DT_END_ELLIPSIS or DT_EDITCONTROL or AlignmentToDrawFlag[Alignment];
+  DrawFormat := DT_CALCRECT or DT_NOPREFIX or DT_WORDBREAK {or DT_END_ELLIPSIS or DT_EDITCONTROL} or AlignmentToDrawFlag[Alignment];
   if BiDiMode <> bdLeftToRight then
     DrawFormat := DrawFormat or DT_RTLREADING;
 
@@ -1516,7 +1516,7 @@ begin
   GetTextExtentPoint32W(Canvas.Handle, PWideChar(Text), Length(Text), Result);
   if vsMultiLine in Node.States then
   begin
-    DrawFormat := DT_CALCRECT or DT_NOPREFIX or DT_WORDBREAK or DT_END_ELLIPSIS or DT_EDITCONTROL or AlignmentToDrawFlag[Alignment];
+    DrawFormat := DT_CALCRECT or DT_NOPREFIX or DT_WORDBREAK {or DT_END_ELLIPSIS or DT_EDITCONTROL} or AlignmentToDrawFlag[Alignment];
     if BidiMode <> bdLeftToRight then
       DrawFormat := DrawFormat or DT_RTLREADING;
 
@@ -1732,7 +1732,7 @@ begin
     ChangeBidiModeAlignment(Alignment);
 
   if vsMultiline in Node.States then
-    DrawFormat := DT_NOPREFIX or DT_TOP or DT_WORDBREAK or DT_EDITCONTROL
+    DrawFormat := DT_NOPREFIX or DT_TOP or DT_WORDBREAK { or DT_EDITCONTROL}
   else
     DrawFormat := DT_NOPREFIX or DT_VCENTER or DT_SINGLELINE;
   DrawFormat := DrawFormat or DT_CALCRECT;
