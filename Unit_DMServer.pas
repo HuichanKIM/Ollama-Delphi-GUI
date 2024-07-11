@@ -26,6 +26,7 @@ type
   TConnectedUserData = class
     Line: TncLine;
     Queue: Integer;
+    UserID: string;
   end;
 
 type
@@ -40,7 +41,6 @@ type
     FQueues : TStringList;
     FQueueNum: Integer;
     FLogList: TStringList;
-    FLine_PeerIP: string;
     FQueueCriticalSection: TRtlCriticalSection;
     FCriticalSection: TRtlCriticalSection;
     FCLoseFlag: Boolean;
@@ -66,6 +66,7 @@ type
     function Get_LogByIndex(const AIndex: Integer): string;
     function Get_Queue(): string;
     function Get_Queue_Count: Integer;
+    //
     procedure Response_ToClient(const AUser, AQueue, AModel, AResponse: string);
   end;
 
@@ -112,7 +113,7 @@ const
   C_CMD_TYPE_STR: array [C_CMD_TYPE] of string = ('Request','Response');
 
 // Common with OllamaClient Android ...
-//C_JsonFmt  = '{"user": "Ollama","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
+// C_JsonFmt  = '{"user": "Ollama","queue": "%queue%","model": "%model%","prompt": "%prompt%"}';
 const
   C_JsonFmt2 = '{"user": "Ollama","queue": "%queue%","model": "%model%","response": "%response%"}';
 
@@ -214,14 +215,14 @@ begin
   FncServerSource_RM.Active := False;
 
   ConnectedUsersLock.Acquire;
-  var UserData: TConnectedUserData;
+  var _UserData: TConnectedUserData;
   try
-    for var _i := 0 to ConnectedUsers.Count - 1 do
+    for var _i := ConnectedUsers.Count - 1 downto 0 do
     begin
-      UserData := TConnectedUserData(ConnectedUsers.Objects[_i]);
-      if Assigned(UserData) then
+      _UserData := TConnectedUserData(ConnectedUsers.Objects[_i]);
+      if Assigned(_UserData) then
       begin
-        UserData.Free;
+        _UserData.Free;
         ConnectedUsers.Delete(_i);
       end;
     end;
@@ -242,9 +243,9 @@ begin
 
   FLogList.Free;
   ConnectedUsers.Free;
-  ConnectedUsersLock.Free;
   FQueues.Clear;
   FQueues.Free;
+  ConnectedUsersLock.Free;
   DeleteCriticalSection(FCriticalSection);
   DeleteCriticalSection(FQueueCriticalSection);
   FncServerSource_RM.Free;
@@ -391,7 +392,7 @@ begin
   var UserData: TConnectedUserData;
   var _cntbool: Integer := ConnectedUsers.Count;;
   try
-    for var _i := 0 to ConnectedUsers.Count - 1 do  // Substitute for aLine.UserID ?
+    for var _i := ConnectedUsers.Count - 1 downto 0 do  // Substitute for aLine.UserID ?
     begin
       UserData := TConnectedUserData(ConnectedUsers.Objects[_i]);
       if Assigned(UserData) and (UserData.Line = aLine) then
@@ -414,9 +415,9 @@ end;
 procedure TDM_Server.Set_Request2Queues(const ARequestsJson: string; const AQueue: Integer);
 begin
   var _queuenum := IntToStr(AQueue);
-  var _Result := ARequestsJson.Replace('%queue%', _queuenum, [rfIgnoreCase]);
+  var _request := ARequestsJson.Replace('%queue%', _queuenum, [rfIgnoreCase]);
 
-  Set_Queue(_Result);
+  Set_Queue(_request);
   PostMessage(Form_RMBroker.Handle, WF_DM_MESSAGE, WF_DM_MESSAGE_REQUEST, 0);
 end;
 
@@ -473,6 +474,7 @@ begin
               _UserData := TConnectedUserData.Create;
               _UserData.Line := aLine;
               _UserData.Queue := 0;
+              _UserData.UserID := _UserID;
               ConnectedUsers.AddObject(_UserID, _UserData);
             end
           else
@@ -482,7 +484,7 @@ begin
                 begin
                   if _UserData.Line <> aLine then
                   begin
-                    var _data: TBytes := BytesOf('The name is already logged in.');
+                    var _data: TBytes := BytesOf('The Name is already logged in.');
                     FncServerSource_RM.ExecCommand(aLine, cmdSrvRefused, _data, False, True);
                     _loginflag := False;
                   end;

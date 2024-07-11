@@ -121,7 +121,7 @@ function Get_GoogleTranslatorEx(const AUser, ACodeFrom, ACodeTo: Integer; const 
 begin
   var _trans := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
   if _trans <> '' then
-    Result := _trans.Replace(GC_UTF8_LF, GC_CRLF, [rfReplaceAll]);
+    Result := _trans.Replace(GC_UTF8_LFA, GC_CRLF, [rfReplaceAll]);
 end;
 
 { TForm_Translator }
@@ -171,7 +171,7 @@ begin
     else
       Label_Prompt.Caption := c_Type[AUser] + '  - '+FRequest;
 
-    var _trans := FTransResult.Replace(GC_UTF8_LF, GC_CRLF, [rfReplaceAll]);
+    var _trans := FTransResult.Replace(GC_UTF8_LFA, GC_CRLF, [rfReplaceAll]);
     Memo_Translates.Lines.Add(_trans)
   end;
 end;

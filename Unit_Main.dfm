@@ -220,11 +220,10 @@ object Form_RestOllama: TForm_RestOllama
             Center = True
             Proportional = True
             Stretch = True
+            Transparent = True
             OnDblClick = Image_LlvaDblClick
             ExplicitLeft = 4
             ExplicitTop = 8
-            ExplicitWidth = 201
-            ExplicitHeight = 187
           end
           object SpeedButton_LlavaLoad: TSpeedButton
             Left = 0
@@ -631,7 +630,7 @@ object Form_RestOllama: TForm_RestOllama
           Top = 20
           Width = 23
           Height = 22
-          Hint = 'Set New Font Size'
+          Hint = 'Set New Font'
           Caption = 'Ff'
           Images = SVGIconVirtualImageList1
           Font.Charset = DEFAULT_CHARSET
@@ -819,8 +818,8 @@ object Form_RestOllama: TForm_RestOllama
           StyleElements = [seClient, seBorder]
         end
         object Shape_TTS: TShape
-          Left = 202
-          Top = 50
+          Left = 198
+          Top = 53
           Width = 10
           Height = 10
           Brush.Color = clGray
@@ -894,8 +893,8 @@ object Form_RestOllama: TForm_RestOllama
         end
         object ProgressBar_TTS: TProgressBar
           Left = 96
-          Top = 53
-          Width = 92
+          Top = 55
+          Width = 87
           Height = 6
           Anchors = [akLeft, akTop, akRight]
           Smooth = True
@@ -1152,7 +1151,7 @@ object Form_RestOllama: TForm_RestOllama
         Top = 26
         Width = 722
         Height = 740
-        ActivePage = Tabsheet_Chatting
+        ActivePage = TabSheet_ChatLogs
         Align = alClient
         TabOrder = 1
         OnChange = PageControl_ChattingChange
@@ -1185,6 +1184,13 @@ object Form_RestOllama: TForm_RestOllama
               DragOperations = [doCopy, doMove]
               ExplicitWidth = 714
               ExplicitHeight = 710
+              Columns = <
+                item
+                  Options = [coEnabled, coParentBidiMode, coParentColor, coResizable, coVisible, coAllowFocus, coStyleColor]
+                  Position = 0
+                  Text = 'Chatting'
+                  Width = 714
+                end>
             end
           end
           object SkAnimatedImage_ChatProcess: TSkAnimatedImage
@@ -1520,34 +1526,6 @@ object Form_RestOllama: TForm_RestOllama
         BevelOuter = bvNone
         ShowCaption = False
         TabOrder = 2
-        object SpeedButton_Translate2: TSpeedButton
-          AlignWithMargins = True
-          Left = 50
-          Top = 3
-          Width = 22
-          Height = 20
-          Margins.Left = 0
-          Action = Action_TransPrompt
-          Align = alLeft
-          Images = SVGIconVirtualImageList1
-          ExplicitLeft = 55
-          ExplicitTop = 4
-          ExplicitHeight = 22
-        end
-        object SpeedButton_LoadImageLlava: TSpeedButton
-          AlignWithMargins = True
-          Left = 25
-          Top = 3
-          Width = 22
-          Height = 20
-          Margins.Left = 0
-          Action = Action_LoadImageLlava
-          Align = alLeft
-          Images = SVGIconVirtualImageList1
-          ExplicitLeft = 30
-          ExplicitTop = 4
-          ExplicitHeight = 22
-        end
         object SpeedButton_ReqDummy: TSpeedButton
           AlignWithMargins = True
           Left = 0
@@ -1565,9 +1543,9 @@ object Form_RestOllama: TForm_RestOllama
         end
         object Edit_ReqContent: TEdit
           AlignWithMargins = True
-          Left = 78
+          Left = 28
           Top = 3
-          Width = 604
+          Width = 654
           Height = 20
           Align = alClient
           TabOrder = 0
@@ -3269,7 +3247,7 @@ object Form_RestOllama: TForm_RestOllama
       Caption = '-'
     end
     object pmn_ClearAll: TMenuItem
-      Caption = 'Clear All'
+      Caption = 'Clear All / Reset'
       OnClick = pmn_ClearAllClick
     end
   end
@@ -3288,6 +3266,9 @@ object Form_RestOllama: TForm_RestOllama
     Params = <>
     ReadTimeout = 60000
     SynchronizedEvents = False
+    BindSource.AutoActivate = False
+    BindSource.AutoEdit = False
+    BindSource.AutoPost = False
     OnSendData = RESTClient_OllamaSendData
     OnReceiveData = RESTClient_OllamaReceiveData
     Left = 448
@@ -3299,10 +3280,16 @@ object Form_RestOllama: TForm_RestOllama
     Params = <>
     Response = RESTResponse_Ollama
     SynchronizedEvents = False
+    BindSource.AutoActivate = False
+    BindSource.AutoEdit = False
+    BindSource.AutoPost = False
     Left = 448
     Top = 502
   end
   object RESTResponse_Ollama: TRESTResponse
+    BindSource.AutoActivate = False
+    BindSource.AutoEdit = False
+    BindSource.AutoPost = False
     Left = 452
     Top = 566
   end

@@ -20,12 +20,12 @@ type
   private
     HResInfo: THandle;
     HGlobal: THandle;
-    procedure Initialize(Instance: THandle; Name, ResType: PChar);
+    procedure Initialize(AInstance: THandle; AName, AResType: PChar);
   public
-    constructor Create(Instance: THandle; const ResName: string; ResType: PChar);
+    constructor Create(AInstance: THandle; const AResName: string; AResType: PChar);
     destructor Destroy; override;
     //
-    procedure Re_Initialize(Instance: THandle; Name, ResType: PChar);
+    procedure Re_Initialize(AInstance: THandle; AName, AResType: PChar);
   end;
 { ... }
 
@@ -37,18 +37,18 @@ type
 
 type
   TUtils = class
-    private
-    public
-      class procedure OpenLink(ALink: string);
-      class procedure ShellExecuteC4D(AFileName: string); overload;
-      class procedure ShellExecuteC4D(AFileName: string; AParameters: string); overload;
-      class procedure ShellExecuteC4D(AFileName: string; AShowCmd: Integer); overload;
-      class procedure ShellExecuteC4D(AFileName: string; AParameters: string; AShowCmd: Integer); overload;
-      class function SelectFolder(const ADefaultFolder: string; const ADefaultFolderIfCancel: Boolean = True): string;
-      class function GetGuidStr: string;
-      class function UTF8ToStr(AValue: string): string;
-      class function CopyReverse(S: string; Index, Count : Integer): string;
-      class procedure MemoFocusOnTheEnd(const AMemo: TMemo);
+  private
+  public
+    class procedure OpenLink(ALink: string);
+    class procedure ShellExecuteC4D(AFileName: string); overload;
+    class procedure ShellExecuteC4D(AFileName: string; AParameters: string); overload;
+    class procedure ShellExecuteC4D(AFileName: string; AShowCmd: Integer); overload;
+    class procedure ShellExecuteC4D(AFileName: string; AParameters: string; AShowCmd: Integer); overload;
+    class function SelectFolder(const ADefaultFolder: string; const ADefaultFolderIfCancel: Boolean = True): string;
+    class function GetGuidStr: string;
+    class function UTF8ToStr(AValue: string): string;
+    class function CopyReverse(S: string; Index, Count : Integer): string;
+    class procedure MemoFocusOnTheEnd(const AMemo: TMemo);
   end;
 
 const
@@ -96,8 +96,8 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  GC_Version0     = 'ver. 0.9.11';
-  GC_Version1     = 'ver. 0.9.11 (2024.07.01)';
+  GC_Version0     = 'ver. 0.9.12';
+  GC_Version1     = 'ver. 0.9.12 (2024.07.11)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
@@ -151,7 +151,7 @@ function Is_ExternalCmd(const AText: string): Boolean;
 function Is_LlavaModel(const AText: string): Boolean;
 function Get_Base64Endoeings1(const AImage: TImage): string;
 
-function BytesToKMG(Value: Int64): string;
+function BytesToKMG(AValue: Int64): string;
 function Get_ReplaceSpecialChar4Trans(const AText: string): string;
 function Get_ReplaceSpecialChar4Json(const AText: string): string;
 function GetUsersWindowsLanguage: string;
@@ -162,8 +162,8 @@ function IOUtils_ReadAllText(const AFilePath: string=''): string;
 function IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
 function Get_SystemInfo(): string;
 
-function Get_DisplayJson(const Display_Type: TDisplay_Type; const ModelsFlag: Boolean; const RespStr: string): string;
-function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer; var AModelsList: TStringList): string;
+function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const AModelsFlag: Boolean; const ARespStr: string): string;
+function Get_DisplayJson_Models(const ARespStr: string; var aIndex: Integer; var AModelsList: TStringList): string;
 
 function MSecsToTime(const AMSec: Int64): string;
 function MSecsToSeconds(const AMSec: Int64): string;
@@ -171,6 +171,8 @@ procedure Global_TrimAppMemorySizeEx(const AStrategy: Integer);
 function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
 procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
 function LoadFromFileBuffered_String(const AFileName: string): string;
+
+function InetIsOffline(AFlag: Integer): Boolean; stdcall; external 'URL.DLL';
 
 const
   C_Connection_Svg0 = '''
@@ -286,7 +288,7 @@ end;
 
 class procedure TUtils.ShellExecuteC4D(AFileName: string; AParameters: string; AShowCmd: Integer);
 begin
-  ShellExecute(Application.Handle, nil, PWideChar(AFileName), PWideChar(AParameters), nil, AShowCmd);
+  var _H: HINST := ShellExecute(Application.Handle, nil, PWideChar(AFileName), PWideChar(AParameters), nil, AShowCmd);
 end;
 
 class procedure TUtils.OpenLink(ALink: string);
@@ -332,10 +334,10 @@ end;
 
 { TResourceStream_Ex - MultiLoad ... }
 
-constructor TResourceStream_Ex.Create(Instance: THandle; const ResName: string; ResType: PChar);
+constructor TResourceStream_Ex.Create(AInstance: THandle; const AResName: string; AResType: PChar);
 begin
   inherited Create;
-  Initialize(Instance, PChar(ResName), ResType);
+  Initialize(AInstance, PChar(AResName), AResType);
 end;
 
 destructor TResourceStream_Ex.Destroy;
@@ -345,16 +347,16 @@ begin
   inherited Destroy;
 end;
 
-procedure TResourceStream_Ex.Initialize(Instance: THandle; Name, ResType: PChar);
+procedure TResourceStream_Ex.Initialize(AInstance: THandle; AName, AResType: PChar);
 begin
-  HResInfo := FindResource(Instance, Name, ResType);
+  HResInfo := FindResource(AInstance, AName, AResType);
     if HResInfo = 0 then Abort;
-  HGlobal := LoadResource(Instance, HResInfo);
+  HGlobal := LoadResource(AInstance, HResInfo);
     if HGlobal = 0 then Abort;
-  SetPointer(LockResource(HGlobal), SizeOfResource(Instance, HResInfo));
+  SetPointer(LockResource(HGlobal), SizeOfResource(AInstance, HResInfo));
 end;
 
-procedure TResourceStream_Ex.Re_Initialize(Instance: THandle; Name, ResType: PChar);
+procedure TResourceStream_Ex.Re_Initialize(AInstance: THandle; AName, AResType: PChar);
 begin
   try
     UnlockResource(HGlobal);
@@ -364,7 +366,7 @@ begin
     Abort;
   end;
 
-  Initialize(Instance, Name, ResType);
+  Initialize(AInstance, AName, AResType);
 end;
 
 { InitializePaths ... }
@@ -399,36 +401,36 @@ const
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '='
     );
 
-function ICS_Base64Encode(const Input : PAnsiChar; Len: Integer) : AnsiString;
+function ICS_Base64Encode(const AInput : PAnsiChar; ALen: Integer) : AnsiString;
 begin
   var _Count := 0;
-  var _I := Len;
+  var _I := ALen;
   while (_I mod 3) > 0 do
       Inc(_I);
   _I := (_I div 3) * 4;
   SetLength(Result, _I);
   _I := 0;
-  while _Count < Len do
+  while _Count < ALen do
   begin
     Inc(_I);
-    Result[_I] := ICS_Base64OutA[(Byte(Input[_Count]) and $FC) shr 2];
-    if (_Count + 1) < Len then
+    Result[_I] := ICS_Base64OutA[(Byte(AInput[_Count]) and $FC) shr 2];
+    if (_Count + 1) < ALen then
       begin
         Inc(_I);
-        Result[_I] := ICS_Base64OutA[((Byte(Input[_Count]) and $03) shl 4) +
-                                     ((Byte(Input[_Count + 1]) and $F0) shr 4)];
-        if (_Count + 2) < Len then
+        Result[_I] := ICS_Base64OutA[((Byte(AInput[_Count]) and $03) shl 4) +
+                                     ((Byte(AInput[_Count + 1]) and $F0) shr 4)];
+        if (_Count + 2) < ALen then
           begin
             Inc(_I);
-            Result[_I] := ICS_Base64OutA[((Byte(Input[_Count + 1]) and $0F) shl 2) +
-                                         ((Byte(Input[_Count + 2]) and $C0) shr 6)];
+            Result[_I] := ICS_Base64OutA[((Byte(AInput[_Count + 1]) and $0F) shl 2) +
+                                         ((Byte(AInput[_Count + 2]) and $C0) shr 6)];
             Inc(_I);
-            Result[_I] := ICS_Base64OutA[(Byte(Input[_Count + 2]) and $3F)];
+            Result[_I] := ICS_Base64OutA[(Byte(AInput[_Count + 2]) and $3F)];
           end
         else
           begin
             Inc(_I);
-            Result[_I] := ICS_Base64OutA[(Byte(Input[_Count + 1]) and $0F) shl 2];
+            Result[_I] := ICS_Base64OutA[(Byte(AInput[_Count + 1]) and $0F) shl 2];
             Inc(_I);
             Result[_I] := '=';
           end
@@ -436,7 +438,7 @@ begin
     else
       begin
         Inc(_I);
-        Result[_I] := ICS_Base64OutA[(Byte(Input[_Count]) and $03) shl 4];
+        Result[_I] := ICS_Base64OutA[(Byte(AInput[_Count]) and $03) shl 4];
         Inc(_I);
         Result[_I] := '=';
         Inc(_I);
@@ -526,11 +528,11 @@ end;
 
 { ... }
 
-function BytesToKMG(Value: Int64): string;
+function BytesToKMG(AValue: Int64): string;
 begin
   var _mask: string := '%5.3f';
   var _suffix: string := '';
-  var _float: Extended := Value;
+  var _float: Extended := AValue;
   var _float2: Extended := _float;
 
   if _float >= GC_BTdivGB then begin _suffix := 'G'; _float2 := _float / GC_BTdivGB; end else
@@ -723,7 +725,8 @@ begin
   var _I := Length(ASource);
   if _I < 1 then Exit;
 
-  if (_I >= 1) and (ASource[_I] > ' ') then Result := ASource
+  if (_I >= 1) and (ASource[_I] > ' ') then
+    Result := ASource
   else
     begin
       while (_I >= 1) and (ASource[_I] <= ' ') do Dec(_I);
@@ -731,17 +734,17 @@ begin
     end;
 end;
 
-function Get_DisplayJson(const Display_Type: TDisplay_Type; const ModelsFlag: Boolean; const RespStr: string): string;
+function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const AModelsFlag: Boolean; const ARespStr: string): string;
 const
   c_Displat_Type: array [TDisplay_Type] of string = ('response', 'content', 'trans');
 begin
   Result := '';
-  var _parsingsrc_0 := StringReplace(RespStr, GC_UTF8_LFH, ',',[rfReplaceAll]);
+  var _parsingsrc_0 := StringReplace(ARespStr, GC_UTF8_LFH, ',',[rfReplaceAll]);
   var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';
   var _acceptflag: Boolean := False;
   var _firstflag: Boolean := True;
-  var _key := c_Displat_Type[Display_Type];
-  if ModelsFlag then
+  var _key := c_Displat_Type[ADisplay_Type];
+  if AModelsFlag then
   begin
     Result := '* Model in loaded : ';
     _key := 'model';
@@ -759,20 +762,19 @@ begin
             Continue;
           end;
         TJsonToken.String:
+          if _acceptflag then
           begin
-            if _acceptflag then
-            begin
-              _acceptflag := False;
-              if _firstflag then
-                begin
-                  _firstflag := False;
-                  Result := _JsonReader.Value.ToString.TrimLeft;
-                end
-              else
-                Result := Result + _JsonReader.Value.ToString;
-            end;
+            _acceptflag := False;
+            if _firstflag then
+              begin
+                _firstflag := False;
+                Result := _JsonReader.Value.ToString.TrimLeft;
+              end
+            else
+              Result := Result + _JsonReader.Value.ToString;
           end;
       end;
+
     Result := TrimRight_Ex(Result);
   finally
     FreeAndNil(_JsonReader);
@@ -780,17 +782,17 @@ begin
   end;
 end;
 
-function Get_DisplayJson_Models(const RespStr: string; var VIndex: Integer; var AModelsList: TStringList): string;
+function Get_DisplayJson_Models(const ARespStr: string; var AIndex: Integer; var AModelsList: TStringList): string;
 begin
   Result := 'Models List at '+FormatDateTime('yyyy-mm-dd HH:NN:SS', Now) +GC_CRLF+GC_CRLF;
 
-  var _StringReader := TStringReader.Create(RespStr);
+  var _StringReader := TStringReader.Create(ARespStr);
   var _JsonReader := TJsonTextReader.Create(_StringReader);
   var _firstflag: Boolean := True;
   var _childflag: Boolean := False;
   var _sizeflag: Boolean := False;
   var _modelflag: Boolean := False;
-  var _firstname: string := '';
+  var _propname: string := '';
   var _prefix: string := '';
   var _arrayflag: Boolean := False;
   var _key: string := 'name';
@@ -800,7 +802,14 @@ begin
   try
     while _JsonReader.Read do
       case _JsonReader.TokenType of
-        TJsonToken.StartObject:;
+        TJsonToken.StartObject:
+          if _modelflag then
+            begin
+              _prefix := '';
+              _childflag := False;
+              _arrayflag := False;
+              _sizeflag  := False;
+            end;
         TJsonToken.Startarray:
           if not SameText(_JsonReader.Path, _fstobject) then
             _arrayflag := True;
@@ -812,21 +821,17 @@ begin
               Continue;
             end;
 
-            _firstname := _JsonReader.Value.ToString;
-            if SameText(_firstname, _key) then
+            _propname := _JsonReader.Value.ToString;
+            if SameText(_propname, _key) then
               begin
-                Inc(Vindex);
-                _prefix := '';
-                _childflag := False;
-                _arrayflag := False;
-                _sizeflag  := False;
-                Result := Result + 'Models ['+Vindex.ToString+'] : ';
                 _modelflag := True;
+                Inc(Aindex);
+                Result := Result + 'Models ['+Aindex.ToString+'] : ';
                 Continue;
               end else
-            if SameText(_firstname, 'details') then
+            if SameText(_propname, 'details') then
               begin
-                Result := Result + _prefix +  _JsonReader.Value.ToString+' : '+ GC_CRLF;
+                Result := Result + _prefix + _propname +' : '+ GC_CRLF;
                 _prefix := '    - ';
                 _childflag := True;
                 Continue;
@@ -837,8 +842,8 @@ begin
                   _prefix := '  . ';
               end;
 
-            _sizeflag := SameText(_firstname, 'size');
-            Result := Result + _prefix + _JsonReader.Value.ToString+' : ';
+            _sizeflag := SameText(_propname, 'size');
+            Result := Result + _prefix + _propname +' : ';
           end;
         TJsonToken.String:
           if _arrayflag then
@@ -849,7 +854,7 @@ begin
                 AModelsList.Add(_JsonReader.Value.ToString);
               _modelflag := False;
               Result := Result + _JsonReader.Value.ToString+ GC_CRLF;
-             end;
+            end;
         TJsonToken.Float, TJsonToken.Boolean:
           if _arrayflag then
             Result := Result + _JsonReader.Value.ToString +', '
@@ -872,7 +877,13 @@ begin
               end;
             _arrayflag := False;
           end;
-        TJsonToken.EndObject:;
+        TJsonToken.EndObject:
+          begin
+            _prefix := '';
+            _childflag := False;
+            _arrayflag := False;
+            _sizeflag  := False;
+          end;
       end;
   finally
     FreeAndNil(_JsonReader);

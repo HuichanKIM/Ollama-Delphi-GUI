@@ -68,9 +68,9 @@ LABEL L_Finish;
 begin
   Result := '';
   var _nodedata: PTopicData := nil;
-  var _firstnode := FTreeView.Items.GetFirstNode;
-  if _firstnode <> nil then
-   _firstnode := _firstnode.getNextSibling;
+  var _insertTarget := FTreeView.Items.GetFirstNode;
+  if _insertTarget <> nil then
+   _insertTarget := _insertTarget.getNextSibling;      // Target Node for Insert Node
 
   var _Indexflag := FTopicList.IndexOf(APrompt);
   var _newnode: TTreeNode := nil;
@@ -100,7 +100,7 @@ begin
             td_Seed := GetSeedRandom();
             td_Level := 0;
           end;
-        _newnode := FTreeView.Items.InsertObject(_firstnode, APrompt, _nodedata);
+        _newnode := FTreeView.Items.InsertObject(_insertTarget, APrompt, _nodedata);
       end;
     GC_MRU_AddChild:
       begin
@@ -115,7 +115,7 @@ begin
         if ANode = nil then
           begin
             _nodedata^.td_Seed := GetSeedRandom();
-            _newnode := FTreeView.Items.InsertObject(_firstnode, APrompt, _nodedata);
+            _newnode := FTreeView.Items.InsertObject(_insertTarget, APrompt, _nodedata);
           end
         else
           begin
@@ -279,7 +279,7 @@ begin
   var _success := CopyFile(PChar(FMruJsonFile), PChar(_backupfile), False);
 
   Clear_TreeData();
-  AddInsertNode(GC_MRU_NewRoot, nil, '');
+  AddInsertNode(GC_MRU_NewRoot, nil, 'Hello');
 end;
 
 destructor TMRU_Manager.Destroy;
@@ -304,7 +304,10 @@ begin
   while True do
   begin
     if not FSeedList.Find(_seed.ToString, _dummy) then
-    Break;
+    begin
+      FSeedList.Add(_seed.ToString);
+      Break;
+    end;
     _seed := RandomRange(10000, 99999);
   end;
 
@@ -314,8 +317,6 @@ end;
 { TreeView to JSON ... }
 
 function TMRU_Manager.Write_TreeViewToJSON(): Boolean;
-var
-  _counts: Integer;
 
   procedure Write_Object(AWriter: TJsonTextWriter; AData: PTopicData);
   begin
@@ -327,8 +328,6 @@ var
         WritePropertyName('level');  WriteValue(AData^.td_Level);
       WriteEndObject;
     end;
-
-    Inc(_counts);
   end;
 
 LABEL L_Return;
@@ -342,7 +341,6 @@ begin
     Exit;
   end;
 
-  _counts := 0;
   var _StringWriter := TStringWriter.Create();
   var _Writer := TJsonTextWriter.Create(_StringWriter);
   try
@@ -400,7 +398,7 @@ begin
     FreeAndNil(_Writer);
   end;
 
-  Result := FileExists(FMruJsonFile) and (FTreeView.Items.Count = _counts);
+  Result := FileExists(FMruJsonFile);
 end;
 
 procedure TMRU_Manager.Read_JsonToTreeView();

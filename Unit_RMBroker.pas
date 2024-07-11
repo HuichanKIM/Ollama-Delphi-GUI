@@ -14,10 +14,10 @@ uses
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
-  REST.Types,
-  REST.Client,
   Data.Bind.Components,
   Data.Bind.ObjectScope,
+  REST.Types,
+  REST.Client,
   Vcl.ComCtrls,
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
@@ -377,7 +377,10 @@ begin
   { -------------------------------------------------------------------------- }
 
   if DM_Server.Get_Queue_Count > 0 then
+  begin
+    Application.ProcessMessages;
     Rm_StartRequest();
+  end;
 end;
 
 procedure TForm_RMBroker.OnRESTRequest_RMError(Sender: TObject);

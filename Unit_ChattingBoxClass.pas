@@ -62,6 +62,7 @@ type
     procedure VST_ChattingBoxResize(Sender: TObject);
     procedure VST_ChattingBoxKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure VST_ChattingBoxDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
+    procedure VST_ChattingBoxColumnResize(Sender: TVTHeader; Column: TColumnIndex);
     procedure PopupMenu1Popup(Sender: TObject);
     procedure pmn_DeleteClick(Sender: TObject);
     procedure pmn_SelectedColorClick(Sender: TObject);
@@ -143,19 +144,20 @@ begin
     SelectionCurveRadius := 20;
     NodeDataSize := SizeOf(TMessageRec);
     NodeAlignment := TVTNodeAlignment.naFromTop;
+    Header.Options := Header.Options - [hoAutoResize];
     Header.Columns[0].Width := ClientWidth - FVST_ColumnOffset;
     TreeOptions.MiscOptions := TreeOptions.MiscOptions + [TVTMiscOption.toVariablenodeHeight];
-    TreeOptions.AutoOptions := TreeOptions.AutoOptions + [TVTAutoOption.toAutoSpanColumns];
+    TreeOptions.AutoOptions := TreeOptions.AutoOptions - [TVTAutoOption.toAutoSpanColumns];
     TreeOptions.SelectionOptions := TreeOptions.SelectionOptions + [TVTSelectionOption.toSelectNextNodeOnRemoval]-[TVTSelectionOption.toMultiSelect];
     {  Custom ... }
-    OffsetWRMagin := 35;
+    OffsetWRMagin := 30;
     NodeHeightOffSet := 15;
     Images := VirtualImageList1;
     SelectedBrushColor := FVST_NSelectionColor;  // in TBaseVirtualTree.pas ...
     Node_HeaderColor :=   FVST_NHeaderColor;
     Node_BodyColor :=     FVST_NBodyColor;
     Node_FooterColor :=   FVST_NFooterColor;
-
+    //
     OnDrawTitle := VST_DrawTitle;
   end;
 end;
@@ -345,6 +347,11 @@ begin
   var _Data: PMessageRec := Sender.GetNodeData(Node);
   if _Data^.FTag = 1 then
     ContentRect.Left := TargetCanvas.ClipRect.Left + FVST_SecondIndent;
+end;
+
+procedure TFrame_ChattingBoxClass.VST_ChattingBoxColumnResize(Sender: TVTHeader; Column: TColumnIndex);
+begin
+  VST_ChattingBox.Header.Columns[0].Width := VST_ChattingBox.ClientWidth - FVST_ColumnOffset;
 end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxDragOver(Sender: TBaseVirtualTree; Source: TObject; Shift: TShiftState; State: TDragState; Pt: TPoint; Mode: TDropMode; var Effect: Integer; var Accept: Boolean);
@@ -621,17 +628,17 @@ begin
   var _AddString: string := '';
   var _CellText: string := '';
   try
+    _sourcelist.BeginUpdate;
     var _Node  : PVirtualNode := VST_ChattingBox.GetFirst;
     while Assigned(_Node) do
     begin
       _AddString := EmptyStr;
-      //_prefix := Format('*%d* ', [_index]);
       _Data := VST_ChattingBox.GetNodeData(_Node);
       if _Data <> nil then
       begin
         _qtag := _Data^.FTag;
           if _qtag = 0 then Inc(_index);
-        _prefix := Format('*%d* ', [_index]);
+        _prefix := Format('[ %.3d ] ', [_index]);
         _CellText :=  _prefix + _Data^.FUser;
         _AddString := _AddString + _CellText +GC_CRLF;
         _CellText :=  _Data^.FCaption+ FormatDateTime('( hh:nn:ss )', _Data^.FTime);
@@ -642,7 +649,7 @@ begin
 
       _Node := _Node.NextSibling;
     end;
-
+    _sourcelist.EndUpdate;
     _sourcelist.SaveToFile(AFile);
   finally
     _sourcelist.Free;

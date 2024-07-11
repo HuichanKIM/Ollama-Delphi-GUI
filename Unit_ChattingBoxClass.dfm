@@ -35,7 +35,7 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     DragType = dtVCL
     Header.AutoSizeIndex = -1
     Header.Height = 21
-    Header.Options = [hoColumnResize]
+    Header.Options = [hoAutoResize, hoColumnResize]
     Header.Style = hsPlates
     Images = VirtualImageList1
     IncrementalSearch = isAll
@@ -47,13 +47,14 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     SelectionCurveRadius = 20
     TabOrder = 0
     TreeOptions.AnimationOptions = [toAnimatedToggle]
-    TreeOptions.AutoOptions = [toAutoScroll, toAutoScrollOnExpand, toAutoSpanColumns, toAutoTristateTracking, toAutoHideButtons, toAutoDeleteMovedNodes, toAutoChangeScale]
+    TreeOptions.AutoOptions = [toAutoScroll, toAutoScrollOnExpand, toAutoTristateTracking, toAutoHideButtons, toAutoDeleteMovedNodes, toAutoChangeScale]
     TreeOptions.MiscOptions = [toReportMode, toWheelPanning, toVariableNodeHeight]
     TreeOptions.PaintOptions = [toShowRoot, toThemeAware, toUseBlendedImages]
     TreeOptions.SelectionOptions = [toRightClickSelect, toSelectNextNodeOnRemoval]
     TreeOptions.StringOptions = [toSaveCaptions]
     WantTabs = True
     OnBeforeCellPaint = VST_ChattingBoxBeforeCellPaint
+    OnColumnResize = VST_ChattingBoxColumnResize
     OnDragOver = VST_ChattingBoxDragOver
     OnEditing = VST_ChattingBoxEditing
     OnFreeNode = VST_ChattingBoxFreeNode
@@ -69,7 +70,7 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
         Options = [coEnabled, coParentBidiMode, coParentColor, coResizable, coVisible, coAllowFocus, coStyleColor]
         Position = 0
         Text = 'Chatting'
-        Width = 300
+        Width = 589
       end>
   end
   object VirtualImageList1: TVirtualImageList

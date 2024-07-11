@@ -127,6 +127,9 @@ object Form_RMBroker: TForm_RMBroker
     Params = <>
     ReadTimeout = 60000
     SynchronizedEvents = False
+    BindSource.AutoActivate = False
+    BindSource.AutoEdit = False
+    BindSource.AutoPost = False
     OnSendData = RESTClient_RMSendData
     OnReceiveData = RESTClient_RMReceiveData
     Left = 160
@@ -138,10 +141,16 @@ object Form_RMBroker: TForm_RMBroker
     Params = <>
     Response = RESTResponse_RM
     SynchronizedEvents = False
+    BindSource.AutoActivate = False
+    BindSource.AutoEdit = False
+    BindSource.AutoPost = False
     Left = 264
     Top = 102
   end
   object RESTResponse_RM: TRESTResponse
+    BindSource.AutoActivate = False
+    BindSource.AutoEdit = False
+    BindSource.AutoPost = False
     Left = 220
     Top = 151
   end

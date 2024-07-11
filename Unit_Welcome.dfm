@@ -78,6 +78,13 @@ object Frame_Welcome: TFrame_Welcome
     ExplicitWidth = 715
     ExplicitHeight = 675
   end
+  object SkPaintBox_Intro: TSkPaintBox
+    Left = 392
+    Top = 80
+    Width = 120
+    Height = 120
+    OnDraw = SkPaintBox_IntroDraw
+  end
   object SkSvg_ICon: TSkSvg
     Left = 400
     Top = 100

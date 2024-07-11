@@ -8,6 +8,8 @@ Uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.Skia,
+  Vcl.Skia,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.ExtCtrls,
@@ -22,7 +24,7 @@ type
   TLoadIndexEvent = procedure(Sender: TObject; const AIndex: Integer) of object;
 
 type
-  TImageDropDown<T: TGraphic, constructor> = Class
+  TImageDropDown = Class
   private
     FImage: TImage;
     FPanel: TPanel;
@@ -35,7 +37,7 @@ type
     FLavaSourceList: TStringList;
     FLavaPrevButton: TSpeedButton;
     FLavaNextButton: TSpeedButton;
-    procedure ImageDrop(var Msg: TWMDROPFILES);
+    procedure WM_ImageDrop(var Msg: TWMDROPFILES);
     procedure PanelWindowProc(var Msg: TMessage);
     //
     procedure Do_UpdateButtons();
@@ -61,17 +63,37 @@ type
     property CurrentIndex: Integer         read FCurrentIndex    write SetCurrentIndex;
   end;
 
+function GetResizedImage(const AImage: ISkImage;  const ANewWidth, ANewHeight: Integer): ISkImage;
+
 implementation
 
 uses
   WinApi.ShellAPI,
   Vcl.Dialogs,
-  System.Skia,
-  Vcl.Skia,
+  System.Math,
+  System.UITypes,
   Unit_Common,
   Unit_Main;
 
-function TImageDropDown<T>.Load_IMG(const ASourceFile: string): Boolean;
+function GetResizedImage(const AImage: ISkImage;  const ANewWidth, ANewHeight: Integer): ISkImage;
+begin
+  var _ScaleFactor: single := Min(ANewWidth / AImage.Width, ANewHeight / AImage.Height);
+  var _NewWidth: single    := AImage.Width * _ScaleFactor;
+  var _NewHeight: single   := AImage.Height * _ScaleFactor;
+  var _OffsetX: single     := (ANewWidth - _NewWidth) / 2;
+  var _OffsetY: single     := (ANewHeight - _NewHeight) / 2;
+
+  var _Surface: ISkSurface := TSkSurface.MakeRaster(ANewWidth, ANewHeight);
+  _Surface.Canvas.Clear(TAlphaColors.Null);
+  _Surface.Canvas.Scale(_ScaleFactor, _ScaleFactor);
+  _Surface.Canvas.DrawImage(AImage, _OffsetX / _ScaleFactor, _OffsetY / _ScaleFactor, TSkSamplingOptions.Medium);
+  Result := _Surface.MakeImageSnapshot;
+
+  // reserved ...
+  // var _Bitmap :=  TBitmap.CreateFromSkImage(_Surface.MakeImageSnapshot)
+end;
+
+function TImageDropDown.Load_IMG(const ASourceFile: string): Boolean;
 begin
   Result := False;
   if FileExists(ASourceFile) then
@@ -100,29 +122,28 @@ begin
   end;
 end;
 
-procedure TImageDropDown<T>.ImageDrop(var Msg: TWMDROPFILES);
-const
-  c_MAX_PATH = 1024;
-var
-  _buffer: array [0 .. c_MAX_PATH] of Char;
+procedure TImageDropDown.WM_ImageDrop(var Msg: TWMDROPFILES);
 begin
   inherited;
-
+  var _DropH: HDROP := Msg.Drop;
   try
-    var _numFiles := DragQueryFile(Msg.Drop, $FFFFFFFF, nil, 0);
+    var _numFiles := DragQueryFile(_DropH, $FFFFFFFF, nil, 0);
     if _numFiles >= 1 then
     begin
-      DragQueryFile(Msg.Drop, 0, @_buffer, SizeOf(_buffer));
-      LoadIMG_Drop(_buffer);
+      var _FileNameLength := DragQueryFile(_DropH, 0, nil, 0);
+      var _FileName: string := '';
+      SetLength(_FileName, _FileNameLength);
+      DragQueryFile(_DropH, 0, PChar(_FileName), _FileNameLength + 1);
+      LoadIMG_Drop(_FileName);
     end;
   finally
-    DragFinish(Msg.Drop);
+    DragFinish(_DropH);
   end;
 
   Msg.Result := 0;
 end;
 
-procedure TImageDropDown<T>.LoadIMG_Drop(const ADropedFile: string);
+procedure TImageDropDown.LoadIMG_Drop(const ADropedFile: string);
 const
   c_VerifyImgFormat = '...*.jpg...*.jpeg...*.png...*.webp...*.gif';
 begin
@@ -159,7 +180,7 @@ begin
   FDropFlag := 0;
 end;
 
-constructor TImageDropDown<T>.Create(AImage: TImage; APanel: TPanel);
+constructor TImageDropDown.Create(AImage: TImage; APanel: TPanel);
 begin
   FImage := AImage;
   FPanel := APanel;
@@ -174,15 +195,15 @@ begin
   DragAcceptFiles(APanel.Handle, True);
 end;
 
-procedure TImageDropDown<T>.PanelWindowProc(var Msg: TMessage);
+procedure TImageDropDown.PanelWindowProc(var Msg: TMessage);
 begin
   if Msg.Msg = WM_DROPFILES then
-    ImageDrop(TWMDROPFILES(Msg))
+    WM_ImageDrop(TWMDROPFILES(Msg))
   else
     FOriginalPanelWndProc(Msg);
 end;
 
-destructor TImageDropDown<T>.Destroy;
+destructor TImageDropDown.Destroy;
 begin
   if Assigned(FPanel) then
   begin
@@ -193,7 +214,7 @@ begin
   inherited;
 end;
 
-procedure TImageDropDown<T>.Do_LoadIMG(const AIndex: Integer);
+procedure TImageDropDown.Do_LoadIMG(const AIndex: Integer);
 begin
   if (AIndex >= 0) and (AIndex < FLavaSourceList.Count) then
   begin
@@ -207,7 +228,7 @@ begin
   end;
 end;
 
-procedure TImageDropDown<T>.Do_UpdateButtons;
+procedure TImageDropDown.Do_UpdateButtons;
 begin
   if Assigned(FLavaPrevButton) then
     FLavaPrevButton.Enabled := (FLavaSourceList.Count > 0) and (FCurrentIndex > 0);
@@ -215,31 +236,31 @@ begin
     FLavaNextButton.Enabled := (FLavaSourceList.Count > 0) and (FCurrentIndex < FLavaSourceList.Count-1);
 end;
 
-procedure TImageDropDown<T>.SetCurrentIndex(const Value: Integer);
+procedure TImageDropDown.SetCurrentIndex(const Value: Integer);
 begin
   FCurrentIndex := Value;
   Do_UpdateButtons;
 end;
 
-procedure TImageDropDown<T>.LavaNextButtonClick(Sender: TObject);
+procedure TImageDropDown.LavaNextButtonClick(Sender: TObject);
 begin
   var _nextindex: Integer := FCurrentIndex+1;
   Do_LoadIMG(_nextindex);
 end;
 
-procedure TImageDropDown<T>.LavaPrevButtonClick(Sender: TObject);
+procedure TImageDropDown.LavaPrevButtonClick(Sender: TObject);
 begin
   var _previndex: Integer := FCurrentIndex-1;
   Do_LoadIMG(_previndex);
 end;
 
-procedure TImageDropDown<T>.SetLavaNextButton(const Value: TSpeedButton);
+procedure TImageDropDown.SetLavaNextButton(const Value: TSpeedButton);
 begin
   FLavaNextButton := Value;
   FLavaNextButton.onClick := LavaNextButtonClick;
 end;
 
-procedure TImageDropDown<T>.SetLavaPrevButton(const Value: TSpeedButton);
+procedure TImageDropDown.SetLavaPrevButton(const Value: TSpeedButton);
 begin
   FLavaPrevButton := Value;
   FLavaPrevButton.onClick := LavaPrevButtonClick;
