@@ -35,6 +35,7 @@ uses
   Posix.SysTypes, Posix.SysSelect, Posix.SysSocket, Posix.NetDB, Posix.SysTime,
   Posix.Unistd, {Posix.ArpaInet,}
 {$ENDIF}
+  System.Types,    // *** //
   System.SyncObjs,
   System.Math,
   System.SysUtils,
@@ -105,6 +106,7 @@ type
     FPeerIP: string;
     // Modified by ichin 2024-06-01 토 오전 3:50:06
     FUserID: string;
+    //
     FDataObject: TObject;
     FOnConnected: TncLineOnConnectDisconnect;
     FOnDisconnected: TncLineOnConnectDisconnect;
@@ -291,6 +293,16 @@ end;
 
 {$ENDIF}
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Modified by ichin 2024-06-12 수 오후 4:49:17
+{ TConnectThread }
+
+procedure TConnectThread.ProcessEvent;
+begin
+  ConnectResult := Connect(Line.FHandle, Line.AddrResult^.ai_addr^, Line.AddrResult^.ai_addrlen);
+end;
+
+
 { TncLine }
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -344,9 +356,7 @@ end;
 
 procedure TncLine.CreateClientHandle(const aHost: string; const aPort: Integer);
 var
-  // Modified by ichin 2025-01-24 금 오전 9:36:41
-  //ConnectThread: TConnectThread;
-  ConnectResult: Integer;
+  ConnectThread: TConnectThread;
 {$IFDEF MSWINDOWS}
   Hints: TAddrInfoW;
 {$ELSE}
@@ -377,35 +387,27 @@ begin
 {$IFNDEF MSWINDOWS}
         EnableReuseAddress;
 {$ENDIF}
-        ConnectResult := Connect(FHandle, AddrResult^.ai_addr^, AddrResult^.ai_addrlen);
-        if ConnectResult = -1 then
-          raise EncLineException.Create('Connect timeout');
-        Check(ConnectResult);
-        SetConnected;
+        ConnectThread := TConnectThread.Create;
+        try
+          ConnectThread.Line := Self;
+          ConnectThread.ConnectResult := -1;
 
-        // Does not work:
-        // ConnectThread := TConnectThread.Create;
-        // try
-        // ConnectThread.Line := Self;
-        // ConnectThread.ConnectResult := -1;
-        //
-        // // Connect to server
-        // ConnectThread.ReadyEvent.WaitFor;
-        // ConnectThread.ReadyEvent.ResetEvent;
-        // ConnectThread.WakeupEvent.SetEvent;
-        // ConnectThread.WaitForReady(FConnectTimeout);
-        //
-        // if ConnectThread.ConnectResult = -1 then
-        // raise EncLineException.Create('Connect timeout');
-        //
-        // Check(ConnectThread.ConnectResult);
-        // SetConnected;
-        // finally
-        // ConnectThread.FreeOnTerminate := True;
-        // ConnectThread.Terminate;
-        // ConnectThread.WakeupEvent.SetEvent;
-        // end;
+          // Connect to server
+          ConnectThread.ReadyEvent.WaitFor;
+          ConnectThread.ReadyEvent.ResetEvent;
+          ConnectThread.WakeupEvent.SetEvent;
+          ConnectThread.WaitForReady(FConnectTimeout);
 
+          if ConnectThread.ConnectResult = -1 then
+            raise EncLineException.Create('Connect timeout');
+
+          Check(ConnectThread.ConnectResult);
+          SetConnected;
+        finally
+          ConnectThread.FreeOnTerminate := True;
+          ConnectThread.Terminate;
+          ConnectThread.WakeupEvent.SetEvent;
+        end;
       except
         DestroyHandle;
         raise;
@@ -556,7 +558,7 @@ begin
 {$IFDEF MSWINDOWS}
   Check(SetSockOpt(FHandle, IPPROTO_TCP, TCP_NODELAY, PAnsiChar(@optval), SizeOf(optval)));
 {$ELSE}
-  Check(SetSockOpt(FHandle, IPPROTO_TCP, TCP_NODELAY, optval, SizeOf(optval)));
+  Check(SetSockOpt(FHandle, IPPROTO_TCP, TCP_NODELAY, optval, socklen_t(SizeOf(optval))));
 {$ENDIF}
 end;
 
@@ -568,7 +570,7 @@ begin
 {$IFDEF MSWINDOWS}
   Check(SetSockOpt(FHandle, SOL_SOCKET, SO_KEEPALIVE, PAnsiChar(@optval), SizeOf(optval)));
 {$ELSE}
-  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_KEEPALIVE, optval, SizeOf(optval)));
+  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_KEEPALIVE, optval, socklen_t(SizeOf(optval))));
 {$ENDIF}
 end;
 
@@ -580,7 +582,7 @@ begin
 {$IFDEF MSWINDOWS}
   Check(SetSockOpt(FHandle, SOL_SOCKET, SO_REUSEADDR, PAnsiChar(@optval), SizeOf(optval)));
 {$ELSE}
-  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_REUSEADDR, optval, SizeOf(optval)));
+  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_REUSEADDR, optval, socklen_t(SizeOf(optval))));
 {$ENDIF}
 end;
 
@@ -590,7 +592,7 @@ begin
 {$IFDEF MSWINDOWS}
   Check(SetSockOpt(FHandle, SOL_SOCKET, SO_RCVBUF, PAnsiChar(@aBufferSize), SizeOf(aBufferSize)));
 {$ELSE}
-  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_RCVBUF, aBufferSize, SizeOf(aBufferSize)));
+  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_RCVBUF, aBufferSize, socklen_t(SizeOf(aBufferSize))));
 {$ENDIF}
 end;
 
@@ -599,7 +601,7 @@ begin
 {$IFDEF MSWINDOWS}
   Check(SetSockOpt(FHandle, SOL_SOCKET, SO_SNDBUF, PAnsiChar(@aBufferSize), SizeOf(aBufferSize)));
 {$ELSE}
-  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_RCVBUF, aBufferSize, SizeOf(aBufferSize)));
+  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_RCVBUF, aBufferSize, socklen_t(SizeOf(aBufferSize))));
 {$ENDIF}
 end;
 
@@ -625,13 +627,9 @@ begin
       // FPeerIP := IntToStr(Ord(addr.sin_addr.S_un_b.s_b1)) + '.' + IntToStr(Ord(addr.sin_addr.S_un_b.s_b2)) + '.' + IntToStr(Ord(addr.sin_addr.S_un_b.s_b3)) +
       // '.' + IntToStr(Ord(addr.sin_addr.S_un_b.s_b4));
       FPeerIP :=
-
         IntToStr(Ord(Addr.sa_data[2])) + '.' +
-
         IntToStr(Ord(Addr.sa_data[3])) + '.' +
-
         IntToStr(Ord(Addr.sa_data[4])) + '.' +
-
         IntToStr(Ord(Addr.sa_data[5]));
     end;
 
@@ -659,73 +657,60 @@ end;
 
 function TncLine.GetReceiveTimeout: Integer;
 var
-  Opt: UInt32;
-{$IFDEF MSWINDOWS}
+  Opt: DWord;
   OptSize: Integer;
-{$ELSE}
-  OptSize: UInt32;
-{$ENDIF}
 begin
   OptSize := SizeOf(Opt);
 {$IFDEF MSWINDOWS}
   Check(GetSockOpt(FHandle, SOL_SOCKET, SO_RCVTIMEO, PAnsiChar(@Opt), OptSize));
 {$ELSE}
-  Check(GetSockOpt(FHandle, SOL_SOCKET, SO_RCVTIMEO, Opt, OptSize));
+  // Modified by ichin 2024-06-12 수 오후 5:35:29
+  Check(GetSockOpt(FHandle, SOL_SOCKET, SO_RCVTIMEO, Opt, socklen_t(OptSize)));
 {$ENDIF}
   Result := Opt;
 end;
 
 procedure TncLine.SetReceiveTimeout(const Value: Integer);
 var
-  Opt: UInt32;
-{$IFDEF MSWINDOWS}
+  Opt: DWord;
   OptSize: Integer;
-{$ELSE}
-  OptSize: UInt32;
-{$ENDIF}
 begin
   Opt := Value;
   OptSize := SizeOf(Opt);
 {$IFDEF MSWINDOWS}
   Check(SetSockOpt(FHandle, SOL_SOCKET, SO_RCVTIMEO, PAnsiChar(@Opt), OptSize));
 {$ELSE}
-  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_RCVTIMEO, Opt, OptSize));
+  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_RCVTIMEO, Opt, socklen_t(OptSize)));
 {$ENDIF}
 end;
 
 function TncLine.GetSendTimeout: Integer;
 var
-  Opt: UInt32;
-{$IFDEF MSWINDOWS}
+  Opt: DWord;
   OptSize: Integer;
-{$ELSE}
-  OptSize: UInt32;
-{$ENDIF}
 begin
   OptSize := SizeOf(Opt);
 {$IFDEF MSWINDOWS}
   Check(GetSockOpt(FHandle, SOL_SOCKET, SO_SNDTIMEO, PAnsiChar(@Opt), OptSize));
 {$ELSE}
-  Check(GetSockOpt(FHandle, SOL_SOCKET, SO_SNDTIMEO, Opt, OptSize));
+  // Modified by ichin 2024-06-12 수 오후 5:35:42
+  Check(GetSockOpt(FHandle, SOL_SOCKET, SO_SNDTIMEO, Opt, socklen_t(OptSize)));
 {$ENDIF}
   Result := Opt;
 end;
 
 procedure TncLine.SetSendTimeout(const Value: Integer);
 var
-  Opt: UInt32;
-{$IFDEF MSWINDOWS}
+  Opt: DWord;
   OptSize: Integer;
-{$ELSE}
-  OptSize: UInt32;
-{$ENDIF}
 begin
   Opt := Value;
   OptSize := SizeOf(Opt);
 {$IFDEF MSWINDOWS}
   Check(SetSockOpt(FHandle, SOL_SOCKET, SO_SNDTIMEO, PAnsiChar(@Opt), OptSize));
 {$ELSE}
-  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_SNDTIMEO, Opt, OptSize));
+  // Modified by ichin 2024-07-13 토 오후 4:12:09
+  Check(SetSockOpt(FHandle, SOL_SOCKET, SO_SNDTIMEO, Opt, socklen_t(OptSize)));
 {$ENDIF}
 end;
 
@@ -769,13 +754,6 @@ begin
   end;
 end;
 
-{ TConnectThread }
-
-procedure TConnectThread.ProcessEvent;
-begin
-  ConnectResult := Connect(Line.FHandle, Line.AddrResult^.ai_addr^, Line.AddrResult^.ai_addrlen);
-end;
-
 {$IFDEF MSWINDOWS}
 
 var
@@ -806,20 +784,27 @@ begin
   SafeLoadFrom('wship6.dll'); // WshIp6 dll
 end;
 
+
+// Modified by ichin 2024-06-12 수 오후 5:42:22
+{
+ TConnectThread ...
+
+procedure TConnectThread.ProcessEvent;
+begin
+  ConnectResult := Connect(Line.FHandle, Line.AddrResult^.ai_addr^, Line.AddrResult^.ai_addrlen);
+end;
+}
+
 var
   WSAData: TWSAData;
 
 initialization
-
 WSAStartup(MakeWord(2, 2), WSAData); // Require WinSock 2 version
-
 AttachAddrInfo;
 
 finalization
-
 if ExtDllHandle <> 0 then
   FreeLibrary(ExtDllHandle);
-
 WSACleanup;
 
 {$ENDIF}
