@@ -36,7 +36,7 @@ type
     TabSheet_Style: TTabSheet;
     Label2: TLabel;
     ComboBox_VclStyles: TComboBox;
-    GroupBox2: TGroupBox;
+    GroupBox_Colors: TGroupBox;
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
@@ -64,7 +64,7 @@ type
     Label_OllamaWeb: TLabel;
     Label7: TLabel;
     Label_OllamaGitHub: TLabel;
-    GroupBox3: TGroupBox;
+    GroupBox_Options: TGroupBox;
     CheckBox_BeepSound: TCheckBox;
     ColorDialog_Colors: TColorDialog;
     CheckBox_SaveOnCLose: TCheckBox;
@@ -73,6 +73,11 @@ type
     Label11: TLabel;
     ComboBox_MRUROOT_Max: TComboBox;
     ComboBox_MRUCHILD_Max: TComboBox;
+    Label12: TLabel;
+    ComboBox_ChatBoxHOffset: TComboBox;
+    CheckBox_SaveContents: TCheckBox;
+    Label14: TLabel;
+    ComboBox_MaxHistory: TComboBox;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -88,6 +93,9 @@ type
     procedure CheckBox_NoCheckAliveClick(Sender: TObject);
     procedure ComboBox_MRUCHILD_MaxChange(Sender: TObject);
     procedure ComboBox_MRUROOT_MaxChange(Sender: TObject);
+    procedure ComboBox_ChatBoxHOffsetChange(Sender: TObject);
+    procedure CheckBox_SaveContentsClick(Sender: TObject);
+    procedure ComboBox_MaxHistoryChange(Sender: TObject);
   private
     FShow_Flag: Integer;
     FUpdateLockFlag: Boolean;
@@ -114,31 +122,52 @@ uses
 {$R *.dfm}
 
 const
-  C_Shortcut_Keys: array [0..26] of string = ('F1','F2','F3','F4','F5',
-                                              'F6','F7','F8','F9','F10',
-                                              'Alt+A','Alt+B','Alt+C','Alt+D','Alt+E',
-                                              'Alt+G','Alt+H','Alt+L','Alt+P','Alt+Q','Alt+S',
-                                              'Alt+T','Alt+V','Alt+W',
-                                              'Ctrl+A','Ctrl+R','Ctrl+Z');
-  C_Shortcut_Desc: array [0..26] of string = ('Show Request Dialog','Send Request','Goto Welcome.','Goto Chatting Room','Translation of Prompt',
-                                              'Translation of Message','(Reserved)','(Reserved)','(Reserved)','Clear Chattings',
-                                              'Ollama Alive ?','Scroll to Bottom','Copy the Message.','Delete the Message.','Skin / Colors',
-                                              'Load Image (llava)','Help - ShortCuts','Show Logs.','Show/Hide Option Panel','TTS Control View','Save All Messages to Text File',
-                                              'Scroll to Top','TextToSpeech on Message','Show About',
-                                              'Abort Connection.','Default / Refresh','Close / Exit.');
+  C_Shortcut_Keys: array [0..28, 0..1] of string = (
+    ('F1',      'Show Request Dialog'),
+    ('F2',      'Send Request'),
+    ('F3',      'Goto Welcome'),
+    ('F4',      'Goto Chatting Room'),
+    ('F5',      'Translation of Prompt'),
+    ('F6',      'Translation of Message'),
+    ('F7',      '(Reserved)'),
+    ('F8',      '(Reserved)'),
+    ('F9',      '(Reserved)'),
+    ('F10',     'Clear Chattings'),
+    ('Alt+A',   'Check Ollama Alive ?'),
+    ('Alt+B',   'Scroll to Bottom'),
+    ('Alt+C',   'Copy the Message'),
+    ('Alt+D',   'Delete the Message'),
+    ('Alt+E',   'Skin/Colors/Options'),
+    ('Alt+F',   'Open/Load History'),
+    ('Alt+G',   'Load Image (MultiModal)'),
+    ('Alt+H',   'Help - ShortCuts'),
+    ('Alt+I',   'Add to History'),
+    ('Alt+L',   'Show Logs'),
+    ('Alt+P',   'Show/Hide Option Panel'),
+    ('Alt+Q',   'TTS Control View'),
+    ('Alt+S',   'Save All Messages to Text File'),
+    ('Alt+T',   'Scroll to Top'),
+    ('Alt+V',   'TextToSpeech on Message'),
+    ('Alt+W',   'Show About'),
+    ('Ctrl+A',  'Abort Connection'),
+    ('Ctrl+R',  'Default / Refresh'),
+    ('Ctrl+Z',  'Close / Exit'));
 
   // CodeInsight Bug ?  - When use ''' (multi line string), raise error with "International UTF8-Char" ...
   C_DevelopInfo: string =
-        'Development Tool  (GUI)'+#13#10+
-        'Embarcadero Delphi 12.1  ( Object Pascal )'+#13#10#13#10+
-        ' 3rd party Reference Library  (* open source)'+#13#10+
-        ' - Virtual-TreeView by JAM-Software (*)'+#13#10+
-        ' - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)'+#13#10+
-        ' - FastMM4-AVX by Maxim Masiutin (*)'+#13#10+
-        ' - Embeded Lib. : SKIA 2D Graphics'+ #13#10+
-        ' - SpeechLibrary by MS SAPI'+#13#10+#13#10+
-        'Support Multilingual Translation  / Voice'+#13#10#13#10+
-        GC_CopyRights;
+    'Development Tool  (GUI)'+sLineBreak+
+    'Embarcadero Delphi 12.1  ( Object Pascal )'+sLineBreak+sLineBreak+
+    ' 3rd party Reference Library  (* open source)'+sLineBreak+
+    ' - Virtual-TreeView by JAM-Software (*)'+sLineBreak+
+    ' - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)'+sLineBreak+
+    ' - FastMM4-AVX by Maxim Masiutin (*)'+sLineBreak+
+    ' - DOSCommand by TurboPack (*)'+sLineBreak+
+    ' - NetComp7 by DelphiBuilder (*)'+sLineBreak+
+    ' - EasyJson by tinyBigGAMES (*)'+sLineBreak+
+    ' - Embeded Lib. : SKIA 2D Graphics'+sLineBreak+
+    ' - SpeechLibrary by MS SAPI'+sLineBreak+sLineBreak+
+    'Support Multilingual Translation  / Voice'+sLineBreak+sLineBreak+
+    GC_CopyRights;
 
 { ... }
 
@@ -146,11 +175,11 @@ function Get_HelpShortcuts(): string;
 begin
   var _list := TStringList.Create;
   try
-    _list.Add('* Shortcuts -------------------------' + #13#10);
+    _list.Add('* Shortcuts -------------------------' + sLineBreak);
     for var _i := 0 to Length(C_Shortcut_Keys) - 1 do
       with _list do
       begin
-        Add(C_Shortcut_Keys[_i] + ' - ' + C_Shortcut_Desc[_i]);
+        Add(C_Shortcut_Keys[_i, 0] + ' - ' + C_Shortcut_Keys[_i, 1]);
       end;
 
     Result := _list.Text;
@@ -173,15 +202,20 @@ begin
   GV_CheckingAliveStart := not CheckBox_NoCheckAlive.Checked;
 end;
 
+procedure TForm_About.CheckBox_SaveContentsClick(Sender: TObject);
+begin
+  if not FUpdateLockFlag then
+  GV_SaveContentsOnClose := CheckBox_SaveContents.Checked;
+end;
+
 procedure TForm_About.CheckBox_SaveOnCLoseClick(Sender: TObject);
 begin
   if not FUpdateLockFlag then
-  Form_RestOllama.SaveLogsOnCLoseFlag := CheckBox_SaveOnCLose.Checked;
+  GV_SaveLogsOnClose := CheckBox_SaveOnCLose.Checked;
 end;
 
 const
  C_MRUMAX: array [0..8] of Integer = (10,15,20,25,30,35,40,45,50);
-
 procedure TForm_About.ComboBox_MRUROOT_MaxChange(Sender: TObject);
 begin
   if not FUpdateLockFlag then
@@ -189,11 +223,25 @@ begin
     MRU_MAX_ROOT := C_MRUMAX[ComboBox_MRUROOT_Max.ItemIndex];
 end;
 
+const
+ C_HISMAX: array [0..8] of Integer = (10,15,20,25,30,35,40,45,50);
+procedure TForm_About.ComboBox_MaxHistoryChange(Sender: TObject);
+begin
+  HIS_MAX_ITEMS := C_MRUMAX[ComboBox_MaxHistory.ItemIndex];
+end;
+
 procedure TForm_About.ComboBox_MRUCHILD_MaxChange(Sender: TObject);
 begin
   if not FUpdateLockFlag then
   if ComboBox_MRUCHILD_Max.ItemIndex >= 0 then
     MRU_MAX_CHILD := C_MRUMAX[ComboBox_MRUCHILD_Max.ItemIndex];
+end;
+
+procedure TForm_About.ComboBox_ChatBoxHOffsetChange(Sender: TObject);
+begin
+  if not FUpdateLockFlag then
+  if (ComboBox_ChatBoxHOffset.ItemIndex >= 0) and (ComboBox_ChatBoxHOffset.ItemIndex <= 4 ) then
+    Form_RestOllama.Frame_ChattingBox.VST_NodeHeightOffSet := C_MRUMAX[ComboBox_ChatBoxHOffset.ItemIndex];
 end;
 
 procedure TForm_About.FormCreate(Sender: TObject);
@@ -212,10 +260,11 @@ begin
   Label_SystemInfo.Caption := Get_SystemInfo();
   if DM_ACTIVATECODE = 1 then
   begin
-    Label_SystemInfo.Caption := Label_SystemInfo.Caption+GC_CRLF+GC_CRLF+
-                                '   Local IP : '+ DM_LocalIP +GC_CRLF+
-                                '   Public IP : '+ DM_PublicIP +GC_CRLF+
-                                '   Port : '+IntToStr(DM_Port);
+    Label_SystemInfo.Caption := Label_SystemInfo.Caption+sLineBreak+sLineBreak+
+                                '  Network Info. - for Broker/Server'+sLineBreak+
+                                '  - Local IP : '+ DM_LocalIP +sLineBreak+
+                                '  - Public IP : '+ DM_PublicIP +sLineBreak+
+                                '  - Port : '+IntToStr(DM_Port);
   end;
   Update_Shortcuts();
 end;
@@ -223,7 +272,9 @@ end;
 procedure TForm_About.FormShow(Sender: TObject);
 const
   c_Caption: array [0..3] of string = ('About','','','Skin / Colors / Options');
+  c_Heights: array [0..3] of Integer = (500,500,500,530);
 begin
+  Self.Height := c_Heights[FShow_Flag];
   Self.Caption := c_Caption[FShow_Flag];
   var _color0, _color1, _color2, _color3: TColor;
   _color0 := Form_RestOllama.Frame_ChattingBox.Get_CustomColor(_color1, _color2, _color3);
@@ -240,9 +291,12 @@ begin
   FUpdateLockFlag := True;
   ComboBox_MRUROOT_Max.ItemIndex :=  (MRU_MAX_ROOT div 5) -2;
   ComboBox_MRUCHILD_Max.ItemIndex := (MRU_MAX_CHILD div 5) -2;
+  ComboBox_MaxHistory.ItemIndex :=   (HIS_MAX_ITEMS div 5) -2;
+  ComboBox_ChatBoxHOffset.ItemIndex := (Form_RestOllama.Frame_ChattingBox.VST_NodeHeightOffSet div 5)-2;
   CheckBox_NoCheckAlive.Checked :=   not GV_CheckingAliveStart;
+  CheckBox_SaveContents.Checked :=   GV_SaveContentsOnClose;
   CheckBox_BeepSound.Checked :=      Form_RestOllama.DoneSoundFlag;
-  CheckBox_SaveOnCLose.Checked :=    Form_RestOllama.SaveLogsOnCLoseFlag;
+  CheckBox_SaveOnCLose.Checked :=    GV_SaveLogsOnClose;// Form_RestOllama.SaveLogsOnCLoseFlag;
   FUpdateLockFlag := False;
 
   TabSheet_Style.TabVisible := FShow_Flag = GC_AboutSkinFlag;  // Cannot Focus Error - When Change Style Event / Bug ?
@@ -255,8 +309,8 @@ begin
   for var _i := 0 to Length(C_Shortcut_Keys)-1 do
   with ListView_Shortcuts.Items.Add do
     begin
-      Caption := C_Shortcut_Keys[_i];
-      SubItems.Add(C_Shortcut_Desc[_i]);
+      Caption := C_Shortcut_Keys[_i, 0];
+      SubItems.Add(C_Shortcut_Keys[_i, 1]);
     end;
 end;
 
@@ -280,6 +334,13 @@ end;
 procedure TForm_About.Label_SystemInfoClick(Sender: TObject);
 begin
   Label_SystemInfo.Caption := Get_SystemInfo();
+  if DM_ACTIVATECODE = 1 then
+  begin
+    Label_SystemInfo.Caption := Label_SystemInfo.Caption+sLineBreak+sLineBreak+
+                                '   Local IP : '+ DM_LocalIP +sLineBreak+
+                                '   Public IP : '+ DM_PublicIP +sLineBreak+
+                                '   Port : '+IntToStr(DM_Port);
+  end;
 end;
 
 { Vcl Styles ... }

@@ -41,6 +41,8 @@ uses
   Vcl.Menus,
   Vcl.Skia,
   Vcl.Samples.Gauges,
+  Vcl.OleServer,
+  Vcl.CheckLst,
   System.Skia,
   SVGIconImageCollection,
   SVGIconVirtualImageList,
@@ -48,11 +50,10 @@ uses
   Data.Bind.ObjectScope,
   REST.Types,
   REST.Client,
-  Vcl.OleServer,
-  Vcl.CheckLst,
   SpeechLib_TLB,
   Unit_Common,
   Unit_MRUManager,
+  Unit_HistoryManager,
   Unit_ImageDropDown,
   Unit_Welcome,
   Unit_ChattingBoxClass,
@@ -91,11 +92,10 @@ type
     Action_Pop_ScrollToBottom: TAction;
     Action_Pop_SaveAllText: TAction;
     Button_Chatting: TButton;
-    GroupBox_BaseURL: TGroupBox;
     GroupBox_Model: TGroupBox;
     ComboBox_Models: TComboBox;
     Label_Caption: TLabel;
-    TabSheet_ChatLogs: TTabSheet;
+    TabSheet_LogsBroker: TTabSheet;
     Memo_LogWin: TMemo;
     Panel_ChatRequestBox: TPanel;
     Edit_ReqContent: TEdit;
@@ -105,15 +105,14 @@ type
     Panel_CaptionModelTopics: TPanel;
     RadioGroup_PromptType: TRadioGroup;
     Panel_Chatting: TPanel;
-    Label_BaseURL: TLabel;
     GroupBox_Username: TGroupBox;
     Edit_Nickname: TEdit;
     Panel_RequestButtons: TPanel;
-    GroupBox_Llava: TGroupBox;
-    Image_Llva: TImage;
+    GroupBox_MultimodelImage: TGroupBox;
+    Image_Source: TImage;
     OpenPictureDialog1: TOpenPictureDialog;
     SaveTextFileDialog1: TSaveTextFileDialog;
-    GroupBox_Description: TGroupBox;
+    GroupBox_Multimodel: TGroupBox;
     Image_Logo: TImage;
     Panel_Setting: TPanel;
     GroupBox_GlobalFontSize: TGroupBox;
@@ -132,7 +131,6 @@ type
     GroupBox_TopicOption: TGroupBox;
     Action_Home: TAction;
     Button_Home: TButton;
-    Label_Description: TLabel;
     SpeedButton_LoadModel: TSpeedButton;
     SpeedButton_TTS: TSpeedButton;
     Action_TTS: TAction;
@@ -146,15 +144,7 @@ type
     Label_TransDir: TLabel;
     SkAnimatedImage_Chat: TSkAnimatedImage;
     GroupBox_TTSEngine: TGroupBox;
-    GroupBox_CPUMem: TGroupBox;
-    Label_MemUsage: TLabel;
-    Gauge_MemUsage: TGauge;
-    Label_MemTotal: TLabel;
-    Label_MemAvailable: TLabel;
-    Label_TotalMemory: TLabel;
-    Label_Available: TLabel;
-    SpeedButton_CPUMemUsage: TSpeedButton;
-    Label_Counter: TLabel;
+    GroupBox_History: TGroupBox;
     Panel_CaptionLog: TPanel;
     SpeedButton_ClearLogBox: TSpeedButton;
     GroupBox_Topics: TGroupBox;
@@ -178,17 +168,16 @@ type
     PopupMenu_Topics: TPopupMenu;
     pmn_RenameTopic: TMenuItem;
     SpeedButton_RenameTopic: TSpeedButton;
-    Panel_ImageLlavaBase: TPanel;
+    Panel_ImageSourceBase: TPanel;
     Action_DefaultRefresh: TAction;
     Action_DosCommand: TAction;
     Action_ClearChatting: TAction;
     Panel_OptionsTop: TPanel;
     SpeedButton_GotoChatting: TSpeedButton;
-    Action_LoadImageLlava: TAction;
+    Action_LoadImageSource: TAction;
     Action_RequestDialog: TAction;
     SpeedButton_OllamaAlive: TSpeedButton;
     CheckBox_DebugToLog: TCheckBox;
-    SpeedButton_SystemInfo: TSpeedButton;
     ComboBox_TTSEngine: TComboBox;
     Label4: TLabel;
     TrackBar_Rate: TTrackBar;
@@ -204,11 +193,9 @@ type
     SpeedButton_TTSPause: TSpeedButton;
     SpeedButton_TTSStop: TSpeedButton;
     Action_About: TAction;
-    Shape_Memory: TShape;
-    CheckBox_SaveOnCLose: TCheckBox;
     Panel_ChattingBase: TPanel;
     Label_Font_Size: TLabel;
-    SpeedButton_LlavaLoad: TSpeedButton;
+    SpeedButton_ImageLoad: TSpeedButton;
     pmn_ClearAll: TMenuItem;
     N2: TMenuItem;
     Frame_ChattingBox: TFrame_ChattingBoxClass;
@@ -244,11 +231,32 @@ type
     RESTClient_Ollama: TRESTClient;
     RESTRequest_Ollama: TRESTRequest;
     RESTResponse_Ollama: TRESTResponse;
-    // for Get Llava Thumb
-    ImageList_LLAVA: TImageList;
-    SpeedButton_LavaPrev: TSpeedButton;
-    SpeedButton_LavaNext: TSpeedButton;
+    ImageList_Multimodel: TImageList;
+    SpeedButton_ImagePrev: TSpeedButton;
+    SpeedButton_ImageNext: TSpeedButton;
     Action_SHowBroker: TAction;
+    SpeedButton_UnloadModel: TSpeedButton;
+    CheckBox_ProcessImage: TCheckBox;
+    CheckBox_Reasoning: TCheckBox;
+    Panel_HistoryButtons: TPanel;
+    SpeedButton_DelToHistory: TSpeedButton;
+    SpeedButton_HistoryMore: TSpeedButton;
+    SpeedButton_AddToHistory2: TSpeedButton;
+    ListBox_History: TListBox;
+    Action_AddToHistory: TAction;
+    Action_DelToHistory: TAction;
+    Action_ClearHistory: TAction;
+    PopupMenu_History: TPopupMenu;
+    pmn_ClearHistory: TMenuItem;
+    pmn_ClearAllHistory: TMenuItem;
+    Action_ClearAllHistory: TAction;
+    Action_LoadHistory: TAction;
+    SpeedButton_AddToHistory: TSpeedButton;
+    Panel_HistoryFile: TPanel;
+    FileOpenDialog1: TFileOpenDialog;
+    Label_HistoryCation: TLabel;
+    Splitter2: TSplitter;
+    // Form controls ...
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -258,7 +266,7 @@ type
     // Messagw Proc ...
     procedure WM_NETHTTPMESSAGE(var Msg: TMessage); Message WM_NETHTTP_MESSAGE;
     procedure WF_DMMESSAGE(var Msg: TMessage); Message WF_DM_MESSAGE;
-    // ...
+    // Actions ...
     procedure Action_OptionsExecute(Sender: TObject);
     procedure Action_ExitExecute(Sender: TObject);
     procedure Action_StartRequestExecute(Sender: TObject);
@@ -278,7 +286,7 @@ type
     procedure Action_DefaultRefreshExecute(Sender: TObject);
     procedure Action_DosCommandExecute(Sender: TObject);
     procedure Action_ClearChattingExecute(Sender: TObject);
-    procedure Action_LoadImageLlavaExecute(Sender: TObject);
+    procedure Action_LoadImageSourceExecute(Sender: TObject);
     procedure Action_RequestDialogExecute(Sender: TObject);
     procedure Action_AboutExecute(Sender: TObject);
     procedure Action_SelectionColorExecute(Sender: TObject);
@@ -286,6 +294,7 @@ type
     procedure Action_HelpShortcutsExecute(Sender: TObject);
     procedure Action_ApplyChangeExecute(Sender: TObject);
     procedure ActionList_OllmaUpdate(Action: TBasicAction; var Handled: Boolean);
+    //
     procedure RadioGroup_PromptTypeClick(Sender: TObject);
     procedure PageControl_ChattingResize(Sender: TObject);
     procedure PageControl_ChattingChange(Sender: TObject);
@@ -296,10 +305,8 @@ type
     procedure SkLabel_IntroClick(Sender: TObject);
     procedure SkLabel_IntroWords5Click(Sender: TObject);
     procedure SkAnimatedImage_ChatClick(Sender: TObject);
-    procedure Timer_SystemTimer(Sender: TObject);
     procedure SpeedButton_ClearLogBoxClick(Sender: TObject);
     procedure SpeedButton_LoadModelClick(Sender: TObject);
-    procedure SpeedButton_CPUMemUsageClick(Sender: TObject);
     procedure SpeedButton_ListModelsClick(Sender: TObject);
     procedure SpeedButton_AddToTopicsClick(Sender: TObject);
     procedure SpeedButton_AddTopicClick(Sender: TObject);
@@ -308,7 +315,6 @@ type
     procedure SpeedButton_NewRootnodeClick(Sender: TObject);
     procedure SpeedButton_ExpandFullClick(Sender: TObject);
     procedure SpeedButton_TTSPlayClick(Sender: TObject);
-    procedure SpeedButton_SystemInfoClick(Sender: TObject);
     procedure SpeedButton_SaveAllLogesClick(Sender: TObject);
     procedure SpeedButton_HelpClick(Sender: TObject);
     procedure SpeedButton_GetIPsClick(Sender: TObject);
@@ -328,9 +334,8 @@ type
     procedure TrackBar_GlobalFontSizeChange(Sender: TObject);
     procedure TrackBar_RateChange(Sender: TObject);
     procedure TrackBar_VolumeChange(Sender: TObject);
-    procedure Label_DescriptionClick(Sender: TObject);
-    procedure CheckBox_SaveOnCLoseClick(Sender: TObject);
     procedure CheckListBox_ConnIPsClickCheck(Sender: TObject);
+    procedure CheckBox_ReasoningClick(Sender: TObject);
     //
     procedure OnRESTRequest_OllamaAfterRequest;
     procedure OnRESTRequest_OllamaError(Sender: TObject);
@@ -339,8 +344,19 @@ type
     //
     procedure SkSvg_BrokerClick(Sender: TObject);
     procedure Action_SHowBrokerExecute(Sender: TObject);
-    procedure Image_LlvaDblClick(Sender: TObject);
+    procedure Image_SourceDblClick(Sender: TObject);
     procedure Label_SeedGetClick(Sender: TObject);
+    procedure SpeedButton_UnloadModelClick(Sender: TObject);
+    procedure CheckBox_ProcessImageClick(Sender: TObject);
+    // History Manager ...
+    procedure Action_AddToHistoryExecute(Sender: TObject);
+    procedure Action_DelToHistoryExecute(Sender: TObject);
+    procedure Action_ClearHistoryExecute(Sender: TObject);
+    procedure SpeedButton_HistoryMoreClick(Sender: TObject);
+    procedure Action_ClearAllHistoryExecute(Sender: TObject);
+    procedure Action_LoadHistoryExecute(Sender: TObject);
+    procedure ListBox_HistoryClick(Sender: TObject);
+    procedure Panel_HistoryButtonsClick(Sender: TObject);
   private
     FInitialized: Boolean;
     FFrameWelcome: TFrame_Welcome;
@@ -361,12 +377,16 @@ type
     FBeenPaused, FStreamJustStarted: Boolean;
     FTTS_Speaking: Boolean;
     FTTS_EngineName: string;
-    FMemMonitoringFlag: Boolean;
     FDoneSoundFlag: Boolean;
-    FSaveLogsOnCLoseFlag: Boolean;
+    FProcessImageFlag: Boolean;
+    FReasoningFlag: Boolean;
+    //FSaveLogsOnCLoseFlag: Boolean;
     FSelectionNode: TTreeNode;
-    // for Get Llava Thumb
-    FLavaIndexFlag: Integer;
+    // for Get M-Image Source Thumb
+    FImageSourceIndex: Integer;
+    //
+    FHistoryManager: THistoryManager;
+    FHistoryCation: string;
     procedure Load_ConfigIni(const AFlag: Integer = 0);
     procedure Save_ConfigIni(const AFlag: Integer = 0);
     // Interface ...
@@ -380,7 +400,7 @@ type
     procedure Add_LogWin (const ALog: string) ;
     procedure Push_LogWin(const AFlag: Integer = 0; const ALog: string = '');
     procedure Do_DisplayJson(const RespStr: string);
-    procedure Do_LoadModel(const AIndex: Integer);
+    procedure Do_LoadModel(const AIndex: Integer; const ALoadFlag: Boolean);
     procedure Do_ListModels(const AIndex: Integer = 0);
     procedure Do_DisplayJson_Models(const RespStr: string);
     procedure Do_TransLate(const AMode: TTranlateMode; const ACodepage: Integer; const ASrc: string);
@@ -392,18 +412,16 @@ type
     procedure Return_FocusToVST(const AFlag: Integer = 0);
     procedure Set_OllamaAlive(const ALiveFlag: Boolean);
     procedure Try_SetFocus(AControl: TWinControl);
-    // for Get Llava Thumb
+    // for Get M-Image Source Thumb
     procedure DropDownLoadImageEvent(Sender: TObject; const ALoadFile: string);
     procedure DropDownLoadIndexEvent(Sender: TObject; const AIndex: Integer);
-    // property ...
+    // set property ...
     procedure SetRequestingFlag(const Value: Boolean);
     procedure SetRequest_Type(const Value: TRequest_Type);
     procedure SetDisplay_Type(const Value: TDisplay_Type);
     procedure SetTopicSeleced(const Value: string);
     procedure SetModelSelected(const Value: string);
-    procedure SetMemMonitoringFlag(const Value: Boolean);
     procedure SetDoneSoundFlag(const Value: Boolean);
-    procedure SetSaveLogsOnCLoseFlag(const Value: Boolean);
     // Dos Command ...
     procedure DOSCommandProc(var Msg : TMessage); Message DOS_MESSAGE;
     procedure DM_DosCommandProc(const AFlag: Integer; const AText: string ='');
@@ -421,7 +439,13 @@ type
     procedure Log_Server(const AFlag: Integer; const ALog: string);
     procedure Build_BanListUp(const AFlag: Integer = 0);
     procedure ResetRESTComponentsToDefaults;
-    procedure SetLavaIndexFlag(const Value: Integer);
+    // History Manager ...
+    procedure Do_LoadHistoryFile(const AFile: string);
+    procedure SetHistoryCation(const Value: string);
+    // set property ...
+    procedure SetImageSourceIndex(const Value: Integer);
+    procedure SetProcessImageFlag(const Value: Boolean);
+    procedure SetReasoningFlag(const Value: Boolean);
   public
     procedure Do_ChangeStyleCustom(const AFlag: Integer = 0);
     procedure Do_TTS_Speak(const AFlag: Integer; const ASource: string);
@@ -434,11 +458,12 @@ type
     property Topic_Seleced: string          read FTopic_Seleced         write SetTopicSeleced;
     property Model_Selected: string         read FModel_Selected        write SetModelSelected;
     property TTS_Speaking: Boolean          read GetTTS_Speaking        write SetTTS_Speaking;
-    property MemMonitoringFlag: Boolean     read FMemMonitoringFlag     write SetMemMonitoringFlag;
     property DoneSoundFlag: Boolean         read FDoneSoundFlag         write SetDoneSoundFlag;
-    property SaveLogsOnCLoseFlag: Boolean   read FSaveLogsOnCLoseFlag   write SetSaveLogsOnCLoseFlag;
     property ModelsList: TStringList        read FModelsList;
-    property LavaIndexFlag: Integer         read FLavaIndexFlag         write SetLavaIndexFlag;
+    property ImageSourceIndex: Integer      read FImageSourceIndex      write SetImageSourceIndex;
+    property HistoryCation: string          read FHistoryCation         write SetHistoryCation;
+    property ProcessImageFlag: Boolean      read FProcessImageFlag      write SetProcessImageFlag;
+    property ReasoningFlag: Boolean         read FReasoningFlag         write SetReasoningFlag;
   end;
 
 var
@@ -461,6 +486,7 @@ uses
   Vcl.Styles,
   Vcl.StyleAPI,
   Vcl.Clipbrd,
+  Unit_Jsonworks,
   Unit_AliveOllama,
   Unit_Translator,
   Unit_About,
@@ -470,47 +496,13 @@ uses
 
 {$R *.dfm}
 
-resourcestring
-  R_Aya =
-      'Aya 23, released by Cohere, is a new family of state-of-the-art, multilingual, '+
-      'generative large language research model (LLM) covering 23 different languages.';
-  R_Phi3 =
-      'Phi-3 Mini is a 3.8B parameters, lightweight, state-of-the-art open model by Microsoft. '+
-      'Trained with the Phi-3 datasets that includes both synthetic data and the filtered publicly available websites data '+
-      'with a focus on high-quality and reasoning dense properties.';
-  R_Llama3 =
-      'Meta Llama 3, a family of models developed by Meta Inc. are new state-of-the-art. '+
-      'Llama 3 instruction-tuned models are fine-tuned and optimized for dialogue/chat use cases and '+
-      'outperform many of the available open-source chat models on common benchmarks.';
-  R_Llama2 =
-      'Llama 2 is released by Meta Platforms, Inc. This model is trained on 2 trillion tokens, and by default supports a context length of 4096. '+
-      'Llama 2 Chat models are fine-tuned on over 1 million human annotations, and are made for chat.';
-  R_Gemma =
-      'Gemma is a family of lightweight, state-of-the-art open models built by Google DeepMind. '+
-      'Updated to version 1.1. It¡¯s inspired by Gemini models at Google.';
-  R_Llava =
-      'LLaVA is a novel end-to-end trained large multimodal model that combines a vision encoder '+
-      'and Vicuna for general-purpose visual and language understanding. Updated to version 1.6.';
-  R_Codegemma =
-      'CodeGemma is a collection of powerful, lightweight models that can perform a variety of coding tasks like fill-in-the-middle code completion, '+
-      'code generation, natural language understanding, mathematical reasoning, and instruction following.';
-  R_DolphiMistral =
-      'The uncensored Dolphin model based on Mistral that excels at coding tasks. Updated to version 2.8. '+
-      'The Dolphin model by Eric Hartford, based on Mistral version 0.2 released in March 2024.';
-  R_Mistral =
-      'Mistral is a 7B parameter model, distributed with the Apache license. '+
-      'It is available in both instruct (instruction following) and text completion.';
-  R_QWen2 =
-      'Qwen2 is a new series of large language models from Alibaba group.';
-
 const
-  C_CaptionFormat       = 'Model - %s / Topic - %s';
-  C_SectionData         = 'Data';
-  C_SectionOptions      = 'Options';
-  C_LlavaPromptContent  = 'Describe this image'; // 'What is in this picture?';
+  C_CaptionFormat   = 'Model - %s / Topic - %s';
+  C_SectionData     = 'Data';
+  C_SectionOptions  = 'Options';
+  C_Prompt4Image    = 'Describe this image'; // 'What is in this picture?';
 
   C_OllamaAlive: array [Boolean] of string = (' * Ollama is dead.',' * Ollama is running.');
-  C_ModelDesc:   array [0 .. 9] of string = (R_Aya, R_Phi3, R_Llama3, R_Llama2, R_Gemma, R_Llava, R_Codegemma, R_DolphiMistral, R_Mistral, R_QWen2);
 
 const
   C_TimestampFontSize = 8;
@@ -543,39 +535,24 @@ const
   C_CHATOllama_Model  = 2;
   C_CHATOllama_System = 3;
 
-  C_DefLavaWidth  = 64;
-  C_DefLavaHeight = 60;
+  C_DefImageWidth  = 64;
+  C_DefImageHeight = 60;
 
 var
   V_BuffLogLines: string;
   V_StopWatch :TStopWatch;
-  V_BaseURL: string = GC_BaseURL_Chat;
+  V_BaseURL: string = Unit_Jsonworks.GC_BaseURL_Chat;
   V_LoadModelFlag: Boolean = False;
   V_Username: string = 'User';
   V_LoadModelIndex: Integer = 0;
   V_MyModel: string = 'phi3';
   V_MyContentPrompt: string = 'Hello';
-  V_BaseURLarray: array [TRequest_Type] of string = (GC_BaseURL_Generate, GC_BaseURL_Chat);
+  V_BaseURLarray: array [TRequest_Type] of string = (Unit_Jsonworks.GC_BaseURL_Generate, Unit_Jsonworks.GC_BaseURL_Chat);
 
-  V_LlavaSource: string = 'logollama.png';
+  V_ImageSource: string = 'logollama.png';
   V_DummyFlag: Integer = 0;
   V_TaskSystem: ITask;
   V_ElapsedInterval: Int64;
-
-{ ... }
-
-procedure GetResizedImage_WIC(const ASource: string; ADest: TImage; const ANewWidth, ANewHeight: Integer);
-begin
-  var _WIC := TWICImage.Create;
-  _WIC.LoadFromFile(ASource);
-  var _WIC2 := _WIC.CreateScaledCopy(ANewWidth, ANewHeight);
-  try
-    ADest.Picture.Assign(_WIC2);
-  finally
-    _WIC.Free;
-    _WIC2.Free;
-  end;
-end;
 
 { TForm_RestOllama }
 
@@ -593,6 +570,7 @@ begin
   Unit_Common.InitializePaths();
   FIniFileName := ExtractFileName(ChangeFileExt(ParamStr(0), '.ini'));
 
+  { Set Skin/Theme ------------------------------------------------------------------------------- }
   var _SkinStyle:= TStyleManager.ActiveStyle.Name;
   with System.Inifiles.TMemIniFile.Create(FIniFileName) do
   try
@@ -605,6 +583,7 @@ begin
   var _default := TStyleManager.ActiveStyle.Name;
   if not SameText(_default, _SkinStyle) then
   TStyleManager.TrySetStyle(_SkinStyle);
+  { / Set Skin/Theme ----------------------------------------------------------------------------- }
 
   FFrameWelcome := TFrame_Welcome.Create(Self);
   with FFrameWelcome do
@@ -629,22 +608,24 @@ begin
     CheckAlive_Ollama(1);
   end;
 
-  { Load Image from Resource ... }
+  // Load Image from Resource --------------------------------------------------------- //
     var _stream := Unit_Common.TResourceStream_Ex.Create(HInstance, 'OLOGO', RT_RCDATA);
-    if _stream.Size > 1 then
     try
-      _stream.Position := 0;
-      Image_Llva.Picture.LoadFromStream(_stream);
-      _stream.Re_Initialize(HInstance, PChar('OWAITTING'), RT_RCDATA);
-      _stream.Position := 0;
-      SkAnimatedImage_ChatProcess.LoadFromStream(_stream);
-      _stream.Re_Initialize(HInstance, PChar('OWIN'), RT_RCDATA);
-      _stream.Position := 0;
-      SkAnimatedImage_Chat.LoadFromStream(_stream);
+      if _stream.Size > 1 then
+        begin
+          _stream.Position := 0;
+          Image_Source.Picture.LoadFromStream(_stream);
+          _stream.Re_Initialize(HInstance, PChar('OWAITTING'), RT_RCDATA);
+          _stream.Position := 0;
+          SkAnimatedImage_ChatProcess.LoadFromStream(_stream);
+          _stream.Re_Initialize(HInstance, PChar('OWIN'), RT_RCDATA);
+          _stream.Position := 0;
+          SkAnimatedImage_Chat.LoadFromStream(_stream);
+        end;
     finally
       _stream.Free;
     end;
-  {... }
+  // / Load Image from Resource ------------------------------------------------------- //
 
   with Memo_LogWin.Lines do
   begin
@@ -668,6 +649,9 @@ begin
     ComboBox_Models.ItemIndex := 0;
   end;
 
+  SkSvg_OllamaAlive.Svg.Source := C_Connection_Svg0;
+  SkSvg_Broker.Svg.Source := C_RemoteConn_Svg0;
+
   // TTS Engine ------------------------------------------------------------- //
   FSpVoice := TSpVoice.Create(Self);
   with FSpVoice do
@@ -680,9 +664,6 @@ begin
     OnAudioLevel :=   SpVoiceAudioLevel;
     EventInterests := SVEAllEvents;
   end;
-
-  SkSvg_OllamaAlive.Svg.Source := C_Connection_Svg0;
-  SkSvg_Broker.Svg.Source := C_RemoteConn_Svg0;
 
   ComboBox_TTSEngine.Clear;
   var _SOTokens: ISpeechObjectTokens := FSpVoice.GetVoices('', '');
@@ -704,36 +685,35 @@ begin
   Label_Rate.Caption := IntToStr(TrackBar_Rate.Position);
   TrackBar_Volume.Position := FSpVoice.Volume;
   Label_Volume.Caption := IntToStr(TrackBar_Volume.Position);
-  // TTS Engine ------------------------------------------------------------- //
+  // / TTS Engine ----------------------------------------------------------- //
 
   Action_TTS.Enabled := False;
-  Tabsheet_Chatting.TabVisible :=  False;
-  TabSheet_ChatLogs.TabVisible :=  False;
-  GroupBox_CPUMem.Visible :=       False;
-  GroupBox_TTSEngine.Visible :=    False;
+  Tabsheet_Chatting.TabVisible :=   False;
+  TabSheet_LogsBroker.TabVisible := False;
+  GroupBox_TTSEngine.Visible :=     False;
   SpeedButton_ExpandFull.Tag := 1;
   FRequest_Type := TRequest_Type.ort_Chat;
   FDisplay_Type := TDisplay_Type.disp_Content;
   FTranlateMode := TTranlateMode.otm_MessageView;
-  Gauge_MemUsage.Progress := 0;
 
-  FLavaIndexFlag := 0;
-  with ImageList_LLAVA do
+  FImageSourceIndex := 0;
+  with ImageList_Multimodel do
   begin
     ColorDepth := cd32Bit;
     DrawingStyle := dsTransparent;
-    Width :=  C_DefLavaWidth;
-    Height := C_DefLavaHeight;
+    Width :=  C_DefImageWidth;
+    Height := C_DefImageHeight;
   end;
   var _bstream := TMemoryStream.Create;
-  Image_Llva.Picture.SaveToStream(_bstream);
+  Image_Source.Picture.SaveToStream(_bstream);
   GetResizedImage_SKIA('', _bstream);   // -> _bstream.free ...
 
   GV_ReservedColor[0] := GC_SkinSelColor;
   GV_ReservedColor[1] := GC_SkinHeadColor;
   GV_ReservedColor[2] := GC_SkinBodyColor;
   GV_ReservedColor[3] := GC_SkinFootColor;
-  // ------------------------------------------------------------------------------------------ //
+
+  // ChattingBox ------------------------------------------------------------------------------ //
   with Frame_ChattingBox do
   begin
     InitializeEx(GV_ReservedColor[1], GV_ReservedColor[2] , GV_ReservedColor[3] );
@@ -743,25 +723,26 @@ begin
     pmn_ClearChattingBox.onClick := SpeedButton_ClearChatBox.OnClick;
     pmn_ShowLogs.OnClick :=         Action_LogsExecute;
     //
-    VST_ChattingBox.ThumbLists :=   ImageList_LLAVA;
+    VST_ChattingBox.ThumbLists :=   ImageList_Multimodel;
   end;
-  // ------------------------------------------------------------------------------------------ //
-  FImage_DropDown := TImageDropDown.Create(Image_Llva, Panel_ImageLlavaBase);
+  // / ChattingBox ---------------------------------------------------------------------------- //
+  // FImage_DropDown -------------------------------------------------------------------------- //
+  FImage_DropDown := TImageDropDown.Create(Image_Source, Panel_ImageSourceBase);
   with FImage_DropDown do
   begin
-    LavaPrevButton := SpeedButton_LavaPrev;
-    LavaNextButton := SpeedButton_LavaNext;
-    OnLoadImage :=    DropDownLoadImageEvent;
-    OnLoadIndex :=    DropDownLoadIndexEvent;
-    CurrentIndex :=  -1;
+    ImagePrevButton := SpeedButton_ImagePrev;
+    ImageNextButton := SpeedButton_ImageNext;
+    OnLoadImage :=     DropDownLoadImageEvent;
+    OnLoadIndex :=     DropDownLoadIndexEvent;
+    CurrentIndex :=   -1;
   end;
-  // ------------------------------------------------------------------------------------------ //
+  // / FImage_DropDown ------------------------------------------------------------------------ //
   Label_Caption.Caption := 'Model / Topic';
   FModel_Selected := '';
   FTopic_Seleced := '';
-  Label_Description.Tag := 1;
-  Label_Description.Caption := C_ModelDesc[0];
 
+  FileOpenDialog1.DefaultFolder := CV_HisPath;
+  FHistoryManager := THistoryManager.Create(ListBox_History);
   // Remote Server Chatting ...
   Memo_ServerChattings.Clear;
   Panel_ServerChatting.Visible := (DM_ACTIVATECODE = 1);
@@ -789,6 +770,7 @@ begin
       Memo_Memo.StyleElements :=                [seBorder];
       Memo_ServerChattings.StyleElements :=     [seBorder];
       CheckListBox_ConnIPs.StyleElements :=     [seBorder];
+      ListBox_History.StyleElements :=          [seBorder];
       var _spanelcolor := StyleServices.GetStyleColor(scWindow);
       var _topcolor :=    StyleServices.GetStyleColor(scGrid);
       TreeView_Topics.color :=                  _spanelcolor;
@@ -796,6 +778,7 @@ begin
       Memo_Memo.Color :=                        _spanelcolor;
       Memo_ServerChattings.Color :=             _spanelcolor;
       CheckListBox_ConnIPs.Color :=             _spanelcolor;
+      ListBox_History.Color :=                  _spanelcolor;
       Panel_CaptionModelTopics.Color :=         _topcolor;
       Panel_ChattingButtons.Color :=            _topcolor;
       Panel_OptionsTop.Color :=                 _topcolor;
@@ -859,7 +842,6 @@ begin
     ComboBox_Models.ItemIndex := V_LoadModelIndex;
     ComboBox_ModelsChange(Self);
 
-    GroupBox_Description.Height := 40;
     SkAnimatedImage_Chat.Left := (PageControl_Chatting.Width -  SkAnimatedImage_Chat.Width) div 2;
     SkAnimatedImage_Chat.Top :=  (PageControl_Chatting.Height - SkAnimatedImage_Chat.Height) div 2;
 
@@ -868,6 +850,7 @@ begin
 
     FInitialized := True;
     StatusBar1.Panels[1].Text := 'Elapsed time';
+    StatusBar1.Panels[2].Text := ' * Stand by ...';
     if GV_CheckingAliveStart then
       begin
         StatusBar1.Panels[0].Text := 'Waiting response from Ollama';
@@ -894,8 +877,7 @@ begin
   ComboBox_TransTarget.ItemIndex := _indexid;
 
   Action_Options.Tag := 1;
-  var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
-  with _IniFile do
+  with System.Inifiles.TMemIniFile.Create(FIniFileName) do
   try
     FLastRequest :=                   ReadString(C_SectionData,      'LastRequest',            'Who are you ?');
     V_Username :=                     ReadString(C_SectionData,      'Nickname',               'User');
@@ -908,12 +890,16 @@ begin
     FTTS_EngineName :=                ReadString(C_SectionOptions,   'TTS_Engine',              '');
     TrackBar_Volume.Position :=       ReadInteger(C_SectionOptions,  'TTS_Volume',              80);
     CheckBox_AutoLoadTopic.Checked := ReadBool(C_SectionOptions,     'AutoLoadTopic',           True);
-    SaveLogsOnCLoseFlag :=            ReadBool(C_SectionOptions,     'Save_Logs',               False);
     CheckBox_UseTopicSeed.Checked :=  ReadBool(C_SectionOptions,     'Use_TopicSeed',           False);
     DoneSoundFlag :=                  ReadBool(C_SectionOptions,     'Done_Beep',               True);
-
+    GV_SaveContentsOnClose :=         ReadBool(C_SectionOptions,     'Save_ContentsClose',      False);
+    GV_SaveLogsOnClose :=             ReadBool(C_SectionOptions,     'Save_LogOnClose',         False);
     MRU_MAX_ROOT :=                   ReadInteger(C_SectionOptions,  'Mru_Root_Max',            20);
     MRU_MAX_CHILD :=                  ReadInteger(C_SectionOptions,  'Mru_Child_Max',           30);
+    HIS_MAX_ITEMS :=                  ReadInteger(C_SectionOptions,  'History_Max',             25);
+
+    ProcessImageFlag :=               ReadBool(C_SectionOptions,     'Process_Image',           False);
+    ReasoningFlag :=                  ReadBool(C_SectionOptions,     'ReasoningFalg',           False);
 
     var _color0: Integer :=           ReadInteger(C_SectionOptions,  'Node_Selected_Color',     GC_SkinSelColor);
     var _color1: Integer :=           ReadInteger(C_SectionOptions,  'Node_HeaderFont_Color',   GC_SkinHeadColor);
@@ -921,12 +907,16 @@ begin
     var _color3: Integer :=           ReadInteger(C_SectionOptions,  'Node_FooterFont_Color',   GC_SkinFootColor);
     var _fontname: string :=          ReadString(C_SectionOptions,   'VST_FontName',            Self.Font.Name);
     var _fontsize: Integer :=         ReadInteger(C_SectionOptions,  'VST_FontSize',            10);
+    var _NodeHeightOffset: Integer := ReadInteger(C_SectionOptions,  'VST_NodeHeightOffset',    15);
 
     Panel_Options.Visible := Action_Options.Tag = 1;
 
+    CheckBox_ProcessImage.Checked := ProcessImageFlag;
+    CheckBox_Reasoning.Checked :=    ReasoningFlag;
     TrackBar_GlobalFontSize.Position := _fontsize;
     Frame_ChattingBox.Do_SetCustomFont(0, _fontname, _fontsize);
     Frame_ChattingBox.Do_SetCustomColor(0, TColor(_color0), TColor(_color1), TColor(_color2), TColor(_color3));
+    Frame_ChattingBox.VST_NodeHeightOffSet := _NodeHeightOffset;
   finally
     Free;
   end;
@@ -934,8 +924,7 @@ end;
 
 procedure TForm_RestOllama.Save_ConfigIni(const AFlag: Integer);
 begin
-  var _IniFile := System.Inifiles.TMemIniFile.Create(FIniFileName);
-  with _IniFile do
+  with System.Inifiles.TMemIniFile.Create(FIniFileName) do
   try
     WriteString(C_SectionData,      'Skin_Style',              TStyleManager.ActiveStyle.Name);
     WriteBool(C_SectionData,        'Check_Alive',             GV_CheckingAliveStart);
@@ -950,12 +939,15 @@ begin
     WriteString(C_SectionOptions,   'TTS_Engine',              FTTS_EngineName);
     WriteInteger(C_SectionOptions,  'TTS_Volume',              TrackBar_Volume.Position);
     WriteBool(C_SectionOptions,     'AutoLoadTopic',           CheckBox_AutoLoadTopic.Checked);
-    WriteBool(C_SectionOptions,     'Save_Logs',               FSaveLogsOnCLoseFlag);
     WriteBool(C_SectionOptions,     'Use_TopicSeed',           CheckBox_UseTopicSeed.Checked);
     WriteBool(C_SectionOptions,     'Done_Beep',               FDoneSoundFlag);
-
+    WriteBool(C_SectionOptions,     'Save_ContentsClose',      GV_SaveContentsOnClose);
+    WriteBool(C_SectionOptions,     'Save_LogOnClose',         GV_SaveLogsOnClose);
     WriteInteger(C_SectionOptions,  'Mru_Root_Max',            MRU_MAX_ROOT);
     WriteInteger(C_SectionOptions,  'Mru_Child_Max',           MRU_MAX_CHILD);
+    WriteInteger(C_SectionOptions,  'History_Max',             HIS_MAX_ITEMS);
+    WriteBool(C_SectionOptions,     'Process_Image',           FProcessImageFlag);
+    WriteBool(C_SectionOptions,     'ReasoningFalg',           FReasoningFlag);
 
     WriteInteger(C_SectionOptions,  'Node_Selected_Color',     Frame_ChattingBox.VST_NSelectionColor);
     WriteInteger(C_SectionOptions,  'Node_HeaderFont_Color',   Frame_ChattingBox.VST_NHeaderColor);
@@ -963,6 +955,7 @@ begin
     WriteInteger(C_SectionOptions,  'Node_FooterFont_Color',   Frame_ChattingBox.VST_NFooterColor);
     WriteString(C_SectionOptions,   'VST_FontName',            Frame_ChattingBox.VST_FontName);
     WriteInteger(C_SectionOptions,  'VST_FontSize',            Frame_ChattingBox.VST_FontSize);
+    WriteInteger(C_SectionOptions,  'VST_NodeHeightOffset',    Frame_ChattingBox.VST_NodeHeightOffSet);
   finally
     UpdateFile;
     Free;
@@ -977,21 +970,30 @@ procedure TForm_RestOllama.FormCloseQuery(Sender: TObject; var CanClose: Boolean
 begin
   CanClose := False;
   GV_AppCloseFlag := True;
-  Winapi.Windows.ShowWindowAsync(Application.Handle, SW_HIDE );  // Trick - Prevent Form-Flickering ...
+  FFrameWelcome.Visible := True;                                   // Trick - Prevent MainForm/Controls Flickering ?
+  FFrameWelcome.BringToFront;                                      // Trick - Prevent MainForm/Controls Flickering ?
+  Sleep(1) ;
+  Winapi.Windows.ShowWindowAsync(Application.Handle, SW_HIDE );    // Trick - Prevent MainForm/Controls Flickering ?
 
   Do_TTSSpeak_Stop();
   Do_Abort(5);
   if Assigned(V_TaskSystem) then
+  begin
     V_TaskSystem.Cancel;
-
-  Application.ProcessMessages; { ??? }
+    Application.ProcessMessages; { ??? }
+  end;
   Timer_System.Enabled := False;
 
   Save_ConfigIni();
-  if CheckBox_SaveOnCLose.Checked then
+  if GV_SaveLogsOnClose then
   begin
     var _slog := Format('%s%s%s', ['Log_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
     Memo_LogWin.Lines.SaveToFile(CV_LogPath+_slog);
+  end;
+  if GV_SaveContentsOnClose and (Frame_ChattingBox.VST_ChattingBox.RootNodeCount > 0) then
+  begin
+    var _recordf := Format('%s%s%s%s', [CV_HisPath, 'Record_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+    Frame_ChattingBox.Do_SaveAllText(_recordf);
   end;
 
   var _fmemo := CV_AppPath+CF_Memos;
@@ -999,6 +1001,9 @@ begin
 
   if FModelsList.Count > 0 then
     FModelsList.SaveToFile(CV_AppPath+CF_ModalList);
+
+  ListBox_History.ClearSelection;                                  // Trick - Prevent MainForm/Controls Flickering ?
+  FHistoryManager.Free;
 
   CanClose := True;
 end;
@@ -1022,13 +1027,13 @@ end;
 procedure TForm_RestOllama.ActionList_OllmaUpdate(Action: TBasicAction; var Handled: Boolean);
 begin
   var _visflag_0: Boolean := (not FFrameWelcome.Visible)  and (PageControl_Chatting.ActivePage = Tabsheet_Chatting);
-  var _visflag_1: Boolean := (not FFrameWelcome.Visible)  and (PageControl_Chatting.ActivePage = Tabsheet_ChatLogs);
+  var _visflag_1: Boolean := (not FFrameWelcome.Visible)  and (PageControl_Chatting.ActivePage = TabSheet_LogsBroker);
   var _visflag_2: Boolean := _visflag_0 or _visflag_1;
   var _visflag_3: Boolean := _visflag_0 and not RequestingFlag;
   var _visflag_4: Boolean := _visflag_2 and not RequestingFlag;
   var _visflag_5: Boolean := _visflag_2 and not RequestingFlag and GV_AliveOllamaFlag;
   var _isfocus: Boolean   := (Frame_ChattingBox.VST_ChattingBox.FocusedNode <> nil);
-  var _isllava: Boolean   := Is_LlavaModel(ComboBox_Models.Items[ComboBox_Models.ItemIndex]);
+  var _isImage: Boolean   := FProcessImageFlag;
 
   Action_Chatting.Enabled :=            GV_AliveOllamaFlag;
   Action_Logs.Enabled :=                GV_AliveOllamaFlag;
@@ -1049,8 +1054,8 @@ begin
 
   Panel_ChattingButtons.Enabled :=      _visflag_3;
   Panel_ChatRequestBox.Enabled :=       _visflag_3;
-  GroupBox_Topics.Enabled :=            _visflag_3;
-  //Panel_TopicButtons.Enabled :=         _visflag_3;
+  GroupBox_Topics.Enabled :=            _visflag_3;    // = Panel_TopicButtons.Enabled := _visflag_3;
+  GroupBox_History.Enabled :=           _visflag_3;    // = Panel_HistoryButtons.Enabled := not RequestingFlag;
   Frame_ChattingBox.pmn_ColorSettings.Enabled :=
                                         _visflag_3;
   Action_InetAlive.Enabled :=           _visflag_3;
@@ -1060,7 +1065,7 @@ begin
   Action_SendRequest.Enabled :=         _visflag_5;
   Action_DosCommand.Enabled :=          _visflag_5;
   Action_RequestDialog.Enabled :=       _visflag_5;
-  Action_LoadImageLlava.Enabled :=      _visflag_5 and _isllava;
+  Action_LoadImageSource.Enabled :=     _visflag_5 and _isImage;
 
   Action_SHowBroker.Enabled :=          _visflag_0;
   SkSvg_Broker.Enabled :=               _visflag_0;
@@ -1083,7 +1088,7 @@ end;
 
 procedure TForm_RestOllama.ApplyChange;
 begin
-   // Reserved ...
+  // Reserved ...
 end;
 
 procedure TForm_RestOllama.Action_ApplyChangeExecute(Sender: TObject);
@@ -1123,10 +1128,12 @@ end;
 
 procedure TForm_RestOllama.Action_DefaultRefreshExecute(Sender: TObject);
 begin
+  GroupBox_Memo.Height := 85;
   TrackBar_GlobalFontSize.OnChange := nil;
   TrackBar_GlobalFontSize.Position := 10;
   Label_Font_Size.Caption := '10';
   TrackBar_GlobalFontSize.OnChange := TrackBar_GlobalFontSizeChange;
+  ListBox_History.ClearSelection;
 
   Frame_ChattingBox.Do_RestoreDefaultColor(1);
   Frame_ChattingBox.VST_ChattingBox.Invalidate;
@@ -1141,7 +1148,7 @@ end;
 
 procedure TForm_RestOllama.DropDownLoadIndexEvent(Sender: TObject; const AIndex: Integer);
 begin
-  LavaIndexFlag := AIndex+1;
+  ImageSourceIndex := AIndex+1;
 end;
 
 procedure TForm_RestOllama.GetResizedImage_SKIA(const ASource: string; const AStream: TMemoryStream);
@@ -1160,44 +1167,44 @@ begin
           AStream.Free;
         end;
 
-      var _w0: single := C_DefLavaWidth;
-      var _h0: single := C_DefLavaHeight;
+      var _w0: single := C_DefImageWidth;
+      var _h0: single := C_DefImageHeight;
       var _l0: single := 0;
       var _t0: single := 0;
-      var _s1: single := C_DefLavaWidth / C_DefLavaHeight;
+      var _s1: single := C_DefImageWidth / C_DefImageHeight;
       var _s2: single := _Image.Width / _Image.Height;
 
       if _s1 > _s2 then
         begin
-          _w0 := C_DefLavaHeight * _s2;
-          _h0 := C_DefLavaHeight;
-          _l0 := (C_DefLavaWidth - _w0) / 2;
+          _w0 := C_DefImageHeight * _s2;
+          _h0 := C_DefImageHeight;
+          _l0 := (C_DefImageWidth - _w0) / 2;
         end
       else
         begin
-          _w0 := C_DefLavaWidth;
-          _h0 := C_DefLavaWidth / _s2;
-          _t0 := (C_DefLavaHeight - _h0) / 2;
+          _w0 := C_DefImageWidth;
+          _h0 := C_DefImageWidth / _s2;
+          _t0 := (C_DefImageHeight - _h0) / 2;
         end;
 
       var _Rect := RectF(_l0, _t0, _l0+_w0, _t0+_h0);
-      var _Surface := TSkSurface.MakeRaster(C_DefLavaWidth, C_DefLavaHeight);
+      var _Surface := TSkSurface.MakeRaster(C_DefImageWidth, C_DefImageHeight);
       _Surface.Canvas.Clear(TAlphaColors.Null);
       _Surface.Canvas.DrawImageRect(_Image, _Rect, TSkSamplingOptions.Medium);
-      LavaIndexFlag := ImageList_LLAVA.Add(TBitmap.CreateFromSkImage(_Surface.MakeImageSnapshot), nil);
+      ImageSourceIndex := ImageList_Multimodel.Add(TBitmap.CreateFromSkImage(_Surface.MakeImageSnapshot), nil);
     end);
 end;
 
-procedure TForm_RestOllama.Action_LoadImageLlavaExecute(Sender: TObject);
+procedure TForm_RestOllama.Action_LoadImageSourceExecute(Sender: TObject);
 begin
   if (FImage_DropDown.DropFlag = 0) and OpenPictureDialog1.Execute() then
   begin
-    V_LlavaSource := OpenPictureDialog1.FileName;
+    V_ImageSource := OpenPictureDialog1.FileName;
     FImage_DropDown.LoadIMG_Drop(OpenPictureDialog1.FileName);
   end;
 end;
 
-procedure TForm_RestOllama.Image_LlvaDblClick(Sender: TObject);
+procedure TForm_RestOllama.Image_SourceDblClick(Sender: TObject);
 begin
   Do_StartRequest(0);
 end;
@@ -1206,6 +1213,7 @@ procedure TForm_RestOllama.Try_SetFocus(AControl: TWinControl);
 begin
   if AControl.Visible and AControl.CanFocus then
   begin
+    Self.ActiveControl := nil;
     try
       AControl.SetFocus();
     except
@@ -1219,11 +1227,11 @@ procedure TForm_RestOllama.Action_LogsExecute(Sender: TObject);
 begin
   FFrameWelcome.Visible := False;
   PageControl_Chatting.OnChange := nil;
-  if PageControl_Chatting.ActivePage = TabSheet_ChatLogs then
+  if PageControl_Chatting.ActivePage = TabSheet_LogsBroker then
     PageControl_Chatting.ActivePage := Tabsheet_Chatting
   else
     begin
-      PageControl_Chatting.ActivePage := TabSheet_ChatLogs;
+      PageControl_Chatting.ActivePage := TabSheet_LogsBroker;
       Try_SetFocus(Memo_LogWin as TWinControl);
     end;
   PageControl_Chatting.OnChange := PageControl_ChattingChange;
@@ -1252,7 +1260,6 @@ end;
 
 procedure TForm_RestOllama.Action_InetAliveExecute(Sender: TObject);
 begin
-  var _requests: string := '';
   var _pos := Panel_Setting.ClientToScreen(Point(0, 0));
   with TForm_AliveOllama.Create(Self) do
   try
@@ -1294,11 +1301,18 @@ end;
 
 procedure TForm_RestOllama.Action_Pop_SaveAllTextExecute(Sender: TObject);
 begin
+  if Frame_ChattingBox.VST_ChattingBox.RootNodeCount < 1 then
+  begin
+    ShowMessage('Failed to Save contents because empty ...');
+    Exit;
+  end;
   if SaveTextFileDialog1.Execute then
   begin
     var _file := SaveTextFileDialog1.FileName;
     if Frame_ChattingBox.Do_SaveAllText(_file) then
-    var _H: HINST := ShellExecute(0, PChar('open'), PChar(_file), nil, nil, SW_SHOWNORMAL);
+      var _H: HINST := ShellExecute(0, PChar('open'), PChar(_file), nil, nil, SW_SHOWNORMAL)
+    else
+      ShowMessage('Failed to Save contents ...');
   end;
 end;
 
@@ -1332,7 +1346,7 @@ procedure TForm_RestOllama.Action_SHowBrokerExecute(Sender: TObject);
 begin
   FFrameWelcome.Visible := False;
   PageControl_Chatting.OnChange := nil;
-  PageControl_Chatting.ActivePage := TabSheet_ChatLogs;
+  PageControl_Chatting.ActivePage := TabSheet_LogsBroker;
   Try_SetFocus(Memo_ServerChattings as TWinControl);
   PageControl_Chatting.OnChange := PageControl_ChattingChange;
   PageControl_ChattingChange(Self);
@@ -1372,7 +1386,7 @@ begin
     if ModalResult = mrOk then
       begin
         _requests := Memo_Request.Lines.Text;
-        _requests := StringReplace(_requests, GC_CRLF, ' ', [rfReplaceAll]);
+        _requests := StringReplace(_requests, GC_CRLF, ' ', [rfIgnoreCase,rfReplaceAll]);
         _requests := Get_ReplaceSpecialChar4Json(_requests);
       end
     else
@@ -1402,9 +1416,12 @@ begin
   V_WriteCount := 0;
   V_ElapsedInterval := 0;
   RESTResponse_Ollama.ResetToDefaults;
-  RESTClient_Ollama.BaseURL := V_BaseURL;
-  RESTClient_Ollama.ContentType := CONTENTTYPE_APPLICATION_JSON;
-  RESTClient_Ollama.SynchronizedEvents := True;
+  with RESTClient_Ollama do
+  begin
+    BaseURL := V_BaseURL;
+    ContentType := CONTENTTYPE_APPLICATION_JSON; {*}
+    SynchronizedEvents := True;
+  end;
   with RESTRequest_Ollama do
   begin
     Method := rmPOST;
@@ -1412,6 +1429,7 @@ begin
     Params.Clear;
     TransientParams.Clear;
     ClearBody;
+    //Params.AddHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8'); {*}
   end;
 end;
 
@@ -1481,66 +1499,30 @@ begin
   V_BaseURL := V_BaseURLarray[Request_Type];
   var _RawParams: string := '';
   var _LvTag: Integer := -1;
-  if Is_LlavaModel(V_MyModel) then
-    begin
-      _LvTag := FLavaIndexFlag;
-      var _ImageData := Get_Base64Endoeings1(Image_Llva);
-      if _ImageData = '' then Exit;
-      case Request_Type of
-        ort_Generate: begin
-             _RawParams := StringReplace( GC_GenerateLlavaPrompt, '%model%',    V_MyModel,         [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,             '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,             '%images%',   _ImageData,        [rfIgnoreCase]);
-           end;
-        ort_Chat: begin
-             _RawParams := StringReplace( GC_ChatLlavaContent,    '%model%',    V_MyModel,         [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,             '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
-             _RawParams := StringReplace( _RawParams,             '%images%',   _ImageData,        [rfIgnoreCase]);
-           end;
-      end;
-    end
-  else
-    begin
-      var _optionflag: Boolean := False;
-      var _tseed: string := '';
+  var _optionflag: Boolean := False;
+  var _tseed: Integer := 0;
+  var _ImageData: string := '';
+  if ProcessImageFlag then
+  begin
+    _LvTag := FImageSourceIndex;
+  end;
+  if CheckBox_UseTopicSeed.Checked then
+  begin
+    _tseed := StrToIntDef(Edit_TopicSeed.Text, 0);
+    if _tseed > 0 then
+      _optionflag := True;
+  end;
 
-      if CheckBox_UseTopicSeed.Checked then
-        begin
-          _tseed := Edit_TopicSeed.Text;
-          if _tseed <> '' then
-          _optionflag := True;
-        end;
-
-      if _optionflag then
-        begin
-          case Request_Type of
-            ort_Generate: begin
-                 _RawParams := StringReplace( GC_GeneratePrompt_opt, '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,            '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,            '%seed%',     _tseed,            [rfIgnoreCase]);
-               end;
-            ort_Chat: begin
-                 _RawParams := StringReplace( GC_ChatContent_opt,    '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,            '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,            '%seed%',     _tseed,            [rfIgnoreCase]);
-               end;
-          end;
-
-          // Debug
-          Add_LogWin('Request Topic Seed : '+ _tseed);
-        end
-      else
-          case Request_Type of
-            ort_Generate: begin
-                 _RawParams := StringReplace( GC_GeneratePrompt, '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,        '%prompts%',  V_MyContentPrompt, [rfIgnoreCase]);
-               end;
-            ort_Chat: begin
-                 _RawParams := StringReplace( GC_ChatContent,    '%model%',    V_MyModel,         [rfIgnoreCase]);
-                 _RawParams := StringReplace( _RawParams,        '%content%',  V_MyContentPrompt, [rfIgnoreCase]);
-               end;
-          end;
-    end;
+  case Request_Type of
+    ort_Generate:
+       begin
+         _RawParams := Get_RequestParams_Generate(V_MyModel, V_MyContentPrompt, _optionflag, _tseed, ProcessImageFlag, Image_Source);
+       end;
+    ort_Chat:
+       begin
+         _RawParams := Get_RequestParams_Chat(V_MyModel, V_MyContentPrompt, _optionflag, _tseed, ProcessImageFlag, Image_Source, ReasoningFlag);
+       end;
+  end;
 
   Edit_ReqContent.TextHint := V_MyContentPrompt;
   Add_LogWin('Starting REST request for URL: ' + V_BaseURL);
@@ -1556,6 +1538,9 @@ begin
   // ------------------------------------------------------------------------------------------ //
   Add_ChattingMessage(C_CHATUser_Model, C_CHATLOC_Left, _LvTag, V_MyContentPrompt);
   // ------------------------------------------------------------------------------------------ //
+
+  StatusBar1.Panels[1].Text := '';
+  StatusBar1.Panels[2].Text := ' Prepare ...';
   Common_RestSettings(V_DummyFlag);
   with RESTRequest_Ollama do
   begin
@@ -1613,9 +1598,9 @@ begin
   StatusBar1.Panels[1].Text := 'et '+  _elapstr;
   StatusBar1.Panels[2].Text := ' * Stand by ...';
 
-  { Core routine ------------------------------------------------------------- }
+  // ------------------------------------------------------------------------- //
     Do_DisplayJson(string(RESTResponse_Ollama.Content));
-  { -------------------------------------------------------------------------- }
+  // ------------------------------------------------------------------------- //
 
   SimpleSound_Common(DoneSoundFlag, 1);
   Inc(V_DummyFlag);
@@ -1640,8 +1625,8 @@ begin
   case AFlag of
     C_CHATUser_Ollama  : _user := V_Username + '  > Ollama';                     // user
     C_CHATUser_Model   : _user := V_Username + '  > '+V_MyModel;                 // user
-    C_CHATOllama_Model : _user := 'Ollama [ ' + V_MyModel+' ]';                  // ollama
-    C_CHATOllama_System: _user := 'Ollama - System';                             // ollama
+    C_CHATOllama_Model : _user := 'Ollama < ' + V_MyModel;                       // ollama
+    C_CHATOllama_System: _user := 'Ollama < System';                             // ollama
   end;
 
   Frame_ChattingBox.Add_Chatting_Message(_user, ALocation, ALvTag, APrompt);
@@ -1679,10 +1664,10 @@ begin
   if AFlag > 0 then
   begin
     if AFlag = 2 then
-      V_BuffLogLines := V_BuffLogLines + GC_CRLF;
+      V_BuffLogLines := V_BuffLogLines + sLineBreak;
     if ALog <> '' then
       V_BuffLogLines := V_BuffLogLines + FormatDateTime('hh:nn:ss', Time) + '  ';
-    V_BuffLogLines := V_BuffLogLines + ALog + GC_CRLF;
+    V_BuffLogLines := V_BuffLogLines + ALog + sLineBreak;
   end;
 
   var _displen := Length(V_BuffLogLines);
@@ -1699,7 +1684,7 @@ end;
 procedure TForm_RestOllama.Add_LogWin(const ALog: string);
 begin
   V_BuffLogLines := V_BuffLogLines + FormatDateTime('hh:nn:ss', Time) + '  ';
-  V_BuffLogLines := V_BuffLogLines + ALog + GC_CRLF;
+  V_BuffLogLines := V_BuffLogLines + ALog + sLineBreak;
 end;
 
 procedure TForm_RestOllama.TrackBar_GlobalFontSizeChange(Sender: TObject);
@@ -1736,17 +1721,15 @@ begin
   SimpleSound_Common(True, 0);
 end;
 
-procedure TForm_RestOllama.SetLavaIndexFlag(const Value: Integer);
+procedure TForm_RestOllama.SetHistoryCation(const Value: string);
 begin
-  FLavaIndexFlag := Value;
+  FHistoryCation := Value;
+  // Label_HistoryCation.Caption:= Value;   { Reserved ... }
 end;
 
-procedure TForm_RestOllama.SetMemMonitoringFlag(const Value: Boolean);
+procedure TForm_RestOllama.SetImageSourceIndex(const Value: Integer);
 begin
-  FMemMonitoringFlag := Value;
-  Label_Counter.Caption :=    IIF.CastBool<string>(Value, '30', '0');
-  Shape_Memory.Brush.Color := IIF.CastBool<TColor>(Value, clLime, clGray);
-  Label_Counter.Font.Color := IIF.CastBool<TColor>(Value, clWhite, clSilver);
+  FImageSourceIndex := Value;
 end;
 
 procedure TForm_RestOllama.SetModelSelected(const Value: string);
@@ -1755,6 +1738,22 @@ begin
   var _caption := Format(C_CaptionFormat, [Value, FTopic_Seleced]);
   Label_Caption.EllipsisPosition := epEndEllipsis;
   Label_Caption.Caption := _caption;
+end;
+
+procedure TForm_RestOllama.SetProcessImageFlag(const Value: Boolean);
+begin
+  FProcessImageFlag := Value;
+  GroupBox_MultimodelImage.Enabled := Value;
+  if Value and FInitialized then
+  begin
+    Edit_ReqContent.Text := C_Prompt4Image;
+    Try_SetFocus(Edit_ReqContent as TWinControl);
+  end;
+end;
+
+procedure TForm_RestOllama.SetReasoningFlag(const Value: Boolean);
+begin
+  FReasoningFlag := Value;
 end;
 
 procedure TForm_RestOllama.SetRequestingFlag(const Value: Boolean);
@@ -1786,15 +1785,6 @@ procedure TForm_RestOllama.SetRequest_Type(const Value: TRequest_Type);
 begin
   FRequest_Type := Value;
   V_BaseURL := V_BaseURLarray[FRequest_Type];
-  Label_BaseURL.Caption := V_BaseURL;
-end;
-
-procedure TForm_RestOllama.SetSaveLogsOnCLoseFlag(const Value: Boolean);
-begin
-  FSaveLogsOnCLoseFlag := Value;
-  CheckBox_SaveOnCLose.OnClick := nil;
-  CheckBox_SaveOnCLose.Checked := Value;
-  CheckBox_SaveOnCLose.OnClick := CheckBox_SaveOnCLoseClick;
 end;
 
 procedure TForm_RestOllama.SetTopicSeleced(const Value: string);
@@ -1836,51 +1826,28 @@ begin
   Memo_LogWin.Lines.Clear;
 end;
 
-{ Deprecating ... }
-function Get_ModelDesc(const AModelName: string): string;
+procedure TForm_RestOllama.CheckBox_ProcessImageClick(Sender: TObject);
 begin
-  Result := 'N/A';
-  var _modelname := LowerCase(AModelName);
-  if Pos('aya', _modelname) = 1 then
-    Result := R_Aya else
-  if Pos('phi3', _modelname) = 1 then
-    Result := R_Phi3 else
-  if Pos('llama3', _modelname) = 1 then
-    Result := R_Llama3 else
-  if Pos('llama2', _modelname) = 1 then
-    Result := R_Llama2 else
-  if Pos('gemma', AModelName) = 1 then
-    Result := R_Gemma else
-  if Pos('llava', _modelname) = 1 then
-    Result := R_Llava else
-  if Pos('codegemma', _modelname) = 1 then
-    Result := R_Codegemma else
-  if Pos('dolphin-mistral', _modelname) = 1 then
-    Result := R_DolphiMistral else
-  if Pos('mistral', _modelname) = 1 then
-    Result := R_Mistral else
-  if Pos('qwen2', _modelname) = 1 then
-    Result := R_QWen2;
+  ProcessImageFlag  := CheckBox_ProcessImage.Checked;
 end;
 
-procedure TForm_RestOllama.CheckBox_SaveOnCLoseClick(Sender: TObject);
+procedure TForm_RestOllama.CheckBox_ReasoningClick(Sender: TObject);
 begin
-  FSaveLogsOnCLoseFlag := CheckBox_SaveOnCLose.Checked;
+  ReasoningFlag := CheckBox_Reasoning.Checked;
 end;
 
 procedure TForm_RestOllama.ComboBox_ModelsChange(Sender: TObject);
 begin
   V_LoadModelIndex := ComboBox_Models.ItemIndex;
   Model_Selected := ComboBox_Models.items[ComboBox_Models.ItemIndex];
-  GroupBox_Llava.Enabled := Is_LlavaModel(Model_Selected);
+  GroupBox_MultimodelImage.Enabled := ProcessImageFlag;//CheckBox_ProcessImage.Checked;
   Request_Type := TRequest_Type(RadioGroup_PromptType.ItemIndex);
   Display_Type := TDisplay_Type(RadioGroup_PromptType.ItemIndex);
-  if Is_LlavaModel(Model_Selected) then
-    Edit_ReqContent.Text := C_LlavaPromptContent
+  if ProcessImageFlag then
+    Edit_ReqContent.Text := C_Prompt4Image
   else
     Edit_ReqContent.Text := FLastRequest;
 
-  Label_Description.Caption := Get_ModelDesc(Model_Selected);
   Return_FocusToVST(1);
 end;
 
@@ -1888,7 +1855,6 @@ procedure TForm_RestOllama.Return_FocusToVST(const AFlag: Integer);
 begin
   if FInitialized and (PageControl_Chatting.ActivePage = Tabsheet_Chatting) then
   begin
-    Self.ActiveControl := nil;
     if AFlag = 1 then
       Try_SetFocus(Edit_ReqContent as TWinControl)
     else
@@ -1900,10 +1866,15 @@ end;
 
 procedure TForm_RestOllama.Do_DisplayJson(const RespStr: string);
 begin
-  var _Responses := Unit_Common.Get_DisplayJson(Display_Type, V_LoadModelFlag, RespStr);
+  var _Responses := '';
   var _jsonflag := C_CHATOllama_Model;
   if V_LoadModelFlag then
-    _jsonflag := C_CHATOllama_System;
+    begin
+      _jsonflag := C_CHATOllama_System;
+      _Responses := Unit_Jsonworks.Get_DisplayJson_LoadModel(RespStr);
+    end
+  else
+    _Responses := Unit_Jsonworks.Get_DisplayJson(Display_Type, RespStr);
   // ------------------------------------------------------------------------ //
   Add_ChattingMessage(_jsonflag, C_CHATLOC_Right, -1, _Responses);
   // ------------------------------------------------------------------------ //
@@ -1933,22 +1904,23 @@ begin
   var _parsingsrc := StringReplace(RespStr, GC_UTF8_LFA, ',',[rfReplaceAll]);
   var _mcount: Integer := 0;
   var _modelname := ComboBox_Models.Items[ComboBox_Models.ItemIndex];
-  var _ParseJson := Unit_Common.Get_DisplayJson_Models(_parsingsrc, _mcount, FModelsList);
-  var _Responses := _ParseJson+GC_CRLF+'Models Count : '+ _mcount.ToString;
+  var _ParseJson := Unit_Jsonworks.Get_DisplayJson_Models(_parsingsrc, _mcount, FModelsList);
+  var _Responses := _ParseJson+sLineBreak+'Models Count : '+ _mcount.ToString;
   // ------------------------------------------------------------------------ //
   Add_ChattingMessage(C_CHATOllama_System, C_CHATLOC_Right, -1, _Responses);
   // ------------------------------------------------------------------------ //
 
   if FModelsList.Count > 0 then
+  with ComboBox_Models do
   begin
-    ComboBox_Models.Items.BeginUpdate;
-    ComboBox_Models.Items.Assign(FModelsList);
-    var _modelIndex := ComboBox_Models.Items.IndexOf(_modelname);
+    Items.BeginUpdate;
+    Items.Assign(FModelsList);
+    var _modelIndex := Items.IndexOf(_modelname);
     if _modelindex >= 0 then
-      ComboBox_Models.ItemIndex := _modelindex
+      ItemIndex := _modelindex
     else
-      ComboBox_Models.ItemIndex := 0;
-    ComboBox_Models.Items.EndUpdate;
+      ItemIndex := 0;
+    Items.EndUpdate;
   end;
   RequestingFlag := False;
 
@@ -1993,7 +1965,7 @@ var
   V_AniFlag: Integer = 0;
 
 { Non Thread Safe of Async Request ? }
-{ ... V9.1 update log window, request may take a long time }
+
 procedure TForm_RestOllama.Edit_NicknameChange(Sender: TObject);
 begin
   V_Username := Edit_Nickname.Text;
@@ -2006,12 +1978,6 @@ begin
     Key := #0;
     Do_StartRequest(2);
   end;
-end;
-
-procedure TForm_RestOllama.Label_DescriptionClick(Sender: TObject);
-begin
-  Label_Description.Tag := (Label_Description.Tag +1 ) mod 2;
-  GroupBox_Description.Height := IIF.CastInteger<Integer>(Label_Description.Tag, 40, 160);
 end;
 
 procedure TForm_RestOllama.Label_SeedGetClick(Sender: TObject);
@@ -2052,10 +2018,18 @@ begin
 procedure TForm_RestOllama.SpeedButton_LoadModelClick(Sender: TObject);
 begin
   V_LoadModelIndex := ComboBox_Models.ItemIndex;
-  Do_LoadModel(V_LoadModelIndex);
+  Do_LoadModel(V_LoadModelIndex, True);
 end;
 
-procedure TForm_RestOllama.Do_LoadModel(const AIndex: Integer);
+procedure TForm_RestOllama.SpeedButton_UnloadModelClick(Sender: TObject);
+begin
+  V_LoadModelIndex := ComboBox_Models.ItemIndex;
+  Do_LoadModel(V_LoadModelIndex, False);
+end;
+
+procedure TForm_RestOllama.Do_LoadModel(const AIndex: Integer; const ALoadFlag: Boolean);
+const
+  c_LoadFlag:  array [Boolean] of string = ('UnLoad','Load');
 begin
   if RequestingFlag then
     Do_Abort(1);
@@ -2071,13 +2045,14 @@ begin
   V_LoadModelFlag := True;
   V_BaseURL := V_BaseURLarray[TRequest_Type.ort_Generate];
   V_MyContentPrompt := '';
-  var _ModelParams := StringReplace( GC_LoadModelPrompt, '%model%', V_MyModel, []);
-
-  Add_LogWin('Starting REST request for Load Model: ' + V_BaseURL);
+  // ------------------------------------------------------------------------ //
+  var _ModelParams := Get_RequestModel_Chat(ALoadFlag, V_MyModel);
+  // ------------------------------------------------------------------------ //
+  Add_LogWin('Starting REST request for '+c_LoadFlag[ALoadFlag]+' Model: ' + V_BaseURL);
   Add_LogWin('With Model : ' + V_MyModel);
   Push_LogWin();
   // ------------------------------------------------------------------------ //
-  Add_ChattingMessage(C_CHATUser_Ollama, C_CHATLOC_Left, -1, 'Request to load model : [ '+V_MyModel + ' ]');
+  Add_ChattingMessage(C_CHATUser_Ollama, C_CHATLOC_Left, -1, 'Request to '+c_LoadFlag[ALoadFlag]+' Model : [ '+V_MyModel + ' ]');
   // ------------------------------------------------------------------------ //
   V_StopWatch := TStopwatch.StartNew;
   // ------------------------------------------------------------------------ //
@@ -2108,7 +2083,7 @@ procedure TForm_RestOllama.Do_ListModels(const AIndex: Integer);
 begin
   RequestingFlag := True;
   var _Request := 'Request to list models ...';
-  var _BaseURL := GC_BaseURL_Models;
+  var _BaseURL := Unit_Jsonworks.GC_BaseURL_Models;
   Add_LogWin('Starting REST request for List Models: ' + _BaseURL);
   StatusBar1.Panels[1].Text := '';
   StatusBar1.Panels[2].Text := ' Processing ...';
@@ -2120,7 +2095,7 @@ begin
   V_StopWatch := TStopwatch.StartNew;
   V_MyContentPrompt := '';
   // ------------------------------------------------------------------------ //
-  var _responses := Get_ListModels_Ollama(_BaseURL); // from Unit_AliveOllama.pas
+  var _responses := Unit_AliveOllama.Get_ListModels_Ollama(_BaseURL);
   // ------------------------------------------------------------------------ //
   V_StopWatch.Stop;
   var _elapsed := V_StopWatch.ElapsedMilliseconds;
@@ -2133,61 +2108,6 @@ begin
   SimpleSound_Common(DoneSoundFlag, 1);
   RequestingFlag := False;
   Push_LogWin(1);
-end;
-
-{ System Info ... }
-
-var
-  V_Counter: Integer = 30;
-
-procedure TForm_RestOllama.SpeedButton_CPUMemUsageClick(Sender: TObject);
-begin
-  V_Counter := 30;
-  Timer_System.Enabled := not Timer_System.Enabled;
-  MemMonitoringFlag := Timer_System.Enabled;
-end;
-
-procedure TForm_RestOllama.Timer_SystemTimer(Sender: TObject);
-begin
-  if GV_AppCloseFlag then Exit;
-
-  if (not Panel_Options.Visible) or  (not GroupBox_CPUMem.Visible) then
-  begin
-    MemMonitoringFlag := False;
-    Timer_System.Enabled := False;
-    Exit;
-  end;
-
-  Dec(V_Counter);
-  if V_Counter <= 0 then
-  begin
-    MemMonitoringFlag := False;
-    Timer_System.Enabled := False;
-  end;
-  Label_Counter.Caption := IntToStr(V_Counter);
-
-  if Assigned(V_TaskSystem) and
-     ((V_TaskSystem.Status = TTaskStatus.Running) or (V_TaskSystem.Status = TTaskStatus.WaitingToRun)) then
-  Exit;
-
-  if (PageControl_Chatting.ActivePage = Tabsheet_Chatting) and (Panel_Options.Visible) then
-  try
-    V_TaskSystem := TTask.Run(
-    procedure
-    begin
-      TThread.Synchronize(nil,
-      procedure
-      begin
-        var _total: string := '';
-        var _avail: string := '';
-        Gauge_MemUsage.Progress :=   GetGlobalMemoryUsed2GB(_total, _avail);
-        Label_Available.Caption :=   _avail;
-        Label_TotalMemory.Caption := _total;
-      end);
-    end);
-  except
-    Abort;
-  end;
 end;
 
 { Translation - by Google Tanslation Service ... }
@@ -2531,17 +2451,6 @@ begin
   DM_Server.Do_ShutDownBroker(1);
 end;
 
-procedure TForm_RestOllama.SpeedButton_SystemInfoClick(Sender: TObject);
-begin
-  GroupBox_CPUMem.Visible := not GroupBox_CPUMem.Visible;
-  if GroupBox_CPUMem.Visible then
-    SpeedButton_CPUMemUsageClick(Self)
-  else
-    begin
-      Timer_SystemTimer(Self);
-    end;
-end;
-
 procedure TForm_RestOllama.SpeedButton_DeleteTopicClick(Sender: TObject);
 begin
   FTopicsMRU.DeleteNode(0);
@@ -2725,7 +2634,6 @@ begin
   end;
 end;
 
-
 {
  Dos Command processing ...
  Not Chatting Mode / Not Use Ollama Models ...
@@ -2854,13 +2762,11 @@ procedure TForm_RestOllama.Build_BanListUp(const AFlag: Integer);
 begin
   GV_RemoteBanList.Clear;
   if CheckListBox_ConnIPs.items.Count > 0 then
-  begin
     for var _i := 0 to CheckListBox_ConnIPs.items.Count-1 do
       begin
         if CheckListBox_ConnIPs.Checked[_i] then
         GV_RemoteBanList.Add(CheckListBox_ConnIPs.Items[_i]);
       end;
-  end;
 end;
 
 procedure TForm_RestOllama.CheckListBox_ConnIPsClickCheck(Sender: TObject);
@@ -2929,11 +2835,11 @@ begin
       end;
     WF_DM_MESSAGE_SERVERON:
       begin
-        Log_Server(WF_DM_SERVERON_FLAG, 'Remote Broker/Server is activated.');
+        Log_Server(WF_DM_SERVERON_FLAG, 'Ollama Broker/Server is activated.');
       end;
     WF_DM_MESSAGE_SERVEROFF:
       begin
-        Log_Server(WF_DM_SERVEROFF_FLAG, 'Remote Broker/Server is down.');
+        Log_Server(WF_DM_SERVEROFF_FLAG, 'Ollama Broker/Server is down.');
       end;
     WF_DM_MESSAGE_CONNECT:
       begin
@@ -2951,6 +2857,117 @@ begin
 
   Msg.Result := 0;
 end;
+
+{ History Actions ------------------------------------------------------------ }
+
+procedure TForm_RestOllama.Action_LoadHistoryExecute(Sender: TObject);
+begin
+  if FileOpenDialog1.Execute then
+  begin
+    HistoryCation := '';
+    var _file: string :=  FileOpenDialog1.FileName;
+    var _filen: string := ExtractFileName(_file);
+    var _ext: string :=   ExtractFileExt(_file);
+    if SameText('.dat', _ext) then
+      Do_LoadHistoryFile(FileOpenDialog1.FileName) else
+    if SameText('history.lst', _filen) then
+      FHistoryManager.Load_HstoryList(_file);
+  end;
+end;
+
+procedure TForm_RestOllama.Action_AddToHistoryExecute(Sender: TObject);
+begin
+  var _historyfile := Format('%s%s%s%s', [CV_HisPath, 'History_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.dat']);
+  if Frame_ChattingBox.Do_SaveAllData(_historyfile) then
+  begin
+    var _Subject: string := Frame_ChattingBox.Get_HistorySubject;
+    if _Subject > '' then
+      begin
+        Panel_HistoryFile.Caption := ExtractFileName(_historyfile);
+        var _index: Integer := FHistoryManager.AddToHistory(0, _Subject, _historyfile);
+        if _index >= 0 then
+          begin
+            ListBox_History.ClearSelection;
+            ListBox_History.Selected[_index] := True;
+          end;
+      end
+    else
+      ShowMessage('The top node must be in request mode.');
+  end;
+end;
+
+procedure TForm_RestOllama.Action_DelToHistoryExecute(Sender: TObject);
+begin
+  HistoryCation := '';
+  FHistoryManager.DeleteHistory(ListBox_History.ItemIndex);
+end;
+
+procedure TForm_RestOllama.Action_ClearHistoryExecute(Sender: TObject);
+begin
+  HistoryCation := '';
+  FHistoryManager.Clear_ViewAll();
+end;
+
+procedure TForm_RestOllama.Action_ClearAllHistoryExecute(Sender: TObject);
+begin
+  HistoryCation := '';
+  FHistoryManager.Clear_ListData();
+end;
+
+procedure TForm_RestOllama.SpeedButton_HistoryMoreClick(Sender: TObject);
+begin
+  var _pos := SpeedButton_HistoryMore.ClientToScreen(Point(0, Panel_HistoryButtons.Height));
+  PopupMenu_History.Popup(_pos.x-170, _pos.Y)
+end;
+
+procedure TForm_RestOllama.Do_LoadHistoryFile(const AFile: string);
+begin
+  if FileExists(AFile) then
+  begin
+    Screen.Cursor := crAppStart;
+    try
+      SkAnimatedImage_Chat.Animation.Enabled := False;
+      SkAnimatedImage_Chat.Visible := False;
+      Frame_ChattingBox.Do_LoadAllData(AFile);
+      Panel_HistoryFile.Caption := ExtractFileName(AFile);
+      HistoryCation := Frame_ChattingBox.Get_HistorySubject;
+    finally
+      Screen.Cursor := crDefault;
+    end;
+  end;
+end;
+
+procedure TForm_RestOllama.ListBox_HistoryClick(Sender: TObject);
+begin
+  var _hcaption: string := '';
+  var _mousePos: TPoint;
+  if GetCursorPos(_mousePos) then
+    begin
+      _mousePos := TListbox(Sender).ScreenToClient(_mousePos);
+      if TListbox(Sender).ItemAtPos(_mousePos, True) <> -1 then
+        begin
+          var _hfile := FHistoryManager.Get_HistoryData(ListBox_History.ItemIndex);
+          if FileExists(_hfile) then
+            begin
+              _hcaption := ListBox_History.Items[ListBox_History.ItemIndex];
+              Do_LoadHistoryFile(_hfile);
+            end;
+        end
+      else
+        TListbox(Sender).ClearSelection;
+    end
+  else
+    TListbox(Sender).ClearSelection;
+
+  HistoryCation  := _hcaption;
+end;
+
+procedure TForm_RestOllama.Panel_HistoryButtonsClick(Sender: TObject);
+begin
+  ListBox_History.ClearSelection;
+end;
+
+{ / History Actions ---------------------------------------------------------- }
 
 initialization
   SetGlobalSVGFactory(GetSkiaSVGFactory);

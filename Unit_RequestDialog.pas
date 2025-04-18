@@ -24,10 +24,10 @@ type
     SpeedButton_Trans: TSpeedButton;
     Label2: TLabel;
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure Label_ClearClick(Sender: TObject);
     procedure SpeedButton_TransClick(Sender: TObject);
-    procedure FormShow(Sender: TObject);
   private
     FPreLoader: string;
     FCode_From: Integer;
@@ -107,7 +107,7 @@ begin
   if _ItemStr <> '' then
   begin
     _ItemStr := Get_ReplaceSpecialChar4Trans(_ItemStr);
-    Memo_Request.lines.Text := Get_GoogleTranslatorEx(0, _codefrom, _codeto, _ItemStr);
+    Memo_Request.Lines.Text := Get_GoogleTranslatorEx(0, _codefrom, _codeto, _ItemStr);
   end;
 end;
 

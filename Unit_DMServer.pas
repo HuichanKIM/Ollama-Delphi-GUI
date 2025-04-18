@@ -153,23 +153,26 @@ begin
       with _HTTP do
       begin
         ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
-        Accept := 'application/json';
         ContentType := 'application/json; charset=UTF-8';
+        Accept := 'application/json';
       end;
       try
         var _HttpResponse := _HTTP.Get(c_IpDomain);
         if _HttpResponse.StatusCode = 200 then
           begin
-            var _response := _HttpResponse.ContentAsString();
+            var _response := _HttpResponse.ContentAsString(TEncoding.UTF8);
             var _JsonObj := TJSONObject.ParseJSONValue(_response) as TJSONObject;
-            if Assigned(_JsonObj) then
-              DM_PublicIP := _JsonObj.Get('ip').JsonValue.Value;
-            _JsonObj.Free;
+            try
+              if Assigned(_JsonObj) then
+                DM_PublicIP := _JsonObj.GetValue<string>('ip');
+            finally
+              _JsonObj.Free;
+            end;
           end;
       finally
         _HTTP.Free;
       end;
-      DM_ServerAddress := Format('Loccal IP %s / Public IP %s Port: %d', [DM_LocalIP, DM_PublicIP, DM_Port]);
+      DM_ServerAddress := Format('Local IP %s / Public IP %s Port: %d', [DM_LocalIP, DM_PublicIP, DM_Port]);
       PostMessage(Form_RestOllama.Handle, WF_DM_MESSAGE, WF_DM_MESSAGE_ADDRESS, AFlag);
     end);
 end;
@@ -238,8 +241,11 @@ begin
   FCLoseFlag := True;
   Do_ShutDownBroker(0);
 
-  var _slog := Format('%s%s%s', ['Log_dm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
-  FLogList.SaveToFile(CV_LogPath+_slog);
+  if GV_SaveLogsOnClose and (FLogList.Count > 1) then
+  begin
+    var _slog := Format('%s%s%s', ['Log_dm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+    FLogList.SaveToFile(CV_LogPath+_slog);
+  end;
 
   FLogList.Free;
   ConnectedUsers.Free;
@@ -389,15 +395,15 @@ begin
   Log_Chat(WF_DM_DISCONNECT_FLAG, 'Client disconnected: ' + aLine.UserID +' /'+ aLine.PeerIP);
 
   ConnectedUsersLock.Acquire;
-  var UserData: TConnectedUserData;
+  var _UserData: TConnectedUserData;
   var _cntbool: Integer := ConnectedUsers.Count;;
   try
     for var _i := ConnectedUsers.Count - 1 downto 0 do  // Substitute for aLine.UserID ?
     begin
-      UserData := TConnectedUserData(ConnectedUsers.Objects[_i]);
-      if Assigned(UserData) and (UserData.Line = aLine) then
+      _UserData := TConnectedUserData(ConnectedUsers.Objects[_i]);
+      if Assigned(_UserData) and (_UserData.Line = aLine) then
       begin
-        UserData.Free;
+        _UserData.Free;
         ConnectedUsers.Delete(_i);
         Break;
       end;

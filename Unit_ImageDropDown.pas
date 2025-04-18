@@ -34,18 +34,18 @@ type
     FOnLoadImage: TLoadImageEvent;
     FOnLoadIndex: TLoadIndexEvent;
     FCurrentIndex: Integer;
-    FLavaSourceList: TStringList;
-    FLavaPrevButton: TSpeedButton;
-    FLavaNextButton: TSpeedButton;
+    FImageSourceList: TStringList;
+    FImagePrevButton: TSpeedButton;
+    FImageNextButton: TSpeedButton;
     procedure WM_ImageDrop(var Msg: TWMDROPFILES);
     procedure PanelWindowProc(var Msg: TMessage);
     //
     procedure Do_UpdateButtons();
     procedure SetCurrentIndex(const Value: Integer);
-    procedure LavaPrevButtonClick(Sender: TObject);
-    procedure LavaNextButtonClick(Sender: TObject);
-    procedure SetLavaNextButton(const Value: TSpeedButton);
-    procedure SetLavaPrevButton(const Value: TSpeedButton);
+    procedure ImagePrevButtonClick(Sender: TObject);
+    procedure ImageNextButtonClick(Sender: TObject);
+    procedure SetImageNextButton(const Value: TSpeedButton);
+    procedure SetImagePrevButton(const Value: TSpeedButton);
     function Load_IMG(const ASourceFile: string): Boolean;
     procedure Do_LoadIMG(const AIndex: Integer);
   public
@@ -53,14 +53,14 @@ type
     destructor Destroy; override;
     procedure LoadIMG_Drop(const ADropedFile: string);
     // property ...
-    property Image: TImage                 read FImage;
-    property DropFlag: Integer             read FDropFlag        write FDropFlag;
-    property OnLoadImage: TLoadImageEvent  read FOnLoadImage     write FOnLoadImage;
-    property OnLoadIndex: TLoadIndexEvent  read FOnLoadIndex     write FOnLoadIndex;
+    property Image: TImage                  read FImage;
+    property DropFlag: Integer              read FDropFlag         write FDropFlag;
+    property OnLoadImage: TLoadImageEvent   read FOnLoadImage      write FOnLoadImage;
+    property OnLoadIndex: TLoadIndexEvent   read FOnLoadIndex      write FOnLoadIndex;
     //
-    property LavaPrevButton: TSpeedButton  read FLavaPrevButton  write SetLavaPrevButton;
-    property LavaNextButton: TSpeedButton  read FLavaNextButton  write SetLavaNextButton;
-    property CurrentIndex: Integer         read FCurrentIndex    write SetCurrentIndex;
+    property ImagePrevButton: TSpeedButton  read FImagePrevButton  write SetImagePrevButton;
+    property ImageNextButton: TSpeedButton  read FImageNextButton  write SetImageNextButton;
+    property CurrentIndex: Integer          read FCurrentIndex     write SetCurrentIndex;
   end;
 
 function GetResizedImage(const AImage: ISkImage;  const ANewWidth, ANewHeight: Integer): ISkImage;
@@ -99,7 +99,7 @@ begin
   if FileExists(ASourceFile) then
   try
     var _ext := LowerCase(ExtractFileExt(ASourceFile));
-    if (_ext = '.webp') or (_ext = '.gif') then   { Unsupported Image Format in Llava model }
+    if (_ext = '.webp') or (_ext = '.gif') then   { Unsupported Image Format in Multimodel Image }
       begin
         var _BytesStreamJpg: TBytesStream := TBytesStream.Create();
         try
@@ -151,7 +151,7 @@ begin
   var _ext := LowerCase(ExtractFileExt(ADropedFile));
   if Pos(_ext, c_VerifyImgFormat) > 3 then
     try
-      if (_ext = '.webp') or (_ext = '.gif') then   { Unsupported Image Format in Llava model }
+      if (_ext = '.webp') or (_ext = '.gif') then   { Unsupported Image Format in Multimodel Image }
         begin
           var _BytesStreamJpg: TBytesStream := TBytesStream.Create();
           try
@@ -168,7 +168,7 @@ begin
       else
         FImage.Picture.LoadFromFile(ADropedFile);
 
-      CurrentIndex := FLavaSourceList.Add(ADropedFile);
+      CurrentIndex := FImageSourceList.Add(ADropedFile);
       if Assigned(FOnLoadImage) then
         FOnLoadImage(Self, ADropedFile);
     except
@@ -187,7 +187,7 @@ begin
 
   FDropFlag := 0;
   FCurrentIndex := -1;
-  FLavaSourceList := TStringList.Create;
+  FImageSourceList := TStringList.Create;
   FImage.Picture.Graphic.EnableScaledDrawer(TWICScaledGraphicDrawer);
 
   FOriginalPanelWndProc := APanel.WindowProc;
@@ -210,15 +210,15 @@ begin
     FPanel.WindowProc := FOriginalPanelWndProc;
     DragAcceptFiles(FPanel.Handle, False);
   end;
-  FLavaSourceList.Free;
+  FImageSourceList.Free;
   inherited;
 end;
 
 procedure TImageDropDown.Do_LoadIMG(const AIndex: Integer);
 begin
-  if (AIndex >= 0) and (AIndex < FLavaSourceList.Count) then
+  if (AIndex >= 0) and (AIndex < FImageSourceList.Count) then
   begin
-    var _source := FLavaSourceList.Strings[AIndex];
+    var _source := FImageSourceList.Strings[AIndex];
     if Load_IMG(_source) then
       begin
         CurrentIndex := AIndex;
@@ -230,10 +230,10 @@ end;
 
 procedure TImageDropDown.Do_UpdateButtons;
 begin
-  if Assigned(FLavaPrevButton) then
-    FLavaPrevButton.Enabled := (FLavaSourceList.Count > 0) and (FCurrentIndex > 0);
-  if Assigned(FLavaNextButton) then
-    FLavaNextButton.Enabled := (FLavaSourceList.Count > 0) and (FCurrentIndex < FLavaSourceList.Count-1);
+  if Assigned(FImagePrevButton) then
+    FImagePrevButton.Enabled := (FImageSourceList.Count > 0) and (FCurrentIndex > 0);
+  if Assigned(FImageNextButton) then
+    FImageNextButton.Enabled := (FImageSourceList.Count > 0) and (FCurrentIndex < FImageSourceList.Count-1);
 end;
 
 procedure TImageDropDown.SetCurrentIndex(const Value: Integer);
@@ -242,28 +242,28 @@ begin
   Do_UpdateButtons;
 end;
 
-procedure TImageDropDown.LavaNextButtonClick(Sender: TObject);
+procedure TImageDropDown.ImageNextButtonClick(Sender: TObject);
 begin
   var _nextindex: Integer := FCurrentIndex+1;
   Do_LoadIMG(_nextindex);
 end;
 
-procedure TImageDropDown.LavaPrevButtonClick(Sender: TObject);
+procedure TImageDropDown.ImagePrevButtonClick(Sender: TObject);
 begin
   var _previndex: Integer := FCurrentIndex-1;
   Do_LoadIMG(_previndex);
 end;
 
-procedure TImageDropDown.SetLavaNextButton(const Value: TSpeedButton);
+procedure TImageDropDown.SetImageNextButton(const Value: TSpeedButton);
 begin
-  FLavaNextButton := Value;
-  FLavaNextButton.onClick := LavaNextButtonClick;
+  FImageNextButton := Value;
+  FImageNextButton.onClick := ImageNextButtonClick;
 end;
 
-procedure TImageDropDown.SetLavaPrevButton(const Value: TSpeedButton);
+procedure TImageDropDown.SetImagePrevButton(const Value: TSpeedButton);
 begin
-  FLavaPrevButton := Value;
-  FLavaPrevButton.onClick := LavaPrevButtonClick;
+  FImagePrevButton := Value;
+  FImagePrevButton.onClick := ImagePrevButtonClick;
 end;
 
 End.

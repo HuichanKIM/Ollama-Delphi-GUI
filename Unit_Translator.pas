@@ -52,6 +52,7 @@ uses
   System.NetConsts,
   Vcl.Themes,
   Unit_Common,
+  Unit_Jsonworks,
   Unit_Main;
 
 {$R *.dfm}
@@ -110,7 +111,7 @@ begin
   try
     _Responses.Position := 0;
     var _rbs := TEncoding.UTF8.GetString(_Responses.Bytes, 0, _Responses.Size);
-    Result := Get_DisplayJson(TDIsplay_Type.disp_Trans, False, _rbs);
+    Result := Get_DisplayJson(TDIsplay_Type.disp_Trans, _rbs);
   finally
     _Responses.Free;
   end;
@@ -159,7 +160,6 @@ end;
 procedure TForm_Translator.Get_GoogleTranslator(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string);
 const
   c_Type: array [0 .. 1 ] of string = ('Request', 'Prompt');
-
 begin
   FTransResult := TranslateByGoogle(ACodeFrom, ACodeTo, AText);
   CheckBox_Pushtochatbox.Enabled := (AUser = 0) and PushFlag;

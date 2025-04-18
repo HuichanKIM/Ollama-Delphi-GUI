@@ -49,9 +49,9 @@ begin
   SkSvg_ICon.Left := (SkLabel_Intro.Width - SkSvg_ICon.Width) div 2;
   SkSvg_ICon.Top :=  (SkLabel_Intro.Height div 4)-10;
   SkAnimatedImage_Alive.Left := (SkLabel_Intro.Width - SkAnimatedImage_Alive.Width) div 2;
-  SkAnimatedImage_Alive.Top :=  SkLabel_Intro.Height - SkLabel_Intro.Height div 6;
+  SkAnimatedImage_Alive.Top :=   SkLabel_Intro.Height - SkLabel_Intro.Height div 6;
   SkPaintBox_Intro.Left := (SkLabel_Intro.Width - SkPaintBox_Intro.Width) div 2;
-  SkPaintBox_Intro.Top := SkSvg_ICon.Top -20;
+  SkPaintBox_Intro.Top :=   SkSvg_ICon.Top -20;
 end;
 
 procedure TFrame_Welcome.SetAnimationFlag(const Value: Boolean);

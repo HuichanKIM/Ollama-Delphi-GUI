@@ -38,13 +38,13 @@ function Get_ListModels_Ollama(const ARequestURI: string): string;
 implementation
 
 uses
-  Vcl.Themes,
-  Unit_Common,
-  Unit_Main,
   System.Threading,
   System.NetConsts,
   System.Net.HttpClient,
-  System.Net.URLClient;
+  System.Net.URLClient,
+  Vcl.Themes,
+  Unit_Common,
+  Unit_Main;
 
 {$R *.dfm}
 
@@ -76,7 +76,7 @@ end;
 
 function Get_ListModels_Ollama(const ARequestURI: string): string;
 begin
-  Result := '';
+  Result := 'n/a';
   if GV_AliveOllamaFlag then
   try
     var _HTTP := THTTPClient.Create;

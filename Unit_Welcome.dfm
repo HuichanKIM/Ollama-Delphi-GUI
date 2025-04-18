@@ -48,8 +48,8 @@ object Frame_Welcome: TFrame_Welcome
       end
       item
         Caption = 
-          #13#10#13#10'Run Llama 3, Phi 3,  Gemma, and other models. Customize and ' +
-          'create your own.'
+          #13#10#13#10'Run Llama 3.3, DeepSeek-R1, Phi-4, Mistral, Gemma 3, and oth' +
+          'er models, locally.'
         Name = 'Item 4'
       end
       item
@@ -79,7 +79,7 @@ object Frame_Welcome: TFrame_Welcome
     ExplicitHeight = 675
   end
   object SkPaintBox_Intro: TSkPaintBox
-    Left = 392
+    Left = 388
     Top = 80
     Width = 120
     Height = 120

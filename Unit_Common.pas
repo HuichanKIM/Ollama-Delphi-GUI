@@ -12,6 +12,7 @@ uses
   System.UITypes,
   Vcl.StdCtrls,
   Vcl.Graphics,
+  Vcl.Controls,
   Vcl.ExtCtrls;
 
 { TResourceStream_Ex - MultiLoad ... }
@@ -27,7 +28,7 @@ type
     //
     procedure Re_Initialize(AInstance: THandle; AName, AResType: PChar);
   end;
-{ ... }
+{ /TResourceStream_Ex ... }
 
 type
   IIF = class
@@ -35,26 +36,10 @@ type
     class function CastInteger<T>(AExpression: Integer; const ATrue, AFalse: T): T; static;
   end;
 
-type
-  TUtils = class
-  private
-  public
-    class procedure OpenLink(ALink: string);
-    class procedure ShellExecuteC4D(AFileName: string); overload;
-    class procedure ShellExecuteC4D(AFileName: string; AParameters: string); overload;
-    class procedure ShellExecuteC4D(AFileName: string; AShowCmd: Integer); overload;
-    class procedure ShellExecuteC4D(AFileName: string; AParameters: string; AShowCmd: Integer); overload;
-    class function SelectFolder(const ADefaultFolder: string; const ADefaultFolderIfCancel: Boolean = True): string;
-    class function GetGuidStr: string;
-    class function UTF8ToStr(AValue: string): string;
-    class function CopyReverse(S: string; Index, Count : Integer): string;
-    class procedure MemoFocusOnTheEnd(const AMemo: TMemo);
-  end;
-
 const
-  // Acivate Remote Broker/Server ------------------------------------------  //
+  // Acivate Remote Broker/Server ---------------------------------------------  //
   DM_ACTIVATECODE = 1;                           { 0 - Deactivate  1- Activate }
-  // ------------------------------------------- Acivate Remote Broker/Server //
+  // /Acivate Remote Broker/Server --------------------------------------------  //
 
   DM_SERVERPORT = 17233;
   WF_DM_MESSAGE  = DM_SERVERPORT + 1;
@@ -70,17 +55,17 @@ const
     WF_DM_MESSAGE_IMAGE       = WF_DM_MESSAGE + 10;
     WF_DM_MESSAGE_WARNING     = WF_DM_MESSAGE + 11;
 
-      WF_DM_ADDRESS_FLAG     = 1;
-      WF_DM_SERVERON_FLAG    = 2;
-      WF_DM_SERVEROFF_FLAG   = 3;
-      WF_DM_CONNECT_FLAG     = 4;
-      WF_DM_DISCONNECT_FLAG  = 5;
-      WF_DM_LOGON_FLAG       = 6;
-      WF_DM_REQUEST_FLAG     = 7;
-      WF_DM_REQUESTEX_FLAG   = 8;
-      WF_DM_RESPONSE_FLAG    = 9;
-      WF_DM_IMAGE_FLAG       = 10;
-      WF_DM_WARNING_FLAG     = 11;
+      WF_DM_ADDRESS_FLAG      = 1;
+      WF_DM_SERVERON_FLAG     = 2;
+      WF_DM_SERVEROFF_FLAG    = 3;
+      WF_DM_CONNECT_FLAG      = 4;
+      WF_DM_DISCONNECT_FLAG   = 5;
+      WF_DM_LOGON_FLAG        = 6;
+      WF_DM_REQUEST_FLAG      = 7;
+      WF_DM_REQUESTEX_FLAG    = 8;
+      WF_DM_RESPONSE_FLAG     = 9;
+      WF_DM_IMAGE_FLAG        = 10;
+      WF_DM_WARNING_FLAG      = 11;
 
 const
   WM_NETHTTP_MESSAGE = WM_USER + 10;
@@ -96,11 +81,11 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  GC_Version0     = 'ver. 0.9.12';
-  GC_Version1     = 'ver. 0.9.12 (2024.07.11)';
+  GC_Version0     = 'ver. 1.0.0';
+  GC_Version1     = 'ver. 1.0.0 (2025.04.12)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
-  GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024 - JNJ Labs. Seoul, Korea.';
+  GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024-2025 JNJ Labs. Seoul, Korea.';
 
 const
   GC_BTdivKB = SizeOf(Byte) shl 10;
@@ -126,30 +111,13 @@ const
   GC_AboutSkinFlag = 3;
 
 const
-  GC_MRU_NewRoot  = 0;
-  GC_MRU_AddRoot  = 1;
-  GC_MRU_AddChild = 2;
-
-const
-  GC_BaseURL_Generate    = 'http://localhost:11434/api/generate';
-  GC_BaseURL_Chat        = 'http://localhost:11434/api/chat';
-  GC_BaseURL_Models      = 'http://localhost:11434/api/tags';
-
-  GC_GeneratePrompt      = '{"model": "%model%","prompt": "%prompts%"}'; // option - "format":"json","stream":false}';
-  GC_GeneratePrompt_opt  = '{"model": "%model%","prompt": "%prompts%","options": {"seed": %seed%,"temperature": 0}}';
-  GC_ChatContent         = '{"model": "%model%","messages": [{"role": "user","content": "%content%"}]}';
-  GC_ChatContent_opt     = '{"model": "%model%","messages": [{"role": "user","content": "%content%"}],"options": {"seed": %seed%,"temperature": 0}}';
-
-  GC_LoadModelPrompt     = '{"model": "%model%"}';
-  GC_GenerateLlavaPrompt = '{"model": "%model%","prompt": "%prompts%","stream": false,"images": ["%images%"]}';
-  GC_ChatLlavaContent    = '{"model": "%model%","messages": [{"role": "user","content": "%content%","images": ["%images%"]}]}';
+  GC_MRU_NewRoot   = 0;
+  GC_MRU_AddRoot   = 1;
+  GC_MRU_AddChild  = 2;
 
 procedure InitializePaths();
 function Is_Hangul(const AText: string): Boolean;
 function Is_ExternalCmd(const AText: string): Boolean;
-
-function Is_LlavaModel(const AText: string): Boolean;
-function Get_Base64Endoeings1(const AImage: TImage): string;
 
 function BytesToKMG(AValue: Int64): string;
 function Get_ReplaceSpecialChar4Trans(const AText: string): string;
@@ -160,17 +128,17 @@ function ReadAllText_Unicode(const AFilePath: string=''): string;
 function WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
 function IOUtils_ReadAllText(const AFilePath: string=''): string;
 function IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
+
 function Get_SystemInfo(): string;
-
-function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const AModelsFlag: Boolean; const ARespStr: string): string;
-function Get_DisplayJson_Models(const ARespStr: string; var aIndex: Integer; var AModelsList: TStringList): string;
-
 function MSecsToTime(const AMSec: Int64): string;
 function MSecsToSeconds(const AMSec: Int64): string;
 procedure Global_TrimAppMemorySizeEx(const AStrategy: Integer);
 function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
 procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
 function LoadFromFileBuffered_String(const AFileName: string): string;
+
+function  Can_Focus(Control: TWinControl): Boolean;
+procedure Set_Focus(Control: TWinControl);
 
 function InetIsOffline(AFlag: Integer): Boolean; stdcall; external 'URL.DLL';
 
@@ -204,15 +172,19 @@ var
   CV_AppPath: string  = '';
   CV_TmpPath: string  = 'temp';
   CV_LogPath: string  = 'log';
+  CV_HisPath: string  = 'history';
   CV_LocaleID: string = 'en';
 
 var
   MRU_MAX_ROOT:Integer   = 20;
   MRU_MAX_CHILD: Integer = 30;
+  HIS_MAX_ITEMS:Integer =  25;
 
 var
   GV_AppCloseFlag: Boolean = False;
   GV_CheckingAliveStart: Boolean = True;
+  GV_SaveContentsOnClose: Boolean = True;
+  GV_SaveLogsOnClose: Boolean = False;
   GV_ReservedColor: array [0..3] of TColor;
   GV_AliveOllamaFlag: Boolean = False;
   GV_RemoteBanList: TStringList;
@@ -229,106 +201,48 @@ uses
   System.Math,
   System.StrUtils,
   System.NetEncoding,
-  System.JSON,
-  System.JSON.Readers,
-  System.JSON.Writers,
-  System.JSON.Types,
   System.RegularExpressions,
   System.Threading,
-  Unit_SysInfo,
   Vcl.Styles,
   Vcl.StyleAPI,
   Vcl.Themes,
   Vcl.Forms,
   Vcl.Dialogs,
+  Unit_SysInfo,
   Unit_Main;
 
-{ TUtils ... }
 
-{$WARN SYMBOL_PLATFORM OFF}
-class function TUtils.SelectFolder(const ADefaultFolder: string; const ADefaultFolderIfCancel: Boolean = True): string;
+{ The CanFocus VCL function is totally flawed and unreliable.}
+
+function Can_Focus(Control: TWinControl): Boolean;
 begin
-  Result := '';
-  var LFileOpenDialog := TFileOpenDialog.Create(nil);
+  Result := Control.CanFocus and Control.Enabled and Control.Visible;
+  if Result and not Control.InheritsFrom(TForm) then
+    { Recursive call:
+      This control might be hosted by a panel which could be also invisible/disabled.
+      So, we need to check all the parents down the road. We stop when we encounter the parent Form.
+      Also see: GetParentForm }
+    Result := Can_Focus(Control.Parent);
+end;
+
+procedure Set_Focus(Control: TWinControl);
+begin
+  if Can_Focus(Control) then
+    Control.SetFocus;
+end;
+
+{ ... }
+procedure GetResizedImage_WIC(const ASource: string; ADest: TImage; const ANewWidth, ANewHeight: Integer);
+begin
+  var _WIC := TWICImage.Create;
+  _WIC.LoadFromFile(ASource);
+  var _WIC2 := _WIC.CreateScaledCopy(ANewWidth, ANewHeight);
   try
-    LFileOpenDialog.Title := 'Ollama Client GUI -  Select a folder';
-    LFileOpenDialog.Options := [fdoPickFolders];
-
-    if(not ADefaultFolder.Trim.IsEmpty)and(System.SysUtils.DirectoryExists(ADefaultFolder))then
-      LFileOpenDialog.DefaultFolder := ADefaultFolder;
-
-    if(not LFileOpenDialog.Execute)then
-    begin
-      if(ADefaultFolderIfCancel)then
-        Result := ADefaultFolder;
-      Exit;
-    end;
-
-    Result := IncludeTrailingPathDelimiter(LFileOpenDialog.FileName).Trim;
+    ADest.Picture.Assign(_WIC2);
   finally
-    LFileOpenDialog.Free;
+    _WIC.Free;
+    _WIC2.Free;
   end;
-end;
-{$WARN SYMBOL_PLATFORM ON}
-
-class procedure TUtils.ShellExecuteC4D(AFileName: string);
-begin
-  Self.ShellExecuteC4D(AFileName, '', SW_SHOWNORMAL);
-end;
-
-class procedure TUtils.ShellExecuteC4D(AFileName, AParameters: string);
-begin
-  Self.ShellExecuteC4D(AFileName, AParameters, SW_SHOWNORMAL);
-end;
-
-class procedure TUtils.ShellExecuteC4D(AFileName: string; AShowCmd: Integer);
-begin
-  Self.ShellExecuteC4D(AFileName, '', AShowCmd);
-end;
-
-class procedure TUtils.ShellExecuteC4D(AFileName: string; AParameters: string; AShowCmd: Integer);
-begin
-  var _H: HINST := ShellExecute(Application.Handle, nil, PWideChar(AFileName), PWideChar(AParameters), nil, AShowCmd);
-end;
-
-class procedure TUtils.OpenLink(ALink: string);
-begin
-  Self.ShellExecuteC4D(ALink);
-end;
-
-class function TUtils.UTF8ToStr(AValue: string): string;
-begin
-  Result := UTF8Tostring(RawBytestring(AValue));
-end;
-
-class function TUtils.GetGuidStr: string;
-begin
-  Result := '';
-  var LGUID1: TGUID;
-  CreateGUID(LGUID1);
-  Result := GUIDTostring(LGUID1).Replace('{', EmptyStr).Replace('}', EmptyStr);
-end;
-
-class function TUtils.CopyReverse(S: string; Index, Count : Integer): string;
-begin
-  Result := ReverseString(S);
-  Result := Copy(Result, Index, Count);
-  Result := ReverseString(Result);
-end;
-
-class procedure TUtils.MemoFocusOnTheEnd(const AMemo: TMemo);
-begin
-  TThread.CreateAnonymousThread(
-    procedure
-    begin
-      TThread.Synchronize(nil,
-        procedure
-        begin
-          AMemo.SelStart := Length(AMemo.Text);
-          AMemo.SelLength := 0;
-          AMemo.SetFocus;
-        end);
-    end).Start;
 end;
 
 
@@ -383,103 +297,11 @@ begin
     if not DirectoryExists(CV_LogPath) then
     ForceDirectories(CV_LogPath);
   CV_LogPath := IncludeTrailingPathDelimiter(CV_LogPath);
+  CV_HisPath := CV_AppPath+'history\';
+    if not DirectoryExists(CV_HisPath) then
+    ForceDirectories(CV_HisPath);
+  CV_HisPath := IncludeTrailingPathDelimiter(CV_HisPath);
 end;
-
-{ Common Methods for Unit_Main,  Unit_RMBroker ... }
-function Is_LlavaModel(const AText: string): Boolean;
-begin
-  var _text: string := LowerCase(AText);
-  Result := (Pos('llava', _text) > 0);
-end;
-
-const
-    ICS_Base64OutA: array [0..64] of AnsiChar = (
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '='
-    );
-
-function ICS_Base64Encode(const AInput : PAnsiChar; ALen: Integer) : AnsiString;
-begin
-  var _Count := 0;
-  var _I := ALen;
-  while (_I mod 3) > 0 do
-      Inc(_I);
-  _I := (_I div 3) * 4;
-  SetLength(Result, _I);
-  _I := 0;
-  while _Count < ALen do
-  begin
-    Inc(_I);
-    Result[_I] := ICS_Base64OutA[(Byte(AInput[_Count]) and $FC) shr 2];
-    if (_Count + 1) < ALen then
-      begin
-        Inc(_I);
-        Result[_I] := ICS_Base64OutA[((Byte(AInput[_Count]) and $03) shl 4) +
-                                     ((Byte(AInput[_Count + 1]) and $F0) shr 4)];
-        if (_Count + 2) < ALen then
-          begin
-            Inc(_I);
-            Result[_I] := ICS_Base64OutA[((Byte(AInput[_Count + 1]) and $0F) shl 2) +
-                                         ((Byte(AInput[_Count + 2]) and $C0) shr 6)];
-            Inc(_I);
-            Result[_I] := ICS_Base64OutA[(Byte(AInput[_Count + 2]) and $3F)];
-          end
-        else
-          begin
-            Inc(_I);
-            Result[_I] := ICS_Base64OutA[(Byte(AInput[_Count + 1]) and $0F) shl 2];
-            Inc(_I);
-            Result[_I] := '=';
-          end
-      end
-    else
-      begin
-        Inc(_I);
-        Result[_I] := ICS_Base64OutA[(Byte(AInput[_Count]) and $03) shl 4];
-        Inc(_I);
-        Result[_I] := '=';
-        Inc(_I);
-        Result[_I] := '=';
-      end;
-
-    Inc(_Count, 3);
-  end;
-end;
-
-function Get_Base64Endoeings1(const AImage: TImage): string;
-begin
-  Result := '';
-  var _Input  := TMemoryStream.Create;
-  try
-    AImage.Picture.SaveToStream(_Input);
-    _Input.Position := 0;
-    Result := string(ICS_Base64Encode(_Input.Memory, _Input.Size));
-  finally
-    _Input.Free;
-  end;
-end;
-
-{ Overhead ... }
-function Get_Base64Endoeings2(const AImage: TImage): string;
-begin
-  Result := '';
-  var _Input  := TMemoryStream.Create;
-  var _Base64 := System.NetEncoding.TBase64Encoding.Create(0);  // CharsPerLine = 0 means no line breaks
-  try
-    AImage.Picture.SaveToStream(_Input);
-    _Input.Position := 0;
-    Result := _Base64.EncodeBytesToString(_Input.Memory, _Input.Size);
-  finally
-    _Base64.Free;
-    _Input.Free;
-  end;
-end;
-
-// Modified by ichin 2024-06-09 ÀÏ ¿ÀÈÄ 5:50:52
-// Import from Animation Studio ...
 
 { IIF.Cast ... }
 
@@ -501,8 +323,8 @@ end;
 
 const
   C_RegEx_Trans: string = '[#$%&]';
-  C_RegEx_Json: string = '["\{\}:;\[\]]';  // - json reserved only / all special char - '[^\w]';
-  C_RegEx_Han0: string = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; {  ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä- Regular expression for Korean language test }
+  C_RegEx_Json: string = '["\{\}:;\[\]]';          { json reserved only / all special char - '[^\w]'; }
+  C_RegEx_Han0: string = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; { ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä- Regular expression for Korean language test }
   C_RegEx_Cmd0: string = '/(?:.*serve.*)|(?:.*create.*)|(?:.*run.*)|(?:.*pull.*)|(?:.*push.*)|(?:.*cp.*)|(?:.*rm.*)/';
 
 function Is_Hangul(const AText: string): Boolean;
@@ -526,7 +348,7 @@ begin
   Result := System.RegularExpressions.TRegEx.Replace(AText, C_RegEx_Json, ' ');
 end;
 
-{ ... }
+{ /RegularExpressions ... }
 
 function BytesToKMG(AValue: Int64): string;
 begin
@@ -642,7 +464,7 @@ begin
     _stream.Position := 0;
     _stream.Read(V_Sounds[1], 0, _sz);
   finally
-    FreeAndNil(_stream);
+    _stream.Free;
   end;
 end;
 
@@ -656,7 +478,7 @@ begin
     SetLength(Result, _sz);
     _stream.Read(Result, 0, _sz);
   finally
-    FreeAndNIL(_stream)
+    _stream.Free;
   end;
 end;
 
@@ -686,26 +508,28 @@ begin
   var _Resultlist := TStringList.Create;
   _Resultlist.BeginUpdate;
   try
-    with TPJComputerInfo do
+    with _Resultlist, TPJComputerInfo do
     begin
-      _Resultlist.Add('  Computer Name: '+ ComputerName);
-      _Resultlist.Add('  - User Name: '+ Username);
-      _Resultlist.Add('  - Processor Name: '+ ProcessorName);
-      _Resultlist.Add('  - Processor Speed (GHz): '+ Format('%.3f', [ProcessorSpeedMHz / GC_BTdivKB]));
-      _Resultlist.Add('  - Processor Count: '+ Integer(ProcessorCount).ToString);
-      _Resultlist.Add('  - Processor Architecture: '+ c_Processors[Processor]);
+      Add('  Computer Name: '+ ComputerName);
+      Add('  - User Name: '+ Username);
+      Add('  - Processor Name: '+ ProcessorName);
+      Add('  - Processor Speed (GHz): '+ Format('%.3f', [ProcessorSpeedMHz / GC_BTdivKB]));
+      Add('  - Processor Count: '+ Integer(ProcessorCount).ToString);
+      Add('  - Processor Architecture: '+ c_Processors[Processor]);
     end;
 
     var _totalmem: string := '';
     var _availmem: string := '';
     var _usagepct: DWord := GetGlobalMemoryUsed2GB(_totalmem, _availmem);
-    _Resultlist.Add('');
-    _Resultlist.Add('  Memory status at present');
-    _Resultlist.Add('  _ Total Memory: '+ _totalmem);
-    _Resultlist.Add('  - Available Memory: '+ _availmem);
-    _Resultlist.Add('  - Usage percent: '+ _usagepct.ToString +' %');
-    _Resultlist.Add('');
-
+    with _Resultlist do
+    begin
+      Add('');
+      Add('  Memory status at present');
+      Add('  _ Total Memory: '+ _totalmem);
+      Add('  - Available Memory: '+ _availmem);
+      Add('  - Usage percent: '+ _usagepct.ToString +' %');
+      Add('');
+    end;
     var _LocaleID := Get_LocaleIDString();
     var _WinLangusage := GetUsersWindowsLanguage;
     _Resultlist.Add('  OS Language: '+_WinLangusage + '  ISO Code ['+_LocaleID+']');
@@ -716,182 +540,6 @@ begin
     _Resultlist.Free;
   end;
 end;
-
-{ Display JSon ... }
-{TStringHelper.TrimRight -> ZEROBASEDSTRINGS ON }
-function TrimRight_Ex(const ASource: string): string;
-begin
-  Result := ASource;
-  var _I := Length(ASource);
-  if _I < 1 then Exit;
-
-  if (_I >= 1) and (ASource[_I] > ' ') then
-    Result := ASource
-  else
-    begin
-      while (_I >= 1) and (ASource[_I] <= ' ') do Dec(_I);
-      Result := System.Copy(ASource, 1, _I);
-    end;
-end;
-
-function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const AModelsFlag: Boolean; const ARespStr: string): string;
-const
-  c_Displat_Type: array [TDisplay_Type] of string = ('response', 'content', 'trans');
-begin
-  Result := '';
-  var _parsingsrc_0 := StringReplace(ARespStr, GC_UTF8_LFH, ',',[rfReplaceAll]);
-  var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';
-  var _acceptflag: Boolean := False;
-  var _firstflag: Boolean := True;
-  var _key := c_Displat_Type[ADisplay_Type];
-  if AModelsFlag then
-  begin
-    Result := '* Model in loaded : ';
-    _key := 'model';
-  end;
-
-  var _StringReader := TStringReader.Create(_parsingsrc_1);
-  var _JsonReader := TJsonTextReader.Create(_StringReader);
-  try
-    while _JsonReader.Read do
-      case _JsonReader.TokenType of
-        TJsonToken.PropertyName:
-          begin
-            _acceptflag := SameText(_JsonReader.Value.ToString, _key);
-            if not  _acceptflag then
-            Continue;
-          end;
-        TJsonToken.String:
-          if _acceptflag then
-          begin
-            _acceptflag := False;
-            if _firstflag then
-              begin
-                _firstflag := False;
-                Result := _JsonReader.Value.ToString.TrimLeft;
-              end
-            else
-              Result := Result + _JsonReader.Value.ToString;
-          end;
-      end;
-
-    Result := TrimRight_Ex(Result);
-  finally
-    FreeAndNil(_JsonReader);
-    FreeAndNil(_StringReader);
-  end;
-end;
-
-function Get_DisplayJson_Models(const ARespStr: string; var AIndex: Integer; var AModelsList: TStringList): string;
-begin
-  Result := 'Models List at '+FormatDateTime('yyyy-mm-dd HH:NN:SS', Now) +GC_CRLF+GC_CRLF;
-
-  var _StringReader := TStringReader.Create(ARespStr);
-  var _JsonReader := TJsonTextReader.Create(_StringReader);
-  var _firstflag: Boolean := True;
-  var _childflag: Boolean := False;
-  var _sizeflag: Boolean := False;
-  var _modelflag: Boolean := False;
-  var _propname: string := '';
-  var _prefix: string := '';
-  var _arrayflag: Boolean := False;
-  var _key: string := 'name';
-  var _fstobject: string := 'models';
-  var _newvalue: string := '';
-  AModelsList.Clear;
-  try
-    while _JsonReader.Read do
-      case _JsonReader.TokenType of
-        TJsonToken.StartObject:
-          if _modelflag then
-            begin
-              _prefix := '';
-              _childflag := False;
-              _arrayflag := False;
-              _sizeflag  := False;
-            end;
-        TJsonToken.Startarray:
-          if not SameText(_JsonReader.Path, _fstobject) then
-            _arrayflag := True;
-        TJsonToken.PropertyName:
-          begin
-            if _firstflag then
-            begin
-              _firstflag := False;    // Skip for "models"
-              Continue;
-            end;
-
-            _propname := _JsonReader.Value.ToString;
-            if SameText(_propname, _key) then
-              begin
-                _modelflag := True;
-                Inc(Aindex);
-                Result := Result + 'Models ['+Aindex.ToString+'] : ';
-                Continue;
-              end else
-            if SameText(_propname, 'details') then
-              begin
-                Result := Result + _prefix + _propname +' : '+ GC_CRLF;
-                _prefix := '    - ';
-                _childflag := True;
-                Continue;
-              end
-            else
-              begin
-                if not _childflag then
-                  _prefix := '  . ';
-              end;
-
-            _sizeflag := SameText(_propname, 'size');
-            Result := Result + _prefix + _propname +' : ';
-          end;
-        TJsonToken.String:
-          if _arrayflag then
-             Result := Result + _JsonReader.Value.ToString +', '
-          else
-            begin
-              if _modelflag then
-                AModelsList.Add(_JsonReader.Value.ToString);
-              _modelflag := False;
-              Result := Result + _JsonReader.Value.ToString+ GC_CRLF;
-            end;
-        TJsonToken.Float, TJsonToken.Boolean:
-          if _arrayflag then
-            Result := Result + _JsonReader.Value.ToString +', '
-          else
-            Result := Result + _JsonReader.Value.ToString+ GC_CRLF;
-        TJsonToken.Integer:
-          if _sizeflag then
-            begin
-              _newvalue := BytesToKMG(_JsonReader.Value.AsInt64);
-              Result := Result + _newvalue+ GC_CRLF;
-              _sizeflag := False;
-            end;
-        TJsonToken.Null:
-          Result := Result + GC_CRLF;
-        TJsonToken.Endarray:
-          begin
-            if not SameText(_JsonReader.Path, _fstobject) then
-              begin
-                Result := Result + GC_CRLF;
-              end;
-            _arrayflag := False;
-          end;
-        TJsonToken.EndObject:
-          begin
-            _prefix := '';
-            _childflag := False;
-            _arrayflag := False;
-            _sizeflag  := False;
-          end;
-      end;
-  finally
-    FreeAndNil(_JsonReader);
-    FreeAndNil(_StringReader);
-  end;
-end;
-
-{ ... JSon }
 
 function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
 begin
@@ -981,8 +629,6 @@ begin
   Result := _WinLanguage;
 end;
 
-{ Edge TTS - PlayBack : MPV ... }
-
 function GetProcessID(AProcess: String): Cardinal;
 begin
   Result := 0;
@@ -1003,30 +649,6 @@ begin
       _ContinueLoop := Process32Next(_FSnapshotHandle, _FProcessEntry32);
     end;
   CloseHandle(_FSnapshotHandle);
-end;
-
-function Kill_Process_MPV(AProcess: string): Boolean;
-begin
-  Result := False;
-
-  var _ProcessID := GetProcessID('mpv.exe');
-  if _ProcessID <> 0 then
-  try
-    var _Killer: THandle := OpenProcess(PROCESS_TERMINATE, False, _ProcessID);
-    if _Killer <> 0 then
-    Result := TerminateProcess(_Killer, 0);
-
-    Sleep(0);
-  except
-    Abort;
-  end;
-end;
-
-function IS_Running_MPV(AProcess: string): Boolean;
-begin
-  Result := False;
-  var _ProcessID := GetProcessID('mpv.exe');
-  Result := _ProcessID <> 0;
 end;
 
 function IS_ProcessRunning_Ollama(): Boolean;

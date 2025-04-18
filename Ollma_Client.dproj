@@ -1139,11 +1139,14 @@
         <DCCReference Include="Include\VirtualTrees.BaseTree.pas"/>
         <DCCReference Include="Include\VirtualTrees.pas"/>
         <DCCReference Include="Include\NetCom7\Source\ncLines.pas"/>
+        <DCCReference Include="Include\EasyJson.pas"/>
         <DCCReference Include="Unit_Common.pas"/>
         <DCCReference Include="Unit_SysInfo.pas"/>
         <DCCReference Include="Unit_MRUManager.pas"/>
         <DCCReference Include="Unit_ImageDropDown.pas"/>
         <DCCReference Include="SpeechLib_TLB.pas"/>
+        <DCCReference Include="Unit_Jsonworks.pas"/>
+        <DCCReference Include="Unit_HistoryManager.pas"/>
         <DCCReference Include="Unit_Welcome.pas">
             <Form>Frame_Welcome</Form>
             <DesignClass>TFrame</DesignClass>

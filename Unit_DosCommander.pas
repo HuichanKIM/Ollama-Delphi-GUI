@@ -232,6 +232,7 @@ begin
   FDosCommand.OnTerminated := DosCommandTerminated;
   FDosTexts.Clear;
   FCommand := Acmd;
+
   with FDosCommand do
   try
     CommandLine := Acmd;

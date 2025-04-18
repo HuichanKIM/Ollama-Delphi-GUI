@@ -49,7 +49,7 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     TreeOptions.AnimationOptions = [toAnimatedToggle]
     TreeOptions.AutoOptions = [toAutoScroll, toAutoScrollOnExpand, toAutoTristateTracking, toAutoHideButtons, toAutoDeleteMovedNodes, toAutoChangeScale]
     TreeOptions.MiscOptions = [toReportMode, toWheelPanning, toVariableNodeHeight]
-    TreeOptions.PaintOptions = [toShowRoot, toThemeAware, toUseBlendedImages]
+    TreeOptions.PaintOptions = [toShowRoot, toThemeAware, toUseBlendedImages, toFixedIndent]
     TreeOptions.SelectionOptions = [toRightClickSelect, toSelectNextNodeOnRemoval]
     TreeOptions.StringOptions = [toSaveCaptions]
     WantTabs = True
@@ -61,8 +61,10 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
     OnGetText = VST_ChattingBoxGetText
     OnInitNode = VST_ChattingBoxInitNode
     OnKeyDown = VST_ChattingBoxKeyDown
+    OnLoadNode = VST_ChattingBoxLoadNode
     OnMeasureItem = VST_ChattingBoxMeasureItem
     OnResize = VST_ChattingBoxResize
+    OnSaveNode = VST_ChattingBoxSaveNode
     Touch.InteractiveGestures = [igPan, igPressAndTap]
     Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
     Columns = <

@@ -14,11 +14,14 @@ uses
   VirtualTrees.BaseTree in 'Include\VirtualTrees.BaseTree.pas',
   VirtualTrees in 'Include\VirtualTrees.pas',
   ncLines in 'Include\NetCom7\Source\ncLines.pas',
+  EasyJson in 'Include\EasyJson.pas',
   Unit_Common in 'Unit_Common.pas',
   Unit_SysInfo in 'Unit_SysInfo.pas',
   Unit_MRUManager in 'Unit_MRUManager.pas',
   Unit_ImageDropDown in 'Unit_ImageDropDown.pas',
   SpeechLib_TLB in 'SpeechLib_TLB.pas',
+  Unit_Jsonworks in 'Unit_Jsonworks.pas',
+  Unit_HistoryManager in 'Unit_HistoryManager.pas',
   Unit_Welcome in 'Unit_Welcome.pas' {Frame_Welcome: TFrame},
   Unit_Main in 'Unit_Main.pas' {Form_RestOllama: T},
   Unit_AliveOllama in 'Unit_AliveOllama.pas' {TForm_AliveOllama},
@@ -65,6 +68,8 @@ begin
     Application.Initialize;
     Application.MainFormOnTaskbar := True;
     TStyleManager.TrySetStyle('Windows11 Impressive Dark');
+    //Uses System Style for border / shadow of Forms ...
+    //TStyleManager.FormBorderStyle := TStyleManager.TFormBorderStyle.fbsSystemStyle;
     Application.Title := 'Ollama Client GUI';
     Application.CreateForm(TForm_RestOllama, Form_RestOllama);
     Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);

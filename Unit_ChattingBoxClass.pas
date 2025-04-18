@@ -26,9 +26,9 @@ uses
 
 type
   PMessageRec = ^TMessageRec;
-  TMessageRec = record
+  TMessageRec = packed record
     FUser: string;
-    FCaption: String;
+    FCaption: string;
     FTime: TDateTime;
     FTag: Integer;
     FLvTag: Integer;
@@ -68,6 +68,8 @@ type
     procedure pmn_SelectedColorClick(Sender: TObject);
     procedure pmn_CopyTextClick(Sender: TObject);
     procedure pmn_ColorSettingsClick(Sender: TObject);
+    procedure VST_ChattingBoxLoadNode(Sender: TBaseVirtualTree; Node: PVirtualNode; Stream: TStream);
+    procedure VST_ChattingBoxSaveNode(Sender: TBaseVirtualTree; Node: PVirtualNode; Stream: TStream);
   private
     FVST_NBodyFontSize: Integer;
     FVST_NHeaderColor: TColor;
@@ -78,6 +80,7 @@ type
     FVST_SecondIndent: Integer;
     FVST_FontName: string;
     FVST_FontSize: Integer;
+    FVST_NodeHeightOffSet: Integer;
     function GetSelectionColor: TColor;
     procedure SetVST_NBodyFontSize(const Value: Integer);
     procedure SetVST_NSelectionColor(const Value: TColor);
@@ -86,6 +89,7 @@ type
     procedure SetVST_NHeaderColor(const Value: TColor);
     procedure SetVST_Fontname(const Value: string);
     procedure SetVST_FontSize(const Value: Integer);
+    procedure SetVST_NodeHeightOffSet(const Value: Integer);
   public
     procedure InitializeEx(const AHeaderColor, ABodyColor, AFooterColor: TColor);
     procedure FinalizeEx(const AFlag: Integer);
@@ -100,20 +104,26 @@ type
     procedure Do_ScrollToTop(const AFlag: Integer = 0);
     procedure Do_ScrollToBottom(const AFlag: Integer = 0);
     function Do_SaveAllText(const AFile: string): Boolean;
+    function Do_SaveAsHistory(const AFlag: string): string;
     function Do_DeleteNode(): Boolean;
     procedure Do_RestoreDefaultColor(const AFontOnlyFlag: Integer = 0);
     procedure Do_SetCustomFont(const AFlag: Integer; const AFontName: string; const AFontSize: Integer);
     procedure Do_SetCustomColor(const AFlag: Integer; const ASelColor, AHeaderColor, ABodyColor, AFooterColor: TColor);
     function Get_CustomColor(var AHeaderColor, ABodyColor, AFooterColor: TColor): TColor;
     procedure Set_FontEx(AFont: TFont);
+    // History Manager
+    procedure Do_LoadAllData(const ALFile: string);
+    function Do_SaveAllData(const ASFile: string): Boolean;
+    function Get_HistorySubject(): string;
     //
-    property VST_NBodyFontSize: Integer   read FVST_NBodyFontSize     write SetVST_NBodyFontSize;
-    property VST_NSelectionColor: TColor  read FVST_NSelectionColor   write SetVST_NSelectionColor;
-    property VST_NHeaderColor: TColor     read FVST_NHeaderColor      write SetVST_NHeaderColor;
-    property VST_NBodyColor: TColor       read FVST_NBodyColor        write SetVST_NBodyColor;
-    property VST_NFooterColor: TColor     read FVST_NFooterColor      write SetVST_NFooterColor;
-    property VST_FontName: string         read FVST_FontName          write SetVST_FontName;
-    property VST_FontSize: Integer        read FVST_FontSize          write SetVST_FontSize;
+    property VST_NBodyFontSize: Integer     read FVST_NBodyFontSize       write SetVST_NBodyFontSize;
+    property VST_NSelectionColor: TColor    read FVST_NSelectionColor     write SetVST_NSelectionColor;
+    property VST_NHeaderColor: TColor       read FVST_NHeaderColor        write SetVST_NHeaderColor;
+    property VST_NBodyColor: TColor         read FVST_NBodyColor          write SetVST_NBodyColor;
+    property VST_NFooterColor: TColor       read FVST_NFooterColor        write SetVST_NFooterColor;
+    property VST_FontName: string           read FVST_FontName            write SetVST_FontName;
+    property VST_FontSize: Integer          read FVST_FontSize            write SetVST_FontSize;
+    property VST_NodeHeightOffSet: Integer  read FVST_NodeHeightOffSet    write SetVST_NodeHeightOffSet;
   end;
 
 implementation
@@ -136,7 +146,8 @@ begin
   FVST_ColumnOffset :=    15;    // Local ...
   FVST_SecondIndent :=    35;    // Reference of Indent for Ollama Response ...
   FVST_FontName :=        VST_ChattingBox.Font.Name;
-  FVST_FontSize :=        GC_SkinFontSize;;
+  FVST_FontSize :=        GC_SkinFontSize;
+  FVST_NodeHeightOffSet := 15;
 
   with VST_ChattingBox do
   begin
@@ -146,12 +157,14 @@ begin
     NodeAlignment := TVTNodeAlignment.naFromTop;
     Header.Options := Header.Options - [hoAutoResize];
     Header.Columns[0].Width := ClientWidth - FVST_ColumnOffset;
+    TreeOptions.AnimationOptions := [];
     TreeOptions.MiscOptions := TreeOptions.MiscOptions + [TVTMiscOption.toVariablenodeHeight];
-    TreeOptions.AutoOptions := TreeOptions.AutoOptions - [TVTAutoOption.toAutoSpanColumns];
+    TreeOptions.AutoOptions := TreeOptions.AutoOptions - [TVTAutoOption.toAutoSpanColumns];    // too much overhead ...
+    TreeOptions.StringOptions := TreeOptions.StringOptions - [TVTStringOption.toShowStaticText];
     TreeOptions.SelectionOptions := TreeOptions.SelectionOptions + [TVTSelectionOption.toSelectNextNodeOnRemoval]-[TVTSelectionOption.toMultiSelect];
     {  Custom ... }
     OffsetWRMagin := 30;
-    NodeHeightOffSet := 15;
+    NodeHeightOffSet := FVST_NodeHeightOffSet;
     Images := VirtualImageList1;
     SelectedBrushColor := FVST_NSelectionColor;  // in TBaseVirtualTree.pas ...
     Node_HeaderColor :=   FVST_NHeaderColor;
@@ -342,11 +355,21 @@ begin
   end;
 end;
 
+procedure TFrame_ChattingBoxClass.SetVST_NodeHeightOffSet(const Value: Integer);
+begin
+  if FVST_NodeHeightOffSet <>  Value then
+  begin
+    FVST_NodeHeightOffSet := Value;
+    VST_ChattingBox.NodeHeightOffSet := Value;
+    VST_ChattingBox.Invalidate;
+  end;
+end;
+
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 begin
   var _Data: PMessageRec := Sender.GetNodeData(Node);
   if _Data^.FTag = 1 then
-    ContentRect.Left := TargetCanvas.ClipRect.Left + FVST_SecondIndent;
+    ContentRect.Left := TargetCanvas.ClipRect.Left + FVST_SecondIndent;  { = CellRect ... }
 end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxColumnResize(Sender: TVTHeader; Column: TColumnIndex);
@@ -372,9 +395,14 @@ end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
 begin
-  var _Data: PMessageRec := Sender.GetNodeData(Node);
-  if Assigned(_Data) then
-    CellText := _Data^.FCaption;
+  case Column of
+    0:
+      begin
+        var _Data: PMessageRec := Sender.GetNodeData(Node);
+        if Assigned(_Data) then
+          CellText := _Data^.FCaption;
+      end;
+  end;
 end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxInitNode(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
@@ -564,7 +592,7 @@ begin
   GV_ReservedColor[2] := FVST_NBodyColor;
   GV_ReservedColor[3] := FVST_NFooterColor;
 
-  with  VST_ChattingBox do
+  with VST_ChattingBox do
   begin
     BeginUpdate;
     Node_HeaderColor :=   FVST_NHeaderColor;
@@ -620,11 +648,16 @@ end;
 
 function TFrame_ChattingBoxClass.Do_SaveAllText(const AFile: string): Boolean;
 begin
+  Result := False;
+  if VST_ChattingBox.RootNodeCount < 1 then
+  Exit;
+
   var _sourcelist := TStringList.Create;
   var _Data: PMessageRec := nil;
   var _index: Integer := 0;
   var _qtag: Integer := 0;
-  var _prefix: string := '';
+  var _prefixn: string := '';
+  var _prefixr: string := 'Q';
   var _AddString: string := '';
   var _CellText: string := '';
   try
@@ -637,12 +670,18 @@ begin
       if _Data <> nil then
       begin
         _qtag := _Data^.FTag;
-          if _qtag = 0 then Inc(_index);
-        _prefix := Format('[ %.3d ] ', [_index]);
-        _CellText :=  _prefix + _Data^.FUser;
-        _AddString := _AddString + _CellText +GC_CRLF;
+          if _qtag = 0 then
+            begin
+              _prefixr := 'Q';
+              Inc(_index);
+            end
+          else
+            _prefixr := 'R';
+        _prefixn := Format('[%s.%.3d] ', [ _prefixr, _index]);
+        _CellText :=  _prefixn + _Data^.FUser;
+        _AddString := _AddString + _CellText +sLineBreak;
         _CellText :=  _Data^.FCaption+ FormatDateTime('( hh:nn:ss )', _Data^.FTime);
-        _AddString := _AddString + _CellText +GC_CRLF;
+        _AddString := _AddString + _CellText +sLineBreak;
 
         _sourcelist.Add(_AddString);
       end;
@@ -650,12 +689,67 @@ begin
       _Node := _Node.NextSibling;
     end;
     _sourcelist.EndUpdate;
+    if _sourcelist.Count > 0 then
     _sourcelist.SaveToFile(AFile);
   finally
     _sourcelist.Free;
   end;
 
   Result := FileExists(AFile);
+end;
+
+function TFrame_ChattingBoxClass.Do_SaveAsHistory(const AFlag: string): string;
+begin
+  Result := '';
+  if VST_ChattingBox.RootNodeCount < 1 then
+  Exit;
+
+  var _hfile := Format('%s%s%s%s', [CV_HisPath, 'History_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.jsn']);
+  var _sourcelist := TStringList.Create;
+  var _Data: PMessageRec := nil;
+  var _index: Integer := 0;
+  var _qtag: Integer := 0;
+  var _prefixn: string := '';
+  var _prefixr: string := 'Q';
+  var _AddString: string := '';
+  var _CellText: string := '';
+  try
+    _sourcelist.BeginUpdate;
+    var _Node  : PVirtualNode := VST_ChattingBox.GetFirst;
+    while Assigned(_Node) do
+    begin
+      _AddString := EmptyStr;
+      _Data := VST_ChattingBox.GetNodeData(_Node);
+      if _Data <> nil then
+      begin
+        _qtag := _Data^.FTag;
+          if _qtag = 0 then
+            begin
+              _prefixr := 'Q';
+              Inc(_index);
+            end
+          else
+            _prefixr := 'R';
+        _prefixn := Format('[%s.%.3d] ', [ _prefixr, _index]);
+        _CellText :=  _prefixn + _Data^.FUser;
+        _AddString := _AddString + _CellText +sLineBreak;
+        _CellText :=  _Data^.FCaption+ FormatDateTime('( hh:nn:ss )', _Data^.FTime);
+        _AddString := _AddString + _CellText +sLineBreak;
+
+        _sourcelist.Add(_AddString);
+      end;
+
+      _Node := _Node.NextSibling;
+    end;
+    _sourcelist.EndUpdate;
+    if _sourcelist.Count > 0 then
+    _sourcelist.SaveToFile(_hfile);
+  finally
+    _sourcelist.Free;
+  end;
+
+  if FileExists(_hfile) then
+  Result := _hfile;
 end;
 
 procedure TFrame_ChattingBoxClass.Do_ScrollToTop(const AFlag: Integer);
@@ -695,5 +789,100 @@ begin
     Perform(WM_VSCROLL, SB_BOTTOM, 0);
   end;
 end;
+
+{ Save/Load Node Data for History Manger ------------------------------------- }
+
+procedure TFrame_ChattingBoxClass.VST_ChattingBoxSaveNode(Sender: TBaseVirtualTree; Node: PVirtualNode; Stream: TStream);
+begin
+  var _Data: PMessageRec := nil;
+  var _len: Integer := 0;
+  _Data := Sender.GetNodeData(Node);
+
+  _len := Length(_Data^.FUser);
+  Stream.Write(_len, SizeOf(_len));
+  Stream.Write(PChar(_Data^.FUser)^, _len * SizeOf(Char));
+  _len := Length(_Data^.FCaption);
+  Stream.Write(_len, SizeOf(_len));
+  Stream.Write(PChar(_Data^.FCaption)^, _len * SizeOf(Char));
+
+  _len := SizeOf(_Data^.FTime);
+  Stream.Write(_len, SizeOf(_len));
+  Stream.Write(_Data^.FTime, _len);
+  _len := SizeOf(_Data^.FTag);
+  Stream.Write(_len, SizeOf(_len));
+  Stream.Write(_Data^.FTag, _len);
+  _len := SizeOf(_Data^.FLvTag);
+  Stream.Write(_len, SizeOf(_len));
+  Stream.Write(_Data^.FLvTag, _len);
+end;
+
+procedure TFrame_ChattingBoxClass.VST_ChattingBoxLoadNode(Sender: TBaseVirtualTree; Node: PVirtualNode; Stream: TStream);
+begin
+  var _Data: PMessageRec := Sender.GetNodeData(Node);
+  var _len: Integer := 0;
+  Stream.Read(_len, SizeOf(_len));
+  SetLength(_Data^.FUser, _len);
+  Stream.Read(PChar(_Data^.FUser)^, _len * SizeOf(Char));
+  Stream.Read(_len, SizeOf(_len));
+  SetLength(_Data^.FCaption, _len);
+  Stream.Read(PChar(_Data^.FCaption)^, _len * SizeOf(Char));
+
+  Stream.Read(_len, SizeOf(_len));
+  Stream.Read(_Data^.FTime, _len);
+  Stream.Read(_len, SizeOf(_len));
+  Stream.Read(_Data^.FTag, _len);
+  Stream.Read(_len, SizeOf(_len));
+  var _imagetag: Integer := -1;
+  Stream.Read(_imagetag, _len);
+  if _imagetag > 0 then
+    _imagetag := 0;
+  _Data^.FLvTag := _imagetag;
+end;
+
+function TFrame_ChattingBoxClass.Do_SaveAllData(const ASFile: string): Boolean;
+begin
+  Result := False;
+  if VST_ChattingBox.RootNodeCount < 1 then
+  begin
+    MessageDlg('The list is empty. Nothing to save.', mtInformation, [mbOk], 0);
+    Exit;
+  end;
+  // ------------------------------------------------------------------------ //
+  VST_ChattingBox.SaveToFile(ASFile);
+  // ------------------------------------------------------------------------ //
+  Result := FileExists(ASFile);
+end;
+
+procedure TFrame_ChattingBoxClass.Do_LoadAllData(const ALFile: string);
+begin
+  if not FileExists(ALFile) then Exit;
+
+  VST_ChattingBox.Clear;
+  VST_ChattingBox.NodeDataSize := SizeOf(TMessageRec);
+  VST_ChattingBox.BeginUpdate;
+  // ------------------------------------------------------------------------ //
+  VST_ChattingBox.LoadFromFile(ALFile);
+  // ------------------------------------------------------------------------ //
+  VST_ChattingBox.EndUpdate;
+  var _Node: PVirtualNode := VST_ChattingBox.GetFirst;
+  VST_ChattingBox.FocusedNode := _Node;
+  VST_ChattingBox.Selected[_Node] := True;
+  Perform(WM_VSCROLL, SB_BOTTOM, 0);
+end;
+
+function TFrame_ChattingBoxClass.Get_HistorySubject: string;
+begin
+  Result := '';
+  var _Node: PVirtualNode := VST_ChattingBox.GetFirst;
+  if Assigned(_Node) then
+  begin
+    var _Data: PMessageRec := nil;
+    _Data := VST_ChattingBox.GetNodeData(_Node);
+    if _Data^.FTag = 0 then
+      Result := _Data^.FCaption;
+  end;
+end;
+
+{ / Save/Load Node Data for History Manger ----------------------------------- }
 
 end.

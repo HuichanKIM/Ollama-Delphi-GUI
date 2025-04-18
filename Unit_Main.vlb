@@ -61,9 +61,6 @@ Coordinates=1020,78,149,58
 [Form_RMBroker.RESTRequest_RM]
 Coordinates=761,386,221,102
 
-[Label_TotalMemory]
-Coordinates=632,581,128,58
-
 [Label_IP_Port]
 Coordinates=1240,540,96,58
 
@@ -94,27 +91,15 @@ Coordinates=1020,1,161,58
 [Form_RMBroker.RESTClient_RM]
 Coordinates=516,463,207,80
 
-[GroupBox_Description]
-Coordinates=761,1,144,58
-
 [Frame_ChattingBox.VST_ChattingBox]
 Coordinates=1672,166,234,36
 Visible=True
 
-[GroupBox_Llava]
-Coordinates=516,155,110,58
-
 [pmn_RenameTopic]
 Coordinates=119,1022,126,36
 
-[CheckBox_SaveOnCLose]
-Coordinates=1434,386,163,58
-
 [TrackBar_Rate]
 Coordinates=0,986,101,36
-
-[SpeedButton_CPUMemUsage]
-Coordinates=1672,221,188,36
 
 [Action_StartRequest]
 Coordinates=1672,276,133,36
@@ -140,20 +125,8 @@ Coordinates=664,882,53,58
 [Frame_ChattingBox.N2]
 Coordinates=1672,386,149,36
 
-[Image_Llva]
-Coordinates=943,1022,81,58
-
-[ImageList_LLAVA]
-Coordinates=1315,1118,117,36
-
 [SpeedButton_ShowRmBroker]
 Coordinates=1672,441,185,36
-
-[Panel_ImageLlavaBase]
-Coordinates=1230,617,150,58
-
-[Label_MemTotal]
-Coordinates=0,0,110,58
 
 [Shape_TTS]
 Coordinates=1226,1118,83,36
@@ -179,9 +152,6 @@ Coordinates=29,173,53,58
 [ProgressBar_TTS]
 Coordinates=79,882,117,58
 
-[Gauge_MemUsage]
-Coordinates=1672,606,125,36
-
 [Button_DosCommand]
 Coordinates=516,78,140,58
 
@@ -205,9 +175,6 @@ Coordinates=1672,826,167,36
 
 [CheckBox_AutoLoadTopic]
 Coordinates=1230,694,166,58
-
-[Label_Counter]
-Coordinates=200,558,99,58
 
 [Action_Pop_CopyText]
 Coordinates=1672,881,142,36
@@ -260,9 +227,6 @@ Coordinates=1672,1101,150,36
 [Frame_ChattingBox.N3]
 Coordinates=641,1131,149,36
 
-[SpeedButton_LavaPrev]
-Coordinates=482,1131,150,36
-
 [Memo_Memo]
 Coordinates=1240,925,92,58
 
@@ -286,9 +250,6 @@ Coordinates=1533,1131,134,36
 
 [Label_Volume]
 Coordinates=1240,1002,97,58
-
-[Label_Available]
-Coordinates=436,882,106,58
 
 [ActionList_Ollma]
 Coordinates=0,1082,111,36
@@ -325,9 +286,6 @@ Coordinates=1944,276,149,36
 
 [SpeedButton_Help]
 Coordinates=1944,331,122,36
-
-[Label_Description]
-Coordinates=1230,309,118,58
 
 [Panel_CaptionModelTopics]
 Coordinates=1020,463,172,58
@@ -374,14 +332,8 @@ Coordinates=1584,1205,62,36
 [Timer_System]
 Coordinates=1485,1205,97,36
 
-[TabSheet_ChatLogs]
-Coordinates=1944,661,132,36
-
 [Action_TransMessagePush]
 Coordinates=1944,716,171,36
-
-[Label_BaseURL]
-Coordinates=761,584,108,58
 
 [SkSvg_OllamaAlive]
 Coordinates=1944,771,127,36
@@ -394,12 +346,6 @@ Coordinates=1434,309,121,58
 
 [Button_StartRequest]
 Coordinates=1434,1,134,58
-
-[SpeedButton_LlavaLoad]
-Coordinates=1944,826,155,36
-
-[GroupBox_CPUMem]
-Coordinates=1020,232,134,58
 
 [Panel_ChattingBase]
 Coordinates=1230,386,132,58
@@ -418,9 +364,6 @@ Coordinates=1396,1205,88,36
 
 [SpeedButton_ActivateBroker]
 Coordinates=1944,991,180,36
-
-[Label_MemAvailable]
-Coordinates=761,78,134,58
 
 [Action_DefaultRefresh]
 Coordinates=1944,1046,143,36
@@ -455,9 +398,6 @@ Coordinates=1009,1205,96,36
 [GroupBox_Memo]
 Coordinates=761,155,115,58
 
-[SpeedButton_SystemInfo]
-Coordinates=840,1230,160,36
-
 [Panel_Chatting]
 Coordinates=1032,1022,103,58
 
@@ -467,9 +407,6 @@ Coordinates=671,1230,165,36
 [Button_SendRequest]
 Coordinates=516,309,136,58
 
-[Shape_Memory]
-Coordinates=562,1205,105,36
-
 [SpeedButton_SaveAllText]
 Coordinates=393,1230,165,36
 
@@ -478,9 +415,6 @@ Coordinates=345,720,158,124
 
 [SpeedButton_DeleteTopic]
 Coordinates=224,1230,165,36
-
-[SpeedButton_LavaNext]
-Coordinates=65,1230,150,36
 
 [Action_TransMessage]
 Coordinates=2214,1,142,36
@@ -493,9 +427,6 @@ Coordinates=2214,111,242,36
 
 [GroupBox_TTSEngine]
 Coordinates=1434,155,143,58
-
-[Label_MemUsage]
-Coordinates=258,405,118,58
 
 [Action_TTSControl]
 Coordinates=2214,166,123,36
@@ -517,9 +448,6 @@ Coordinates=137,720,90,58
 
 [Panel_Models]
 Coordinates=309,558,96,58
-
-[GroupBox_BaseURL]
-Coordinates=881,720,134,58
 
 [Label4]
 Coordinates=20,882,53,58
@@ -602,12 +530,42 @@ Coordinates=2517,1,245,36
 [Label_StartRequest]
 Coordinates=1230,155,128,58
 
-[Action_LoadImageLlava]
-Coordinates=2214,1211,152,36
-
 [SpeedButton_AddToTopics]
 Coordinates=2214,1266,171,36
 
 []
-Coordinates=1925,1304,91,36
+Coordinates=840,1230,160,36
+
+[GroupBox_Multimodel]
+Coordinates=761,1,144,58
+
+[GroupBox_MultimodelImage]
+Coordinates=516,155,110,58
+
+[SpeedButton_ImageNext]
+Coordinates=65,1230,150,36
+
+[SpeedButton_ImagePrev]
+Coordinates=482,1131,150,36
+
+[SpeedButton_ImageLoad]
+Coordinates=1944,826,155,36
+
+[Panel_ImageSourceBase]
+Coordinates=1230,617,150,58
+
+[ImageList_Multimodel]
+Coordinates=1315,1118,117,36
+
+[Image_Source]
+Coordinates=943,1022,81,58
+
+[Action_LoadImageSource]
+Coordinates=2214,1211,152,36
+
+[GroupBox_History]
+Coordinates=1020,232,134,58
+
+[TabSheet_LogsBroker]
+Coordinates=1944,661,132,36
 

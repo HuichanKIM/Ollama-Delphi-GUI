@@ -1590,7 +1590,8 @@ begin
   Result := DefaultInterface.GetDescription(Locale);
 end;
 
-procedure TSpObjectToken.SetId(const Id: WideString; const CategoryID: WideString;
+procedure TSpObjectToken.SetId(const Id: WideString;
+                               const CategoryID: WideString;
                                CreateIfNotExist: WordBool);
 begin
   DefaultInterface.SetId(Id, CategoryID, CreateIfNotExist);

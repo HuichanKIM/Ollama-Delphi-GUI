@@ -80,9 +80,9 @@ implementation
 
 uses
   System.JSON.Types,
-  System.Threading,
   System.Diagnostics,
   System.UITypes,
+  Unit_Jsonworks,
   Unit_Main,
   Unit_DMServer;
 
@@ -120,8 +120,11 @@ begin
   Application.ProcessMessages;
   V_RmStopwatch.Stop;
 
-  var _slog := Format('%s%s%s', ['Log_rm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
-  Memo_Log_Rm.Lines.SaveToFile(CV_LogPath+_slog);
+  if GV_SaveLogsOnClose and (Memo_Log_Rm.Lines.Count > 0) then
+  begin
+    var _slog := Format('%s%s%s', ['Log_rm_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+    Memo_Log_Rm.Lines.SaveToFile(CV_LogPath+_slog);
+  end;
 end;
 
 procedure TForm_RMBroker.FormKeyPress(Sender: TObject; var Key: Char);
@@ -280,20 +283,10 @@ begin
     DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, 'Empty Request/Model');
     Exit;
   end;
-  // ------------------------------------------------------------------------ //
-  FPrompt_Rm := Get_ReplaceSpecialChar4Json(FPrompt_Rm); // Duplicated from User ?
-  // ------------------------------------------------------------------------ //
-  var _RawParams: string := '';
-  if Is_LlavaModel(FMmodel_Rm) then
-    begin
-      DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, 'Not supported yet');
-      Exit;
-    end
-  else
-    begin
-       _RawParams := StringReplace( GC_ChatContent,    '%model%',    FMmodel_Rm,   [rfIgnoreCase]);
-       _RawParams := StringReplace( _RawParams,        '%content%',  FPrompt_Rm,   [rfIgnoreCase]);
-    end;
+  // ------------------------------------------------------------------------------------------ //
+  FPrompt_Rm := Unit_Common.Get_ReplaceSpecialChar4Json(FPrompt_Rm); // Duplicated from User ?
+  // ------------------------------------------------------------------------------------------ //
+  var _RawParams: string := Unit_Jsonworks.Get_RequestParams_Chat(FMmodel_Rm, FPrompt_Rm, False, 0, False, nil);
   StatusBar_RM.SimpleText := '* Requesting ...';
   FRequesting_Flag := True;
 
@@ -361,20 +354,20 @@ begin
   Add_LogWin('Elapsed Time after request : '+_elapstr);
   StatusBar_RM.SimpleText := '* '+_updown;
 
-  { Core routine ------------------------------------------------------------- }
-    var _Responses := Unit_Common.Get_DisplayJson(TDIsplay_Type.disp_Content, False,
-                                               string(RESTResponse_RM.Content));
-    _Responses := Get_ReplaceSpecialChar4Json(_Responses);
-    // ---------------------------------------------------------------------- //
-    DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, _Responses);
-    // ---------------------------------------------------------------------- //
-    SimpleSound_Common(Form_RestOllama.DoneSoundFlag, 1);
-    Inc(V_RmDummyFlag);
+  // ----------------------------------------------------------------------------------- //
+  var _Responses := Unit_Jsonworks.Get_DisplayJson(TDIsplay_Type.disp_Content, {False, }
+                                                   string(RESTResponse_RM.Content));
+  _Responses := Unit_Common.Get_ReplaceSpecialChar4Json(_Responses);
+  // ----------------------------------------------------------------------------------- //
+  DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, _Responses);
+  // ----------------------------------------------------------------------------------- //
+  SimpleSound_Common(Form_RestOllama.DoneSoundFlag, 1);
+  Inc(V_RmDummyFlag);
 
-    GV_CheckingAliveStart := False;
-    FRequesting_Flag := False;
-    Push_LogWin();
-  { -------------------------------------------------------------------------- }
+  GV_CheckingAliveStart := False;
+  FRequesting_Flag := False;
+  Push_LogWin();
+  // ----------------------------------------------------------------------------------- //
 
   if DM_Server.Get_Queue_Count > 0 then
   begin

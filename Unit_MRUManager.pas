@@ -59,6 +59,7 @@ uses
   Unit_Common;
 
 { TMRU_Manager ... }
+
 { getNextSibling - Returns the next node in the tree view "at the same level" as the calling node. }
 
 function TMRU_Manager.AddInsertNode(const AFlag: Integer; const ANode: TTreeNode; const APrompt: string): string;
@@ -216,12 +217,12 @@ begin
   FTreeView := ATreeView;
   FSeedList := TStringList.Create;
   FSeedList.Sorted := True;
-  FSeedList.Duplicates := TDuplicates.dupIgnore;   //
-  FSeedList.CaseSensitive := False;                //
+  FSeedList.Duplicates := TDuplicates.dupIgnore;
+  FSeedList.CaseSensitive := False;
   FTopicList := TStringList.Create();
   FTopicList.Sorted := True;
-  FTopicList.Duplicates := TDuplicates.dupIgnore;  //
-  FTopicList.CaseSensitive := False;               //
+  FTopicList.Duplicates := TDuplicates.dupIgnore;
+  FTopicList.CaseSensitive := False;
 
   with FDefaultTopic do
   begin
@@ -250,8 +251,8 @@ begin
   FTreeView.Update;                         // Invalidate + Update = Repaint ...
   FTopicList.EndUpdate;
   FTopicList.Sorted := True;
-  FTopicList.Duplicates := TDuplicates.dupIgnore;  //
-  FTopicList.CaseSensitive := False;               //
+  FTopicList.Duplicates := TDuplicates.dupIgnore;
+  FTopicList.CaseSensitive := False;
 end;
 
 procedure TMRU_Manager.Clear_TreeData(const AFalg: Integer);
