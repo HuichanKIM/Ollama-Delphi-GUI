@@ -481,7 +481,7 @@ object Form_Setting: TForm_Setting
         Size.PlatformDefault = False
         TextSettings.FontColor = claBisque
         TextSettings.WordWrap = False
-        Text = '  Help'
+        Text = '  Help (buttons...)'
         TabOrder = 3
       end
       object SpeedButton6: TSpeedButton

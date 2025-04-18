@@ -95,7 +95,6 @@ type
     FInitializeFlag: Boolean;
     FUserNameSaved: string;
   public
-    { Public declarations }
   end;
 
 {$IF Defined(ANDROID)}
@@ -122,6 +121,7 @@ uses
   Unit_Main;
 
 { Class TUrlOpen ... }
+
 {$IF Defined(ANDROID)}
 class procedure TUrlOpen.Open(URL: string);
 begin
@@ -141,6 +141,7 @@ end;
 procedure TForm_Setting.FormCreate(Sender: TObject);
 begin
   Rectangle_DesignTime.Free;
+  ApplyStyleLookup;
   Text_Version.Text := 'Ver. 0.9.10 - 2024.06.21';
 end;
 
@@ -149,8 +150,8 @@ begin
   if not FInitializeFlag then
   begin
     FInitializeFlag := True;
-    Edit_Host.Text :=     MainForm.ServerHost;
-    Edit_Port.Text :=     MainForm.ServerPort.ToString;
+    Edit_Host.Text :=  MainForm.ServerHost;
+    Edit_Port.Text :=  MainForm.ServerPort.ToString;
 
     ColorComboBox_Header.Color := MainForm.ColorHeader;
     ColorComboBox_Body.Color :=   MainForm.ColorBody;
@@ -172,7 +173,7 @@ begin
   Edit_UserName.Text := MainForm.UserName;
   Edit_UserName.OnTyping := Edit_UserNameTyping;
   SpeedButton_NewLogon.Visible := False;
-  Circle_Connection2.fill.Color := MainForm.Circle_Connection.fill.Color;
+  Circle_Connection2.Fill.Color := MainForm.Circle_Connection.Fill.Color;
 end;
 
 procedure TForm_Setting.Image_OllamaClick(Sender: TObject);

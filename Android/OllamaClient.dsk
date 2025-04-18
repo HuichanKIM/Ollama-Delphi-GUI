@@ -1,26 +1,24 @@
 ﻿[Closed Files]
-File_0=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Styles.pas',0,1,1157,1,1175,0,0,,
-File_1=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Forms.pas',0,1,6748,90,6755,0,0,{{882,4}
-File_2=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Types.pas',0,1,5808,1,5832,0,0,{{6036,0}
-File_3=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Controls.pas',0,1,6039,82,5984,0,0,{{701,4}
-File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Graphics.pas',0,1,7172,11,7205,0,0,,
-File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Styles.Objects.pas',0,1,1,1,1,0,0,,
-File_6=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.pas',0,1,2465,83,2508,0,0,{{1095,0}
-File_7=TSourceModule,'E:\OllamaCkent\Android\FMX.ListView.pas',0,1,3269,31,3282,0,0,{{1101,0}
-File_8=TSourceModule,'E:\2024_DelphiLibs12\ModernListView\FMX.ListView.Types.pas',0,1,3502,83,3518,0,0,,
-File_9=TSourceModule,'E:\2024_DelphiLibs12\ModernListView\FMX.ListView.pas',0,1,3794,43,3803,0,0,,
-File_10=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.Types.pas',0,1,364,1,12,0,0,{{1260,0}
-File_11=TSourceModule,'E:\2024_DelphiLibs12\FMXExpress\Cross-Platform-Samples\28-PopupMenuButton\Unit1.pas',0,1,13,1,1,0,0,,
-File_12=TSourceModule,'E:\2024_DelphiLibs12\FMXExpress\Cross-Platform-Samples\13-Animation\Unit1.pas',0,1,4,50,22,0,0,,
-File_13=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.DynamicAppearance.pas',0,1,331,1,1,0,0,,
-File_14=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.TextLayout.pas',0,1,526,77,545,0,0,,
+File_0=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.ListView.pas',0,1,3231,12,3276,0,0,{{1095,0}
+File_1=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.NetEncoding.pas',0,1,878,49,885,0,0,,
+File_2=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\posix\android\NetDBTypes.inc',0,1,52,1,88,0,0,,
+File_3=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\posix\Posix.SysSocket.pas',0,1,49,1,1,0,0,,
+File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\posix\SysSocketAPI.inc',0,1,58,66,72,0,0,,
+File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\posix\Posix.SysTypes.pas',0,1,7,1,1,0,0,,
+File_6=TSourceModule,'C:\Program Files (x86)\Embarcadero\Studio\23.0\source\rtl\posix\android\SysSocketTypes.inc',0,1,4,19,13,0,0,,
+File_7=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Styles.pas',0,1,1175,1,1205,0,0,,
+File_8=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Forms.pas',0,1,6734,5,6740,0,0,{{882,4}
+File_9=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Types.pas',0,1,5808,1,5832,0,0,{{6036,0}
+File_10=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Controls.pas',0,1,6039,82,5984,0,0,{{701,4}
+File_11=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Graphics.pas',0,1,7172,11,7205,0,0,,
+File_12=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\fmx\FMX.Styles.Objects.pas',0,1,1,1,1,0,0,,
 
 [Modules]
 Module0=E:\OllamaCkent\Android\Unit_Main.pas
 Module1=E:\OllamaCkent\Android\OllamaClient.dproj
 Module2=E:\OllamaCkent\Android\Unit_Setting.pas
-Module3=E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas
-Module4=E:\OllamaCkent\Include\NetCom7\Source\ncLines.pas
+Module3=E:\OllamaCkent\Include\NetCom7\Source\ncLines.pas
+Module4=E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas
 Count=5
 EditWindowCount=1
 
@@ -33,20 +31,21 @@ ModuleType=TBaseProject
 [E:\OllamaCkent\Android\Unit_Setting.pas]
 ModuleType=TSourceModule
 
-[E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas]
-ModuleType=TSourceModule
-
 [E:\OllamaCkent\Include\NetCom7\Source\ncLines.pas]
 ModuleType=TSourceModule
 
+[E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas]
+ModuleType=TSourceModule
+
 [EditWindow0]
-ViewCount=5
+ViewCount=6
 CurrentEditView=E:\OllamaCkent\Android\Unit_Main.pas
 View0=0
 View1=1
 View2=2
 View3=3
 View4=4
+View5=5
 PercentageSizes=1
 Create=1
 Visible=1
@@ -81,6 +80,10 @@ BottomMiddlePanelClients=DockSite0,GraphDrawingModel
 BottomMiddelPanelData=0000080001020200000009000000446F636B536974653010000000477261706844726177696E67566965779F1D00000000000002F706000000000000FFFFFFFF
 
 [View0]
+CustomEditViewType=TOTACustomEditView
+OTAEditViewType=WelcomePage.MainPage
+
+[View1]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Android\OllamaClient.dpr
 CursorX=1
@@ -91,49 +94,49 @@ Elisions=
 Bookmarks=
 EditViewName=E:\OllamaCkent\Android\OllamaClient.dpr
 
-[View1]
+[View2]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Android\Unit_Main.pas
-CursorX=70
-CursorY=827
-TopLine=857
+CursorX=73
+CursorY=89
+TopLine=89
 LeftCol=1
 Elisions=
 Bookmarks=
 EditViewName=E:\OllamaCkent\Android\Unit_Main.pas
 
-[View2]
+[View3]
+CustomEditViewType=TEditView
+Module=E:\OllamaCkent\Android\Unit_Setting.pas
+CursorX=1
+CursorY=98
+TopLine=157
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=E:\OllamaCkent\Android\Unit_Setting.pas
+
+[View4]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas
-CursorX=1
-CursorY=344
-TopLine=731
+CursorX=72
+CursorY=367
+TopLine=332
 LeftCol=1
 Elisions=
 Bookmarks=
 EditViewName=E:\OllamaCkent\Include\NetCom7\Source\ncSources.pas
 
-[View3]
+[View5]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Include\NetCom7\Source\ncLines.pas
-CursorX=28
-CursorY=518
-TopLine=736
+CursorX=5
+CursorY=348
+TopLine=389
 LeftCol=1
 Elisions=
 Bookmarks=
 EditViewName=E:\OllamaCkent\Include\NetCom7\Source\ncLines.pas
-
-[View4]
-CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Android\Unit_Setting.pas
-CursorX=48
-CursorY=216
-TopLine=202
-LeftCol=1
-Elisions=
-Bookmarks=
-EditViewName=E:\OllamaCkent\Android\Unit_Setting.pas
 
 [Watches]
 Count=0
@@ -285,8 +288,8 @@ SplitPos=143
 
 [PropInspDesignerSelection]
 ArrangeBy=Name
-SelectedItem=TextSettings.FontColor,CustomHint
-ExpandedItems=BindSource=0,"LiveBindings Designer=0",RedirectsWithGET=0,SecureProtocols=0,LiveBindings=0,Margins=0,Svg=0,Touch=0,Anchors=0,BevelEdges=0,Constraints=0,Padding=0,Position=0,RotationCenter=0,Scale=0,Size=0,TextSettings=1,TextSettings.Font=0
+SelectedItem=Action,Action
+ExpandedItems=Anchors=1,BorderIcons=0,Constraints=0,CustomTitleBar=0,LiveBindings=0,"LiveBindings Designer=0",Margins=0,Border=0,Fill=1,FormFactor=1,Padding=0,SystemStatusBar=0,Touch=0,FormFactor.Devices=0,FormFactor.Orientations=0,Position=0,RotationCenter=0,Scale=0,Size=0,TouchTargetExpansion=0,StyledSettings=0,TextSettings=1,TextSettings.Font=0,Fill.Bitmap=0,Fill.Resource=0,ActiveControl=0
 
 [frmDesignPreview]
 PercentageSizes=1

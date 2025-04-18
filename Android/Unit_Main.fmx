@@ -28,7 +28,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 65
+    TabOrder = 70
     object Text_Status: TText
       Align = Client
       Margins.Left = 10.000000000000000000
@@ -70,7 +70,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 120.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 41
+    TabOrder = 46
     object Layout3: TLayout
       Align = MostLeft
       Size.Width = 140.000000000000000000
@@ -197,7 +197,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 60.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 39
+    TabOrder = 44
     OnResized = Layout_RequestResized
     object Button_Request: TButton
       Align = Right
@@ -263,7 +263,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 30.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 70
+    TabOrder = 75
     object Text_Caption2: TText
       Align = Client
       HitTest = False
@@ -295,6 +295,8 @@ object MainForm: TMainForm
     end
   end
   object ListView_ChatBox: TListView
+    Touch.GestureManager = GestureManager1
+    OnGesture = ListView_ChatBoxGesture
     ItemAppearanceClassName = 'TDynamicAppearance'
     ItemEditAppearanceClassName = 'TDynamicAppearance'
     HeaderAppearanceClassName = 'TListHeaderObjects'
@@ -307,7 +309,7 @@ object MainForm: TMainForm
     Size.Width = 399.000000000000000000
     Size.Height = 357.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 35
+    TabOrder = 40
     OnMouseDown = ListView_ChatBoxMouseDown
     OnResized = ListView_ChatBoxResized
     ItemAppearance.ItemHeight = 60
@@ -1567,6 +1569,23 @@ object MainForm: TMainForm
     Sensitivity = 80.000000000000000000
     Left = 120
     Top = 364
+    GestureData = <
+      item
+        Control = ListView_ChatBox
+        Collection = <
+          item
+            GestureID = sgiLeft
+          end
+          item
+            GestureID = sgiRight
+          end
+          item
+            GestureID = sgiLeftRight
+          end
+          item
+            GestureID = sgiRightLeft
+          end>
+      end>
   end
   object ImageList2: TImageList
     Source = <

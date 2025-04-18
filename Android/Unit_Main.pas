@@ -104,6 +104,7 @@ type
     Text_Logon: TText;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormVirtualKeyboardHidden(Sender: TObject; KeyboardVisible: Boolean; const Bounds: TRect);
     procedure FormVirtualKeyboardShown(Sender: TObject; KeyboardVisible: Boolean; const Bounds: TRect);
@@ -118,11 +119,10 @@ type
     procedure Button_SettingClick(Sender: TObject);
     procedure SpeedButton_RestoreClick(Sender: TObject);
     procedure Button_ModelListClick(Sender: TObject);
+    procedure Timer_UpdaterTimer(Sender: TObject);
     procedure ListBox_ModelsChange(Sender: TObject);
     procedure ListView_ChatBoxUpdateObjects(const Sender: TObject; const AItem: TListViewItem);
     procedure ListView_ChatBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
-    procedure Timer_UpdaterTimer(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure ListView_ChatBoxScrollViewChange(Sender: TObject);
     procedure Button_MoveTopClick(Sender: TObject);
     procedure ListView_ChatBoxResized(Sender: TObject);
@@ -130,6 +130,7 @@ type
     procedure SpeedButton_ClearClick(Sender: TObject);
     procedure Layout_RequestResized(Sender: TObject);
     procedure SpeedButton_CopyTextClick(Sender: TObject);
+    procedure ListView_ChatBoxGesture(Sender: TObject; const EventInfo: TGestureEventInfo; var Handled: Boolean);
   private
     FClient_Source: TncClientSource;
     //
@@ -288,6 +289,19 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+  Rectangle_Designtime.Free;  // Only for Designer time  background ...
+
+ // ------------------------------------------------------------------------ //
+  TStyleManager.TrySetStyleFromResource('MYSTYLE');
+  ApplyStyleLookup;
+  var _stream: TStream := TResourceStream.Create(HInstance, 'LLAVA', RT_RCDATA);
+  try
+    _stream.Position := 0;
+    SourceImage.Bitmap.LoadFromStream(_stream);
+  finally
+    FreeAndNil(_stream);
+  end;
+  // ------------------------------------------------------------------------ //
   FServerHost := C_BaseURL;
   FServerPort := C_BasePort;    // Read only - Preserved Server Constant ...
   FUserName := 'Anonymous';
@@ -324,19 +338,6 @@ begin
     OnHandleCommand :=   FClient_SourceHandleCommand;
   end;
   SetProcessingFlag(0);
-  // ------------------------------------------------------------------------ //
-  var _stream: TStream := TResourceStream.Create(HInstance, 'LLAVA', RT_RCDATA);
-  try
-    _stream.Position := 0;
-    SourceImage.Bitmap.LoadFromStream(_stream);
-  finally
-    FreeAndNil(_stream);
-  end;
-  Rectangle_Designtime.Free;
-  var _MyStyle: TFmxObject := TStyleManager.GetStyleResource('MYSTYLE');
-  TStyleManager.SetStyle(_MyStyle);
-  ApplyStyleLookup;
-  // ------------------------------------------------------------------------ //
 
   FDWToast := TToast.Create;
   FFont_Size := 12;
@@ -720,7 +721,7 @@ begin
   if TPlatformServices.Current.SupportsPlatformService(IFMXClipboardService, _ClipBoard) then
   begin
     var _Value: TValue := _ClipBoard.GetClipboard;
-    var _text: string;
+    var _text: string := '';
     if not _Value.IsEmpty and _Value.TryAsType(_text)
       then _text := _Value.ToString
       else _text := '';
@@ -753,11 +754,11 @@ begin
   MemoryStream.Position := 0;
   var _OutputStringStream := TStringStream.Create('', TEncoding.ASCII);
   try
-    var _Base64Encoder := TBase64Encoding.Create;
+    var _Base64Encoder := TBase64Encoding.Create(0);  // *** //
     var _MimeType: string := 'image/jpg';  // Default - *.jpg
     try
       _Base64Encoder.Encode(MemoryStream, _OutputStringStream);
-      Result := 'data:' + _MimeType + ';base64,' + _OutputStringStream.DataString.Replace(#13#10,'');
+      Result := 'data:' + _MimeType + ';base64,' + _OutputStringStream.DataString;  //.Replace(#13#10,'');  // *** //
     finally
       _Base64Encoder.Free;
     end;
@@ -815,7 +816,7 @@ begin
     Exit;
   end;
 
-  var _request: string := Memo_Prompt.Lines.Text.Trim;
+  var _request := Memo_Prompt.Lines.Text.Trim;
   if _request = '' then
   begin
     FDWToast.Make('Empty request not allowed.');
@@ -922,7 +923,7 @@ begin
   FKBBounds.TopLeft := ScreenToClient(FKBBounds.TopLeft);
   FKBBounds.BottomRight := ScreenToClient(FKBBounds.BottomRight);
 
-  var _conRec: TRectF := Layout_Request.AbsoluteRect;  // *** //
+  var _conRec := Layout_Request.AbsoluteRect;  // *** //
   if _conRec.Bottom > FKBBounds.Top then
   begin
     FNeedOffset := True;
@@ -998,8 +999,8 @@ begin
     Label_Welcome.Visible := False;
   end;
 
-  var _title: string := Format('%s  [%s] - %s', [AUser, AQueue, AModel ]);
-  var _timestamp: string := FormatDateTime('(hh:nn:ss)', Now);
+  var _title := Format('%s  [%s] - %s', [AUser, AQueue, AModel ]);
+  var _timestamp := FormatDateTime('(hh:nn:ss)', Now);
   var _item: TListViewItem := ListView_ChatBox.Items.Add;
   with _item do
   begin
@@ -1094,6 +1095,14 @@ end;
 
 { ... For ListView Ownerdwar = False }
 
+procedure TMainForm.ListView_ChatBoxGesture(Sender: TObject; const EventInfo: TGestureEventInfo; var Handled: Boolean);
+begin
+  var _s: string := 'sgiLeft';
+  if GestureToIdent(EventInfo.GestureID, _s) then
+    if SameText(_s, 'sgiLeftRight') or SameText(_s, 'sgiLeft') then
+      Do_ShowModalSetting();
+end;
+
 procedure TMainForm.ListView_ChatBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
   Layout_PopupMenu.Visible := False;
@@ -1143,11 +1152,11 @@ procedure TMainForm.ListView_ChatBoxUpdateObjects(const Sender: TObject; const A
 begin
   AItem.BeginUpdate;
 
-  var _IconImg: TListItemImage := TListItemImage(AItem.View.FindDrawable('imgIcon'));
+  var _IconImg := TListItemImage(AItem.View.FindDrawable('imgIcon'));
   _IconImg.OwnsBitmap := False;
   _IconImg.Bitmap := GetItemsBitmap(AItem.ImageIndex);
   var _Text: string := '';
-  var _AvailableWidth: Single := TListView(Sender).Width - 65;
+  var _AvailableWidth := TListView(Sender).Width - 65;
   var _Drawable_h := TListItemText(AItem.View.FindDrawable('txtHeader'));
         _Drawable_h.TextColor := FColorHeader;
         _Drawable_h.SelectedTextColor := FColorHeader;
