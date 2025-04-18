@@ -1,35 +1,28 @@
 # Ollama-Delphi-GUI
 
-**Latest Version 0.9.12 - 07.11.2024**
-- Add a Thumbnail Image to ChattingBox on Llava Model
-- Add Broker/Server Functions
-- Avoid third-party components as much as possible and 
-- make the most of the basic Delphi library.
-- Use RESTClient, RESTRequest, RESTResponse as a substitute for OberBytes ICS
-
-- v0.9.9
-- If your computer has good performance, 
-- use it as a server/broker to connect your Android smartphone
+### Latest Version 1.0.0 - 2025.04.15
 
 ### Features
-
-- Supports Windows 10 and 11 (for 64 bits).
-
+- Supports Request-History Manager
+- Supports Multimodal Image Analysis (Gemma3, Llava ... ) and Reasoning (Cogito, Deepseek ...)
 - Themes (Windows10 SlateGray) according to user preferences of Windows Theme
+- If your computer has good performance, use it as a server/broker to connect your Android smartphone
+- Supports Windows 10 and 11 (for 64 bits).
 
 ### Prerequisites
 
- 1. Ollama Install ( https://ollama.com/ )
- 2. Pull Models (phi3, llama3, gemma, llava, codegemma ...)
+ 1. Ollama Install <https://ollama.com/>
+ 2. Pull Models (Cogito, Gemma3, Phi4, llama3, gemma, llava ...)
  3. Delphi Athens 12.0. over
 
 
-### 3rd party Library (Open source for Delphi developers) ###
+### 3rd party Library (Open source for Delphi developers)
 
 - SVGIconImageList by EtheaDev <https://github.com/EtheaDev/SVGIconImageList>
 - DOSCommand by TurboPack <https://github.com/TurboPack/DOSCommand>
 - Virtual-TreeView by JAM-Software <https://github.com/JAM-Software/Virtual-TreeView>
 - NetCom7 <https://github.com/DelphiBuilder/NetCom7>
+- EasyJson <https://github.com/tinyBigGAMES/EasyJson>
 
 
 ### About / Skin / Colors (Screenshot)
@@ -53,10 +46,10 @@
 
 ![Chattings 5: Preview page](./Images/O_chattings5.png)
 
-(Skin - Windows10 SlateGray, Windows11 Impressive Dark, Windows11 Modern Dark  )
+### Skin  ( Windows10 SlateGray, Windows11 Impressive Dark, Windows11 Modern Dark  )
 ![Chattings 7: Preview page](./Images/O_chattings6.png)
 
 ![Chattings 8: Preview page](./Images/O_chattings7.png)
 
-(Model Llava - Thumbnail view  )
+### Multimodal ( Gemma3, Llava ...) - Image Analysis
 ![Chattings 9: Preview page](./Images/O_chattings10.png)
