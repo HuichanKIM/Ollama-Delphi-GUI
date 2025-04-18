@@ -12,7 +12,7 @@ interface
 {$WARN UNSAFE_CODE OFF}
 
 {$LEGACYIFEND ON}
-{$WARN UNSUPPORTED_CONSTRUCT OFF}
+{$WARN UNSUPPORTED_CONSTRUCT      OFF}
 
 uses
   Winapi.Windows, Winapi.Messages, Winapi.ActiveX, Winapi.CommCtrl,
@@ -29,9 +29,14 @@ uses
 {$MinEnumSize 1, make enumerations as small as possible}
 
 type
-  TVTBaseAncestor          = TVTBaseAncestorVcl;
-  TCanvas                  = Vcl.Graphics.TCanvas;
-  TFormatEtcArray          = VirtualTrees.Types.TFormatEtcArray;
+  {$IFDEF VT_FMX}
+    TVTBaseAncestor        = TVTBaseAncestorFMX;
+    TCanvas                = FMX.Graphics.TCanvas;
+  {$ELSE}
+    TVTBaseAncestor        = TVTBaseAncestorVcl;
+    TCanvas                = Vcl.Graphics.TCanvas;
+    TFormatEtcArray        = VirtualTrees.Types.TFormatEtcArray;
+  {$ENDIF}
 
   // Alias defintions for convenience
   TImageIndex              = System.UITypes.TImageIndex;
@@ -132,7 +137,7 @@ type
     Node: PVirtualNode;
     Column: TColumnIndex;
     HintRect: TRect;            // used for draw trees only, string trees get the size from the hint string
-    HintText: string;    // set when size of the hint window is calculated
+    HintText: string;           // set when size of the hint window is calculated
     BidiMode: TBidiMode;
     Alignment: TAlignment;
     LineBreakStyle: TVTToolTipLineBreakStyle;
@@ -145,7 +150,7 @@ type
     ['{2BE3EAFA-5ACB-45B4-9D9A-B58BCC496E17}']
     function BeginEdit: Boolean; stdcall;                  // Called when editing actually starts.
     function CancelEdit: Boolean; stdcall;                 // Called when editing has been cancelled by the tree.
-    function EndEdit: Boolean; stdcall;                    // Called when editing has been finished by the tree. Returns True if successful, False if edit mode is still active.
+    function EndEdit: Boolean; stdcall;                     // Called when editing has been finished by the tree. Returns True if successful, False if edit mode is still active.
     function PrepareEdit(Tree: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex): Boolean; stdcall;
                                                            // Called after creation to allow a setup.
     procedure ProcessMessage(var Message: TMessage); stdcall;
@@ -267,8 +272,6 @@ type
 
   TVTPrepareButtonImagesEvent = procedure(Sender: TBaseVirtualTree; const APlusBM: TBitmap; const APlusHotBM: TBitmap; const APlusSelectedHotBM: TBitmap; const AMinusBM: TBitmap; const AMinusHotBM: TBitmap;
     const AMinusSelectedHotBM: TBitmap; var ASize: TSize) of object;
-
-  TVTColumnHeaderSpanningEvent = procedure(Sender: TVTHeader; Column: TColumnIndex; var Count: Integer) of object;
 
   // search, sort
   TVTCompareEvent = procedure(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer) of object;
@@ -488,6 +491,7 @@ type
     // miscellanous
     FPanningWindow: TForm;                       // Helper window for wheel panning
     FPanningCursor: TVTCursor;                   // Current wheel panning cursor.
+    FPanningImage: TIcon;                        // A little 32x32 bitmap to indicate the panning reference point.
     FLastClickPos: TPoint;                       // Used for retained drag start and wheel mouse scrolling.
     FOperationCount: Cardinal;                   // Counts how many nested long-running operations are in progress.
     FOperationCanceled: Boolean;                 // Used to indicate that a long-running operation should be canceled.
@@ -620,7 +624,6 @@ type
                                                  // not covered by any node
     FOnMeasureItem: TVTMeasureItemEvent;         // Triggered when a node is about to be drawn and its height was not yet
                                                  // determined by the application.
-    FOnColumnHeaderSpanning: TVTColumnHeaderSpanningEvent; // triggered before the header column area been create for painting
     FOnGetUserClipboardFormats: TVTGetUserClipboardFormatsEvent; // gives application/descendants the opportunity to
                                                  // add own clipboard formats on the fly
     FOnPaintText: TVTPaintText;                  // triggered before either normal or fixed text is painted to allow
@@ -985,7 +988,6 @@ type
     procedure DoStructureChange(Node: PVirtualNode; Reason: TChangeReason); virtual;
     procedure DoTimerScroll; virtual;
     procedure DoUpdating(State: TVTUpdateState); virtual;
-    procedure DoColumnHeaderSpanning(Column: TColumnIndex; var Count: Integer); virtual;
     function DoValidateCache: Boolean; virtual;
     procedure DragAndDrop(AllowedEffects: DWord; const DataObject: TVTDragDataObject; var DragEffect: Integer); virtual;
     procedure DragCanceled; override;
@@ -1008,7 +1010,7 @@ type
     function GetCheckImage(Node: PVirtualNode; ImgCheckType: TCheckType = ctNone; ImgCheckState: TCheckState = csUncheckedNormal; ImgEnabled: Boolean = True): Integer; virtual;
     function GetColumnClass: TVirtualTreeColumnClass; virtual;
     function GetDefaultHintKind: TVTHintKind; virtual;
-    function GetDoubleBuffered: Boolean; {$if CompilerVersion >= 36}override;{$ifend}
+    function GetDoubleBuffered: Boolean; {$IF CompilerVersion >= 36}override; {$IFEND}
     function GetHeaderClass: TVTHeaderClass; virtual;
     function GetHintWindowClass: THintWindowClass; virtual; abstract;
     procedure GetImageIndex(var Info: TVTPaintInfo; Kind: TVTImageKind; InfoIndex: TVTImageInfoIndex); virtual;
@@ -1042,7 +1044,6 @@ type
     procedure InternalRemoveFromSelection(Node: PVirtualNode); virtual;
     procedure InterruptValidation(pWaitForValidationTermination: Boolean = True);
     procedure InvalidateCache;
-    function LineWidth(): TDimension;
     procedure Loaded; override;
     procedure MainColumnChanged; virtual;
     procedure MarkCutCopyNodes; override;
@@ -1206,7 +1207,7 @@ type
     property OnColumnChecking: TVTColumnCheckChangingEvent read FOnColumnChecking write FOnColumnChecking;
     property OnColumnClick: TVTColumnClickEvent read FOnColumnClick write FOnColumnClick;
     property OnColumnDblClick: TVTColumnDblClickEvent read FOnColumnDblClick write FOnColumnDblClick;
-    property OnColumnExport: TVTColumnExportEvent read FOnColumnExport write FOnColumnExport;
+    property OnColumnExport : TVTColumnExportEvent read FOnColumnExport write FOnColumnExport;
     property OnColumnResize: TVTHeaderNotifyEvent read FOnColumnResize write FOnColumnResize;
     property OnColumnVisibilityChanged: TColumnChangeEvent read fOnColumnVisibilityChanged write fOnColumnVisibilityChanged;
     property OnColumnWidthDblClickResize: TVTColumnWidthDblClickResizeEvent read FOnColumnWidthDblClickResize write FOnColumnWidthDblClickResize;
@@ -1287,11 +1288,9 @@ type
     property OnStateChange: TVTStateChangeEvent read FOnStateChange write FOnStateChange;
     property OnStructureChange: TVTStructureChangeEvent read FOnStructureChange write FOnStructureChange;
     property OnUpdating: TVTUpdatingEvent read FOnUpdating write FOnUpdating;
-    property OnColumnHeaderSpanning: TVTColumnHeaderSpanningEvent read FOnColumnHeaderSpanning write FOnColumnHeaderSpanning;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-
     function AbsoluteIndex(Node: PVirtualNode): Cardinal;
     function AddChild(Parent: PVirtualNode; UserData: Pointer = nil): PVirtualNode; overload; virtual;
     function AddChild(Parent: PVirtualNode; const UserData: IInterface): PVirtualNode; overload;
@@ -1377,7 +1376,7 @@ type
     function GetNextVisibleSiblingNoInit(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
     function GetNodeAt(const P: TPoint): PVirtualNode; overload; inline;
     function GetNodeAt(X, Y: TDimension): PVirtualNode; overload;
-    function GetNodeAt(X, Y: TDimension; Relative: Boolean; var NodeTop: TDimension): PVirtualNode; overload;
+    function GetNodeAt(X, Y: TDimension; relative: Boolean; var NodeTop: TDimension): PVirtualNode; overload;
     function GetNodeData(Node: PVirtualNode): Pointer; overload;
     function GetNodeData<T>(pNode: PVirtualNode): T; overload; inline;
     function GetSelectedData<T>(): TArray<T>; overload;
@@ -1557,13 +1556,13 @@ uses
 
 resourcestring
   // Localizable strings.
-  SEditLinkIsNil        = 'Edit link must not be nil.';
-  SWrongMoveError       = 'Target node cannot be a child node of the node to be moved.';
-  SWrongStreamFormat    = 'Unable to load tree structure, the format is wrong.';
-  SWrongStreamVersion   = 'Unable to load tree structure, the version is unknown.';
-  SStreamTooSmall       = 'Unable to load tree structure, not enough data available.';
-  SCorruptStream1       = 'Stream data corrupt. A node''s anchor chunk is missing.';
-  SCorruptStream2       = 'Stream data corrupt. Unexpected data after node''s end position.';
+  SEditLinkIsNil = 'Edit link must not be nil.';
+  SWrongMoveError = 'Target node cannot be a child node of the node to be moved.';
+  SWrongStreamFormat = 'Unable to load tree structure, the format is wrong.';
+  SWrongStreamVersion = 'Unable to load tree structure, the version is unknown.';
+  SStreamTooSmall = 'Unable to load tree structure, not enough data available.';
+  SCorruptStream1 = 'Stream data corrupt. A node''s anchor chunk is missing.';
+  SCorruptStream2 = 'Stream data corrupt. Unexpected data after node''s end position.';
 
 const
   ClipboardStates = [tsCopyPending, tsCutPending];
@@ -1926,7 +1925,8 @@ begin
 
   inherited;
 
-  ControlStyle := ControlStyle - [csSetCaption] + [csCaptureMouse, csOpaque, csReplicatable, csDisplayDragImage, csReflector];
+  ControlStyle := ControlStyle - [csSetCaption] + [csCaptureMouse, csOpaque, csReplicatable, csDisplayDragImage,
+    csReflector];
   FTotalInternalDataSize := 0;
   FNodeDataSize := -1;
   Width := 200;
@@ -3282,13 +3282,13 @@ begin
     exit;
 
   // right of left image, left of normal image
-  // Modified by ichin 2024-12-08 일 오전 6:04:28
+  // Modified by ichin 2024-12-06 금 오후 2:16:03
   pOffsets[TVTElement.ofsImage] := pOffsets[TVTElement.ofsStateImage];// + GetImageSize(pNode, TVTImageKind.ikState, pColumn).cx;
   if pElement = TVTElement.ofsImage then
     exit;
 
   // label
-  // Modified by ichin 2024-12-08 일 오전 6:04:41
+  // Modified by ichin 2024-12-06 금 오후 2:16:22
   pOffsets[TVTElement.ofsLabel] := pOffsets[TVTElement.ofsImage];// + GetImageSize(pNode, TVTImageKind.ikNormal, pColumn).cx;
   pOffsets[TVTElement.ofsText] := pOffsets[TVTElement.ofsLabel] + FTextMargin;
   Dec(pOffsets[TVTElement.ofsText]); //TODO: This should no longer be necessary once issue #369 is resolved.
@@ -5141,8 +5141,6 @@ begin
   end;
 end;
 
-//----------------------------------------------------------------------------------------------------------------------
-
 procedure TBaseVirtualTree.SetSelectionCurveRadius(const Value: Cardinal);
 
 begin
@@ -6097,7 +6095,7 @@ begin
     FHintData.Tree.FLastHintRect := Rect(0, 0, 0, 0);
 
   LeaveStates := [tsHint];
-  if not (tsPanning in FStates) then
+  if [tsWheelPanning, tsWheelScrolling] * FStates = [] then
   begin
     StopTimer(ScrollTimer);
     LeaveStates := LeaveStates + [tsScrollPending, tsScrolling];
@@ -7385,7 +7383,7 @@ begin
     inherited;
 
     // Start wheel panning or scrolling if not already active, allowed and scrolling is useful at all.
-    if (toWheelPanning in FOptions.MiscOptions) and not (tsPanning in FStates) and
+    if (toWheelPanning in FOptions.MiscOptions) and ([tsWheelScrolling, tsWheelPanning] * FStates = []) and
       ((FRangeX > ClientWidth) or (FRangeY > ClientHeight)) then
     begin
       FLastClickPos := SmallPointToPoint(Message.Pos);
@@ -7415,7 +7413,16 @@ var
 begin
   DoStateChange([], [tsMiddleButtonDown]);
 
-  if not (tsPanning in FStates) then
+  // If wheel panning/scrolling is active and the mouse has not yet been moved then the user starts wheel auto scrolling.
+  // Indicate this by removing the panning flag. Otherwise (the mouse has moved meanwhile) stop panning.
+  if [tsWheelPanning, tsWheelScrolling] * FStates <> [] then
+  begin
+    if tsWheelScrolling in FStates then
+      DoStateChange([], [tsWheelPanning])
+    else
+      StopWheelPanning;
+  end
+  else
     if FHeader.States = [] then
     begin
       inherited;
@@ -7455,7 +7462,7 @@ begin
   StopTimer(ChangeTimer);
   StopTimer(StructureChangeTimer);
 
-  if not (csDesigning in ComponentState) and HandleAllocated then
+  if not (csDesigning in ComponentState) and (toAcceptOLEDrop in FOptions.MiscOptions) and HandleAllocated then
     RevokeDragDrop(Handle);
 
   inherited;
@@ -7688,7 +7695,8 @@ begin
   begin
     // Feature: design-time header #415
     // Allow header to handle cursor and return control's default if it did nothing
-    if (CursorWnd = Handle) and not (tsPanning in FStates) then
+    if (CursorWnd = Handle) and
+      ([tsWheelPanning, tsWheelScrolling] * FStates = []) then
     begin
       if not TVTHeaderCracker(FHeader).HandleMessage(TMessage(Message)) then
       begin
@@ -8264,7 +8272,7 @@ begin
   // wheel panning/scrolling is active.
   IsDropTarget := Assigned(FDragManager) and DragManager.IsDropTarget;
   IsDrawSelecting := [tsDrawSelPending, tsDrawSelecting] * FStates <> [];
-  IsWheelPanning := tsPanning in FStates;
+  IsWheelPanning := [tsWheelPanning, tsWheelScrolling] * FStates <> [];
   Result := ((toAutoScroll in FOptions.AutoOptions) or IsWheelPanning) and
     (FHeader.States = []) and (IsDrawSelecting or IsDropTarget or (tsVCLDragging in FStates) or IsWheelPanning);
 end;
@@ -8639,8 +8647,9 @@ begin
   PrepareBitmaps(True, True);
 
   // Register tree as OLE drop target.
-  if not (csDesigning in ComponentState) and not (csLoading in ComponentState) then // will be done in Loaded after all inherited settings are loaded from the DFMs
-    RegisterDragDrop(Handle, DragManager as IDropTarget);
+  if not (csDesigning in ComponentState) and (toAcceptOLEDrop in FOptions.MiscOptions) then
+    if not (csLoading in ComponentState) then // will be done in Loaded after all inherited settings are loaded from the DFMs
+      RegisterDragDrop(Handle, DragManager as IDropTarget);
 
   UpdateScrollBars(True);
   UpdateHeaderRect;
@@ -9194,7 +9203,7 @@ begin
   if CanAutoScroll then
   begin
     // Calculation for wheel panning/scrolling is a bit different to normal auto scroll.
-    if tsPanning in FStates then
+    if [tsWheelPanning, tsWheelScrolling] * FStates <> [] then
     begin
       if (X - FLastClickPos.X) < -8 then
         Include(Result, TScrollDirection.sdLeft);
@@ -9297,7 +9306,7 @@ procedure TBaseVirtualTree.DoAutoScroll(X, Y: TDimension);
 begin
   FScrollDirections := DetermineScrollDirections(X, Y);
 
-  if  not (tsPanning in FStates) then
+  if FStates * [tsWheelPanning, tsWheelScrolling] = [] then
   begin
     if FScrollDirections = [] then
     begin
@@ -9581,14 +9590,6 @@ procedure TBaseVirtualTree.DoColumnDblClick(Column: TColumnIndex; Shift: TShiftS
 begin
   if Assigned(FOnColumnDblClick) then
     FOnColumnDblClick(Self, Column, Shift);
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TBaseVirtualTree.DoColumnHeaderSpanning(Column: TColumnIndex; var Count: Integer);
-begin
-  if Assigned(FOnColumnHeaderSpanning) then
-    FOnColumnHeaderSpanning(Self.Header, Column, Count);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -10811,7 +10812,7 @@ begin
   MapWindowPoints(Handle, 0, R, 2);
   InRect := PtInRect(R, P);
   ClientP := ScreenToClient(P);
-  Panning := tsPanning in FStates;
+  Panning := [tsWheelPanning, tsWheelScrolling] * FStates <> [];
 
   if IsMouseSelecting or InRect or Panning then
   begin
@@ -10908,7 +10909,7 @@ begin
     end;
     UpdateWindow();
 
-    if (FScrollDirections = []) and not (tsPanning in FStates) then
+    if (FScrollDirections = []) and ([tsWheelPanning, tsWheelScrolling] * FStates = []) then
     begin
       StopTimer(ScrollTimer);
       DoStateChange([], [tsScrollPending, tsScrolling]);
@@ -11131,11 +11132,6 @@ var
 
 begin
   try
-    if not (toAcceptOLEDrop in TreeOptions.MiscOptions) then
-    begin
-      Effect := DROPEFFECT_NONE;
-      Exit(NOERROR);
-    end;
     // Determine acceptance of drag operation and reset scroll start time.
     FDragScrollStart := 0;
 
@@ -11406,7 +11402,7 @@ procedure TBaseVirtualTree.DrawGridHLine(const PaintInfo: TVTPaintInfo; Left, Ri
 var
   R: TRect;
 begin
-  R := Rect(Min(Left, Right), Top, Max(Left, Right) + LineWidth, Top + LineWidth);
+  R := Rect(Min(Left, Right), Top, Max(Left, Right) + 1, Top + 1);
   DrawGridLine(PaintInfo.Canvas, R)
 end;
 
@@ -11418,7 +11414,7 @@ procedure TBaseVirtualTree.DrawGridVLine(const PaintInfo: TVTPaintInfo; Top, Bot
 var
   R: TRect;
 begin
-  R := Rect(Left, Min(Top, Bottom), Left + LineWidth, Max(Top, Bottom) + LineWidth);
+  R := Rect(Left, Min(Top, Bottom), Left + 1, Max(Top, Bottom) + 1);
   if pFixedColumn and (TVtPaintOption.toShowVertGridLines in TreeOptions.PaintOptions) then // In case we showe grid lines, we must use a color for the fixed column that differentiates from the normal gridlines
     StyleServices.DrawElement(PaintInfo.Canvas.Handle, StyleServices.GetElementDetails(tlGroupHeaderLineOpenHot), R {$IF CompilerVersion  >= 34}, @R, CurrentPPI{$IFEND})
   else begin
@@ -12319,7 +12315,7 @@ var
   //--------------- end local functions ---------------------------------------
 
 begin
-  if tsPanning in FStates then
+  if [tsWheelPanning, tsWheelScrolling] * FStates <> [] then
   begin
     StopWheelPanning;
     Exit;
@@ -12497,8 +12493,7 @@ begin
   if not FSelectionLocked and ((not (IsAnyHit or FullRowDrag) and MultiSelect and ShiftEmpty) or
     (IsAnyHit and (not NodeSelected or (NodeSelected and CanClear)) and (ShiftEmpty or not MultiSelect or (tsRightButtonDown in FStates)))) then
   begin
-    // Modified by ichin 2025-02-06 목 오전 7:00:31
-    // Assert(not (tsClearPending in FStates), 'Pending and direct clearance are mutual exclusive!');
+    Assert(not (tsClearPending in FStates), 'Pending and direct clearance are mutual exclusive!');
 
     // If the currently hit node was already selected then we have to reselect it again after clearing the current
     // selection, but without a change event if it is the only selected node.
@@ -13401,8 +13396,9 @@ begin
   inherited;
 
   // Call RegisterDragDrop after all visual inheritance changes to MiscOptions have been applied.
-  if not (csDesigning in ComponentState) and HandleAllocated then
-    RegisterDragDrop(Handle, DragManager as IDropTarget);
+  if not (csDesigning in ComponentState) and (toAcceptOLEDrop in FOptions.MiscOptions) then
+    if HandleAllocated then
+      RegisterDragDrop(Handle, DragManager as IDropTarget);
 
   // If a root node count has been set during load of the tree then update its child structure now
   // as this hasn't been done yet in this case.
@@ -13522,6 +13518,14 @@ begin
       end;
     end;
 
+    // If both wheel panning and auto scrolling are pending then the user moved the mouse while holding down the
+    // middle mouse button. This means panning is being used, hence remove the wheel scroll flag.
+    if [tsWheelPanning, tsWheelScrolling] * FStates = [tsWheelPanning, tsWheelScrolling] then
+    begin
+      if ((Abs(FLastClickPos.X - X) >= Mouse.DragThreshold) or (Abs(FLastClickPos.Y - Y) >= Mouse.DragThreshold)) then
+        DoStateChange([], [tsWheelScrolling]);
+    end;
+
     // Really start dragging if the mouse has been moved more than the threshold.
     if (tsOLEDragPending in FStates) and
       (
@@ -13534,7 +13538,7 @@ begin
     begin
       if CanAutoScroll then
         DoAutoScroll(X, Y);
-      if tsPanning in FStates then
+      if [tsWheelPanning, tsWheelScrolling] * FStates <> [] then
         AdjustPanningCursor(X, Y);
       if not IsMouseSelecting then
       begin
@@ -14116,9 +14120,9 @@ procedure TBaseVirtualTree.PrepareCell(var PaintInfo: TVTPaintInfo; WindowOrgX, 
 // This method is called immediately before a cell's content is drawn und is responsible to paint selection colors etc.
 
 var
-  //TextColorBackup,
-  //BackColorBackup: COLORREF;
-  //FocusRect,
+  TextColorBackup,
+  BackColorBackup: COLORREF;
+  FocusRect,
   InnerRect: TRect;
   RowRect: TRect;
   Theme: HTHEME;
@@ -14732,7 +14736,6 @@ procedure TBaseVirtualTree.StartWheelPanning(Position: TPoint);
   var
     Form: TForm;
     Image: TImage;
-    PanningImage: TIcon;
   begin
     Form := TForm.Create(Self);
     Form.PopupMode := pmExplicit;
@@ -14749,15 +14752,11 @@ procedure TBaseVirtualTree.StartWheelPanning(Position: TPoint);
     Image.Parent := Form;
     Image.Align := TAlign.alClient;
 
-    PanningImage := TIcon.Create;
-    try
-      PanningImage.Handle := LoadImage(0, MAKEINTRESOURCE(ImageName), IMAGE_CURSOR, Form.Width, Form.Height, LR_DEFAULTCOLOR or LR_LOADTRANSPARENT);
-      Image.Picture.Assign(PanningImage);
-      Form.Left := Pos.X - (PanningImage.Width div 2);
-      Form.Top := Pos.Y - (PanningImage.Height div 2);
-    finally
-      PanningImage.Free;
-    end;
+    FPanningImage := TIcon.Create;
+    FPanningImage.Handle := LoadImage(0, MAKEINTRESOURCE(ImageName), IMAGE_CURSOR, Form.Width, Form.Height, LR_DEFAULTCOLOR or LR_LOADTRANSPARENT);
+    Image.Picture.Assign(FPanningImage);
+    Form.Left := Pos.X - (FPanningImage.Width div 2);
+    Form.Top := Pos.Y - (FPanningImage.Height div 2);
     Form.Position := poDesigned;
     // This prevents a focus chnage compare to using TForm.Show()
     ShowWindow(Form.Handle, SW_SHOWNOACTIVATE);
@@ -14771,8 +14770,11 @@ var
   Pt: TPoint;
 
 begin
+  // Set both panning and scrolling flag. One will be removed shortly depending on whether the middle mouse button is
+  // released before the mouse is moved or vice versa. The first case is referred to as wheel scrolling while the
+  // latter is called wheel panning.
   StopTimer(ScrollTimer);
-  DoStateChange([tsPanning]);
+  DoStateChange([tsWheelPanning, tsWheelScrolling]);
 
   // Determine correct cursor
   if FRangeX > ClientWidth then
@@ -14802,17 +14804,18 @@ procedure TBaseVirtualTree.StopWheelPanning;
 // Stops panning if currently active and destroys the helper window.
 
 begin
-  if tsPanning in FStates then
+  if [tsWheelPanning, tsWheelScrolling] * FStates <> [] then
   begin
     // Release the mouse capture and stop the panscroll timer.
     StopTimer(ScrollTimer);
     ReleaseCapture;
-    DoStateChange([], [tsPanning]);
+    DoStateChange([], [tsWheelPanning, tsWheelScrolling]);
 
     // Destroy the helper window.
     if Assigned(FPanningWindow) then
       FPanningWindow.Release;
     DeleteObject(FPanningCursor);
+    FreeAndNil(FPanningImage);
     FPanningCursor := 0;
     Winapi.Windows.SetCursor(Screen.Cursors[Cursor]);
   end;
@@ -16219,8 +16222,6 @@ var
   I: Integer;
   LevelChange: Boolean;
 begin
-  if Length(pNodes) = 0 then
-    exit; // Prevent range error below when empty array is passen. See issue #1288
   BeginUpdate;
   try
     for I := High(pNodes) downto 1 do
@@ -19085,20 +19086,6 @@ begin
   Result.FNodeLevel := NodeLevel;
 end;
 
-function TBaseVirtualTree.LineWidth: TDimension;
-// Returns the width in pixels that should be used to draw grid lines, see issue #1203
-begin
-  // Always use line width of 1 for older Delphi versions.
-  {$if CompilerVersion < 31}
-  Exit(1);
-  {$else}
-  if FCurrentPPI < 200 then
-    Exit(1) // Always use 1 pixel is scaled <=200%
-  else
-    Exit(MulDiv(1, Self.FCurrentPPI, 132)); // Use 132 dpi instead of the typical 96 so that line width increase slightly slower than the actual scaling, so we have a 3px line at 400%
-  {$ifend}
-end;
-
 //----------------------------------------------------------------------------------------------------------------------
 
 function TBaseVirtualTree.NoInitNodes(ConsiderChildrenAbove: Boolean): TVTVirtualNodeEnumeration;
@@ -20442,15 +20429,15 @@ begin
                             begin
                               if BidiMode = bdLeftToRight then
                               begin
-                                DrawGridHLine(PaintInfo, CellRect.Left + PaintInfo.Offsets[ofsCheckBox] - fImagesMargin, CellRect.Right - LineWidth, CellRect.Bottom - LineWidth);
+                                DrawGridHLine(PaintInfo, CellRect.Left + PaintInfo.Offsets[ofsCheckBox] - fImagesMargin, CellRect.Right - 1, CellRect.Bottom - 1);
                               end
                               else
                               begin
-                                DrawGridHLine(PaintInfo, CellRect.Left, CellRect.Right - IfThen(toFixedIndent in FOptions.PaintOptions, LineWidth, IndentSize) * FIndent - 1, CellRect.Bottom - LineWidth);
+                                DrawGridHLine(PaintInfo, CellRect.Left, CellRect.Right - IfThen(toFixedIndent in FOptions.PaintOptions, 1, IndentSize) * FIndent - 1, CellRect.Bottom - 1);
                               end;
                             end
                             else
-                              DrawGridHLine(PaintInfo, CellRect.Left, CellRect.Right, CellRect.Bottom - LineWidth);
+                              DrawGridHLine(PaintInfo, CellRect.Left, CellRect.Right, CellRect.Bottom - 1);
 
                             Dec(CellRect.Bottom);
                             Dec(ContentRect.Bottom);
@@ -20480,7 +20467,7 @@ begin
                                 begin
                                   if (BidiMode = bdLeftToRight) or not ColumnIsEmpty(Node, Column) then
                                   begin
-                                    DrawGridVLine(PaintInfo, CellRect.Top, CellRect.Bottom, CellRect.Right - LineWidth, ColumnIsFixed and (NextColumn >= 0));
+                                    DrawGridVLine(PaintInfo, CellRect.Top, CellRect.Bottom, CellRect.Right - 1, ColumnIsFixed and (NextColumn >= 0));
                                   end;
 
                                   Dec(CellRect.Right);
@@ -20496,7 +20483,7 @@ begin
                                 begin
                                   if (BidiMode = bdLeftToRight) or not ColumnIsEmpty(Node, Column) then
                                   begin
-                                    DrawGridVLine(PaintInfo, CellRect.Top, CellRect.Bottom, CellRect.Right - LineWidth, ColumnIsFixed and (NextColumn >= 0));
+                                    DrawGridVLine(PaintInfo, CellRect.Top, CellRect.Bottom, CellRect.Right - 1, ColumnIsFixed and (NextColumn >= 0));
                                   end;
                                   Dec(CellRect.Right);
                                 end;
@@ -22441,7 +22428,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TBaseVirtualTree.UpdateVerticalScrollBar(DoRepaint: Boolean);
+  procedure TBaseVirtualTree.UpdateVerticalScrollBar(DoRepaint: Boolean);
 
 var
   ScrollInfo: TScrollInfo;
