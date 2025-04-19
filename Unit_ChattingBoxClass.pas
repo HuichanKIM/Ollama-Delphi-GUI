@@ -104,7 +104,7 @@ type
     procedure Do_ScrollToTop(const AFlag: Integer = 0);
     procedure Do_ScrollToBottom(const AFlag: Integer = 0);
     function Do_SaveAllText(const AFile: string): Boolean;
-    function Do_SaveAsHistory(const AFlag: string): string;
+    //function Do_SaveAsHistory(const AFlag: string): string;
     function Do_DeleteNode(): Boolean;
     procedure Do_RestoreDefaultColor(const AFontOnlyFlag: Integer = 0);
     procedure Do_SetCustomFont(const AFlag: Integer; const AFontName: string; const AFontSize: Integer);
@@ -736,60 +736,6 @@ begin
   end;
 
   Result := FileExists(AFile);
-end;
-
-function TFrame_ChattingBoxClass.Do_SaveAsHistory(const AFlag: string): string;
-begin
-  Result := '';
-  if VST_ChattingBox.RootNodeCount < 1 then
-  Exit;
-
-  var _hfile := Format('%s%s%s%s', [CV_HisPath, 'History_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.jsn']);
-  var _sourcelist := TStringList.Create;
-  var _Data: PMessageRec := nil;
-  var _index: Integer := 0;
-  var _qtag: Integer := 0;
-  var _prefixn: string := '';
-  var _prefixr: string := 'Q';
-  var _AddString: string := '';
-  var _CellText: string := '';
-  try
-    _sourcelist.BeginUpdate;
-    var _Node  : PVirtualNode := VST_ChattingBox.GetFirst;
-    while Assigned(_Node) do
-    begin
-      _AddString := EmptyStr;
-      _Data := VST_ChattingBox.GetNodeData(_Node);
-      if _Data <> nil then
-      begin
-        _qtag := _Data^.FTag;
-          if _qtag = 0 then
-            begin
-              _prefixr := 'Q';
-              Inc(_index);
-            end
-          else
-            _prefixr := 'R';
-        _prefixn := Format('[%s.%.3d] ', [ _prefixr, _index]);
-        _CellText :=  _prefixn + _Data^.FUser;
-        _AddString := _AddString + _CellText +sLineBreak;
-        _CellText :=  _Data^.FCaption+ FormatDateTime('( hh:nn:ss )', _Data^.FTime);
-        _AddString := _AddString + _CellText +sLineBreak;
-
-        _sourcelist.Add(_AddString);
-      end;
-
-      _Node := _Node.NextSibling;
-    end;
-    _sourcelist.EndUpdate;
-    if _sourcelist.Count > 0 then
-    _sourcelist.SaveToFile(_hfile);
-  finally
-    _sourcelist.Free;
-  end;
-
-  if FileExists(_hfile) then
-  Result := _hfile;
 end;
 
 procedure TFrame_ChattingBoxClass.Do_ScrollToTop(const AFlag: Integer);

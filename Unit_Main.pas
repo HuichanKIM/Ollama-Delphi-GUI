@@ -131,7 +131,6 @@ type
     GroupBox_TopicOption: TGroupBox;
     Action_Home: TAction;
     Button_Home: TButton;
-    SpeedButton_LoadModel: TSpeedButton;
     SpeedButton_TTS: TSpeedButton;
     Action_TTS: TAction;
     Timer_System: TTimer;
@@ -235,7 +234,6 @@ type
     SpeedButton_ImagePrev: TSpeedButton;
     SpeedButton_ImageNext: TSpeedButton;
     Action_SHowBroker: TAction;
-    SpeedButton_UnloadModel: TSpeedButton;
     CheckBox_ProcessImage: TCheckBox;
     CheckBox_Reasoning: TCheckBox;
     Panel_HistoryButtons: TPanel;
@@ -260,6 +258,10 @@ type
     N1: TMenuItem;
     pmn_ClearanceHistory: TMenuItem;
     Action_CLearanceHistory: TAction;
+    SpeedButton_ModelLoad: TSpeedButton;
+    PopupMenu_Models: TPopupMenu;
+    pmn_LoadModel: TMenuItem;
+    pmn_UnLoadModel: TMenuItem;
     // Form controls ...
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -310,7 +312,6 @@ type
     procedure SkLabel_IntroWords5Click(Sender: TObject);
     procedure SkAnimatedImage_ChatClick(Sender: TObject);
     procedure SpeedButton_ClearLogBoxClick(Sender: TObject);
-    procedure SpeedButton_LoadModelClick(Sender: TObject);
     procedure SpeedButton_ListModelsClick(Sender: TObject);
     procedure SpeedButton_AddToTopicsClick(Sender: TObject);
     procedure SpeedButton_AddTopicClick(Sender: TObject);
@@ -350,7 +351,6 @@ type
     procedure Action_SHowBrokerExecute(Sender: TObject);
     procedure Image_SourceDblClick(Sender: TObject);
     procedure Label_SeedGetClick(Sender: TObject);
-    procedure SpeedButton_UnloadModelClick(Sender: TObject);
     procedure CheckBox_ProcessImageClick(Sender: TObject);
     // History Manager ...
     procedure Action_AddToHistoryExecute(Sender: TObject);
@@ -362,6 +362,9 @@ type
     procedure ListBox_HistoryClick(Sender: TObject);
     procedure Panel_HistoryButtonsClick(Sender: TObject);
     procedure Action_CLearanceHistoryExecute(Sender: TObject);
+    procedure SpeedButton_ModelLoadClick(Sender: TObject);
+    procedure pmn_LoadModelClick(Sender: TObject);
+    procedure pmn_UnLoadModelClick(Sender: TObject);
   private
     FInitialized: Boolean;
     FFrameWelcome: TFrame_Welcome;
@@ -992,12 +995,12 @@ begin
   Save_ConfigIni();
   if GV_SaveLogsOnClose then
   begin
-    var _slog := Format('%s%s%s', ['Log_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+    var _slog := Format('%s%s%s', ['Log_',FormatDateTime('yymmdd_hhnnss', Now()), '.txt']);
     Memo_LogWin.Lines.SaveToFile(CV_LogPath+_slog);
   end;
   if GV_SaveContentsOnClose and (Frame_ChattingBox.VST_ChattingBox.RootNodeCount > 0) then
   begin
-    var _recordf := Format('%s%s%s%s', [CV_HisPath, 'Record_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+    var _recordf := Format('%s%s%s%s', [CV_HisPath, 'Record_',FormatDateTime('yymmdd_hhnnss', Now()), '.txt']);
     Frame_ChattingBox.Do_SaveAllText(_recordf);
   end;
 
@@ -2021,13 +2024,19 @@ begin
 
 { Load Model ... }
 
-procedure TForm_RestOllama.SpeedButton_LoadModelClick(Sender: TObject);
+procedure TForm_RestOllama.SpeedButton_ModelLoadClick(Sender: TObject);
+begin
+  var _pos := SpeedButton_ModelLoad.ClientToScreen(Point(SpeedButton_ModelLoad.Width, 0));
+  PopupMenu_Models.Popup(_pos.x, _pos.Y)
+end;
+
+procedure TForm_RestOllama.pmn_LoadModelClick(Sender: TObject);
 begin
   V_LoadModelIndex := ComboBox_Models.ItemIndex;
   Do_LoadModel(V_LoadModelIndex, True);
 end;
 
-procedure TForm_RestOllama.SpeedButton_UnloadModelClick(Sender: TObject);
+procedure TForm_RestOllama.pmn_UnLoadModelClick(Sender: TObject);
 begin
   V_LoadModelIndex := ComboBox_Models.ItemIndex;
   Do_LoadModel(V_LoadModelIndex, False);
@@ -2424,7 +2433,7 @@ end;
 
 procedure TForm_RestOllama.SpeedButton_SaveAllLogesClick(Sender: TObject);
 begin
-  var _slog := CV_LogPath+Format('%s%s%s', ['Log_', FormatDateTime('yyyymmdd_hhnnss', Now()), '.txt']);
+  var _slog := CV_LogPath+Format('%s%s%s', ['Log_', FormatDateTime('yymmdd_hhnnss', Now()), '.txt']);
   Memo_LogWin.Lines.SaveToFile(_slog);
   if FileExists(_slog) then
     var _H: HINST := ShellExecute(0, PChar('Open'), PChar(_slog) , nil, nil, SW_SHOWNORMAL);
@@ -2889,7 +2898,8 @@ begin
   var _subject: string := Frame_ChattingBox.Get_HistorySubject;
   if _subject > '' then
     begin
-      var _overwriteflag := FHistoryManager.GetOverwriteFlag(_subject);
+      var _overwriteflag := False;
+      var _oldhfile: string := FHistoryManager.Get_HistoryFile(_subject, _overwriteflag);
       var _chooseflag: Integer := mrYes;
       if _overwriteflag then
         _chooseflag := MessageDlg('Overwrite this on the same topic as before ? - '+_subject, mtInformation, [mbYes, mbRetry, mbCancel], 0, mbCancel);
@@ -2902,26 +2912,26 @@ begin
             if InputQuery('Add Top Node', 'New Subject', _newsubject) then
             begin
               Frame_ChattingBox.Add_DummyHistorySubject(0, _username, 0, _newsubject);
-              // Return to save history ...
+              // Recursive Call - Return to save history ...
               Action_AddToHistoryExecute(Self);
             end;
           end;
         mrYes:
           begin
-            var _oldhfile: string := FHistoryManager.Get_HistoryFile(_subject);
-            var _historyfile := Format('%s%s%s%s', [CV_HisPath, 'History_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.dat']);
+            var _historyfile := Format('%s%s%s%s', [CV_HisPath, 'History_',FormatDateTime('yymmdd_hhnnss', Now()), '.dat']);
             if Frame_ChattingBox.Do_SaveAllData(_historyfile) then
+            begin
+              Panel_HistoryFile.Caption := ExtractFileName(_historyfile);
+              var _index: Integer := FHistoryManager.AddToHistory(0, _subject, _historyfile);
+              if _index >= 0 then
               begin
-                Panel_HistoryFile.Caption := ExtractFileName(_historyfile);
-                var _index: Integer := FHistoryManager.AddToHistory(0, _subject, _historyfile);
-                if _index >= 0 then
-                begin
-                  ListBox_History.ClearSelection;
-                  ListBox_History.Selected[_index] := True;
-                  if FileExists(_oldhfile) then
-                  DeleteFile(_oldhfile);
-                end;
+                ListBox_History.ClearSelection;
+                ListBox_History.Selected[_index] := True;
               end;
+
+              if FileExists(_oldhfile) then
+                DeleteFile(_oldhfile);
+            end;
           end;
         mrNo:;
       end;

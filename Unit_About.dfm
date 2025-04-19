@@ -103,7 +103,7 @@ object Form_About: TForm_About
       Height = 389
       Margins.Left = 10
       Margins.Right = 10
-      ActivePage = TabSheet_Style
+      ActivePage = TabSheet1
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
@@ -345,9 +345,9 @@ object Form_About: TForm_About
             object Label3: TLabel
               Left = 13
               Top = 21
-              Width = 30
+              Width = 39
               Height = 15
-              Caption = '. Web'
+              Caption = '. Home'
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clSilver
               Font.Height = -12

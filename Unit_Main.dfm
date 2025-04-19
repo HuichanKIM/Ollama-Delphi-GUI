@@ -150,17 +150,6 @@ object Form_RestOllama: TForm_RestOllama
         Caption = 'Model'
         TabOrder = 3
         StyleElements = [seClient, seBorder]
-        object SpeedButton_LoadModel: TSpeedButton
-          Left = 165
-          Top = 20
-          Width = 20
-          Height = 25
-          Hint = 'Load Model'
-          ImageIndex = 18
-          ImageName = 'ic_change_history_48px'
-          Images = SVGIconVirtualImageList1
-          OnClick = SpeedButton_LoadModelClick
-        end
         object SpeedButton_ListModels: TSpeedButton
           Left = 5
           Top = 20
@@ -172,21 +161,22 @@ object Form_RestOllama: TForm_RestOllama
           Images = SVGIconVirtualImageList1
           OnClick = SpeedButton_ListModelsClick
         end
-        object SpeedButton_UnloadModel: TSpeedButton
-          Left = 189
+        object SpeedButton_ModelLoad: TSpeedButton
+          Tag = 1
+          Left = 182
           Top = 20
-          Width = 20
+          Width = 23
           Height = 25
-          Hint = 'UnLoad Model'
-          ImageIndex = 15
-          ImageName = 'ic_close_48px'
+          Hint = 'Model Load/UnLoad'
+          ImageIndex = 45
+          ImageName = 'ic_more_horiz_48px'
           Images = SVGIconVirtualImageList1
-          OnClick = SpeedButton_UnloadModelClick
+          OnClick = SpeedButton_ModelLoadClick
         end
         object ComboBox_Models: TComboBox
           Left = 30
           Top = 22
-          Width = 130
+          Width = 145
           Height = 23
           Style = csDropDownList
           DragMode = dmAutomatic
@@ -977,7 +967,6 @@ object Form_RestOllama: TForm_RestOllama
           TabOrder = 1
           StyleElements = [seClient, seBorder]
           OnClick = ListBox_HistoryClick
-          ExplicitLeft = 3
         end
         object Panel_HistoryFile: TPanel
           Left = 1
@@ -1004,7 +993,7 @@ object Form_RestOllama: TForm_RestOllama
         Align = alTop
         Alignment = taRightJustify
         BevelOuter = bvNone
-        Caption = 'Protocol  '
+        Caption = 'Protocol  / History  '
         TabOrder = 8
         StyleElements = [seClient, seBorder]
       end
@@ -3391,5 +3380,22 @@ object Form_RestOllama: TForm_RestOllama
     Title = 'Open the History File'
     Left = 566
     Top = 298
+  end
+  object PopupMenu_Models: TPopupMenu
+    Images = SVGIconVirtualImageList1
+    Left = 742
+    Top = 530
+    object pmn_LoadModel: TMenuItem
+      Caption = 'Load Model'
+      ImageIndex = 18
+      ImageName = 'ic_change_history_48px'
+      OnClick = pmn_LoadModelClick
+    end
+    object pmn_UnLoadModel: TMenuItem
+      Caption = 'UnLoad Model'
+      ImageIndex = 15
+      ImageName = 'ic_close_48px'
+      OnClick = pmn_UnLoadModelClick
+    end
   end
 end

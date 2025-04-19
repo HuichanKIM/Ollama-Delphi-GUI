@@ -30,6 +30,7 @@ type
     procedure FreeListObjects;
     procedure UpdateHistory(const AFlag: Integer = 0);
     procedure Clearance_HistoryFiles_All(const AFlag: Integer = 0);
+    function Get_OverwriteFlag(const ASubject: string): Boolean;
   public
     constructor Create(AListBox: TListBox);
     destructor Destroy; override;
@@ -40,9 +41,9 @@ type
     procedure Clear_ViewAll(const AFlag: Integer = 0);
     procedure Clear_ListData(const AFlag: Integer = 0);
     procedure Clearance_HistoryFiles(const AFlag: Integer = 0);
-    function GetOverwriteFlag(const ASubject: string): Boolean;
+    //
     function Get_HistoryData(const AIndex: Integer): string;
-    function Get_HistoryFile(const ASubject: string): string;
+    function Get_HistoryFile(const ASubject: string; var AOvereriteFlag:  Boolean): string;
     // Property ...
     property ListBox: TListBox  read FListBox  write FListBox;
   end;
@@ -50,7 +51,6 @@ type
 implementation
 
 uses
-  System.Threading,
   Unit_Common;
 
 { THisObject }
@@ -158,10 +158,11 @@ begin
       UpdateHistory(0);
       FreeListObjects();
     end;
+
   inherited;
 end;
 
-function THistoryManager.GetOverwriteFlag(const ASubject: string): Boolean;
+function THistoryManager.Get_OverwriteFlag(const ASubject: string): Boolean;
 begin
   Result := FListBox.Items.IndexOf(ASubject) >= 0;
 end;
@@ -182,11 +183,7 @@ begin
       THisObject(FListBox.Items.Objects[_index0]).ho_Filename := AFile;
     end;
 
-  TTask.Run(
-    procedure
-    begin
-      UpdateHistory(2);
-    end);
+  UpdateHistory(2);
 end;
 
 procedure THistoryManager.FreeListObjects();
@@ -215,12 +212,16 @@ begin
   end;
 end;
 
-function THistoryManager.Get_HistoryFile(const ASubject: string): string;
+function THistoryManager.Get_HistoryFile(const ASubject: string; var AOvereriteFlag:  Boolean): string;
 begin
   Result := '';
+  AOvereriteFlag := False;
   var _index := FListBox.Items.IndexOf(ASubject);
   if _index >= 0 then
+  begin
+    AOvereriteFlag := True;
     Result := THisObject(FListBox.Items.Objects[_index]).ho_Filename;
+  end;
 end;
 
 procedure THistoryManager.DeleteHistory(const AIndex: Integer);
@@ -242,11 +243,7 @@ begin
     if FileExists(_hfile) then
       DeleteFile(_hfile);
 
-    TTask.Run(
-      procedure
-      begin
-        UpdateHistory(1);
-      end);
+    UpdateHistory(1);
   end;
 end;
 
@@ -314,12 +311,7 @@ begin
   DeleteFile(FHistoricFile);
   DeleteFile(FAttachedFile);
   Clearance_HistoryFiles_All(0);
-
-  TTask.Run(
-    procedure
-    begin
-      UpdateHistory(3);
-    end);
+  UpdateHistory(3);
 end;
 
 procedure THistoryManager.Clear_ViewAll(const AFlag: Integer = 0);
