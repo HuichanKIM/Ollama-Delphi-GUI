@@ -1529,7 +1529,7 @@ object Form_RestOllama: TForm_RestOllama
         BevelOuter = bvNone
         ShowCaption = False
         TabOrder = 2
-        object SpeedButton_ReqDummy: TSpeedButton
+        object SpeedButton_ReqMultiline: TSpeedButton
           AlignWithMargins = True
           Left = 0
           Top = 3

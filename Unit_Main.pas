@@ -204,7 +204,7 @@ type
     SpeedButton_SaveAllLoges: TSpeedButton;
     Action_CustomFontColor: TAction;
     Action_TTSControl: TAction;
-    SpeedButton_ReqDummy: TSpeedButton;
+    SpeedButton_ReqMultiline: TSpeedButton;
     Action_HelpShortcuts: TAction;
     SpeedButton_Help: TSpeedButton;
     Label1: TLabel;
@@ -652,7 +652,7 @@ begin
   var _fmodels := CV_AppPath+CF_ModalList;
   if FileExists(_fmodels) then
   begin
-    FModelsList.LoadFromFile(_fmodels) ;
+    FModelsList.LoadFromFile(_fmodels);
     ComboBox_Models.Items.Assign(FModelsList);
     ComboBox_Models.ItemIndex := 0;
   end;
@@ -1378,9 +1378,8 @@ begin
   var _pos := Button_StartRequest.ClientToScreen(Point(Button_StartRequest.Width+3, 0));
   if AMode = 1 then
   begin
-    _pos.X := (PageControl_Chatting.ClientWidth  - Form_RequestDialog.Width) div 2;
-    _pos.Y :=  PageControl_Chatting.ClientHeight - Form_RequestDialog.Height - 5;
-    _pos   := PageControl_Chatting.ClientToScreen(_pos);
+    _pos := SpeedButton_ReqMultiline.ClientToScreen(Point(0, 0));
+    _pos.Y := _pos.Y - Form_RequestDialog.Height - 5;
   end;
 
   var _requests: string := '';
@@ -1849,15 +1848,17 @@ procedure TForm_RestOllama.ComboBox_ModelsChange(Sender: TObject);
 begin
   V_LoadModelIndex := ComboBox_Models.ItemIndex;
   Model_Selected := ComboBox_Models.items[ComboBox_Models.ItemIndex];
-  GroupBox_MultimodelImage.Enabled := ProcessImageFlag;//CheckBox_ProcessImage.Checked;
+  GroupBox_MultimodelImage.Enabled := ProcessImageFlag;
   Request_Type := TRequest_Type(RadioGroup_PromptType.ItemIndex);
   Display_Type := TDisplay_Type(RadioGroup_PromptType.ItemIndex);
-  if ProcessImageFlag then
-    Edit_ReqContent.Text := C_Prompt4Image
-  else
-    Edit_ReqContent.Text := FLastRequest;
-
-  Return_FocusToVST(1);
+  if FInitialized then
+  begin
+    if ProcessImageFlag  then
+      Edit_ReqContent.Text := C_Prompt4Image
+    else
+      Edit_ReqContent.Text := FLastRequest;
+    Return_FocusToVST(1);
+  end;
 end;
 
 procedure TForm_RestOllama.Return_FocusToVST(const AFlag: Integer);
@@ -1964,7 +1965,6 @@ begin
         GV_AliveOllamaFlag := (Msg.LParam = 1);
         Set_OllamaAlive(GV_AliveOllamaFlag);
         FFrameWelcome.AnimationFlag := False;
-        FFrameWelcome.SkSvg_ICon.Opacity := 200;
       end;
     WM_NETHTTP_MESSAGE_ALIST:;
   end;
@@ -2241,10 +2241,10 @@ begin
     Edit_ReqContent.Text := _node.Text;
     var _tseed: string := '';
     if _node.Data <> nil then
-      begin
-        _tseed := PTopicData(_node.Data)^.td_Seed;
-        Label_NodeSeed.Caption := 's '+_tseed;
-      end;
+    begin
+      _tseed := PTopicData(_node.Data)^.td_Seed;
+      Label_NodeSeed.Caption := 's '+_tseed;
+    end;
     Edit_TopicSeed.Text := _tseed;
   end;
 
@@ -2272,9 +2272,9 @@ begin
       var _newprompt :=  V_LastInput;
       var _clickedok := Vcl.Dialogs.InputQuery('New Topic', 'Prompt', _newprompt);
       if _clickedok and (_newprompt <> '') then
-        begin
-          Do_ListUpTopic(GC_MRU_AddRoot, nil, _newprompt);
-        end;
+      begin
+        Do_ListUpTopic(GC_MRU_AddRoot, nil, _newprompt);
+      end;
     end;
 end;
 
@@ -2294,9 +2294,9 @@ begin
       var _newprompt := V_LastInput;
       var _clickedok := Vcl.Dialogs.InputQuery('Input Box', 'Prompt', _newprompt);
       if _clickedok and (_newprompt <> '') then
-        begin
-          Do_ListUpTopic(GC_MRU_AddChild, TreeView_Topics.Selected, _newprompt);
-        end;
+      begin
+        Do_ListUpTopic(GC_MRU_AddChild, TreeView_Topics.Selected, _newprompt);
+      end;
     end;
 end;
 
@@ -2386,7 +2386,6 @@ begin
     Exit;
   end;
 
-  // var _aIndex := Selected.AbsoluteIndex;
   var _node := TreeView_Topics.Selected;
   if Assigned(_node) and (_node.Level <> 0) then
   begin
@@ -2902,13 +2901,13 @@ begin
       var _oldhfile: string := FHistoryManager.Get_HistoryFile(_subject, _overwriteflag);
       var _chooseflag: Integer := mrYes;
       if _overwriteflag then
-        _chooseflag := MessageDlg('Overwrite this on the same topic as before ? - '+_subject, mtInformation, [mbYes, mbRetry, mbCancel], 0, mbCancel);
+        _chooseflag := MessageDlg('Overwrite this on the same subject as before ? - '+_subject, mtInformation, [mbYes, mbRetry, mbCancel], 0, mbCancel);
 
       case _chooseflag of
         mrRetry:
           begin
-            var _newsubject := _subject + ' (*)';
-            var _username := V_Username + '- system';
+            var _newsubject := _subject + ' *';
+            var _username := V_Username + ' (history)';
             if InputQuery('Add Top Node', 'New Subject', _newsubject) then
             begin
               Frame_ChattingBox.Add_DummyHistorySubject(0, _username, 0, _newsubject);
@@ -3001,10 +3000,10 @@ begin
         begin
           var _hfile := FHistoryManager.Get_HistoryData(ListBox_History.ItemIndex);
           if FileExists(_hfile) then
-            begin
-              _hcaption := ListBox_History.Items[ListBox_History.ItemIndex];
-              Do_LoadHistoryFile(_hfile);
-            end;
+          begin
+            _hcaption := ListBox_History.Items[ListBox_History.ItemIndex];
+            Do_LoadHistoryFile(_hfile);
+          end;
         end
       else
         TListbox(Sender).ClearSelection;

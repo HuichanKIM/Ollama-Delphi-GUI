@@ -258,7 +258,7 @@ begin
     var _Node := GetFirst;
     if _Node <> nil then
       begin
-        var _next: PVirtualNode := _Node.NextSibling;
+        var _next := _Node.NextSibling;
         if _next <> nil then
           begin
             _Node := InsertNode(_Node, amInsertBefore);
@@ -282,6 +282,17 @@ begin
       FTime :=    Now;
       FTag :=     ALocation;
       FLvTag :=   -1;
+    end;
+
+    var _second := _Node.NextSibling;
+    if _second <> nil then
+    begin
+      var _seconddata: PMessageRec := GetNodeData(_second);
+      if SameText(_seconddata^.FUser, AUser) then      // V_Username + ' (history)';
+        try
+          DeleteNode(_second);
+        finally
+        end;
     end;
 
     FocusedNode := _Node;

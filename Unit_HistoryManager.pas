@@ -256,10 +256,13 @@ begin
   if FindFirst(CV_HisPath + '*.*', faAnyFile, _srec) = 0 then
   begin
     var _AttachedFiles:= TStringList.Create;
-    _AttachedFiles.CaseSensitive := False;
-    _AttachedFiles.Duplicates := dupIgnore;
-    _AttachedFiles.Sorted := True;
-    _AttachedFiles.LoadFromFile(FAttachedFile);
+    with _AttachedFiles do
+    begin
+      CaseSensitive := False;
+      Duplicates := dupIgnore;
+      Sorted := True;
+      LoadFromFile(FAttachedFile);
+    end;
 
     var _fname := '';
     var _ext := '.dat';
