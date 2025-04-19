@@ -1,13 +1,14 @@
 # Ollama-Delphi-GUI
 
-### Latest Version 1.0.0 - 2025.04.15
+### Latest Version 1.0.3 - 2025.04.19
 
 ### Features
 - Supports Request-History Manager
 - Supports Multimodal Image Analysis (Gemma3, Llava ... ) and Reasoning (Cogito, Deepseek ...)
 - Themes (Windows10 SlateGray) according to user preferences of Windows Theme
-- If your computer has good performance, use it as a server/broker to connect your Android smartphone
 - Supports Windows 10 and 11 (for 64 bits).
+- If your computer has good performance, use it as a server/broker to connect your Android smartphone
+
 
 ### Prerequisites
 
