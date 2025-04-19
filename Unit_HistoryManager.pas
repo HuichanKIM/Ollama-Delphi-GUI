@@ -256,30 +256,24 @@ begin
   if FindFirst(CV_HisPath + '*.*', faAnyFile, _srec) = 0 then
   begin
     var _AttachedFiles:= TStringList.Create;
+    _AttachedFiles.CaseSensitive := False;
+    _AttachedFiles.Duplicates := dupIgnore;
+    _AttachedFiles.Sorted := True;
     _AttachedFiles.LoadFromFile(FAttachedFile);
-    var _clearancelist:= TStringList.Create;
-    _clearancelist.CaseSensitive := False;
-    _clearancelist.Duplicates := dupIgnore;
-    _clearancelist.Sorted := True;
+
     var _fname := '';
-    for var _i := 0 to _AttachedFiles.Count-1 do
-      begin
-        _fname := ExtractFileName(_AttachedFiles.Strings[_i]);
-        _clearancelist.Add(_fname);
-      end;
     var _ext := '.dat';
     try
       repeat
-        _fname := _srec.Name;
-        _ext := ExtractFileExt(_fname);
-        if SameText(_ext, '.dat') and (_clearancelist.IndexOf(_fname) < 0) then
-          if not DeleteFile(CV_HisPath + _fname) then
-          RaiseLastOSError;
+        _fname := CV_HisPath + _srec.Name;
+        _ext := ExtractFileExt(_srec.Name);
+        if SameText(_ext, '.dat') and (_AttachedFiles.IndexOf(_fname) < 0) then
+          if not DeleteFile(_fname) then
+            RaiseLastOSError;
       until FindNext(_srec) <> 0;
     finally
       FindClose(_srec);
       _AttachedFiles.Free;
-      _clearancelist.Free;
     end;
   end;
 end;
