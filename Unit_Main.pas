@@ -2878,9 +2878,9 @@ begin
       Do_LoadHistoryFile(FileOpenDialog1.FileName) else
     if SameText('history.lst', _filen) then
     begin
-      ListBox_History.ClearSelection;
       FHistoryManager.Load_HstoryList(_file);
     end;
+    ListBox_History.ClearSelection;
   end;
 end;
 
