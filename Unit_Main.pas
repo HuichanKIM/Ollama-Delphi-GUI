@@ -251,11 +251,15 @@ type
     pmn_ClearAllHistory: TMenuItem;
     Action_ClearAllHistory: TAction;
     Action_LoadHistory: TAction;
-    SpeedButton_AddToHistory: TSpeedButton;
+    SpeedButton_AddToHistory1: TSpeedButton;
     Panel_HistoryFile: TPanel;
     FileOpenDialog1: TFileOpenDialog;
     Label_HistoryCation: TLabel;
     Splitter2: TSplitter;
+    SpeedButton_AddToHistory0: TSpeedButton;
+    N1: TMenuItem;
+    pmn_ClearanceHistory: TMenuItem;
+    Action_CLearanceHistory: TAction;
     // Form controls ...
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -357,6 +361,7 @@ type
     procedure Action_LoadHistoryExecute(Sender: TObject);
     procedure ListBox_HistoryClick(Sender: TObject);
     procedure Panel_HistoryButtonsClick(Sender: TObject);
+    procedure Action_CLearanceHistoryExecute(Sender: TObject);
   private
     FInitialized: Boolean;
     FFrameWelcome: TFrame_Welcome;
@@ -1119,6 +1124,7 @@ end;
 procedure TForm_RestOllama.Action_ClearChattingExecute(Sender: TObject);
 begin
   Frame_ChattingBox.VST_ChattingBox.Clear;
+  ListBox_History.ClearSelection;
   Action_TTS.Enabled := False;
   SkAnimatedImage_Chat.Left := (PageControl_Chatting.Width -  SkAnimatedImage_Chat.Width)  div 2;
   SkAnimatedImage_Chat.Top :=  (PageControl_Chatting.Height - SkAnimatedImage_Chat.Height) div 2;
@@ -1303,7 +1309,7 @@ procedure TForm_RestOllama.Action_Pop_SaveAllTextExecute(Sender: TObject);
 begin
   if Frame_ChattingBox.VST_ChattingBox.RootNodeCount < 1 then
   begin
-    ShowMessage('Failed to Save contents because empty ...');
+    MessageDlg('Failed to Save contents cause of empty ...', mtWarning, [mbOk], 0);
     Exit;
   end;
   if SaveTextFileDialog1.Execute then
@@ -1312,7 +1318,7 @@ begin
     if Frame_ChattingBox.Do_SaveAllText(_file) then
       var _H: HINST := ShellExecute(0, PChar('open'), PChar(_file), nil, nil, SW_SHOWNORMAL)
     else
-      ShowMessage('Failed to Save contents ...');
+      MessageDlg('Failed to Save contents ...', mtWarning, [mbOk], 0);
   end;
 end;
 
@@ -1356,7 +1362,7 @@ end;
 
 procedure TForm_RestOllama.Action_StartRequestExecute(Sender: TObject);
 begin
-  Action_StartRequestMode();
+  Action_StartRequestMode(0);
 end;
 
 procedure TForm_RestOllama.Action_RequestDialogExecute(Sender: TObject);
@@ -1366,15 +1372,15 @@ end;
 
 procedure TForm_RestOllama.Action_StartRequestMode(const AMode: Integer);
 begin
-  var _requests: string := '';
   var _pos := Button_StartRequest.ClientToScreen(Point(Button_StartRequest.Width+3, 0));
   if AMode = 1 then
   begin
     _pos.X := (PageControl_Chatting.ClientWidth  - Form_RequestDialog.Width) div 2;
-    _pos.Y :=  PageControl_Chatting.ClientHeight - Form_RequestDialog.Height - 10;
+    _pos.Y :=  PageControl_Chatting.ClientHeight - Form_RequestDialog.Height - 5;
     _pos   := PageControl_Chatting.ClientToScreen(_pos);
   end;
 
+  var _requests: string := '';
   with Form_RequestDialog do
   begin
     Left := _pos.x;
@@ -1488,7 +1494,7 @@ begin
   V_MyModel := ComboBox_Models.Text;
   if (V_MyContentPrompt = '') or (V_MyModel = '') then
   begin
-    ShowMessage('Empty "Content / Model" is not allowed.');
+    MessageDlg('Empty "Content / Model" is not allowed.', mtWarning, [mbOk], 0);
     Exit;
   end;
 
@@ -1944,7 +1950,7 @@ begin
   ActionList_OllmaUpdate(Action_InetAlive, _dummy);
   StatusBar1.Panels[0].Text := C_OllamaAlive[ALiveFlag];
   if not ALiveFlag  then
-    ShowMessage('Ollama is not connected. Check Ollama is running ...');
+    MessageDlg('Ollama is not connected. Check Ollama is running ...', mtWarning, [mbOk], 0);
 end;
 
 procedure TForm_RestOllama.WM_NETHTTPMESSAGE(var Msg: TMessage);
@@ -2037,7 +2043,7 @@ begin
   V_MyModel := ComboBox_Models.Text;
   if V_MyModel = '' then
   begin
-    ShowMessage('Empty "Model" is not allowed.');
+    MessageDlg('Empty "Model" is not allowed.', mtWarning, [mbOk], 0);
     Exit;
   end;
 
@@ -2149,7 +2155,7 @@ begin
 
   if _ItemStr = '' then
   begin
-    ShowMessage('Can not translate for empty string');
+    MessageDlg('Can not translate for empty string.', mtWarning, [mbOk], 0);
     Exit;
   end;
 
@@ -2319,7 +2325,7 @@ begin
   var _prompt := Trim(Edit_ReqContent.Text);
   if _prompt = '' then
   begin
-    ShowMessage('Can not add topics for empty string.');
+    MessageDlg('Can not add topics for empty string.', mtWarning, [mbOk], 0);
     Exit;
   end;
 
@@ -2548,7 +2554,7 @@ procedure TForm_RestOllama.Do_TTSSpeak_Ex(const AFlag: Integer; const ASource: s
 begin
   if (ASource = '') then
   begin
-    ShowMessage('Unable to speak empty text');
+    MessageDlg('Unable to speak empty text.', mtWarning, [mbOk], 0);
     Exit;
   end;
 
@@ -2671,7 +2677,7 @@ begin
         if not GV_DosCommand.Dos_Execute(_command) then
         begin
           SimpleSound_Common(DoneSoundFlag, 0);
-          ShowMessage('Failed to Command : '+_command);
+          MessageDlg('Failed to Command : '+_command, mtWarning, [mbOk], 0);
         end;
       end;
   end;
@@ -2763,10 +2769,10 @@ begin
   GV_RemoteBanList.Clear;
   if CheckListBox_ConnIPs.items.Count > 0 then
     for var _i := 0 to CheckListBox_ConnIPs.items.Count-1 do
-      begin
-        if CheckListBox_ConnIPs.Checked[_i] then
-        GV_RemoteBanList.Add(CheckListBox_ConnIPs.Items[_i]);
-      end;
+    begin
+      if CheckListBox_ConnIPs.Checked[_i] then
+      GV_RemoteBanList.Add(CheckListBox_ConnIPs.Items[_i]);
+    end;
 end;
 
 procedure TForm_RestOllama.CheckListBox_ConnIPsClickCheck(Sender: TObject);
@@ -2871,29 +2877,57 @@ begin
     if SameText('.dat', _ext) then
       Do_LoadHistoryFile(FileOpenDialog1.FileName) else
     if SameText('history.lst', _filen) then
+    begin
+      ListBox_History.ClearSelection;
       FHistoryManager.Load_HstoryList(_file);
+    end;
   end;
 end;
 
 procedure TForm_RestOllama.Action_AddToHistoryExecute(Sender: TObject);
 begin
-  var _historyfile := Format('%s%s%s%s', [CV_HisPath, 'History_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.dat']);
-  if Frame_ChattingBox.Do_SaveAllData(_historyfile) then
-  begin
-    var _Subject: string := Frame_ChattingBox.Get_HistorySubject;
-    if _Subject > '' then
-      begin
-        Panel_HistoryFile.Caption := ExtractFileName(_historyfile);
-        var _index: Integer := FHistoryManager.AddToHistory(0, _Subject, _historyfile);
-        if _index >= 0 then
+  var _subject: string := Frame_ChattingBox.Get_HistorySubject;
+  if _subject > '' then
+    begin
+      var _overwriteflag := FHistoryManager.GetOverwriteFlag(_subject);
+      var _chooseflag: Integer := mrYes;
+      if _overwriteflag then
+        _chooseflag := MessageDlg('Overwrite this on the same topic as before ? - '+_subject, mtInformation, [mbYes, mbRetry, mbCancel], 0, mbCancel);
+
+      case _chooseflag of
+        mrRetry:
           begin
-            ListBox_History.ClearSelection;
-            ListBox_History.Selected[_index] := True;
+            var _newsubject := _subject + ' (*)';
+            var _username := V_Username + '- system';
+            if InputQuery('Add Top Node', 'New Subject', _newsubject) then
+            begin
+              Frame_ChattingBox.Add_DummyHistorySubject(0, _username, 0, _newsubject);
+              // Return to save history ...
+              Action_AddToHistoryExecute(Self);
+            end;
           end;
-      end
-    else
-      ShowMessage('The top node must be in request mode.');
-  end;
+        mrYes:
+          begin
+            var _oldhfile: string := FHistoryManager.Get_HistoryFile(_subject);
+            var _historyfile := Format('%s%s%s%s', [CV_HisPath, 'History_',FormatDateTime('yyyymmdd_hhnnss', Now()), '.dat']);
+            if Frame_ChattingBox.Do_SaveAllData(_historyfile) then
+              begin
+                Panel_HistoryFile.Caption := ExtractFileName(_historyfile);
+                var _index: Integer := FHistoryManager.AddToHistory(0, _subject, _historyfile);
+                if _index >= 0 then
+                begin
+                  ListBox_History.ClearSelection;
+                  ListBox_History.Selected[_index] := True;
+                  if FileExists(_oldhfile) then
+                  DeleteFile(_oldhfile);
+                end;
+              end;
+          end;
+        mrNo:;
+      end;
+    end
+  else
+    MessageDlg('The top node must be in request mode.', mtWarning, [mbOk], 0);
 end;
 
 procedure TForm_RestOllama.Action_DelToHistoryExecute(Sender: TObject);
@@ -2911,7 +2945,16 @@ end;
 procedure TForm_RestOllama.Action_ClearAllHistoryExecute(Sender: TObject);
 begin
   HistoryCation := '';
-  FHistoryManager.Clear_ListData();
+  var _chooseflag := MessageDlg('Clear All - Clear View, Delete all history files ?', mtConfirmation, [mbYes, mbCancel], 0, mbCancel);
+  if _chooseflag = mrYes then
+    FHistoryManager.Clear_ListData();
+end;
+
+procedure TForm_RestOllama.Action_CLearanceHistoryExecute(Sender: TObject);
+begin
+  var _chooseflag := MessageDlg('Clearance History - Delete unlisted files ... ', mtConfirmation, [mbYes, mbCancel], 0, mbCancel);
+  if _chooseflag = mrYes then
+    FHistoryManager.Clearance_HistoryFiles(0);
 end;
 
 procedure TForm_RestOllama.SpeedButton_HistoryMoreClick(Sender: TObject);

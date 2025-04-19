@@ -113,6 +113,7 @@ type
     procedure Set_FontEx(AFont: TFont);
     // History Manager
     procedure Do_LoadAllData(const ALFile: string);
+    procedure Add_DummyHistorySubject(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
     function Do_SaveAllData(const ASFile: string): Boolean;
     function Get_HistorySubject(): string;
     //
@@ -247,6 +248,45 @@ begin
     Selected[_Node] := True;
     if _bottomflag then
     Perform(WM_VSCROLL, SB_BOTTOM, 0);
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.Add_DummyHistorySubject(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
+begin
+  with VST_ChattingBox do
+  begin
+    var _Node := GetFirst;
+    if _Node <> nil then
+      begin
+        var _next: PVirtualNode := _Node.NextSibling;
+        if _next <> nil then
+          begin
+            _Node := InsertNode(_Node, amInsertBefore);
+          end
+        else
+          begin
+            _Node := AddChild(nil);
+          end;
+      end
+    else
+      begin
+        _Node := AddChild(nil);
+      end;
+
+    ClearSelection;
+    var _Data: PMessageRec := GetNodeData(_Node);
+    with _Data^ do
+    begin
+      FUser :=    AUser;
+      FCaption := APrompt;
+      FTime :=    Now;
+      FTag :=     ALocation;
+      FLvTag :=   -1;
+    end;
+
+    FocusedNode := _Node;
+    Selected[_Node] := True;
+    Perform(WM_VSCROLL, SB_TOP, 0);
   end;
 end;
 
@@ -844,7 +884,7 @@ begin
   Result := False;
   if VST_ChattingBox.RootNodeCount < 1 then
   begin
-    MessageDlg('The list is empty. Nothing to save.', mtInformation, [mbOk], 0);
+    MessageDlg('The list is empty. Nothing to save.', mtWarning, [mbOk], 0);
     Exit;
   end;
   // ------------------------------------------------------------------------ //

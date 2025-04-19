@@ -898,7 +898,6 @@ object Form_RestOllama: TForm_RestOllama
         Caption = 'History'
         TabOrder = 7
         StyleElements = [seClient, seBorder]
-        ExplicitHeight = 227
         object Panel_HistoryButtons: TPanel
           AlignWithMargins = True
           Left = 4
@@ -950,7 +949,7 @@ object Form_RestOllama: TForm_RestOllama
             ExplicitLeft = -2
             ExplicitHeight = 14
           end
-          object SpeedButton_AddToHistory: TSpeedButton
+          object SpeedButton_AddToHistory1: TSpeedButton
             AlignWithMargins = True
             Left = 3
             Top = 3
@@ -971,13 +970,14 @@ object Form_RestOllama: TForm_RestOllama
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
+          BorderStyle = bsNone
           DoubleBuffered = True
           ItemHeight = 15
           ParentDoubleBuffered = False
           TabOrder = 1
           StyleElements = [seClient, seBorder]
           OnClick = ListBox_HistoryClick
-          ExplicitHeight = 156
+          ExplicitLeft = 3
         end
         object Panel_HistoryFile: TPanel
           Left = 1
@@ -989,7 +989,6 @@ object Form_RestOllama: TForm_RestOllama
           Caption = '...'
           TabOrder = 2
           StyleElements = [seClient, seBorder]
-          ExplicitTop = 206
         end
       end
       object Panel_OptionsTop: TPanel
@@ -1031,7 +1030,6 @@ object Form_RestOllama: TForm_RestOllama
           BorderStyle = bsNone
           ScrollBars = ssVertical
           TabOrder = 0
-          ExplicitHeight = 60
         end
       end
     end
@@ -1150,7 +1148,7 @@ object Form_RestOllama: TForm_RestOllama
           AlignWithMargins = True
           Left = 100
           Top = 3
-          Width = 387
+          Width = 358
           Height = 20
           Margins.Left = 100
           Margins.Right = 30
@@ -1160,6 +1158,18 @@ object Form_RestOllama: TForm_RestOllama
           StyleElements = [seBorder]
           ExplicitWidth = 3
           ExplicitHeight = 15
+        end
+        object SpeedButton_AddToHistory0: TSpeedButton
+          AlignWithMargins = True
+          Left = 491
+          Top = 3
+          Width = 23
+          Height = 20
+          Action = Action_LoadHistory
+          Align = alRight
+          Images = SVGIconVirtualImageList1
+          ExplicitLeft = 11
+          ExplicitTop = 6
         end
       end
       object PageControl_Chatting: TPageControl
@@ -1536,7 +1546,6 @@ object Form_RestOllama: TForm_RestOllama
           Top = 3
           Width = 22
           Height = 20
-          Hint = 'Request Dialog'
           Margins.Left = 0
           Action = Action_RequestDialog
           Align = alLeft
@@ -1781,9 +1790,9 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_ExitExecute
     end
     object Action_StartRequest: TAction
-      Hint = 'Start Request  (F1)'
-      ImageIndex = 12
-      ImageName = 'All\ic_send_48px'
+      Hint = 'Start Request  - Multi Lines (F1)'
+      ImageIndex = 43
+      ImageName = 'chat-118'
       OnExecute = Action_StartRequestExecute
     end
     object Action_Home: TAction
@@ -1927,6 +1936,7 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_LoadImageSourceExecute
     end
     object Action_RequestDialog: TAction
+      Hint = 'Request Dialog - Multi Lines'
       ImageIndex = 43
       ImageName = 'chat-118'
       ShortCut = 112
@@ -1979,14 +1989,14 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_LoadHistoryExecute
     end
     object Action_AddToHistory: TAction
-      Hint = 'Add to History'
+      Hint = 'Add / Update to History'
       ImageIndex = 14
       ImageName = 'ic_add_48px'
       ShortCut = 32841
       OnExecute = Action_AddToHistoryExecute
     end
     object Action_DelToHistory: TAction
-      Hint = 'Delete to History'
+      Hint = 'Delete to History View'
       ImageIndex = 49
       ImageName = 'ic_remove_48px'
       OnExecute = Action_DelToHistoryExecute
@@ -1999,10 +2009,17 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_ClearHistoryExecute
     end
     object Action_ClearAllHistory: TAction
-      Caption = 'Clear All History'
+      Caption = 'Clear All History Data'
       ImageIndex = 33
       ImageName = 'ic_crop_din_48px'
       OnExecute = Action_ClearAllHistoryExecute
+    end
+    object Action_CLearanceHistory: TAction
+      Caption = 'Clearance History (View=Data)'
+      Hint = 'Update History'
+      ImageIndex = 33
+      ImageName = 'ic_crop_din_48px'
+      OnExecute = Action_CLearanceHistoryExecute
     end
   end
   object SVGIconVirtualImageList1: TSVGIconVirtualImageList
@@ -3346,11 +3363,16 @@ object Form_RestOllama: TForm_RestOllama
     Top = 538
     object pmn_ClearHistory: TMenuItem
       Action = Action_ClearHistory
-      Caption = 'Clear History (View)'
+      Caption = 'Clear History (only View)'
+    end
+    object pmn_ClearanceHistory: TMenuItem
+      Action = Action_CLearanceHistory
+    end
+    object N1: TMenuItem
+      Caption = '-'
     end
     object pmn_ClearAllHistory: TMenuItem
       Action = Action_ClearAllHistory
-      Caption = 'Clear All History (List)'
     end
   end
   object FileOpenDialog1: TFileOpenDialog
