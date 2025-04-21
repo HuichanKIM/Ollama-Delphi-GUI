@@ -121,20 +121,22 @@ object Form_RestOllama: TForm_RestOllama
         StyleElements = [seClient, seBorder]
         object CheckBox_ProcessImage: TCheckBox
           Left = 11
-          Top = 18
-          Width = 118
+          Top = 42
+          Width = 190
           Height = 17
-          Caption = 'Processing Image'
+          Hint = 'Llava, Gemma3 ...'
+          Caption = 'Analysis Image'
           TabOrder = 0
           StyleElements = [seClient, seBorder]
           OnClick = CheckBox_ProcessImageClick
         end
         object CheckBox_Reasoning: TCheckBox
           Left = 11
-          Top = 41
+          Top = 20
           Width = 190
           Height = 17
-          Caption = 'Resoning (cogito, deepseek ...)'
+          Hint = 'Cogito, Deepseek ...'
+          Caption = 'Add Resoning'
           TabOrder = 1
           StyleElements = [seClient, seBorder]
           OnClick = CheckBox_ReasoningClick
@@ -949,6 +951,20 @@ object Form_RestOllama: TForm_RestOllama
             Align = alLeft
             Images = SVGIconVirtualImageList1
             ExplicitTop = 6
+          end
+          object Label_HistoryCount: TLabel
+            AlignWithMargins = True
+            Left = 84
+            Top = 3
+            Width = 113
+            Height = 16
+            Align = alClient
+            Alignment = taCenter
+            Caption = '0 / 0'
+            Layout = tlCenter
+            StyleElements = [seClient, seBorder]
+            ExplicitWidth = 23
+            ExplicitHeight = 15
           end
         end
         object ListBox_History: TListBox
@@ -1993,22 +2009,29 @@ object Form_RestOllama: TForm_RestOllama
     object Action_ClearHistory: TAction
       Caption = 'Clear History'
       Hint = 'Clear History'
-      ImageIndex = 15
-      ImageName = 'ic_close_48px'
+      ImageIndex = 33
+      ImageName = 'ic_crop_din_48px'
       OnExecute = Action_ClearHistoryExecute
     end
     object Action_ClearAllHistory: TAction
       Caption = 'Clear All History Data'
-      ImageIndex = 33
-      ImageName = 'ic_crop_din_48px'
+      ImageIndex = 15
+      ImageName = 'ic_close_48px'
       OnExecute = Action_ClearAllHistoryExecute
     end
     object Action_CLearanceHistory: TAction
       Caption = 'Clearance History (View=Data)'
       Hint = 'Update History'
-      ImageIndex = 33
-      ImageName = 'ic_crop_din_48px'
+      ImageIndex = 15
+      ImageName = 'ic_close_48px'
       OnExecute = Action_CLearanceHistoryExecute
+    end
+    object Action_SaveToHistory: TAction
+      Hint = 'Save / Replace'
+      ImageIndex = 57
+      ImageName = 'ic_explicit_48px'
+      ShortCut = 32843
+      OnExecute = Action_SaveToHistoryExecute
     end
   end
   object SVGIconVirtualImageList1: TSVGIconVirtualImageList
@@ -3274,8 +3297,8 @@ object Form_RestOllama: TForm_RestOllama
   end
   object Timer_System: TTimer
     Enabled = False
-    Left = 381
-    Top = 288
+    Left = 413
+    Top = 280
   end
   object PopupMenu_Topics: TPopupMenu
     OnPopup = PopupMenu_TopicsPopup
@@ -3378,8 +3401,8 @@ object Form_RestOllama: TForm_RestOllama
       end>
     Options = []
     Title = 'Open the History File'
-    Left = 566
-    Top = 298
+    Left = 774
+    Top = 346
   end
   object PopupMenu_Models: TPopupMenu
     Images = SVGIconVirtualImageList1

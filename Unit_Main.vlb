@@ -353,12 +353,6 @@ Coordinates=1230,386,132,58
 [GroupBox_Tranlation]
 Coordinates=1230,1,137,58
 
-[SpeedButton_LoadModel]
-Coordinates=1944,881,159,36
-
-[SpeedButton_ReqDummy]
-Coordinates=1944,936,163,36
-
 [Action_Abort]
 Coordinates=1396,1205,88,36
 
@@ -534,7 +528,7 @@ Coordinates=1230,155,128,58
 Coordinates=2214,1266,171,36
 
 []
-Coordinates=840,1230,160,36
+Coordinates=1944,881,159,36
 
 [GroupBox_Multimodel]
 Coordinates=761,1,144,58
@@ -568,4 +562,7 @@ Coordinates=1020,232,134,58
 
 [TabSheet_LogsBroker]
 Coordinates=1944,661,132,36
+
+[SpeedButton_ReqMultiline]
+Coordinates=1944,936,163,36
 

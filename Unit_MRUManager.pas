@@ -300,7 +300,7 @@ end;
 function TMRU_Manager.GetSeedRandom(): string;
 begin
   Result := '';
-  var _seed := RandomRange(10000, 99999);
+  var _seed := RandomRange(10000, 9999999);    // trick - Set Edit_Seed space ...
   var _dummy: Integer := 0;
   while True do
   begin
@@ -309,7 +309,7 @@ begin
       FSeedList.Add(_seed.ToString);
       Break;
     end;
-    _seed := RandomRange(10000, 99999);
+    _seed := RandomRange(10000, 9999999);
   end;
 
   Result := _seed.ToString;

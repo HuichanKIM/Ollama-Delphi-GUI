@@ -120,8 +120,8 @@ object Form_About: TForm_About
           AlignWithMargins = True
           Left = 10
           Top = 82
-          Width = 332
-          Height = 271
+          Width = 130
+          Height = 15
           Margins.Left = 10
           Margins.Right = 10
           Align = alClient
@@ -133,8 +133,6 @@ object Form_About: TForm_About
           Font.Style = []
           ParentFont = False
           StyleElements = [seClient, seBorder]
-          ExplicitWidth = 130
-          ExplicitHeight = 15
         end
         object Panel2: TPanel
           Left = 0

@@ -57,7 +57,7 @@ object Frame_Welcome: TFrame_Welcome
         Name = 'Item 6'
       end
       item
-        Caption = #13#10'Web-site : '
+        Caption = #13#10'Home : '
         FontColor = claSilver
         Name = 'Item 5'
         StyledSettings = [Family, Size, Style]

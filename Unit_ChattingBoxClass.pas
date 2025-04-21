@@ -796,41 +796,47 @@ begin
   _Data := Sender.GetNodeData(Node);
 
   _len := Length(_Data^.FUser);
-  Stream.Write(_len, SizeOf(_len));
-  Stream.Write(PChar(_Data^.FUser)^, _len * SizeOf(Char));
-  _len := Length(_Data^.FCaption);
-  Stream.Write(_len, SizeOf(_len));
-  Stream.Write(PChar(_Data^.FCaption)^, _len * SizeOf(Char));
+  with Stream do
+  begin
+    Write(_len, SizeOf(_len));
+    Write(PChar(_Data^.FUser)^, _len * SizeOf(Char));
+    _len := Length(_Data^.FCaption);
+    Write(_len, SizeOf(_len));
+    Write(PChar(_Data^.FCaption)^, _len * SizeOf(Char));
 
-  _len := SizeOf(_Data^.FTime);
-  Stream.Write(_len, SizeOf(_len));
-  Stream.Write(_Data^.FTime, _len);
-  _len := SizeOf(_Data^.FTag);
-  Stream.Write(_len, SizeOf(_len));
-  Stream.Write(_Data^.FTag, _len);
-  _len := SizeOf(_Data^.FLvTag);
-  Stream.Write(_len, SizeOf(_len));
-  Stream.Write(_Data^.FLvTag, _len);
+    _len := SizeOf(_Data^.FTime);
+    Write(_len, SizeOf(_len));
+    Write(_Data^.FTime, _len);
+    _len := SizeOf(_Data^.FTag);
+    Write(_len, SizeOf(_len));
+    Write(_Data^.FTag, _len);
+    _len := SizeOf(_Data^.FLvTag);
+    Write(_len, SizeOf(_len));
+    Write(_Data^.FLvTag, _len);
+  end;
 end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxLoadNode(Sender: TBaseVirtualTree; Node: PVirtualNode; Stream: TStream);
 begin
   var _Data: PMessageRec := Sender.GetNodeData(Node);
   var _len: Integer := 0;
-  Stream.Read(_len, SizeOf(_len));
-  SetLength(_Data^.FUser, _len);
-  Stream.Read(PChar(_Data^.FUser)^, _len * SizeOf(Char));
-  Stream.Read(_len, SizeOf(_len));
-  SetLength(_Data^.FCaption, _len);
-  Stream.Read(PChar(_Data^.FCaption)^, _len * SizeOf(Char));
-
-  Stream.Read(_len, SizeOf(_len));
-  Stream.Read(_Data^.FTime, _len);
-  Stream.Read(_len, SizeOf(_len));
-  Stream.Read(_Data^.FTag, _len);
-  Stream.Read(_len, SizeOf(_len));
   var _imagetag: Integer := -1;
-  Stream.Read(_imagetag, _len);
+  with Stream do
+  begin
+    Read(_len, SizeOf(_len));
+    SetLength(_Data^.FUser, _len);
+    Read(PChar(_Data^.FUser)^, _len * SizeOf(Char));
+    Read(_len, SizeOf(_len));
+    SetLength(_Data^.FCaption, _len);
+    Read(PChar(_Data^.FCaption)^, _len * SizeOf(Char));
+
+    Read(_len, SizeOf(_len));
+    Read(_Data^.FTime, _len);
+    Read(_len, SizeOf(_len));
+    Read(_Data^.FTag, _len);
+    Read(_len, SizeOf(_len));
+    Read(_imagetag, _len);
+  end;
   if _imagetag > 0 then
     _imagetag := 0;
   _Data^.FLvTag := _imagetag;
@@ -854,17 +860,21 @@ procedure TFrame_ChattingBoxClass.Do_LoadAllData(const ALFile: string);
 begin
   if not FileExists(ALFile) then Exit;
 
-  VST_ChattingBox.Clear;
-  VST_ChattingBox.NodeDataSize := SizeOf(TMessageRec);
-  VST_ChattingBox.BeginUpdate;
-  // ------------------------------------------------------------------------ //
-  VST_ChattingBox.LoadFromFile(ALFile);
-  // ------------------------------------------------------------------------ //
-  VST_ChattingBox.EndUpdate;
-  var _Node: PVirtualNode := VST_ChattingBox.GetFirst;
-  VST_ChattingBox.FocusedNode := _Node;
-  VST_ChattingBox.Selected[_Node] := True;
-  Perform(WM_VSCROLL, SB_BOTTOM, 0);
+  with VST_ChattingBox do
+  begin
+    Clear;
+    NodeDataSize := SizeOf(TMessageRec);
+    BeginUpdate;
+    // ------------------------------------------------------------------------ //
+    LoadFromFile(ALFile);
+    // ------------------------------------------------------------------------ //
+    EndUpdate;
+    var _Node: PVirtualNode := GetFirst;
+    FocusedNode := _Node;
+    Selected[_Node] := True;
+
+    Perform(WM_VSCROLL, SB_TOP, 0);
+  end;
 end;
 
 function TFrame_ChattingBoxClass.Get_HistorySubject: string;

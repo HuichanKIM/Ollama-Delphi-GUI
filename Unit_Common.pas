@@ -81,8 +81,8 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  GC_Version0     = 'ver. 1.0.5';
-  GC_Version1     = 'ver. 1.0.5 (2025.04.20)';
+  GC_Version0     = 'ver. 1.0.6';
+  GC_Version1     = 'ver. 1.0.6 (2025.04.21)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024-2025 JNJ Labs. Seoul, Korea.';
@@ -95,10 +95,11 @@ const
 const
   GC_LanguageCnt = 13;
   GC_LanguageCode: array [0 .. GC_LanguageCnt-1] of string = ('en','ko','ja','zh','hi','fr','de','it','pt','hi','ru','es','ar');
-  GC_UTF8_LFA = #10;
-  GC_UTF8_LFH = #$0A;
+
+  GC_UTF8_LFA   = #10;
+  GC_UTF8_LFH   = #$0A;
   GC_UTF8_CRLFH = #$0D#$0A;
-  GC_CRLF = #13#10;
+  GC_CRLF       = #13#10;
 
 const
   GC_SkinSelColor: TColor  = TColors.DarkSlateBlue;
@@ -323,9 +324,9 @@ end;
 
 const
   C_RegEx_Trans: string = '[#$%&]';
-  C_RegEx_Json: string = '["\{\}:;\[\]]';          { json reserved only / all special char - '[^\w]'; }
-  C_RegEx_Han0: string = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; { ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä- Regular expression for Korean language test }
-  C_RegEx_Cmd0: string = '/(?:.*serve.*)|(?:.*create.*)|(?:.*run.*)|(?:.*pull.*)|(?:.*push.*)|(?:.*cp.*)|(?:.*rm.*)/';
+  C_RegEx_Json: string  = '["\{\}:;\[\]]';          { json reserved only / all special char - '[^\w]'; }
+  C_RegEx_Han0: string  = '.*[¤¡-¤¾¤¿-¤Ó°¡-ÆR]+.*'; { ÇÑ±Û°Ë»ç Á¤±ÔÇ¥Çö½Ä- Regular expression for Korean language test }
+  C_RegEx_Cmd0: string  = '/(?:.*serve.*)|(?:.*create.*)|(?:.*run.*)|(?:.*pull.*)|(?:.*push.*)|(?:.*cp.*)|(?:.*rm.*)/';
 
 function Is_Hangul(const AText: string): Boolean;
 begin

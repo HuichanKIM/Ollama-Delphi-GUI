@@ -122,16 +122,13 @@ uses
 {$R *.dfm}
 
 const
-  C_Shortcut_Keys: array [0..28, 0..1] of string = (
+  C_Shortcut_Keys: array [0..26, 0..1] of string = (
     ('F1',      'Show Request Dialog'),
     ('F2',      'Send Request'),
     ('F3',      'Goto Welcome'),
     ('F4',      'Goto Chatting Room'),
     ('F5',      'Translation of Prompt'),
-    ('F6',      'Translation of Message'),
-    ('F7',      '(Reserved)'),
-    ('F8',      '(Reserved)'),
-    ('F9',      '(Reserved)'),
+    ('F6',      'Translation of Message'),      //    ('F7',      '(Reserved)'),    ('F8',      '(Reserved)'),    ('F9',      '(Reserved)'),
     ('F10',     'Clear Chattings'),
     ('Alt+A',   'Check Ollama Alive ?'),
     ('Alt+B',   'Scroll to Bottom'),
@@ -141,19 +138,19 @@ const
     ('Alt+F',   'Open/Load History'),
     ('Alt+G',   'Load Image (MultiModal)'),
     ('Alt+H',   'Help - ShortCuts'),
-    ('Alt+I',   'Add to History'),
-    ('Alt+L',   'Show Logs'),
+    ('Alt+I',   'Add to History'),              //    ('Alt+J',   '(Reserved)'),
+    ('Alt+K',   'Save / Replaceo History'),
+    ('Alt+L',   'Show Logs'),                   //    ('Alt+M',   '(Reserved)'),    ('Alt+N',   '(Reserved)'),    ('Alt+O',   '(Reserved)'),
     ('Alt+P',   'Show/Hide Option Panel'),
-    ('Alt+Q',   'TTS Control View'),
+    ('Alt+Q',   'TTS Control View'),            //    ('Alt+R',   '(Reserved)'),
     ('Alt+S',   'Save All Messages to Text File'),
-    ('Alt+T',   'Scroll to Top'),
+    ('Alt+T',   'Scroll to Top'),               //    ('Alt+U',   '(Reserved)'),
     ('Alt+V',   'TextToSpeech on Message'),
     ('Alt+W',   'Show About'),
     ('Ctrl+A',  'Abort Connection'),
     ('Ctrl+R',  'Default / Refresh'),
     ('Ctrl+Z',  'Close / Exit'));
 
-  // CodeInsight Bug ?  - When use ''' (multi line string), raise error with "International UTF8-Char" ...
   C_DevelopInfo: string =
     'Development Tool  (GUI)'+sLineBreak+
     'Embarcadero Delphi 12.1  ( Object Pascal )'+sLineBreak+sLineBreak+
@@ -184,7 +181,7 @@ begin
 
     Result := _list.Text;
   finally
-    _list.free;
+    _list.Free;
   end;
 end;
 
@@ -223,13 +220,6 @@ begin
     MRU_MAX_ROOT := C_MRUMAX[ComboBox_MRUROOT_Max.ItemIndex];
 end;
 
-const
- C_HISMAX: array [0..8] of Integer = (10,15,20,25,30,35,40,45,50);
-procedure TForm_About.ComboBox_MaxHistoryChange(Sender: TObject);
-begin
-  HIS_MAX_ITEMS := C_MRUMAX[ComboBox_MaxHistory.ItemIndex];
-end;
-
 procedure TForm_About.ComboBox_MRUCHILD_MaxChange(Sender: TObject);
 begin
   if not FUpdateLockFlag then
@@ -242,6 +232,13 @@ begin
   if not FUpdateLockFlag then
   if (ComboBox_ChatBoxHOffset.ItemIndex >= 0) and (ComboBox_ChatBoxHOffset.ItemIndex <= 4 ) then
     Form_RestOllama.Frame_ChattingBox.VST_NodeHeightOffSet := C_MRUMAX[ComboBox_ChatBoxHOffset.ItemIndex];
+end;
+
+const
+ C_HISMAX: array [0..8] of Integer = (10,15,20,25,30,35,40,45,50);
+procedure TForm_About.ComboBox_MaxHistoryChange(Sender: TObject);
+begin
+  HIS_MAX_ITEMS := C_HISMAX[ComboBox_MaxHistory.ItemIndex];
 end;
 
 procedure TForm_About.FormCreate(Sender: TObject);
@@ -289,14 +286,14 @@ begin
   Label_Footer.Font.Color :=     _color3;
 
   FUpdateLockFlag := True;
-  ComboBox_MRUROOT_Max.ItemIndex :=  (MRU_MAX_ROOT div 5) -2;
+  ComboBox_MRUROOT_Max.ItemIndex :=  (MRU_MAX_ROOT  div 5) -2;
   ComboBox_MRUCHILD_Max.ItemIndex := (MRU_MAX_CHILD div 5) -2;
   ComboBox_MaxHistory.ItemIndex :=   (HIS_MAX_ITEMS div 5) -2;
   ComboBox_ChatBoxHOffset.ItemIndex := (Form_RestOllama.Frame_ChattingBox.VST_NodeHeightOffSet div 5)-2;
   CheckBox_NoCheckAlive.Checked :=   not GV_CheckingAliveStart;
   CheckBox_SaveContents.Checked :=   GV_SaveContentsOnClose;
   CheckBox_BeepSound.Checked :=      Form_RestOllama.DoneSoundFlag;
-  CheckBox_SaveOnCLose.Checked :=    GV_SaveLogsOnClose;// Form_RestOllama.SaveLogsOnCLoseFlag;
+  CheckBox_SaveOnCLose.Checked :=    GV_SaveLogsOnClose;
   FUpdateLockFlag := False;
 
   TabSheet_Style.TabVisible := FShow_Flag = GC_AboutSkinFlag;  // Cannot Focus Error - When Change Style Event / Bug ?

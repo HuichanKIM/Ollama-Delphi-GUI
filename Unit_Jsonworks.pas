@@ -26,7 +26,7 @@ const
   GC_ChatContent          = '{"model": "%model%","messages": [{"role": "user","content": "%content%"}]}';
   GC_ChatContent_opt      = '{"model": "%model%","messages": [{"role": "user","content": "%content%"}],"options": {"seed": %seed%, "temperature": 0}}';
   GC_ChatContent4Image    = '{"model": "%model%","messages": [{"role": "user","content": "%content%","images": ["%images%"]}]}';
-  { /Deprecated ... }
+  { / Deprecated ... }
 
 function Get_RequestModel_Chat(const ALoadFlag: Boolean; const AModel: string): string;
 function Get_RequestParams_Generate(const AModel: string;
@@ -120,7 +120,12 @@ begin
     if ASeedFlag then
       _ejson.Root.AddObject('options')
                  .Put('seed', ASeed)
-                 .Put('temperature', 0);
+                 .Put('temperature', 0)
+    else
+      // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
+      _ejson.Root.AddObject('options')
+                   .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ?
+                   .Put('temperature', 1.0); // Regardless of temperature ?
 
     Result := _ejson.ToString;
   finally
@@ -136,53 +141,61 @@ function Get_RequestParams_Chat(const AModel: string;
                                 const AImage:TImage;
                                 const AReasoning: Boolean=False): string;
 begin
-  var _ej_main :=  TEasyJson.Create;
-  var _ej_simg :=  TEasyJson.Create;
+  var _ej_asmb :=  TEasyJson.Create;
+  var _ej_body :=  TEasyJson.Create;
   var _ej_think := TEasyJson.Create;
   var _isGranite: Boolean := Pos('granite', LowerCase(AModel)) > 0;
   try
-    _ej_simg.Put('role', 'user')
-              .Put('content', AContent);
+    _ej_body.Put('role', 'user')
+            .Put('content', AContent);
+    if AImageFlag then
+    begin
+      var _ImageData := 'Image Data';
+      if AImage <> nil then
+        _ImageData := Get_Base64Endoeings(AImage);
+      _ej_body.AddArray('images')
+              .Put(0, _ImageData);
+    end;
+
     if AReasoning then
     begin
       if _isGranite then
         _ej_think.Put('role', 'control')
-                    .Put('content', 'thinking')
+                 .Put('content', 'thinking')
       else
         _ej_think.Put('role', 'system')
-                    .Put('content', 'Enable deep thinking subroutine.');
-    end;
-    if AImageFlag then
-    begin
-      var _ImageData := Get_Base64Endoeings(AImage);
-      _ej_simg.AddArray('images')
-                .Put(0, _ImageData);
+                 .Put('content', 'Enable deep thinking subroutine.');
     end;
 
     if AReasoning then
       begin
-        _ej_main.Put('model', AModel)
-              .AddArray('messages')
-              .Put(0, _ej_think)
-              .Put(1, _ej_simg);
+        _ej_asmb.Put('model', AModel)
+                .AddArray('messages')
+                .Put(0, _ej_think)
+                .Put(1, _ej_body);
       end
     else
       begin
-        _ej_main.Put('model', AModel)
-              .AddArray('messages')
-              .Put(0, _ej_simg);
+        _ej_asmb.Put('model', AModel)
+                .AddArray('messages')
+                .Put(0, _ej_body);
       end;
 
     if ASeedFlag then
-      _ej_main.Root.AddObject('options')
-                 .Put('seed', ASeed)
-                 .Put('temperature', 0);
+      _ej_asmb.Root.AddObject('options')
+                   .Put('seed', ASeed)
+                   .Put('temperature', 0.0)
+    else
+      // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
+      _ej_asmb.Root.AddObject('options')
+                   .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ?
+                   .Put('temperature', 1.0); // Regardless of temperature ?
 
-    Result := _ej_main.ToString;
+    Result := _ej_asmb.ToString;
   finally
     _ej_think.Free;
-    _ej_simg.Free;
-    _ej_main.Free;
+    _ej_body.Free;
+    _ej_asmb.Free;
   end;
 end;
 
@@ -210,6 +223,9 @@ end;
 function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const ARespStr: string): string;
 const
   c_Display_Type: array [TDisplay_Type] of string = ('response', 'content', 'trans');
+const
+  _OldPatterns: array [0..2] of string =('<think>','</think>','<response>');
+  _NewPatterns: array [0..2] of string =('<think>'+sLineBreak,sLineBreak+'</think>'+sLineBreak,sLineBreak+'<response>'+sLineBreak);
 begin
   Result := '';
   var _parsingsrc_0 := StringReplace(ARespStr, GC_UTF8_LFH, ',', [rfIgnoreCase, rfReplaceAll]);
@@ -241,6 +257,11 @@ begin
               Result := Result + _JsonReader.Value.ToString;
           end;
       end;
+
+    // Worried about the overhead ? / ignore replacing last "</response>" ...
+    if Pos('<think>', Result) > 0 then
+      for var _i := Low(_OldPatterns) to High(_OldPatterns) do
+        Result := StringReplace(Result, _OldPatterns[_i], _NewPatterns[_i], [rfIgnoreCase]);
 
     Result := TrimRight_Ex(Result);
   finally

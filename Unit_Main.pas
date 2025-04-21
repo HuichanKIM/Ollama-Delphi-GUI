@@ -262,6 +262,8 @@ type
     PopupMenu_Models: TPopupMenu;
     pmn_LoadModel: TMenuItem;
     pmn_UnLoadModel: TMenuItem;
+    Action_SaveToHistory: TAction;
+    Label_HistoryCount: TLabel;
     // Form controls ...
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -365,6 +367,7 @@ type
     procedure SpeedButton_ModelLoadClick(Sender: TObject);
     procedure pmn_LoadModelClick(Sender: TObject);
     procedure pmn_UnLoadModelClick(Sender: TObject);
+    procedure Action_SaveToHistoryExecute(Sender: TObject);
   private
     FInitialized: Boolean;
     FFrameWelcome: TFrame_Welcome;
@@ -873,7 +876,8 @@ end;
 
 procedure TForm_RestOllama.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FTopicsMRU.free;
+  FHistoryManager.Free;
+  FTopicsMRU.Free;
   FModelsList.Free;
   FImage_DropDown.Free;
 end;
@@ -978,9 +982,7 @@ procedure TForm_RestOllama.FormCloseQuery(Sender: TObject; var CanClose: Boolean
 begin
   CanClose := False;
   GV_AppCloseFlag := True;
-  FFrameWelcome.Visible := True;                                   // Trick - Prevent MainForm/Controls Flickering ?
-  FFrameWelcome.BringToFront;                                      // Trick - Prevent MainForm/Controls Flickering ?
-  Sleep(1) ;
+  ActionList_Ollma.OnUpdate := nil;                                // Trick - Prevent MainForm/Controls Flickering ?
   Winapi.Windows.ShowWindowAsync(Application.Handle, SW_HIDE );    // Trick - Prevent MainForm/Controls Flickering ?
 
   Do_TTSSpeak_Stop();
@@ -1009,9 +1011,6 @@ begin
 
   if FModelsList.Count > 0 then
     FModelsList.SaveToFile(CV_AppPath+CF_ModalList);
-
-  ListBox_History.ClearSelection;                                  // Trick - Prevent MainForm/Controls Flickering ?
-  FHistoryManager.Free;
 
   CanClose := True;
 end;
@@ -1077,6 +1076,9 @@ begin
 
   Action_SHowBroker.Enabled :=          _visflag_0;
   SkSvg_Broker.Enabled :=               _visflag_0;
+  //
+  Label_HistoryCount.Caption :=         Format('%d / %d', [ListBox_History.Count, HIS_MAX_ITEMS]);
+  Label_HistoryCount.Font.Color :=      IIF.CastBool<TColor>(ListBox_History.Count > HIS_MAX_ITEMS, clRed, clSilver);
 end;
 
 procedure TForm_RestOllama.Action_AbortExecute(Sender: TObject);
@@ -1621,8 +1623,11 @@ end;
 procedure TForm_RestOllama.OnRESTRequest_OllamaError(Sender: TObject);
 begin
   SimpleSound_Common(DoneSoundFlag, 0);
-  Do_Abort(1);
+  // ------------------------------------------------------------------------ //
+  Add_ChattingMessage(C_CHATOllama_Model, C_CHATLOC_Right, -1, RESTResponse_Ollama.StatusText);
+  // ------------------------------------------------------------------------ //
   Push_LogWin(1,  RESTResponse_Ollama.StatusText);
+  Do_Abort(1);
 end;
 
 { Add_ChattingPrompt ... }
@@ -1996,10 +2001,9 @@ end;
 
 procedure TForm_RestOllama.PageControl_ChattingChange(Sender: TObject);
 begin
-  var _visflag_0: Boolean := (not FFrameWelcome.Visible) and (PageControl_Chatting.ActivePage = Tabsheet_Chatting);
-  if _visflag_0 and SkAnimatedImage_Chat.Visible then
-    SkAnimatedImage_Chat.Animation.Enabled := True;
-  if _visflag_0 then
+  var _visflag: Boolean := (not FFrameWelcome.Visible) and (PageControl_Chatting.ActivePage = Tabsheet_Chatting);
+  SkAnimatedImage_Chat.Animation.Enabled := _visflag and SkAnimatedImage_Chat.Visible;
+  if _visflag then
     Try_SetFocus(Edit_ReqContent as TWinControl);
 end;
 
@@ -2657,7 +2661,7 @@ var
   V_LastCommand: string = '--help';
 
 procedure TForm_RestOllama.Action_DosCommandExecute(Sender: TObject);
-begin
+begin                                                                               // Image_Source
   var _dosflag: Boolean := False;
   var _position := Button_DosCommand.ClientToScreen(Point(Button_DosCommand.Width+5, 0));
   with TForm_DosCommander.Create(Self) do
@@ -2878,27 +2882,27 @@ procedure TForm_RestOllama.Action_LoadHistoryExecute(Sender: TObject);
 begin
   if FileOpenDialog1.Execute then
   begin
+    ListBox_History.ClearSelection;
     HistoryCation := '';
     var _file: string :=  FileOpenDialog1.FileName;
     var _filen: string := ExtractFileName(_file);
     var _ext: string :=   ExtractFileExt(_file);
     if SameText('.dat', _ext) then
-      Do_LoadHistoryFile(FileOpenDialog1.FileName) else
+      Do_LoadHistoryFile(_file) else
     if SameText('history.lst', _filen) then
     begin
       FHistoryManager.Load_HstoryList(_file);
     end;
-    ListBox_History.ClearSelection;
   end;
 end;
 
 procedure TForm_RestOllama.Action_AddToHistoryExecute(Sender: TObject);
 begin
   var _subject: string := Frame_ChattingBox.Get_HistorySubject;
-  if _subject > '' then
+  if _subject <> '' then
     begin
       var _overwriteflag := False;
-      var _oldhfile: string := FHistoryManager.Get_HistoryFile(_subject, _overwriteflag);
+      var _hfile: string := FHistoryManager.Get_HistoryFile(_subject, _overwriteflag);
       var _chooseflag: Integer := mrYes;
       if _overwriteflag then
         _chooseflag := MessageDlg('Overwrite this on the same subject as before ? - '+_subject, mtInformation, [mbYes, mbRetry, mbCancel], 0, mbCancel);
@@ -2928,8 +2932,8 @@ begin
                 ListBox_History.Selected[_index] := True;
               end;
 
-              if FileExists(_oldhfile) then
-                DeleteFile(_oldhfile);
+              if FileExists(_hfile) then
+                DeleteFile(_hfile);
             end;
           end;
         mrNo:;
@@ -2937,6 +2941,11 @@ begin
     end
   else
     MessageDlg('The top node must be in request mode.', mtWarning, [mbOk], 0);
+end;
+
+procedure TForm_RestOllama.Action_SaveToHistoryExecute(Sender: TObject);
+begin
+  { Reserved ... }
 end;
 
 procedure TForm_RestOllama.Action_DelToHistoryExecute(Sender: TObject);
@@ -2983,6 +2992,8 @@ begin
       Frame_ChattingBox.Do_LoadAllData(AFile);
       Panel_HistoryFile.Caption := ExtractFileName(AFile);
       HistoryCation := Frame_ChattingBox.Get_HistorySubject;
+      var _subject: string := Frame_ChattingBox.Get_HistorySubject;
+      FHistoryManager.SetSelectionOfSubject(_subject);
     finally
       Screen.Cursor := crDefault;
     end;
