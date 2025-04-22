@@ -338,7 +338,9 @@ type
     property ThumbLists: TImageList    read FThumbLists        write FThumbLists;
   end;
 
-  [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
+  //[ComponentPlatformsAttribute(pidWin32 or pidWin64)]
+  // Modified by ichin 2025-04-22 화 오전 7:37:17
+  [ComponentPlatformsAttribute(pfidWindows)]
   TVirtualStringTree = class(TCustomVirtualStringTree)
   private
     function GetOptions: TStringTreeOptions;
