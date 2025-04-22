@@ -122,12 +122,12 @@ begin
     if ASeedFlag then
       _ejson.Root.AddObject('options')
                  .Put('seed', ASeed)
-                 .Put('temperature', 0)
-    else
-      // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
-      _ejson.Root.AddObject('options')
-                   .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ?
-                   .Put('temperature', 1.0); // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
+                 .Put('temperature', 0);
+    //else
+    // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
+    //  _ejson.Root.AddObject('options')
+    //               .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ?
+    //               .Put('temperature', 1.0); // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
 
     Result := _ejson.ToString;
   finally
@@ -186,12 +186,12 @@ begin
     if ASeedFlag then
       _ej_asmb.Root.AddObject('options')
                    .Put('seed', ASeed)
-                   .Put('temperature', 0.0)
-    else
-      // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
-      _ej_asmb.Root.AddObject('options')
-                   .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ? - response Internal server error
-                   .Put('temperature', 1.0); // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
+                   .Put('temperature', 0.0);
+    //else
+    // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
+    //  _ej_asmb.Root.AddObject('options')
+    //               .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ? - response Internal server error
+    //               .Put('temperature', 1.0); // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
 
     Result := _ej_asmb.ToString;
   finally
@@ -261,7 +261,7 @@ begin
       end;
 
     // Worried about the overhead ? / ignore replacing last "</response>" ...
-    var _checkings: string := Copy(Result, 1, 25);
+    var _checkings: string := LowerCase(Copy(Result, 1, 25));
     if Pos('<think>', _checkings) > 0 then
       for var _i := Low(_OldPatterns) to High(_OldPatterns) do
         Result := StringReplace(Result, _OldPatterns[_i], _NewPatterns[_i], [rfIgnoreCase]);
