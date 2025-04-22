@@ -379,7 +379,6 @@ begin
   var _style := ComboBox_VclStyles.Items[ComboBox_VclStyles.ItemIndex];
   if not SameText(_style, TStyleManager.ActiveStyle.Name) then
   begin
-    LockWindowUpdate(Self.Handle);
     TStyleManager.TrySetStyle(_style);
     Application.ProcessMessages;
     Form_RestOllama.Do_ChangeStyleCustom(1);
