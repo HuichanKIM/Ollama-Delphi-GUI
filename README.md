@@ -1,6 +1,6 @@
 # Ollama-Delphi-GUI
 
-### Latest Version 1.0.6 - 2025.04.21
+### Latest Version 1.0.7 - 2025.04.22
 
 ### Features
 - Supports Request-History Manager
