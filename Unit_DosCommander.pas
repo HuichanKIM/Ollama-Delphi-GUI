@@ -1,5 +1,7 @@
 unit Unit_DosCommander;
 
+{$I OllmaClient_Defines.inc}
+
 interface
 
 uses

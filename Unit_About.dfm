@@ -4,7 +4,7 @@ object Form_About: TForm_About
   ActiveControl = Button_OK
   BorderStyle = bsDialog
   Caption = 'About / Skin / Color Setting'
-  ClientHeight = 491
+  ClientHeight = 476
   ClientWidth = 386
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,6 +16,7 @@ object Form_About: TForm_About
   KeyPreview = True
   Position = poMainFormCenter
   RoundedCorners = rcOn
+  ShowHint = True
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -23,9 +24,13 @@ object Form_About: TForm_About
   object Label_Title: TLabel
     AlignWithMargins = True
     Left = 3
-    Top = 3
+    Top = 10
     Width = 380
     Height = 15
+    Cursor = crHandPoint
+    Hint = 'https://github.com/HuichanKIM/Ollama-Delphi-GUI'
+    Margins.Top = 10
+    Margins.Bottom = 10
     Align = alTop
     Caption = 'Ollama GUI  -  Version 0.9 - beta  ( Deploy  :  2024.05.13 )'
     Font.Charset = DEFAULT_CHARSET
@@ -34,47 +39,19 @@ object Form_About: TForm_About
     Font.Name = 'Segoe UI'
     Font.Style = [fsBold]
     ParentFont = False
+    OnClick = Label_TitleClick
     ExplicitWidth = 313
   end
-  object Label_GitHub: TLabel
-    Left = 70
-    Top = 25
-    Width = 279
-    Height = 15
-    Cursor = crHandPoint
-    Caption = 'https://github.com/HuichanKIM/Ollama-Delphi-GUI'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clSilver
-    Font.Height = -12
-    Font.Name = 'Segoe UI'
-    Font.Style = [fsUnderline]
-    ParentFont = False
-    StyleElements = [seClient, seBorder]
-    OnClick = Label_GitHubClick
-  end
-  object Label1: TLabel
-    Left = 17
-    Top = 25
-    Width = 36
-    Height = 15
-    Caption = 'Source'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clSilver
-    Font.Height = -12
-    Font.Name = 'Segoe UI'
-    Font.Style = []
-    ParentFont = False
-    StyleElements = [seClient, seBorder]
-  end
-  object Panel1: TPanel
+  object Panel_Buttons: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 452
+    Top = 437
     Width = 380
     Height = 36
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitTop = 452
     object Button_OK: TButton
       Left = 311
       Top = 5
@@ -85,25 +62,26 @@ object Form_About: TForm_About
       TabOrder = 0
     end
   end
-  object Panel3: TPanel
+  object Panel_Body: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 51
+    Top = 38
     Width = 380
-    Height = 395
-    Margins.Top = 30
+    Height = 393
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = 51
+    ExplicitHeight = 395
     object PageControl1: TPageControl
       AlignWithMargins = True
       Left = 10
       Top = 3
       Width = 360
-      Height = 389
+      Height = 387
       Margins.Left = 10
       Margins.Right = 10
-      ActivePage = TabSheet1
+      ActivePage = TabSheet_Style
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
@@ -114,6 +92,7 @@ object Form_About: TForm_About
       Style = tsFlatButtons
       TabOrder = 0
       StyleElements = [seClient, seBorder]
+      ExplicitHeight = 389
       object TabSheet1: TTabSheet
         Caption = 'About     '
         object Label_Development: TLabel
@@ -411,7 +390,7 @@ object Form_About: TForm_About
           Left = 10
           Top = 3
           Width = 332
-          Height = 350
+          Height = 348
           Hint = 'Click to update'
           Margins.Left = 10
           Margins.Right = 10
@@ -441,7 +420,7 @@ object Form_About: TForm_About
           Left = 0
           Top = 0
           Width = 352
-          Height = 356
+          Height = 354
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -484,6 +463,7 @@ object Form_About: TForm_About
           ParentFont = False
           TabOrder = 0
           ViewStyle = vsReport
+          ExplicitHeight = 356
         end
       end
       object TabSheet_Style: TTabSheet
@@ -886,7 +866,7 @@ object Form_About: TForm_About
     end
   end
   object ColorDialog_Colors: TColorDialog
-    Left = 233
-    Top = 92
+    Left = 81
+    Top = 196
   end
 end

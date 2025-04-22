@@ -1,5 +1,7 @@
 unit Unit_ChattingBoxClass;
 
+{$I OllmaClient_Defines.inc}
+
 interface
 
 uses

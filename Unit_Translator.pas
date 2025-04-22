@@ -1,5 +1,7 @@
 unit Unit_Translator;
 
+{$I OllmaClient_Defines.inc}
+
 interface
 
 uses

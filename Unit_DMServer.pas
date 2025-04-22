@@ -1,10 +1,6 @@
 unit Unit_DMServer;
 
-{$B-}    { Enable partial boolean evaluation   }
-{$T-}    { Untyped pointers                    }
-{$X+}    { Enable extended syntax              }
-{$H+}    { Use long strings                    }
-{$J+}    { Allow typed constant to be modified }
+{$I OllmaClient_Defines.inc}
 
 interface
 

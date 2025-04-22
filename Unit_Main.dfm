@@ -357,14 +357,13 @@ object Form_RestOllama: TForm_RestOllama
             Left = 125
             Top = 0
             Width = 24
-            Height = 20
+            Height = 15
             Margins.Left = 10
             Margins.Top = 0
             Margins.Bottom = 0
             Align = alLeft
             Caption = 'seed'
             StyleElements = [seClient, seBorder]
-            ExplicitHeight = 15
           end
           object SpeedButton_NewRootnode: TSpeedButton
             Left = 23
@@ -550,18 +549,15 @@ object Form_RestOllama: TForm_RestOllama
         end
         object Label1: TLabel
           AlignWithMargins = True
-          Left = 139
+          Left = 155
           Top = 3
-          Width = 66
-          Height = 19
+          Width = 50
+          Height = 15
           Align = alClient
           Alignment = taRightJustify
           Caption = 'Options -'
           Layout = tlCenter
           StyleElements = [seClient, seBorder]
-          ExplicitLeft = 155
-          ExplicitWidth = 50
-          ExplicitHeight = 15
         end
         object SpeedButton_Broker: TSpeedButton
           AlignWithMargins = True
@@ -956,15 +952,13 @@ object Form_RestOllama: TForm_RestOllama
             AlignWithMargins = True
             Left = 84
             Top = 3
-            Width = 113
-            Height = 16
+            Width = 23
+            Height = 15
             Align = alClient
             Alignment = taCenter
             Caption = '0 / 0'
             Layout = tlCenter
             StyleElements = [seClient, seBorder]
-            ExplicitWidth = 23
-            ExplicitHeight = 15
           end
         end
         object ListBox_History: TListBox
@@ -3406,7 +3400,7 @@ object Form_RestOllama: TForm_RestOllama
   end
   object PopupMenu_Models: TPopupMenu
     Images = SVGIconVirtualImageList1
-    Left = 742
+    Left = 766
     Top = 530
     object pmn_LoadModel: TMenuItem
       Caption = 'Load Model'

@@ -20,9 +20,9 @@ uses
 
 type
   TForm_About = class(TForm)
-    Panel1: TPanel;
+    Panel_Buttons: TPanel;
     Button_OK: TButton;
-    Panel3: TPanel;
+    Panel_Body: TPanel;
     Label_Title: TLabel;
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
@@ -31,8 +31,6 @@ type
     ListView_Shortcuts: TListView;
     TabSheet3: TTabSheet;
     Label_SystemInfo: TLabel;
-    Label_GitHub: TLabel;
-    Label1: TLabel;
     TabSheet_Style: TTabSheet;
     Label2: TLabel;
     ComboBox_VclStyles: TComboBox;
@@ -96,6 +94,7 @@ type
     procedure ComboBox_ChatBoxHOffsetChange(Sender: TObject);
     procedure CheckBox_SaveContentsClick(Sender: TObject);
     procedure ComboBox_MaxHistoryChange(Sender: TObject);
+    procedure Label_TitleClick(Sender: TObject);
   private
     FShow_Flag: Integer;
     FUpdateLockFlag: Boolean;
@@ -151,20 +150,22 @@ const
     ('Ctrl+R',  'Default / Refresh'),
     ('Ctrl+Z',  'Close / Exit'));
 
-  C_DevelopInfo: string =
-    'Development Tool  (GUI)'+sLineBreak+
-    'Embarcadero Delphi 12.1  ( Object Pascal )'+sLineBreak+sLineBreak+
-    ' 3rd party Reference Library  (* open source)'+sLineBreak+
-    ' - Virtual-TreeView by JAM-Software (*)'+sLineBreak+
-    ' - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)'+sLineBreak+
-    ' - FastMM4-AVX by Maxim Masiutin (*)'+sLineBreak+
-    ' - DOSCommand by TurboPack (*)'+sLineBreak+
-    ' - NetComp7 by DelphiBuilder (*)'+sLineBreak+
-    ' - EasyJson by tinyBigGAMES (*)'+sLineBreak+
-    ' - Embeded Lib. : SKIA 2D Graphics'+sLineBreak+
-    ' - SpeechLibrary by MS SAPI'+sLineBreak+sLineBreak+
-    'Support Multilingual Translation  / Voice'+sLineBreak+sLineBreak+
-    GC_CopyRights;
+  C_DevelopInfo: string = '''
+    Development Tool  (GUI)
+    Embarcadero Delphi 12.1  ( Object Pascal )
+
+     3rd party Reference Library  (* open source)
+     - Virtual-TreeView by JAM-Software (*)
+     - SVGIconImageList v 4.1.4 by Ethea S.r.l.  (*)
+     - FastMM4-AVX by Maxim Masiutin (*)
+     - DOSCommand by TurboPack (*)
+     - NetComp7 by DelphiBuilder (*)
+     - EasyJson by tinyBigGAMES (*)
+     - Embeded Lib. : SKIA 2D Graphics
+     - SpeechLibrary by MS SAPI
+
+    Support Broker/Server for Remote Access
+    ''';
 
 { ... }
 
@@ -253,7 +254,7 @@ begin
   end;
 
   FUpdateLockFlag := False;
-  Label_Development.Caption := C_DevelopInfo;
+  Label_Development.Caption := C_DevelopInfo+sLineBreak+sLineBreak+GC_CopyRights;
   Label_SystemInfo.Caption := Get_SystemInfo();
   if DM_ACTIVATECODE = 1 then
   begin
@@ -268,8 +269,8 @@ end;
 
 procedure TForm_About.FormShow(Sender: TObject);
 const
-  c_Caption: array [0..3] of string = ('About','','','Skin / Colors / Options');
-  c_Heights: array [0..3] of Integer = (500,500,500,530);
+  c_Caption: array [0..3] of string = ('About','System Info.','ShortCuts','Skin / Colors / Options');
+  c_Heights: array [0..3] of Integer = (485,485,485,515);
 begin
   Self.Height := c_Heights[FShow_Flag];
   Self.Caption := c_Caption[FShow_Flag];
@@ -286,14 +287,14 @@ begin
   Label_Footer.Font.Color :=     _color3;
 
   FUpdateLockFlag := True;
-  ComboBox_MRUROOT_Max.ItemIndex :=  (MRU_MAX_ROOT  div 5) -2;
-  ComboBox_MRUCHILD_Max.ItemIndex := (MRU_MAX_CHILD div 5) -2;
-  ComboBox_MaxHistory.ItemIndex :=   (HIS_MAX_ITEMS div 5) -2;
+  ComboBox_MRUROOT_Max.ItemIndex :=    (MRU_MAX_ROOT  div 5) -2;
+  ComboBox_MRUCHILD_Max.ItemIndex :=   (MRU_MAX_CHILD div 5) -2;
+  ComboBox_MaxHistory.ItemIndex :=     (HIS_MAX_ITEMS div 5) -2;
   ComboBox_ChatBoxHOffset.ItemIndex := (Form_RestOllama.Frame_ChattingBox.VST_NodeHeightOffSet div 5)-2;
-  CheckBox_NoCheckAlive.Checked :=   not GV_CheckingAliveStart;
-  CheckBox_SaveContents.Checked :=   GV_SaveContentsOnClose;
-  CheckBox_BeepSound.Checked :=      Form_RestOllama.DoneSoundFlag;
-  CheckBox_SaveOnCLose.Checked :=    GV_SaveLogsOnClose;
+  CheckBox_NoCheckAlive.Checked :=     not GV_CheckingAliveStart;
+  CheckBox_SaveContents.Checked :=     GV_SaveContentsOnClose;
+  CheckBox_BeepSound.Checked :=        Form_RestOllama.DoneSoundFlag;
+  CheckBox_SaveOnCLose.Checked :=      GV_SaveLogsOnClose;
   FUpdateLockFlag := False;
 
   TabSheet_Style.TabVisible := FShow_Flag = GC_AboutSkinFlag;  // Cannot Focus Error - When Change Style Event / Bug ?
@@ -340,6 +341,12 @@ begin
   end;
 end;
 
+procedure TForm_About.Label_TitleClick(Sender: TObject);
+begin
+  var _addr := 'https://github.com/HuichanKIM/Ollama-Delphi-GUI';
+  ShellExecute(0, PChar('Open'), PChar(_addr), nil, nil, SW_SHOW);
+end;
+
 { Vcl Styles ... }
 
 procedure TForm_About.StylesList_Refresh;
@@ -372,13 +379,13 @@ begin
   var _style := ComboBox_VclStyles.Items[ComboBox_VclStyles.ItemIndex];
   if not SameText(_style, TStyleManager.ActiveStyle.Name) then
   begin
+    LockWindowUpdate(Self.Handle);
     TStyleManager.TrySetStyle(_style);
     Application.ProcessMessages;
     Form_RestOllama.Do_ChangeStyleCustom(1);
   end;
 
-  if Button_OK.CanFocus then
-    Button_OK.Setfocus;
+  Set_Focus(Button_OK as TWinControl);
 end;
 
 procedure TForm_About.SpeedButton_CancelColorsClick(Sender: TObject);

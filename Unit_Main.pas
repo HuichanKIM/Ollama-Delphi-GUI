@@ -1,10 +1,6 @@
 unit Unit_Main;
 
-{$B-}    { Enable partial boolean evaluation   }
-{$T-}    { Untyped pointers                    }
-{$X+}    { Enable extended syntax              }
-{$H+}    { Use long strings                    }
-{$J+}    { Allow typed constant to be modified }
+{$I OllmaClient_Defines.inc}
 
 interface
 
@@ -1439,7 +1435,7 @@ begin
     Params.Clear;
     TransientParams.Clear;
     ClearBody;
-    //Params.AddHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8'); {*}
+    Params.AddHeader('Content-Type','application/x-www-form-urlencoded; charset=UTF-8'); {*}
   end;
 end;
 
@@ -2225,15 +2221,6 @@ begin
   end;
 end;
 
-{ Topics Manager Problem ?
-
- Not supported for random seed - Ollama Bug ?
- [ Ollama issues - "Ollama chat API output consistently missing <tool_call>" #4408]
- - https://github.com/ollama/ollama/issues/4408
- Fixed seed (?) "123" at Ollama api.md
-
-}
-
 var
   V_LastInput: string = 'New prompt ?';
 
@@ -2972,7 +2959,10 @@ procedure TForm_RestOllama.Action_CLearanceHistoryExecute(Sender: TObject);
 begin
   var _chooseflag := MessageDlg('Clearance History - Delete unlisted files ... ', mtConfirmation, [mbYes, mbCancel], 0, mbCancel);
   if _chooseflag = mrYes then
-    FHistoryManager.Clearance_HistoryFiles(0);
+    begin
+      var _delcount := FHistoryManager.Clearance_HistoryFiles(0);
+      MessageDlg('Result of clearance files : '+ _Delcount.ToString, TMsgDlgType.mtInformation, [mbOk], 0);
+    end;
 end;
 
 procedure TForm_RestOllama.SpeedButton_HistoryMoreClick(Sender: TObject);

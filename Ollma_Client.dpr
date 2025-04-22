@@ -72,10 +72,10 @@ begin
     //TStyleManager.FormBorderStyle := TStyleManager.TFormBorderStyle.fbsSystemStyle;
     Application.Title := 'Ollama Client GUI';
     Application.CreateForm(TForm_RestOllama, Form_RestOllama);
-    Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);
-    Application.CreateForm(TDM_Server, DM_Server);
-    Application.CreateForm(TForm_RMBroker, Form_RMBroker);
-    Application.Run;
+  Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);
+  Application.CreateForm(TDM_Server, DM_Server);
+  Application.CreateForm(TForm_RMBroker, Form_RMBroker);
+  Application.Run;
   finally
     CloseHandle(_mxHandle);
   end;

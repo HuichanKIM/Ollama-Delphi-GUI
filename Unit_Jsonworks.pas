@@ -1,5 +1,7 @@
 unit Unit_Jsonworks;
 
+{$I OllmaClient_Defines.inc}
+
 interface
 
 uses
@@ -125,7 +127,7 @@ begin
       // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
       _ejson.Root.AddObject('options')
                    .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ?
-                   .Put('temperature', 1.0); // Regardless of temperature ?
+                   .Put('temperature', 1.0); // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
 
     Result := _ejson.ToString;
   finally
@@ -188,8 +190,8 @@ begin
     else
       // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
       _ej_asmb.Root.AddObject('options')
-                   .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ?
-                   .Put('temperature', 1.0); // Regardless of temperature ?
+                   .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ? - response Internal server error
+                   .Put('temperature', 1.0); // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
 
     Result := _ej_asmb.ToString;
   finally
@@ -259,7 +261,8 @@ begin
       end;
 
     // Worried about the overhead ? / ignore replacing last "</response>" ...
-    if Pos('<think>', Result) > 0 then
+    var _checkings: string := Copy(Result, 1, 25);
+    if Pos('<think>', _checkings) > 0 then
       for var _i := Low(_OldPatterns) to High(_OldPatterns) do
         Result := StringReplace(Result, _OldPatterns[_i], _NewPatterns[_i], [rfIgnoreCase]);
 

@@ -1,5 +1,7 @@
 unit Unit_Common;
 
+{$I OllmaClient_Defines.inc}
+
 interface
 
 uses
@@ -81,8 +83,8 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  GC_Version0     = 'ver. 1.0.6';
-  GC_Version1     = 'ver. 1.0.6 (2025.04.21)';
+  GC_Version0     = 'ver. 1.0.7';
+  GC_Version1     = 'ver. 1.0.7 (2025.04.22)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024-2025 JNJ Labs. Seoul, Korea.';

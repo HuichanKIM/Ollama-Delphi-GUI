@@ -1,5 +1,7 @@
 unit Unit_HistoryManager;
 
+{$I OllmaClient_Defines.inc}
+
 interface
 
 uses
@@ -32,6 +34,7 @@ type
     procedure UpdateHistory(const AFlag: Integer = 0);
     procedure Clearance_HistoryFiles_All(const AFlag: Integer = 0);
     function Get_OverwriteFlag(const ASubject: string): Boolean;
+    procedure Clearance_ListBox;
   public
     constructor Create(AListBox: TListBox);
     destructor Destroy; override;
@@ -41,7 +44,7 @@ type
     procedure Load_HstoryList(const AListfile: string = '');
     procedure Clear_ViewAll(const AFlag: Integer = 0);
     procedure Clear_ListData(const AFlag: Integer = 0);
-    procedure Clearance_HistoryFiles(const AFlag: Integer = 0);
+    function Clearance_HistoryFiles(const AFlag: Integer = 0): Integer;
     procedure SetSelectionOfSubject(const ASubject: string);
     function Is_HistorySubject(const ASubject: string): Integer;
     function Get_HistorySubject(): string;
@@ -55,6 +58,7 @@ type
 implementation
 
 uses
+  System.IOUtils,
   Unit_Common;
 
 { THisObject }
@@ -128,12 +132,12 @@ begin
     var _afile: string := '';
     with FListBox.Items do
     for var _idx := 0 to Count -1 do
-    begin
-      _subject := Strings[_idx];
-      _afile := THisObject(Objects[_idx]).ho_Filename;
-      _HistoryList.Add(_subject);
-      _AttachedFiles.Add(_afile);
-    end;
+      begin
+        _subject := Strings[_idx];
+        _afile := THisObject(Objects[_idx]).ho_Filename;
+        _HistoryList.Add(_subject);
+        _AttachedFiles.Add(_afile);
+      end;
 
     _HistoryList.SaveToFile(FHistoricFile);
     _AttachedFiles.SaveToFile(FAttachedFile);
@@ -149,23 +153,23 @@ begin
   begin
     var _delcount:= FListBox.Items.Count - HIS_MAX_ITEMS;
     FListBox.Items.BeginUpdate;
+    with FListBox.Items do
     for var _i := 1 to _delcount do
-      with FListBox.Items do
-        try
-          THisObject(Objects[0]).Free;
-          Objects[0] := nil;
-        finally
-          Delete(0);
-        end;
+      try
+        THisObject(Objects[0]).Free;
+        Objects[0] := nil;
+      finally
+        Delete(0);
+      end;
     FListBox.Items.EndUpdate;
   end;
 
   if FListBox.Items.Count = 0 then
     begin
       if FileExists(FHistoricFile) then
-        DeleteFile(FHistoricFile);
+        TFile.Delete(FHistoricFile);
       if FileExists(FAttachedFile) then
-       DeleteFile(FAttachedFile);
+       TFile.Delete(FAttachedFile);
     end
   else
     begin
@@ -215,11 +219,11 @@ begin
   FListBox.Items.BeginUpdate;
   with FListBox do
   try
-    for var _idx := 0 to Count -1 do
-    begin
-      THisObject(Items.Objects[_idx]).Free;
-      Items.Objects[_idx] := nil;
-    end;
+    for var _idx := Count -1 downto 0 do
+      begin
+        THisObject(Items.Objects[_idx]).Free;
+        Items.Objects[_idx] := nil;
+      end;
   finally
     if AClearFlag then
       Clear;
@@ -275,14 +279,41 @@ begin
     end;
 
     if FileExists(_hfile) then
-      DeleteFile(_hfile);
+      TFile.Delete(_hfile);
 
     UpdateHistory(1);
   end;
 end;
 
-procedure THistoryManager.Clearance_HistoryFiles(const AFlag: Integer = 0);
+procedure THistoryManager.Clearance_ListBox();
 begin
+  FListBox.Items.BeginUpdate;
+  with FListBox do
+  try
+    var _ofilename: string := '';
+    var _delindex: Integer := -1;
+    for var _idx := Count -1 downto 0 do
+      begin
+        _ofilename := THisObject(Items.Objects[_idx]).ho_Filename;
+        if not FileExists(_ofilename) then
+        begin
+          THisObject(Items.Objects[_idx]).Free;
+          Items.Objects[_idx] := nil;
+          Items.Delete(_idx);
+        end;
+      end;
+  finally
+    Items.EndUpdate;
+  end;
+
+  UpdateHistory(3);
+end;
+
+function THistoryManager.Clearance_HistoryFiles(const AFlag: Integer = 0): Integer;
+begin
+  Result := 0;
+
+  Clearance_ListBox();
   if not FileExists(FAttachedFile) then Exit;
 
   var _srec: TSearchRec;
@@ -297,18 +328,24 @@ begin
       LoadFromFile(FAttachedFile);
     end;
 
-    var _fname := '';
-    var _ext := '.dat';
+    if _AttachedFiles.Count > 0 then
     try
-      repeat
-        _fname := CV_HisPath + _srec.Name;
-        _ext := ExtractFileExt(_srec.Name);
-        if SameText(_ext, '.dat') and (_AttachedFiles.IndexOf(_fname) < 0) then
-          if not DeleteFile(_fname) then
-            RaiseLastOSError;
-      until FindNext(_srec) <> 0;
+      var _fname := '';
+      var _ext := '.dat';
+      try
+        repeat
+          _fname := CV_HisPath + _srec.Name;
+          _ext := ExtractFileExt(_srec.Name);
+          if SameText(_ext, '.dat') and (_AttachedFiles.IndexOf(_fname) < 0) then
+            if DeleteFile(_fname) then
+              Inc(Result)
+            else
+              RaiseLastOSError;
+        until FindNext(_srec) <> 0;
+      finally
+        FindClose(_srec);
+      end;
     finally
-      FindClose(_srec);
       _AttachedFiles.Free;
     end;
   end;
@@ -326,8 +363,7 @@ begin
         _fname := _srec.Name;
         _ext := ExtractFileExt(_fname);
         if SameText(_ext, '.dat') then
-          if not DeleteFile(CV_HisPath + _fname) then
-          RaiseLastOSError;
+          TFile.Delete(CV_HisPath + _fname);
       until FindNext(_srec) <> 0;
     finally
       FindClose(_srec);
@@ -338,8 +374,10 @@ end;
 procedure THistoryManager.Clear_ListData(const AFlag: Integer = 0);
 begin
   FreeListObjects(True);
-  DeleteFile(FHistoricFile);
-  DeleteFile(FAttachedFile);
+  if FileExists(FHistoricFile) then
+    TFile.Delete(FHistoricFile);
+  if FileExists(FAttachedFile) then
+    TFile.Delete(FAttachedFile);
   Clearance_HistoryFiles_All(0);
 end;
 

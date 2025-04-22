@@ -1,5 +1,7 @@
 ﻿unit Unit_MRUManager;
 
+{$I OllmaClient_Defines.inc}
+
 interface
 
 uses

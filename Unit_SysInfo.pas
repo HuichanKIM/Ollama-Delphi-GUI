@@ -4,8 +4,7 @@
 
 unit Unit_SysInfo;
 
-{$WARN UNSAFE_TYPE OFF}
-{$WARN UNSAFE_CODE OFF}
+{$I OllmaClient_Defines.inc}
 
 interface
 

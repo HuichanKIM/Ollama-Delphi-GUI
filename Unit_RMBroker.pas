@@ -1,5 +1,7 @@
 unit Unit_RMBroker;
 
+{$I OllmaClient_Defines.inc}
+
 interface
 
 uses
