@@ -17,6 +17,7 @@ object Form_About: TForm_About
   Position = poMainFormCenter
   RoundedCorners = rcOn
   ShowHint = True
+  OnClose = FormClose
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -51,7 +52,6 @@ object Form_About: TForm_About
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = 452
     object Button_OK: TButton
       Left = 311
       Top = 5
@@ -71,8 +71,6 @@ object Form_About: TForm_About
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 51
-    ExplicitHeight = 395
     object PageControl1: TPageControl
       AlignWithMargins = True
       Left = 10
@@ -92,7 +90,6 @@ object Form_About: TForm_About
       Style = tsFlatButtons
       TabOrder = 0
       StyleElements = [seClient, seBorder]
-      ExplicitHeight = 389
       object TabSheet1: TTabSheet
         Caption = 'About     '
         object Label_Development: TLabel
@@ -463,7 +460,6 @@ object Form_About: TForm_About
           ParentFont = False
           TabOrder = 0
           ViewStyle = vsReport
-          ExplicitHeight = 356
         end
       end
       object TabSheet_Style: TTabSheet
@@ -750,7 +746,7 @@ object Form_About: TForm_About
             AlignWithMargins = True
             Left = 189
             Top = 48
-            Width = 125
+            Width = 132
             Height = 17
             Caption = 'Save logs on close'
             TabOrder = 1
@@ -773,6 +769,7 @@ object Form_About: TForm_About
             Width = 40
             Height = 23
             Style = csDropDownList
+            DropDownCount = 10
             ItemIndex = 3
             TabOrder = 3
             Text = '25'
@@ -795,6 +792,7 @@ object Form_About: TForm_About
             Width = 40
             Height = 23
             Style = csDropDownList
+            DropDownCount = 10
             ItemIndex = 3
             TabOrder = 4
             Text = '25'
@@ -817,6 +815,7 @@ object Form_About: TForm_About
             Width = 40
             Height = 23
             Style = csDropDownList
+            DropDownCount = 10
             ItemIndex = 1
             TabOrder = 5
             Text = '15'
@@ -845,6 +844,7 @@ object Form_About: TForm_About
             Width = 40
             Height = 23
             Style = csDropDownList
+            DropDownCount = 10
             ItemIndex = 3
             TabOrder = 7
             Text = '25'
@@ -860,6 +860,17 @@ object Form_About: TForm_About
               '40'
               '45'
               '50')
+          end
+          object CheckBox_Experimental: TCheckBox
+            AlignWithMargins = True
+            Left = 189
+            Top = 72
+            Width = 132
+            Height = 17
+            Caption = 'Experimental Seed (*)'
+            TabOrder = 8
+            StyleElements = [seClient, seBorder]
+            OnClick = CheckBox_ExperimentalClick
           end
         end
       end

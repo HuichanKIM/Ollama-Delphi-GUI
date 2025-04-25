@@ -698,6 +698,7 @@ begin
   Tabsheet_Chatting.TabVisible :=   False;
   TabSheet_LogsBroker.TabVisible := False;
   GroupBox_TTSEngine.Visible :=     False;
+  Label_HistoryCation.Visible :=    False;
   SpeedButton_ExpandFull.Tag := 1;
   FRequest_Type := TRequest_Type.ort_Chat;
   FDisplay_Type := TDisplay_Type.disp_Content;
@@ -813,7 +814,7 @@ begin
 
     Do_ChangeStyleCustom(0);
 
-    Panel_CaptionLog.Caption := '      LOGs from '+FormatDateTime('yyyy.mm.dd HH:NN:SS', Now);
+    Panel_CaptionLog.Caption := '      LOGs from '+FormatDateTime('yyyy.mm.dd HH:NN:SS AM/PM, dddd', Now);
     Panel_ChatRequestBox.Enabled := GV_AliveOllamaFlag;
     Action_StartRequest.Enabled :=  GV_AliveOllamaFlag;
     SetRequestingFlag(False);
@@ -908,6 +909,7 @@ begin
 
     ProcessImageFlag :=               ReadBool(C_SectionOptions,     'Process_Image',           False);
     ReasoningFlag :=                  ReadBool(C_SectionOptions,     'ReasoningFalg',           False);
+    GV_ExperimentalSeedFlag :=        ReadBool(C_SectionOptions,     'ExperimentalSeedFlag',    False);
 
     var _color0: Integer :=           ReadInteger(C_SectionOptions,  'Node_Selected_Color',     GC_SkinSelColor);
     var _color1: Integer :=           ReadInteger(C_SectionOptions,  'Node_HeaderFont_Color',   GC_SkinHeadColor);
@@ -956,6 +958,7 @@ begin
     WriteInteger(C_SectionOptions,  'History_Max',             HIS_MAX_ITEMS);
     WriteBool(C_SectionOptions,     'Process_Image',           FProcessImageFlag);
     WriteBool(C_SectionOptions,     'ReasoningFalg',           FReasoningFlag);
+    WriteBool(C_SectionOptions,     'ExperimentalSeedFlag',    GV_ExperimentalSeedFlag);
 
     WriteInteger(C_SectionOptions,  'Node_Selected_Color',     Frame_ChattingBox.VST_NSelectionColor);
     WriteInteger(C_SectionOptions,  'Node_HeaderFont_Color',   Frame_ChattingBox.VST_NHeaderColor);
@@ -1126,6 +1129,8 @@ procedure TForm_RestOllama.Action_ClearChattingExecute(Sender: TObject);
 begin
   Frame_ChattingBox.VST_ChattingBox.Clear;
   ListBox_History.ClearSelection;
+  HistoryCation := '';
+
   Action_TTS.Enabled := False;
   SkAnimatedImage_Chat.Left := (PageControl_Chatting.Width -  SkAnimatedImage_Chat.Width)  div 2;
   SkAnimatedImage_Chat.Top :=  (PageControl_Chatting.Height - SkAnimatedImage_Chat.Height) div 2;
@@ -1141,6 +1146,7 @@ begin
   Label_Font_Size.Caption := '10';
   TrackBar_GlobalFontSize.OnChange := TrackBar_GlobalFontSizeChange;
   ListBox_History.ClearSelection;
+  HistoryCation := '';
 
   Frame_ChattingBox.Do_RestoreDefaultColor(1);
   Frame_ChattingBox.VST_ChattingBox.Invalidate;
@@ -1547,6 +1553,7 @@ begin
 
   StatusBar1.Panels[1].Text := '';
   StatusBar1.Panels[2].Text := ' Prepare ...';
+  HistoryCation := '';
   Common_RestSettings(V_DummyFlag);
   with RESTRequest_Ollama do
   begin
@@ -1733,7 +1740,7 @@ end;
 procedure TForm_RestOllama.SetHistoryCation(const Value: string);
 begin
   FHistoryCation := Value;
-  // Label_HistoryCation.Caption:= Value;   { Reserved ... }
+  Label_HistoryCation.Visible := (Value > '');
 end;
 
 procedure TForm_RestOllama.SetImageSourceIndex(const Value: Integer);
@@ -2908,19 +2915,18 @@ begin
           end;
         mrYes:
           begin
-            var _historyfile := Format('%s%s%s%s', [CV_HisPath, 'History_',FormatDateTime('yymmdd_hhnnss', Now()), '.dat']);
+            var _historyfile := Format('%s%s%s%s', [CV_HisPath, 'History_',FormatDateTime('yymmdd_hhnnsszzz', Now()), '.dat']);
             if Frame_ChattingBox.Do_SaveAllData(_historyfile) then
             begin
               Panel_HistoryFile.Caption := ExtractFileName(_historyfile);
               var _index: Integer := FHistoryManager.AddToHistory(0, _subject, _historyfile);
-              if _index >= 0 then
-              begin
-                ListBox_History.ClearSelection;
-                ListBox_History.Selected[_index] := True;
-              end;
-
-              if FileExists(_hfile) then
-                DeleteFile(_hfile);
+                if _index >= 0 then
+                begin
+                  ListBox_History.ClearSelection;
+                  ListBox_History.Selected[_index] := True;
+                end;
+              HistoryCation := _subject;
+              Safety_DeleteFile(_hfile);
             end;
           end;
         mrNo:;
@@ -2999,7 +3005,7 @@ begin
       _mousePos := TListbox(Sender).ScreenToClient(_mousePos);
       if TListbox(Sender).ItemAtPos(_mousePos, True) <> -1 then
         begin
-          var _hfile := FHistoryManager.Get_HistoryData(ListBox_History.ItemIndex);
+          var _hfile := FHistoryManager.Get_HistoryFile(ListBox_History.ItemIndex);
           if FileExists(_hfile) then
           begin
             _hcaption := ListBox_History.Items[ListBox_History.ItemIndex];
@@ -3018,6 +3024,7 @@ end;
 procedure TForm_RestOllama.Panel_HistoryButtonsClick(Sender: TObject);
 begin
   ListBox_History.ClearSelection;
+  HistoryCation := '';
 end;
 
 { / History Actions ---------------------------------------------------------- }

@@ -15,6 +15,7 @@ uses
   VirtualTrees in 'Include\VirtualTrees.pas',
   ncLines in 'Include\NetCom7\Source\ncLines.pas',
   EasyJson in 'Include\EasyJson.pas',
+  DosCommand in 'Include\DosCommand\DosCommand.pas',
   Unit_Common in 'Unit_Common.pas',
   Unit_SysInfo in 'Unit_SysInfo.pas',
   Unit_MRUManager in 'Unit_MRUManager.pas',
@@ -72,10 +73,10 @@ begin
     //TStyleManager.FormBorderStyle := TStyleManager.TFormBorderStyle.fbsSystemStyle;
     Application.Title := 'Ollama Client GUI';
     Application.CreateForm(TForm_RestOllama, Form_RestOllama);
-  Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);
-  Application.CreateForm(TDM_Server, DM_Server);
-  Application.CreateForm(TForm_RMBroker, Form_RMBroker);
-  Application.Run;
+    Application.CreateForm(TForm_RequestDialog, Form_RequestDialog);
+    Application.CreateForm(TDM_Server, DM_Server);
+    Application.CreateForm(TForm_RMBroker, Form_RMBroker);
+    Application.Run;
   finally
     CloseHandle(_mxHandle);
   end;

@@ -1,65 +1,70 @@
 ﻿[Closed Files]
-File_0=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.StdCtrls.pas',0,1,7474,13,7494,0,0,{{1775,4},{1793,15},{'TScrollWindow'}},
-File_1=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.Classes.pas',0,1,724,18,742,0,0,,
-File_2=TSourceModule,'E:\Projects_Backup12\Ollma_Client_2025-04-10_14-59-12\OllamaCkent\Unit_Welcome.pas',0,1,1,1,1,0,0,,
-File_3=TSourceModule,'E:\Projects_Backup12\Ollma_Client_hisTask_2025-04-19_17-58-15\OllamaCkent\Unit_Welcome.pas',0,1,1,1,1,0,0,,
-File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\RTL\SYS\System.SysUtils.pas',0,1,3454,1,3472,0,0,,
-File_5=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.UITypes.pas',0,1,162,1,180,0,0,,
-File_6=TSourceModule,'E:\OllamaCkent\Include\VirtualTrees.BaseTree.pas',0,1,15836,1,15854,0,0,,
-File_7=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.Threading.pas',0,1,437,1,455,0,0,,
-File_8=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.Dialogs.pas',0,1,98,17,119,0,0,,
-File_9=TSourceModule,'E:\OllamaCkent\Include\EasyJson.pas',0,1,1710,69,1721,0,0,,
-File_10=TSourceModule,'E:\OllamaCkent\Include\VirtualTrees.pas',0,1,1716,21,1734,0,0,,
-File_11=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\win\Winapi.Windows.pas',0,1,43229,1,43247,0,0,,
-File_12=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\RTL\SYS\System.Types.pas',0,1,133,1,133,0,0,,
-File_13=TSourceModule,'E:\OllamaCkent\Unit_MRUManager.pas',0,1,31,1,3,0,0,,
+File_0=TSourceModule,'E:\OllamaCkent\Include\VirtualTrees.BaseTree.pas',0,1,16167,11,16208,0,0,,
+File_1=TSourceModule,'E:\OllamaCkent\Include\DosCommand\DosCommand.pas',0,1,325,1,1,0,0,,
+File_2=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.IOUtils.pas',0,1,2745,1,2760,0,0,,
+File_3=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\source\rtl\common\System.Classes.pas',0,1,7227,1,7245,0,0,,
+File_4=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\VCL\Vcl.StdCtrls.pas',0,1,7386,1,7383,0,0,{{1775,4}
+File_5=TSourceModule,'C:\Users\Public\Documents\Embarcadero\Studio\23.0\Skia4Delphi\Source\System.Skia.pas',0,1,13431,1,3891,0,0,{{62,0}
+File_6=TSourceModule,'C:\Users\Public\Documents\Embarcadero\Studio\23.0\Skia4Delphi\Source\System.Skia.API.pas',0,1,1898,111,1456,0,0,{{8572,0}
+File_7=TSourceModule,'E:\OllamaCkent\Unit_Translator.pas',0,1,1,127,9,0,0,,
+File_8=TSourceModule,'E:\2025_DelphiAI\OllamaBox\src\OllamaBox.pas',0,1,200,64,199,0,0,,
+File_9=TSourceModule,'c:\program files (x86)\embarcadero\studio\23.0\SOURCE\RTL\SYS\System.pas',0,1,4371,1,4362,0,0,,
+File_10=TSourceModule,'E:\OllamaCkent\Unit_ImageDropDown.pas',0,1,181,1,1,0,0,,
+File_11=TSourceModule,'E:\OllamaCkent\Unit_RequestDialog.pas',0,1,85,1,1,0,0,,
+File_12=TSourceModule,'E:\OllamaCkent\Unit_SysInfo.pas',0,1,1,29,7,0,0,,
+File_13=TSourceModule,'E:\OllamaCkent\Unit_DMServer.pas',0,1,1,29,3,0,0,,
+File_14=TSourceModule,'E:\OllamaCkent\Unit_RMBroker.pas',0,1,145,141,157,0,0,,
 
 [Modules]
 Module0=E:\OllamaCkent\Unit_Jsonworks.pas
-Module1=E:\2025_DelphiAI\OllamaBox\src\OllamaBox.Utils.pas
-Module2=E:\OllamaCkent\Unit_Main.pas
-Module3=E:\OllamaCkent\Unit_HistoryManager.pas
-Module4=E:\2025_DelphiAI\OllamaBox\src\OllamaBox.pas
-Module5=E:\OllamaCkent\Unit_Welcome.pas
+Module1=E:\OllamaCkent\Unit_ChattingBoxClass.pas
+Module2=E:\OllamaCkent\Unit_HistoryManager.pas
+Module3=E:\OllamaCkent\Unit_Main.pas
+Module4=E:\OllamaCkent\Unit_Common.pas
+Module5=E:\OllamaCkent\Unit_DosCommander.pas
 Module6=E:\OllamaCkent\Ollma_Client.dproj
-Module7=E:\OllamaCkent\Unit_ChattingBoxClass.pas
+Module7=E:\OllamaCkent\Unit_MRUManager.pas
 Module8=E:\OllamaCkent\Unit_About.pas
-Module9=E:\OllamaCkent\Unit_Common.pas
-Count=10
+Module9=E:\OllamaCkent\Unit_Welcome.pas
+Module10=E:\2025_DelphiAI\OllamaBox\src\OllamaBox.Utils.pas
+Count=11
 EditWindowCount=1
 
 [E:\OllamaCkent\Unit_Jsonworks.pas]
 ModuleType=TSourceModule
 
-[E:\2025_DelphiAI\OllamaBox\src\OllamaBox.Utils.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Unit_Main.pas]
+[E:\OllamaCkent\Unit_ChattingBoxClass.pas]
 ModuleType=TSourceModule
 
 [E:\OllamaCkent\Unit_HistoryManager.pas]
 ModuleType=TSourceModule
 
-[E:\2025_DelphiAI\OllamaBox\src\OllamaBox.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Unit_Welcome.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Ollma_Client.dproj]
-ModuleType=TBaseProject
-
-[E:\OllamaCkent\Unit_ChattingBoxClass.pas]
-ModuleType=TSourceModule
-
-[E:\OllamaCkent\Unit_About.pas]
+[E:\OllamaCkent\Unit_Main.pas]
 ModuleType=TSourceModule
 
 [E:\OllamaCkent\Unit_Common.pas]
 ModuleType=TSourceModule
 
+[E:\OllamaCkent\Unit_DosCommander.pas]
+ModuleType=TSourceModule
+
+[E:\OllamaCkent\Ollma_Client.dproj]
+ModuleType=TBaseProject
+
+[E:\OllamaCkent\Unit_MRUManager.pas]
+ModuleType=TSourceModule
+
+[E:\OllamaCkent\Unit_About.pas]
+ModuleType=TSourceModule
+
+[E:\OllamaCkent\Unit_Welcome.pas]
+ModuleType=TSourceModule
+
+[E:\2025_DelphiAI\OllamaBox\src\OllamaBox.Utils.pas]
+ModuleType=TSourceModule
+
 [EditWindow0]
-ViewCount=11
+ViewCount=12
 CurrentEditView=E:\OllamaCkent\Unit_Jsonworks.pas
 View0=0
 View1=1
@@ -72,6 +77,7 @@ View7=7
 View8=8
 View9=9
 View10=10
+View11=11
 PercentageSizes=1
 Create=1
 Visible=1
@@ -112,9 +118,9 @@ OTAEditViewType=WelcomePage.MainPage
 [View1]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Ollma_Client.dpr
-CursorX=50
-CursorY=66
-TopLine=49
+CursorX=36
+CursorY=59
+TopLine=55
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -123,9 +129,9 @@ EditViewName=E:\OllamaCkent\Ollma_Client.dpr
 [View2]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_Main.pas
-CursorX=89
-CursorY=1369
-TopLine=1375
+CursorX=56
+CursorY=3008
+TopLine=2990
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -133,21 +139,21 @@ EditViewName=E:\OllamaCkent\Unit_Main.pas
 
 [View3]
 CustomEditViewType=TEditView
-Module=E:\OllamaCkent\Unit_Jsonworks.pas
-CursorX=46
-CursorY=212
-TopLine=193
+Module=E:\OllamaCkent\Unit_DosCommander.pas
+CursorX=86
+CursorY=257
+TopLine=109
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=E:\OllamaCkent\Unit_Jsonworks.pas
+EditViewName=E:\OllamaCkent\Unit_DosCommander.pas
 
 [View4]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_Welcome.pas
-CursorX=86
-CursorY=66
-TopLine=17
+CursorX=57
+CursorY=12
+TopLine=7
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -155,32 +161,32 @@ EditViewName=E:\OllamaCkent\Unit_Welcome.pas
 
 [View5]
 CustomEditViewType=TEditView
-Module=E:\2025_DelphiAI\OllamaBox\src\OllamaBox.pas
-CursorX=1
-CursorY=1
-TopLine=28
+Module=E:\OllamaCkent\Unit_MRUManager.pas
+CursorX=76
+CursorY=404
+TopLine=386
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=E:\2025_DelphiAI\OllamaBox\src\OllamaBox.pas
+EditViewName=E:\OllamaCkent\Unit_MRUManager.pas
 
 [View6]
 CustomEditViewType=TEditView
-Module=E:\2025_DelphiAI\OllamaBox\src\OllamaBox.Utils.pas
-CursorX=87
-CursorY=1874
-TopLine=1861
+Module=E:\OllamaCkent\Unit_Jsonworks.pas
+CursorX=76
+CursorY=169
+TopLine=151
 LeftCol=1
 Elisions=
 Bookmarks=
-EditViewName=E:\2025_DelphiAI\OllamaBox\src\OllamaBox.Utils.pas
+EditViewName=E:\OllamaCkent\Unit_Jsonworks.pas
 
 [View7]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_About.pas
-CursorX=100
-CursorY=347
-TopLine=275
+CursorX=1
+CursorY=328
+TopLine=304
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -189,9 +195,9 @@ EditViewName=E:\OllamaCkent\Unit_About.pas
 [View8]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_ChattingBoxClass.pas
-CursorX=61
-CursorY=207
-TopLine=177
+CursorX=72
+CursorY=447
+TopLine=444
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -200,9 +206,9 @@ EditViewName=E:\OllamaCkent\Unit_ChattingBoxClass.pas
 [View9]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_HistoryManager.pas
-CursorX=1
-CursorY=213
-TopLine=210
+CursorX=96
+CursorY=407
+TopLine=403
 LeftCol=1
 Elisions=
 Bookmarks=
@@ -211,13 +217,24 @@ EditViewName=E:\OllamaCkent\Unit_HistoryManager.pas
 [View10]
 CustomEditViewType=TEditView
 Module=E:\OllamaCkent\Unit_Common.pas
-CursorX=52
-CursorY=723
-TopLine=685
+CursorX=88
+CursorY=186
+TopLine=179
 LeftCol=1
 Elisions=
 Bookmarks=
 EditViewName=E:\OllamaCkent\Unit_Common.pas
+
+[View11]
+CustomEditViewType=TEditView
+Module=E:\2025_DelphiAI\OllamaBox\src\OllamaBox.Utils.pas
+CursorX=1
+CursorY=20
+TopLine=77
+LeftCol=1
+Elisions=
+Bookmarks=
+EditViewName=E:\2025_DelphiAI\OllamaBox\src\OllamaBox.Utils.pas
 
 [Watches]
 Count=0
@@ -366,11 +383,6 @@ LRDockWidth=1562
 Dockable=1
 StayOnTop=0
 SplitPos=143
-
-[PropInspDesignerSelection]
-ArrangeBy=Name
-SelectedItem=Name,OnUpdate
-ExpandedItems=Images=0,"LiveBindings Designer=0"
 
 [frmDesignPreview]
 PercentageSizes=1

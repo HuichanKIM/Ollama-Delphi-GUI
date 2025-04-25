@@ -293,7 +293,8 @@ begin
       if SameText(_seconddata^.FUser, AUser) then      // V_Username + ' (history)';
         try
           DeleteNode(_second);
-        finally
+        except
+          Abort;
         end;
     end;
 
@@ -789,7 +790,7 @@ begin
   end;
 end;
 
-{ Save/Load Node Data for History Manger ------------------------------------- }
+{ Save/Load Node Data for History Manager ------------------------------------ }
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxSaveNode(Sender: TBaseVirtualTree; Node: PVirtualNode; Stream: TStream);
 begin

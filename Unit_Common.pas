@@ -83,8 +83,8 @@ type
   TTransCountryCode = (otcc_KO = 0, otcc_EN);
 
 const
-  GC_Version0     = 'ver. 1.0.7';
-  GC_Version1     = 'ver. 1.0.7 (2025.04.22)';
+  GC_Version0     = 'ver. 1.0.8';
+  GC_Version1     = 'ver. 1.0.8 (2025.04.23)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024-2025 JNJ Labs. Seoul, Korea.';
@@ -142,7 +142,7 @@ function LoadFromFileBuffered_String(const AFileName: string): string;
 
 function  Can_Focus(Control: TWinControl): Boolean;
 procedure Set_Focus(Control: TWinControl);
-
+function Safety_DeleteFile(const AFile: string): Boolean;
 function InetIsOffline(AFlag: Integer): Boolean; stdcall; external 'URL.DLL';
 
 const
@@ -191,6 +191,8 @@ var
   GV_ReservedColor: array [0..3] of TColor;
   GV_AliveOllamaFlag: Boolean = False;
   GV_RemoteBanList: TStringList;
+  // experimental seed flag
+  GV_ExperimentalSeedFlag: Boolean = False;
 
 implementation
 
@@ -232,6 +234,16 @@ procedure Set_Focus(Control: TWinControl);
 begin
   if Can_Focus(Control) then
     Control.SetFocus;
+end;
+
+function Safety_DeleteFile(const AFile: string): Boolean;
+begin
+  Result := False;
+  if FileExists(AFile) then
+  begin
+    TFile.Delete(AFile);
+    Result := True;
+  end;
 end;
 
 { ... }
@@ -723,6 +735,28 @@ begin
     AStrings.EndUpdate;
     _Stream.Free;
   end;
+end;
+
+{ Reference .... }
+{ from OllamaBox_Utils by tinyBigGAMES }
+{ class procedure obUtils.Wait(const AMilliseconds: Double); }
+procedure Ollama_Wait(const AMilliseconds: Double);
+var
+  LStartCount, LCurrentCount: Int64;
+  LElapsedTime: Double;
+  // Modified by ichin 2025-04-23 수 오전 10:54:59
+  LPerformanceFrequency: Int64;
+begin
+  // Get the starting value of the performance counter
+  QueryPerformanceCounter(LStartCount);
+  // Modified by ichin 2025-04-23 수 오전 10:54:11
+  QueryPerformanceFrequency(LPerformanceFrequency);
+
+  // Convert milliseconds to seconds for precision timing
+  repeat
+    QueryPerformanceCounter(LCurrentCount);
+    LElapsedTime := (LCurrentCount - LStartCount) / LPerformanceFrequency * 1000.0; // Convert to milliseconds
+  until LElapsedTime >= AMilliseconds;
 end;
 
 initialization

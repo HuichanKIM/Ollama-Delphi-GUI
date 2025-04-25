@@ -116,7 +116,7 @@ object Form_RestOllama: TForm_RestOllama
         Width = 212
         Height = 70
         Align = alTop
-        Caption = 'Multimodal / Reasoning Option'
+        Caption = 'Multimodal / Reasoning'
         TabOrder = 2
         StyleElements = [seClient, seBorder]
         object CheckBox_ProcessImage: TCheckBox
@@ -135,7 +135,7 @@ object Form_RestOllama: TForm_RestOllama
           Top = 20
           Width = 190
           Height = 17
-          Hint = 'Cogito, Deepseek ...'
+          Hint = 'Cogito, Deepseek, Granite ...'
           Caption = 'Add Resoning'
           TabOrder = 1
           StyleElements = [seClient, seBorder]
@@ -1145,18 +1145,18 @@ object Form_RestOllama: TForm_RestOllama
         end
         object Label_HistoryCation: TLabel
           AlignWithMargins = True
-          Left = 100
+          Left = 464
           Top = 3
-          Width = 358
+          Width = 21
           Height = 20
+          Hint = 'on view history'
           Margins.Left = 100
-          Margins.Right = 30
-          Align = alClient
+          Align = alRight
+          Alignment = taRightJustify
           AutoSize = False
+          Caption = '*'
           EllipsisPosition = epEndEllipsis
           StyleElements = [seBorder]
-          ExplicitWidth = 3
-          ExplicitHeight = 15
         end
         object SpeedButton_AddToHistory0: TSpeedButton
           AlignWithMargins = True
@@ -1378,7 +1378,7 @@ object Form_RestOllama: TForm_RestOllama
                 Width = 120
                 Height = 124
                 Align = alClient
-                ItemHeight = 15
+                ItemHeight = 17
                 Items.Strings = (
                   '192.168.123.123'
                   '127.0.0.1')

@@ -54,6 +54,7 @@ function Get_Base64Endoeings(const AImage: TImage): string;
 implementation
 
 uses
+  System.IOUtils,
   System.NetEncoding,
   System.JSON,
   System.JSON.Readers,
@@ -122,12 +123,15 @@ begin
     if ASeedFlag then
       _ejson.Root.AddObject('options')
                  .Put('seed', ASeed)
-                 .Put('temperature', 0);
-    //else
-    // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
-    //  _ejson.Root.AddObject('options')
-    //               .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ?
-    //               .Put('temperature', 1.0); // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
+                 .Put('temperature', 0) else
+    if GV_ExperimentalSeedFlag then
+      begin
+        // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
+        _ejson.Root.AddObject('options')
+                   .Put('seed', 0)            // -1 : Negative value(expected random seed) show error ?
+                   .Put('temperature', 1.0);  // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
+                                              // ? Put('num_ctx', 4096);    (default - 2048)
+      end;
 
     Result := _ejson.ToString;
   finally
@@ -160,17 +164,14 @@ begin
     end;
 
     if AReasoning then
-    begin
-      if _isGranite then
-        _ej_think.Put('role', 'control')
-                 .Put('content', 'thinking')
-      else
-        _ej_think.Put('role', 'system')
-                 .Put('content', 'Enable deep thinking subroutine.');
-    end;
-
-    if AReasoning then
       begin
+        if _isGranite then
+          _ej_think.Put('role', 'control')
+                   .Put('content', 'thinking')
+        else
+          _ej_think.Put('role', 'system')
+                   .Put('content', 'Enable deep thinking subroutine.');
+
         _ej_asmb.Put('model', AModel)
                 .AddArray('messages')
                 .Put(0, _ej_think)
@@ -186,12 +187,16 @@ begin
     if ASeedFlag then
       _ej_asmb.Root.AddObject('options')
                    .Put('seed', ASeed)
-                   .Put('temperature', 0.0);
-    //else
-    // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
-    //  _ej_asmb.Root.AddObject('options')
-    //               .Put('seed', 0)           // -1 : Negative value(expected random seed) show error ? - response Internal server error
-    //               .Put('temperature', 1.0); // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
+                   .Put('temperature', 0.0) else
+    if GV_ExperimentalSeedFlag then
+      begin
+        // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
+        // How to get consistency ?
+        _ej_asmb.Root.AddObject('options')
+                     .Put('seed', 0)            // -1 : Negative value(expected random seed) show error ?
+                     .Put('temperature', 1.0);  // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
+                                                // ? Put('num_ctx', 4096);    (default - 2048)
+      end;
 
     Result := _ej_asmb.ToString;
   finally
@@ -213,11 +218,11 @@ begin
   var _I := Length(ASource);
   if _I < 1 then Exit;
 
-  if (_I >= 1) and (ASource[_I] > ' ') then
+  if (_I >= 1) and (ASource[_I] > #32) then
     Result := ASource
   else
     begin
-      while (_I >= 1) and (ASource[_I] <= ' ') do Dec(_I);
+      while (_I >= 1) and (ASource[_I] <= #32) do Dec(_I);
       Result := System.Copy(ASource, 1, _I);
     end;
 end;
@@ -260,13 +265,21 @@ begin
           end;
       end;
 
-    // Worried about the overhead ? / ignore replacing last "</response>" ...
-    var _checkings: string := LowerCase(Copy(Result, 1, 25));
+    // Worried about the overhead ? / skip replacing last "</response>" ...
+    var _checkings: string := Copy(Result, 1, 25);
     if Pos('<think>', _checkings) > 0 then
       for var _i := Low(_OldPatterns) to High(_OldPatterns) do
         Result := StringReplace(Result, _OldPatterns[_i], _NewPatterns[_i], [rfIgnoreCase]);
 
     Result := TrimRight_Ex(Result);
+
+    // replacing last "</response>" ...
+    var _rlength: Integer := Length(Result);
+    if Pos('</response>', Result, _rlength-13) > 0 then
+      begin
+        SetLength(Result, _rlength - 12);
+        Result := Result + sLineBreak+'</response>';
+      end;
   finally
     FreeAndNil(_JsonReader);
     FreeAndNil(_StringReader);
@@ -534,6 +547,46 @@ begin
     end;
   finally
     OutputStringStream.Free;
+  end;
+end;
+
+{ Reference .... }
+{ from OllamaBox_Utils by tinyBigGAMES }
+{ class function obUtils.FileToBase64(const AFilename: string): string; }
+
+function FileToBase64(const AFilename: string): string;
+var
+  LFileStream: TFileStream;
+  LBytesStream: TBytesStream;
+begin
+  Result := '';
+  if AFilename.IsEmpty then Exit;
+  if not TFile.Exists(AFilename) then Exit;
+
+  LFileStream := TFileStream.Create(AFilename, fmOpenRead or fmShareDenyWrite);
+  try
+    LBytesStream := TBytesStream.Create;
+    try
+      LBytesStream.CopyFrom(LFileStream, LFileStream.Size);
+      { Original }
+      Result := TNetEncoding.Base64.EncodeBytesToString(LBytesStream.Bytes, LBytesStream.Size);
+
+      // Remove newline characters
+      Result := StringReplace(Result, #13, '', [rfReplaceAll]); // Remove carriage returns
+      Result := StringReplace(Result, #10, '', [rfReplaceAll]); // Remove line feeds
+
+      { My Code / prevent from overhead of StringReplace scanning ... }
+      var _Base64 := System.NetEncoding.TBase64Encoding.Create(0);  // CharsPerLine = 0 means no line breaks
+      try
+        Result := _Base64.EncodeBytesToString(LBytesStream.Bytes, LBytesStream.Size);
+      finally
+        _Base64.Free;
+      end;
+    finally
+      LBytesStream.Free;
+    end;
+  finally
+    LFileStream.Free;
   end;
 end;
 

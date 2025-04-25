@@ -76,8 +76,10 @@ type
     CheckBox_SaveContents: TCheckBox;
     Label14: TLabel;
     ComboBox_MaxHistory: TComboBox;
+    CheckBox_Experimental: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure Label_SystemInfoClick(Sender: TObject);
     procedure Label_GitHubClick(Sender: TObject);
@@ -95,6 +97,7 @@ type
     procedure CheckBox_SaveContentsClick(Sender: TObject);
     procedure ComboBox_MaxHistoryChange(Sender: TObject);
     procedure Label_TitleClick(Sender: TObject);
+    procedure CheckBox_ExperimentalClick(Sender: TObject);
   private
     FShow_Flag: Integer;
     FUpdateLockFlag: Boolean;
@@ -150,6 +153,7 @@ const
     ('Ctrl+R',  'Default / Refresh'),
     ('Ctrl+Z',  'Close / Exit'));
 
+const
   C_DevelopInfo: string = '''
     Development Tool  (GUI)
     Embarcadero Delphi 12.1  ( Object Pascal )
@@ -210,6 +214,12 @@ procedure TForm_About.CheckBox_SaveOnCLoseClick(Sender: TObject);
 begin
   if not FUpdateLockFlag then
   GV_SaveLogsOnClose := CheckBox_SaveOnCLose.Checked;
+end;
+
+procedure TForm_About.CheckBox_ExperimentalClick(Sender: TObject);
+begin
+  if not FUpdateLockFlag then
+  GV_ExperimentalSeedFlag := CheckBox_Experimental.Checked;
 end;
 
 const
@@ -295,21 +305,16 @@ begin
   CheckBox_SaveContents.Checked :=     GV_SaveContentsOnClose;
   CheckBox_BeepSound.Checked :=        Form_RestOllama.DoneSoundFlag;
   CheckBox_SaveOnCLose.Checked :=      GV_SaveLogsOnClose;
+  CheckBox_Experimental.Checked :=     GV_ExperimentalSeedFlag;
   FUpdateLockFlag := False;
 
   TabSheet_Style.TabVisible := FShow_Flag = GC_AboutSkinFlag;  // Cannot Focus Error - When Change Style Event / Bug ?
   PageControl1.ActivePageIndex := FShow_Flag;   // 0 or 3
 end;
 
-procedure TForm_About.Update_Shortcuts();
+procedure TForm_About.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  ListView_Shortcuts.items.Clear;
-  for var _i := 0 to Length(C_Shortcut_Keys)-1 do
-  with ListView_Shortcuts.Items.Add do
-    begin
-      Caption := C_Shortcut_Keys[_i, 0];
-      SubItems.Add(C_Shortcut_Keys[_i, 1]);
-    end;
+  Action := caFree;
 end;
 
 procedure TForm_About.FormKeyPress(Sender: TObject; var Key: Char);
@@ -319,6 +324,17 @@ begin
     Key := #0;
     ModalResult := mrCancel;
   end;
+end;
+
+procedure TForm_About.Update_Shortcuts();
+begin
+  ListView_Shortcuts.items.Clear;
+  for var _i := 0 to Length(C_Shortcut_Keys)-1 do
+    with ListView_Shortcuts.Items.Add do
+    begin
+      Caption := C_Shortcut_Keys[_i, 0];
+      SubItems.Add(C_Shortcut_Keys[_i, 1]);
+    end;
 end;
 
 procedure TForm_About.Label_GitHubClick(Sender: TObject);
