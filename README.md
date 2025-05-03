@@ -1,11 +1,11 @@
 # Ollama-Delphi-GUI
 
-### Latest Version 1.0.8 - 2025.04.25
+### Latest Version 1.1.0 - 2025.05.03
 
 ### Features
-- Supports Request-History Manager
+- Supports Request-History Manager, Chat with history
 - Supports Multimodal Image Analysis (Gemma3, Llava ... ) and Reasoning (Cogito, Deepseek ...)
-- Themes (Windows10 SlateGray) according to user preferences of Windows Theme
+- Themes (Windows11 Impressive Dark, Windows10 SlateGray) according to user preferences of Windows Theme
 - Supports Windows 10 and 11 (for 64 bits).
 - If your computer has good performance, use it as a server/broker to connect your Android smartphone
 
@@ -13,7 +13,7 @@
 ### Prerequisites
 
  1. Ollama Install <https://ollama.com/>
- 2. Pull Models (Cogito, Gemma3, Phi4, llama3, gemma, llava ...)
+ 2. Pull Models to Ollama (Cogito, Gemma3, Phi4, llama3, DeepSeek, Llava ...)
  3. Delphi Athens 12.0. over
 
 
