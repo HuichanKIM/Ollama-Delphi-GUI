@@ -8639,7 +8639,8 @@ begin
   PrepareBitmaps(True, True);
 
   // Register tree as OLE drop target.
-  if not (csDesigning in ComponentState) and not (csLoading in ComponentState) then // will be done in Loaded after all inherited settings are loaded from the DFMs
+  // Modified by ichin 2025-04-26 토 오전 8:21:30
+  if not (csDesigning in ComponentState) and not (csLoading in ComponentState) and ((hoDrag in Header.Options) or (toAcceptOLEDrop in TreeOptions.MiscOptions)) then // will be done in Loaded after all inherited settings are loaded from the DFMs
     RegisterDragDrop(Handle, DragManager as IDropTarget);
 
   UpdateScrollBars(True);
@@ -12345,6 +12346,8 @@ begin
     Winapi.Windows.SetFocus(Handle);
     // Repeat the hit test as an OnExit event might got triggered that could modify the tree.
     GetHitTestInfoAt(Message.XPos, Message.YPos, True, HitInfo, KeysToShiftState(Message.Keys));
+    // Modified by ichin 2025-04-26 토 오전 8:17:30
+    FLastHitInfo := HitInfo; // See issue #1297
   end;
 
   if IsEmpty then
@@ -13401,7 +13404,8 @@ begin
   inherited;
 
   // Call RegisterDragDrop after all visual inheritance changes to MiscOptions have been applied.
-  if not (csDesigning in ComponentState) and HandleAllocated then
+  // Modified by ichin 2025-04-26 토 오전 8:22:23
+  if not (csDesigning in ComponentState) and HandleAllocated and ((hoDrag in Header.Options) or (toAcceptOLEDrop in TreeOptions.MiscOptions)) then
     RegisterDragDrop(Handle, DragManager as IDropTarget);
 
   // If a root node count has been set during load of the tree then update its child structure now
