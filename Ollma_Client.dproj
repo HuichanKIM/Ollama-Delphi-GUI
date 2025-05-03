@@ -1119,6 +1119,7 @@
         </DCCReference>
         <DCCReference Include="Unit_RMBroker.pas">
             <Form>Form_RMBroker</Form>
+            <DesignClass>TForm_RMBroker</DesignClass>
         </DCCReference>
         <RcItem Include="beep0.wav">
             <ContainerId>ResourceItem</ContainerId>

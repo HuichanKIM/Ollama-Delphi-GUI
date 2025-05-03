@@ -24,6 +24,7 @@ object Form_RestOllama: TForm_RestOllama
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
+  OnResize = FormResize
   OnShow = FormShow
   TextHeight = 15
   object Panel_ChattingBase: TPanel
@@ -89,8 +90,7 @@ object Form_RestOllama: TForm_RestOllama
           ImageName = 'ic_queue_48px'
           Images = SVGIconVirtualImageList1
           OnClick = SpeedButton_AddToTopicsClick
-          ExplicitLeft = 203
-          ExplicitTop = -3
+          ExplicitLeft = 186
         end
         object CheckBox_AutoLoadTopic: TCheckBox
           Left = 0
@@ -202,7 +202,6 @@ object Form_RestOllama: TForm_RestOllama
         Height = 210
         Align = alTop
         Caption = 'Image for Multimodel'
-        Enabled = False
         TabOrder = 4
         StyleElements = [seClient, seBorder]
         object Panel_ImageSourceBase: TPanel
@@ -357,13 +356,14 @@ object Form_RestOllama: TForm_RestOllama
             Left = 125
             Top = 0
             Width = 24
-            Height = 15
+            Height = 20
             Margins.Left = 10
             Margins.Top = 0
             Margins.Bottom = 0
             Align = alLeft
             Caption = 'seed'
             StyleElements = [seClient, seBorder]
+            ExplicitHeight = 15
           end
           object SpeedButton_NewRootnode: TSpeedButton
             Left = 23
@@ -429,7 +429,7 @@ object Form_RestOllama: TForm_RestOllama
         Proportional = True
         Visible = False
       end
-      object Splitter2: TSplitter
+      object Splitter_History: TSplitter
         AlignWithMargins = True
         Left = 3
         Top = 653
@@ -437,6 +437,9 @@ object Form_RestOllama: TForm_RestOllama
         Height = 3
         Cursor = crVSplit
         Align = alBottom
+        AutoSnap = False
+        Beveled = True
+        ResizeStyle = rsLine
         ExplicitLeft = 0
         ExplicitTop = 428
         ExplicitWidth = 233
@@ -549,15 +552,18 @@ object Form_RestOllama: TForm_RestOllama
         end
         object Label1: TLabel
           AlignWithMargins = True
-          Left = 155
+          Left = 139
           Top = 3
-          Width = 50
-          Height = 15
+          Width = 66
+          Height = 19
           Align = alClient
           Alignment = taRightJustify
           Caption = 'Options -'
           Layout = tlCenter
           StyleElements = [seClient, seBorder]
+          ExplicitLeft = 155
+          ExplicitWidth = 50
+          ExplicitHeight = 15
         end
         object SpeedButton_Broker: TSpeedButton
           AlignWithMargins = True
@@ -685,8 +691,8 @@ object Form_RestOllama: TForm_RestOllama
         TabOrder = 5
         StyleElements = [seClient, seBorder]
         object SpeedButton_Translate: TSpeedButton
-          Left = 15
-          Top = 24
+          Left = 16
+          Top = 25
           Width = 30
           Height = 22
           Action = Action_TransMessage
@@ -934,8 +940,7 @@ object Form_RestOllama: TForm_RestOllama
             Action = Action_AddToHistory
             Align = alLeft
             Images = SVGIconVirtualImageList1
-            ExplicitLeft = -2
-            ExplicitHeight = 14
+            ExplicitTop = 6
           end
           object SpeedButton_AddToHistory1: TSpeedButton
             AlignWithMargins = True
@@ -952,13 +957,16 @@ object Form_RestOllama: TForm_RestOllama
             AlignWithMargins = True
             Left = 84
             Top = 3
-            Width = 23
-            Height = 15
+            Width = 113
+            Height = 16
             Align = alClient
             Alignment = taCenter
             Caption = '0 / 0'
             Layout = tlCenter
             StyleElements = [seClient, seBorder]
+            OnClick = Panel_HistoryButtonsClick
+            ExplicitWidth = 23
+            ExplicitHeight = 15
           end
         end
         object ListBox_History: TListBox
@@ -967,6 +975,7 @@ object Form_RestOllama: TForm_RestOllama
           Top = 47
           Width = 223
           Height = 145
+          Style = lbOwnerDrawFixed
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -976,16 +985,14 @@ object Form_RestOllama: TForm_RestOllama
           ParentDoubleBuffered = False
           TabOrder = 1
           StyleElements = [seClient, seBorder]
-          OnClick = ListBox_HistoryClick
         end
-        object Panel_HistoryFile: TPanel
+        object Panel_History: TPanel
           Left = 1
           Top = 195
           Width = 229
           Height = 20
           Align = alBottom
           Alignment = taLeftJustify
-          Caption = '...'
           TabOrder = 2
           StyleElements = [seClient, seBorder]
         end
@@ -1057,6 +1064,7 @@ object Form_RestOllama: TForm_RestOllama
         Caption = '  Chatting Box'
         TabOrder = 0
         StyleElements = [seClient, seBorder]
+        OnDblClick = Panel_ChattingButtonsDblClick
         object SpeedButton_ScrollTop: TSpeedButton
           AlignWithMargins = True
           Left = 520
@@ -1143,21 +1151,6 @@ object Form_RestOllama: TForm_RestOllama
           ExplicitLeft = 712
           ExplicitTop = 6
         end
-        object Label_HistoryCation: TLabel
-          AlignWithMargins = True
-          Left = 464
-          Top = 3
-          Width = 21
-          Height = 20
-          Hint = 'on view history'
-          Margins.Left = 100
-          Align = alRight
-          Alignment = taRightJustify
-          AutoSize = False
-          Caption = '*'
-          EllipsisPosition = epEndEllipsis
-          StyleElements = [seBorder]
-        end
         object SpeedButton_AddToHistory0: TSpeedButton
           AlignWithMargins = True
           Left = 491
@@ -1169,6 +1162,44 @@ object Form_RestOllama: TForm_RestOllama
           Images = SVGIconVirtualImageList1
           ExplicitLeft = 11
           ExplicitTop = 6
+        end
+        object Label_SavedToHistory: TLabel
+          AlignWithMargins = True
+          Left = 483
+          Top = 3
+          Width = 5
+          Height = 20
+          Hint = 'Saved to History'
+          Margins.Right = 0
+          Align = alRight
+          Caption = '*'
+          ExplicitHeight = 15
+        end
+        object CheckBox_Assistant: TCheckBox
+          AlignWithMargins = True
+          Left = 90
+          Top = 3
+          Width = 119
+          Height = 20
+          Hint = 'Option for Chat History (Apply all response nodes...) '
+          Margins.Left = 90
+          Align = alLeft
+          Caption = 'Chat with history'
+          TabOrder = 0
+          StyleElements = [seClient, seBorder]
+          OnClick = CheckBox_AssistantClick
+        end
+        object CheckBox_HistoryNode: TCheckBox
+          AlignWithMargins = True
+          Left = 215
+          Top = 3
+          Width = 66
+          Height = 20
+          Hint = 'Apply only to selected response node...'
+          Align = alLeft
+          Caption = '* Node'
+          TabOrder = 1
+          StyleElements = [seClient, seBorder]
         end
       end
       object PageControl_Chatting: TPageControl
@@ -1220,7 +1251,7 @@ object Form_RestOllama: TForm_RestOllama
           end
           object SkAnimatedImage_ChatProcess: TSkAnimatedImage
             Left = 335
-            Top = 660
+            Top = 661
             Width = 50
             Height = 50
             Anchors = [akRight, akBottom]
@@ -1241,13 +1272,15 @@ object Form_RestOllama: TForm_RestOllama
         object TabSheet_LogsBroker: TTabSheet
           Caption = 'LOG'
           ImageIndex = 1
-          object Splitter1: TSplitter
+          object Splitter_Log: TSplitter
             Left = 0
             Top = 556
             Width = 714
             Height = 4
             Cursor = crVSplit
             Align = alBottom
+            AutoSnap = False
+            Beveled = True
             ExplicitTop = 557
           end
           object Memo_LogWin: TMemo
@@ -1378,7 +1411,7 @@ object Form_RestOllama: TForm_RestOllama
                 Width = 120
                 Height = 124
                 Align = alClient
-                ItemHeight = 17
+                ItemHeight = 15
                 Items.Strings = (
                   '192.168.123.123'
                   '127.0.0.1')
@@ -1549,9 +1582,8 @@ object Form_RestOllama: TForm_RestOllama
           Action = Action_RequestDialog
           Align = alLeft
           Images = SVGIconVirtualImageList1
-          ExplicitLeft = 30
+          ExplicitLeft = 3
           ExplicitTop = 4
-          ExplicitHeight = 22
         end
         object Edit_ReqContent: TEdit
           AlignWithMargins = True
@@ -1838,29 +1870,29 @@ object Form_RestOllama: TForm_RestOllama
     end
     object Action_Pop_CopyText: TAction
       Hint = 'Copy Text of Selected Massage'
-      ImageIndex = 25
-      ImageName = 'ic_copyright_48px'
+      ImageIndex = 75
+      ImageName = 'copy'
       ShortCut = 32835
       OnExecute = Action_Pop_CopyTextExecute
     end
     object Action_Pop_DeleteItem: TAction
       Hint = 'Delete Selected Message'
-      ImageIndex = 31
-      ImageName = 'ic_highlight_off_48px'
+      ImageIndex = 73
+      ImageName = 'delete'
       ShortCut = 32836
       OnExecute = Action_Pop_DeleteItemExecute
     end
     object Action_Pop_ScrollToTop: TAction
       Hint = 'Scroll to Top'
-      ImageIndex = 35
-      ImageName = 'ic_file_upload_48px'
+      ImageIndex = 72
+      ImageName = 'go_to_top'
       ShortCut = 32852
       OnExecute = Action_Pop_ScrollToTopExecute
     end
     object Action_Pop_ScrollToBottom: TAction
       Hint = 'Scroll To Bottom'
-      ImageIndex = 34
-      ImageName = 'ic_file_download_48px'
+      ImageIndex = 71
+      ImageName = 'go_to_bottom'
       ShortCut = 32834
       OnExecute = Action_Pop_ScrollToBottomExecute
     end
@@ -1921,7 +1953,7 @@ object Form_RestOllama: TForm_RestOllama
       OnExecute = Action_DosCommandExecute
     end
     object Action_ClearChatting: TAction
-      Hint = 'Clear Chattings'
+      Hint = 'Clear Chattings - New Session'
       ImageIndex = 33
       ImageName = 'ic_crop_din_48px'
       ShortCut = 121
@@ -2385,6 +2417,31 @@ object Form_RestOllama: TForm_RestOllama
         CollectionIndex = 70
         CollectionName = 'ic_record_voice2'
         Name = 'ic_record_voice2'
+      end
+      item
+        CollectionIndex = 71
+        CollectionName = 'go_to_bottom'
+        Name = 'go_to_bottom'
+      end
+      item
+        CollectionIndex = 72
+        CollectionName = 'go_to_top'
+        Name = 'go_to_top'
+      end
+      item
+        CollectionIndex = 73
+        CollectionName = 'delete'
+        Name = 'delete'
+      end
+      item
+        CollectionIndex = 74
+        CollectionName = 'delete2'
+        Name = 'delete2'
+      end
+      item
+        CollectionIndex = 75
+        CollectionName = 'copy'
+        Name = 'copy'
       end>
     ImageCollection = SVGIconImageCollection1
     PreserveItems = True
@@ -3261,6 +3318,130 @@ object Form_RestOllama: TForm_RestOllama
           '1-.01 21.47L40.15 32c7.8-7.77 7.8-19.91 0-28z"/>'#13#10'    <path fill' +
           '="none" d="M0 0h48v48H0z"/>'#13#10'</svg>'#13#10
         FixedColor = clGold
+      end
+      item
+        IconName = 'go_to_bottom'
+        SVGText = 
+          '<?xml version="1.0" encoding="utf-8"?>'#13#10'<!-- Svg Vector Icons : ' +
+          'http://www.onlinewebfonts.com/icon -->'#13#10'<!DOCTYPE svg PUBLIC "-/' +
+          '/W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/s' +
+          'vg11.dtd">'#13#10'<svg version="1.1" xmlns="http://www.w3.org/2000/svg' +
+          '" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" vie' +
+          'wBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space' +
+          '="preserve">'#13#10'<metadata> Svg Vector Icons : http://www.onlineweb' +
+          'fonts.com/icon </metadata>'#13#10'<g><g><g><path fill="#000000" d="M94' +
+          '.3,55v45H66H37.7L82.9,145l45.1,45.2l45.1-45.2l45.2-45.1H190h-28.' +
+          '2V55V10H128H94.3V55z"/><path fill="#000000" d="M38.1,229.1V246H1' +
+          '28h89.9v-16.9v-16.9H128H38.1V229.1z"/></g></g></g>'#13#10'</svg>'
+        FixedColor = cl3DLight
+      end
+      item
+        IconName = 'go_to_top'
+        SVGText = 
+          '<?xml version="1.0" encoding="utf-8"?>'#13#10'<!-- Svg Vector Icons : ' +
+          'http://www.onlinewebfonts.com/icon -->'#13#10'<!DOCTYPE svg PUBLIC "-/' +
+          '/W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/s' +
+          'vg11.dtd">'#13#10'<svg version="1.1" xmlns="http://www.w3.org/2000/svg' +
+          '" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" vie' +
+          'wBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space' +
+          '="preserve">'#13#10'<metadata> Svg Vector Icons : http://www.onlineweb' +
+          'fonts.com/icon </metadata>'#13#10'<g><g><g><path fill="#000000" d="M38' +
+          '.6,26.9v16.9h89.9h89.9V26.9V10h-89.9H38.6V26.9z"/><path fill="#0' +
+          '00000" d="M82.5,111.1l-45,45h28.7h28.6v45v45h33.7h33.7v-45v-45h2' +
+          '7.9h28l-44.9-45c-24.7-24.7-45.1-45-45.3-45S107.2,86.4,82.5,111.1' +
+          'z"/></g></g></g>'#13#10'</svg>'
+        FixedColor = cl3DLight
+      end
+      item
+        IconName = 'delete'
+        SVGText = 
+          '<?xml version="1.0" encoding="utf-8"?>'#13#10'<!-- Svg Vector Icons : ' +
+          'http://www.onlinewebfonts.com/icon -->'#13#10'<!DOCTYPE svg PUBLIC "-/' +
+          '/W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/s' +
+          'vg11.dtd">'#13#10'<svg version="1.1" xmlns="http://www.w3.org/2000/svg' +
+          '" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" vie' +
+          'wBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space' +
+          '="preserve">'#13#10'<metadata> Svg Vector Icons : http://www.onlineweb' +
+          'fonts.com/icon </metadata>'#13#10'<g><g><g><path fill="#000000" d="M95' +
+          '.6,40.1c-0.7,0.4-20.2,19.5-43.2,42.6c-45.5,45.5-42.9,42.7-42.1,4' +
+          '7c0.3,1.6,5,6.5,42.3,43.9c32.9,32.9,42.4,42.2,43.7,42.6c1.1,0.3,' +
+          '25.6,0.4,73.4,0.3c71.7-0.1,71.8-0.1,73.1-1.1c0.7-0.5,1.7-1.5,2.2' +
+          '-2.2l1-1.2V128V44.1l-1-1.2c-0.5-0.7-1.5-1.7-2.2-2.2c-1.2-1-1.3-1' +
+          '-73.5-1.1C109,39.5,96.8,39.6,95.6,40.1z M121.2,69.6c1.2,0.5,7.3,' +
+          '6.4,19.1,18.1l17.4,17.4l17.4-17.4c17.6-17.6,19-18.8,22.2-18.8c2.' +
+          '8,0,4.8,1.4,11.2,7.7c8.1,8,9.3,10.4,7.5,14.8c-0.5,1.2-6.4,7.4-18' +
+          '.1,19.1L180.5,128l17.4,17.4c11.8,11.8,17.6,17.9,18.1,19.1c1.8,4.' +
+          '2,0.7,6.4-6.5,13.7c-6.6,6.8-8.6,8.3-11.2,8.6c-3.9,0.5-4.2,0.3-23' +
+          '.1-18.4l-17.6-17.6l-17.4,17.4c-17.6,17.6-19,18.8-22.2,18.8c-2.8,' +
+          '0-4.8-1.4-11.2-7.7c-8.1-8-9.3-10.4-7.5-14.8c0.5-1.2,6.4-7.3,18.1' +
+          '-19.1l17.4-17.4l-17.4-17.4c-11.8-11.8-17.6-17.9-18.1-19.1c-1.8-4' +
+          '.4-0.7-6.5,7.1-14.4C114.4,69,116.7,67.8,121.2,69.6z"/></g></g></' +
+          'g>'#13#10'</svg>'
+        FixedColor = cl3DLight
+      end
+      item
+        IconName = 'delete2'
+        SVGText = 
+          '<?xml version="1.0" encoding="utf-8"?>'#13#10'<!-- Svg Vector Icons : ' +
+          'http://www.onlinewebfonts.com/icon -->'#13#10'<!DOCTYPE svg PUBLIC "-/' +
+          '/W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/s' +
+          'vg11.dtd">'#13#10'<svg version="1.1" xmlns="http://www.w3.org/2000/svg' +
+          '" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" vie' +
+          'wBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space' +
+          '="preserve">'#13#10'<metadata> Svg Vector Icons : http://www.onlineweb' +
+          'fonts.com/icon </metadata>'#13#10'<g><g><g><path fill="#000000" d="M11' +
+          '6.7,10.3C88.9,13.2,64,24.9,44.4,44.5c-18.8,18.8-29.9,41.6-33.9,6' +
+          '9c-0.8,5.5-0.8,23.6,0,29.1c3.9,27.4,15.1,50.3,33.9,69c18.7,18.7,' +
+          '41.7,30,69,33.9c5.4,0.8,23.6,0.8,29.1,0c22.6-3.2,42.9-11.8,59.6-' +
+          '25.4c23.8-19.2,38.8-46.1,43.3-77.5c0.8-5.5,0.8-23.6,0-29.1c-3.9-' +
+          '27.3-15.1-50.3-33.9-69c-18.3-18.3-40.6-29.5-66.9-33.5C138.8,10.1' +
+          ',122.6,9.6,116.7,10.3z M162.7,53.6c2.8,1.3,5.4,4,6.6,6.6c0.9,2,1' +
+          ',2.9,1.2,26.5l0.2,24.4l3.7,1c14.6,3.9,27,15.5,31.9,30c6.8,19.9-0' +
+          '.6,41.8-18.1,53.9c-3.3,2.3-10.2,5.4-14.5,6.5c-3.3,0.9-5.1,1.1-11' +
+          '.8,1.1c-6.8,0-8.4-0.1-11.8-1c-12.8-3.5-23.9-12.4-29.6-23.7l-1.8-' +
+          '3.6L88,175c-30.5-0.1-30.9-0.1-33-1.2c-2.9-1.3-5.7-4.3-6.8-7.4c-0' +
+          '.9-2.5-0.9-3-0.8-53.6l0.1-51.1l1.4-2.5c1.8-3,4-4.9,7.2-6.1c2.3-0' +
+          '.8,5-0.8,53.5-0.7l51,0.1L162.7,53.6z"/><path fill="#000000" d="M' +
+          '57.3,121.6v42h29.1h29.2l-0.3-3.4c-0.6-7.3,1.1-16.2,4.8-23.6c6.9-' +
+          '14.3,21.3-24.3,37.1-25.9l3.1-0.3V95V79.5h-51.5H57.3V121.6z"/><pa' +
+          'th fill="#000000" d="M137.2,157.8v8.5h25.9H189v-8.5v-8.5h-25.9h-' +
+          '25.9V157.8z"/></g></g></g>'#13#10'</svg>'
+        FixedColor = cl3DLight
+      end
+      item
+        IconName = 'copy'
+        SVGText = 
+          '<?xml version="1.0" encoding="utf-8"?>'#13#10'<!-- Svg Vector Icons : ' +
+          'http://www.onlinewebfonts.com/icon -->'#13#10'<!DOCTYPE svg PUBLIC "-/' +
+          '/W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/s' +
+          'vg11.dtd">'#13#10'<svg version="1.1" xmlns="http://www.w3.org/2000/svg' +
+          '" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" vie' +
+          'wBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space' +
+          '="preserve">'#13#10'<metadata> Svg Vector Icons : http://www.onlineweb' +
+          'fonts.com/icon </metadata>'#13#10'<g><g><g><path fill="#000000" d="M78' +
+          '.5,10.8c-1.4,0.5-3.3,1.4-4.2,2c-2.5,1.5-42.8,47.7-44.2,50.7c-2.7' +
+          ',5.6-2.6,2.8-2.6,68.6v60.6l1.1,2.1c0.6,1.2,1.7,2.5,2.7,3.1c1.6,0' +
+          '.9,2.6,1,21.1,1.1l19.4,0.1v-12v-11.9H60.9c-10.5,0-10.9,0-12.5-1.' +
+          '1c-3.5-2.3-3.3,1-3.3-51.3c0-44.8,0-47,0.9-48.9c0.7-1.5,1.4-2.2,3' +
+          '-3c2-1,2.8-1,13.7-1c17,0,16.2,0.9,16.2-18.8c0-12.7,0-13.1,1.1-14' +
+          '.6c2.3-3.4,0.5-3.3,37.7-3.3c31.5,0,33.5,0,35.3,0.9c2.6,1.1,4,4,4' +
+          ',7.8v2.7h8.9h8.8L174.6,30c-0.1-13.6-0.2-14.7-1.1-16.2c-0.5-0.9-1' +
+          '.6-2-2.3-2.6c-1.3-1-1.4-1-45.7-1.1C82.8,9.9,81,9.9,78.5,10.8z"/>' +
+          '<path fill="#000000" d="M134.8,57.5c-2.4,0.5-6.5,2.5-8.1,4c-2.7,' +
+          '2.5-41.3,46.9-42.2,48.7c-0.6,1.1-1.5,3.1-2,4.6c-0.9,2.5-0.9,5.4-' +
+          '0.9,64.3c0,60.8,0,61.7,1,63.3c0.5,0.9,1.6,2,2.3,2.6l1.3,1h68.8c6' +
+          '8.7,0,68.8,0,70.1-1c0.7-0.5,1.8-1.6,2.3-2.3l1-1.3l0.1-89l0.1-89l' +
+          '-1-2.1c-0.7-1.2-1.8-2.5-2.8-3.1c-1.6-1-2.4-1-44.8-1C156.2,57.2,1' +
+          '35.9,57.4,134.8,57.5z M208.3,82.3c2.8,2.5,2.6-1.2,2.6,69.4c0,63.' +
+          '5,0,65.2-1,67.2c-0.7,1.6-1.4,2.2-3,3c-2,0.9-3.5,1-52.1,1c-48.6,0' +
+          '-50.1,0-52.1-1c-1.6-0.7-2.2-1.4-3-3.1c-0.9-2.1-0.9-3.2-0.8-49.5l' +
+          '0.1-47.3l1.1-1.6c1.9-2.7,2.2-2.7,15.7-3c17.7-0.3,16.8,0.7,16.8-1' +
+          '8.6c0-14.5,0.1-15.2,3.1-17.2c1.4-1,2.2-1,36.3-0.9l34.8,0.1L208.3' +
+          ',82.3z"/><path fill="#000000" d="M118.9,137.8v7.4h36h36v-7.4v-7.' +
+          '4h-36h-36V137.8z"/><path fill="#000000" d="M118.9,165v7.4h36h36V' +
+          '165v-7.4h-36h-36V165z"/><path fill="#000000" d="M118.9,191.9v7.1' +
+          'h36h36v-7.1v-7.1h-36h-36V191.9z"/></g></g></g>'#13#10'</svg>'
+        FixedColor = cl3DLight
       end>
     Left = 660
     Top = 119
@@ -3346,7 +3527,6 @@ object Form_RestOllama: TForm_RestOllama
     Top = 502
   end
   object RESTResponse_Ollama: TRESTResponse
-    BindSource.AutoActivate = False
     BindSource.AutoEdit = False
     BindSource.AutoPost = False
     Left = 452

@@ -20,6 +20,7 @@ uses
 
 type
   THisObject = class
+    ho_Session: Integer;
     ho_Filename: string;
     constructor Create(const AFileName: string);
   end;
@@ -48,13 +49,15 @@ type
     procedure SetSelectionOfSubject(const ASubject: string);
     function Is_HistorySubject(const ASubject: string): Integer;
     function Get_HistoryCurrent(): string;
-    function Get_HistoryFile(const ASubject: string; var AOvereriteFlag:  Boolean): string;  overload;
+    function Get_HistoryFile(const ASubject: string; var VOvereriteFlag:  Boolean): string;  overload;
     function Get_HistoryFile(const AIndex: Integer): string; overload;
+    function Get_HistoryFileSession(const AIndex: Integer; var VSession: Integer): string;
   end;
 
 implementation
 
 uses
+  System.Math,
   System.IOUtils,
   Unit_Common;
 
@@ -62,6 +65,7 @@ uses
 
 constructor THisObject.Create(const AFileName: string);
 begin
+  ho_Session := RandomRange(1000000, 9999999);
   ho_Filename := AFileName;
 end;
 
@@ -69,6 +73,7 @@ end;
 
 constructor THistoryManager.Create(AListBox: TListBox);
 begin
+  Randomize;
   FHistoricFile := CV_HisPath+'history.lst';
   FAttachedFile := CV_HisPath+'attached.txt';   // in preparation for a very long string of history subject ...
   FListBox := AListBox;
@@ -132,8 +137,8 @@ begin
         _AttachedFiles.Add(_afile);
       end;
 
-    FListBox.Items.SaveToFile(FHistoricFile);
-    _AttachedFiles.SaveToFile(FAttachedFile);
+    FListBox.Items.SaveToFile(FHistoricFile);      // OverWrite ...
+    _AttachedFiles.SaveToFile(FAttachedFile);      // OverWrite ...
   finally
     _AttachedFiles.Free;
   end;
@@ -237,14 +242,14 @@ begin
   FListBox.Items.EndUpdate;
 end;
 
-function THistoryManager.Get_HistoryFile(const ASubject: string; var AOvereriteFlag:  Boolean): string;
+function THistoryManager.Get_HistoryFile(const ASubject: string; var VOvereriteFlag:  Boolean): string;
 begin
   Result := '';
-  AOvereriteFlag := False;
+  VOvereriteFlag := False;
   var _index := FListBox.Items.IndexOf(ASubject);
   if _index >= 0 then
   begin
-    AOvereriteFlag := True;
+    VOvereriteFlag := True;
     Result := THisObject(FListBox.Items.Objects[_index]).ho_Filename;
   end;
 end;
@@ -256,6 +261,19 @@ begin
   begin
     if (AIndex >= 0) and (AIndex < FListBox.Count) then
     Result := THisObject(FListBox.Items.Objects[AIndex]).ho_Filename;
+  end;
+end;
+
+function THistoryManager.Get_HistoryFileSession(const AIndex: Integer; var VSession: Integer): string;
+begin
+  Result := '';
+  if FListBox.Count > 0 then
+  begin
+    if (AIndex >= 0) and (AIndex < FListBox.Count) then
+    begin
+      VSession := THisObject(FListBox.Items.Objects[AIndex]).ho_Session;
+      Result :=   THisObject(FListBox.Items.Objects[AIndex]).ho_Filename;
+    end;
   end;
 end;
 

@@ -28,8 +28,11 @@ type
     procedure SkPaintBox_IntroDraw(ASender: TObject; const ACanvas: ISkCanvas; const ADest: TRectF; const AOpacity: Single);
   private
     FAnimationFlag: Boolean;
+    FVisibleBounds: Boolean;
     procedure SetAnimationFlag(const Value: Boolean);
+    procedure SetVisibleBounds(const Value: Boolean);
   public
+    property VisibleBounds: Boolean  read FVisibleBounds  write SetVisibleBounds;
     property AnimationFlag: Boolean  read FAnimationFlag  write SetAnimationFlag;
   end;
 
@@ -60,6 +63,18 @@ begin
   SkAnimatedImage_Alive.Animation.Enabled := Value;
   SkAnimatedImage_Alive.Visible := Value;
   SkSvg_ICon.Opacity := IIF.CastBool<Byte>(Value, 50, 200);
+end;
+
+procedure TFrame_Welcome.SetVisibleBounds(const Value: Boolean);
+begin
+  FVisibleBounds := Value;
+  Self.Visible := Value;
+  if Value then
+  begin
+    Self.SetBounds(0, 0, TForm(Self.Parent).ClientWidth, TForm(Self.Parent).ClientHeight);
+    FrameResize(Self);
+    Self.BringToFront;
+  end;
 end;
 
 procedure TFrame_Welcome.SkPaintBox_IntroDraw(ASender: TObject;

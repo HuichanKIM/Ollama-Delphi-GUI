@@ -100,24 +100,24 @@ type
     procedure Insert_Chatting_Message(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
     //
     function Get_NodeText(): string;
-    function Get_NodeTextLocation(var AIndex, ALocation: Integer): string;
+    function Get_NodeTextLocation(var VIndex, VLocation: Integer): string;
     function Get_NodeRequest(): string;
     function Get_SelectedColor(): TColor;
     procedure Do_ScrollToTop(const AFlag: Integer = 0);
     procedure Do_ScrollToBottom(const AFlag: Integer = 0);
     function Do_SaveAllText(const AFile: string): Boolean;
-    //function Do_SaveAsHistory(const AFlag: string): string;
     function Do_DeleteNode(): Boolean;
     procedure Do_RestoreDefaultColor(const AFontOnlyFlag: Integer = 0);
     procedure Do_SetCustomFont(const AFlag: Integer; const AFontName: string; const AFontSize: Integer);
     procedure Do_SetCustomColor(const AFlag: Integer; const ASelColor, AHeaderColor, ABodyColor, AFooterColor: TColor);
-    function Get_CustomColor(var AHeaderColor, ABodyColor, AFooterColor: TColor): TColor;
+    function Get_CustomColor(var VHeaderColor, VBodyColor, VFooterColor: TColor): TColor;
     procedure Set_FontEx(AFont: TFont);
     // History Manager
     procedure Do_LoadAllData(const ALFile: string);
     procedure Add_DummyHistorySubject(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
     function Do_SaveAllData(const ASFile: string): Boolean;
     function Get_HistorySubject(): string;
+    function Get_ChatHistory(const ANodeOneFlag: Boolean = False): string;
     //
     property VST_NBodyFontSize: Integer     read FVST_NBodyFontSize       write SetVST_NBodyFontSize;
     property VST_NSelectionColor: TColor    read FVST_NSelectionColor     write SetVST_NSelectionColor;
@@ -216,7 +216,7 @@ begin
   with VST_ChattingBox do
   begin
     var _Node := FocusedNode;
-    if _Node <> nil then
+    if (_Node <> nil) and (_Node.Index = AIndex) then
       begin
         var _next: PVirtualNode := _Node.NextSibling;
         if _next <> nil then
@@ -262,18 +262,12 @@ begin
       begin
         var _next := _Node.NextSibling;
         if _next <> nil then
-          begin
-            _Node := InsertNode(_Node, amInsertBefore);
-          end
+          _Node := InsertNode(_Node, amInsertBefore)
         else
-          begin
-            _Node := AddChild(nil);
-          end;
+          _Node := AddChild(nil);
       end
     else
-      begin
-        _Node := AddChild(nil);
-      end;
+      _Node := AddChild(nil);
 
     ClearSelection;
     var _Data: PMessageRec := GetNodeData(_Node);
@@ -290,7 +284,7 @@ begin
     if _second <> nil then
     begin
       var _seconddata: PMessageRec := GetNodeData(_second);
-      if SameText(_seconddata^.FUser, AUser) then      // V_Username + ' (history)';
+      if (_seconddata^.FTag = 0) and SameText(_seconddata^.FUser, AUser) then      // V_Username + ' (history)';
         try
           DeleteNode(_second);
         except
@@ -422,7 +416,7 @@ end;
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 begin
   var _Data: PMessageRec := Sender.GetNodeData(Node);
-  if _Data^.FTag = 1 then
+  if _Data^.FTag > 0 then
     ContentRect.Left := TargetCanvas.ClipRect.Left + FVST_SecondIndent;  { = CellRect ... }
 end;
 
@@ -514,12 +508,12 @@ begin
   end;
 end;
 
-function TFrame_ChattingBoxClass.Get_CustomColor(var AHeaderColor, ABodyColor, AFooterColor: TColor): TColor;
+function TFrame_ChattingBoxClass.Get_CustomColor(var VHeaderColor, VBodyColor, VFooterColor: TColor): TColor;
 begin
   Result :=       FVST_NSelectionColor;
-  AHeaderColor := FVST_NHeaderColor;
-  ABodyColor :=   FVST_NBodyColor;
-  AFooterColor := FVST_NFooterColor;
+  VHeaderColor := FVST_NHeaderColor;
+  VBodyColor :=   FVST_NBodyColor;
+  VFooterColor := FVST_NFooterColor;
 end;
 
 function TFrame_ChattingBoxClass.Get_NodeRequest: string;
@@ -556,7 +550,7 @@ begin
   end;
 end;
 
-function TFrame_ChattingBoxClass.Get_NodeTextLocation(var AIndex, ALocation: Integer): string;
+function TFrame_ChattingBoxClass.Get_NodeTextLocation(var VIndex, VLocation: Integer): string;
 begin
   Result := '';
   with VST_ChattingBox do
@@ -564,11 +558,11 @@ begin
     var _node := FocusedNode;
     if Assigned(_node) then
     begin
-      AIndex := _node.Index;
+      VIndex := _node.Index;
       var _Data: PMessageRec := GetNodeData(_node);
       if (_Data <> nil) then
       begin
-        ALocation := _Data^.FTag;
+        VLocation := _Data^.FTag;
         Result := _Data^.FCaption;
       end;
     end;
@@ -794,13 +788,10 @@ end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxSaveNode(Sender: TBaseVirtualTree; Node: PVirtualNode; Stream: TStream);
 begin
-  var _Data: PMessageRec := nil;
-  var _len: Integer := 0;
-  _Data := Sender.GetNodeData(Node);
-
-  _len := Length(_Data^.FUser);
+  var _Data: PMessageRec := Sender.GetNodeData(Node);
   with Stream do
   begin
+    var _len:= Length(_Data^.FUser);
     Write(_len, SizeOf(_len));
     Write(PChar(_Data^.FUser)^, _len * SizeOf(Char));
     _len := Length(_Data^.FCaption);
@@ -840,8 +831,8 @@ begin
     Read(_len, SizeOf(_len));
     Read(_imagetag, _len);
   end;
-  if _imagetag > 0 then
-    _imagetag := 0;
+  if (_imagetag > 0) and (_Data^.FTime < GV_DateTime) then
+    _imagetag := 0; // Virtual Image Index ...
   _Data^.FLvTag := _imagetag;
 end;
 
@@ -891,6 +882,39 @@ begin
     if _Data^.FTag = 0 then
       Result := _Data^.FCaption;
   end;
+end;
+
+function TFrame_ChattingBoxClass.Get_ChatHistory(const ANodeOneFlag: Boolean = False): string;
+begin
+  Result := '';
+  if VST_ChattingBox.RootNodeCount < 1 then Exit;
+
+  if ANodeOneFlag then
+    begin
+      var _Node: PVirtualNode := VST_ChattingBox.FocusedNode;
+      if Assigned(_Node) then
+      begin
+        var _Data: PMessageRec := nil;
+        _Data := VST_ChattingBox.GetNodeData(_Node);
+
+        if _Data^.FTag = 1 then
+          Result := _Data^.FCaption;
+      end;
+    end
+  else
+    begin
+      var _Data: PMessageRec := nil;
+      var _Node  : PVirtualNode := VST_ChattingBox.GetFirst;
+      while Assigned(_Node) do
+      try
+        _Data := VST_ChattingBox.GetNodeData(_Node);
+        if (_Data <> nil) and (_Data^.FTag = 1) then
+          Result := Result + _Data^.FCaption+sLineBreak;
+        _Node := _Node.NextSibling;
+      except
+        Abort;
+      end;
+    end;
 end;
 
 { / Save/Load Node Data for History Manger ----------------------------------- }

@@ -51,11 +51,9 @@ implementation
 uses
   System.Net.HttpClient,
   System.Net.URLClient,
-  System.NetConsts,
   Vcl.Themes,
   Unit_Common,
-  Unit_Jsonworks,
-  Unit_Main;
+  Unit_Jsonworks;
 
 {$R *.dfm}
 
@@ -131,7 +129,7 @@ end;
 
 procedure TForm_Translator.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  //
+  Action := caFree;
 end;
 
 procedure TForm_Translator.FormCreate(Sender: TObject);

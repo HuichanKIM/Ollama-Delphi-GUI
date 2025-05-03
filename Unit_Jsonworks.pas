@@ -14,41 +14,31 @@ uses
   Unit_Common;
 
 const
-  GC_BaseURL_Generate     = 'http://localhost:11434/api/generate';
+  GC_BaseURL_Generate     = 'http://localhost:11434/api/generate';       // api_key="ollama"
   GC_BaseURL_Chat         = 'http://localhost:11434/api/chat';
   GC_BaseURL_Models       = 'http://localhost:11434/api/tags';
-
-  { Deprecated ... }
-  GC_LoadModelChat        = '{"model": "%model%","messages": []}';
-  GC_UnLoadModelChat      = '{"model": "%model%","messages": [],"keep_alive": 0}';
-
-  GC_GeneratePrompt       = '{"model": "%model%","prompt": "%prompts%"}'; // option - "format":"json","stream":false}';
-  GC_GeneratePrompt_opt   = '{"model": "%model%","prompt": "%prompts%","options": {"seed": %seed%, "temperature": 0}}';
-  GC_GeneratePrompt4Image = '{"model": "%model%","prompt": "%prompts%","images": ["%images%"]}';  // "stream": false,
-  GC_ChatContent          = '{"model": "%model%","messages": [{"role": "user","content": "%content%"}]}';
-  GC_ChatContent_opt      = '{"model": "%model%","messages": [{"role": "user","content": "%content%"}],"options": {"seed": %seed%, "temperature": 0}}';
-  GC_ChatContent4Image    = '{"model": "%model%","messages": [{"role": "user","content": "%content%","images": ["%images%"]}]}';
-  { / Deprecated ... }
 
 function Get_RequestModel_Chat(const ALoadFlag: Boolean; const AModel: string): string;
 function Get_RequestParams_Generate(const AModel: string;
                                     const APrompt: string;
-                                    const ASeedFlag: Boolean;
-                                    const ASeed: Integer;
-                                    const AImageFlag: Boolean;
-                                    const AImage:TImage): string;
+                                    const ASeedFlag: Boolean = False;
+                                    const ASeed: Integer = 0;
+                                    const AImageFlag: Boolean = False;
+                                    const AImage:TImage = nil): string;
 function Get_RequestParams_Chat(const AModel: string;
                                 const AContent: string;
-                                const ASeedFlag: Boolean;
-                                const ASeed: Integer;
-                                const AImageFlag: Boolean;
-                                const AImage: TImage;
-                                const AReasoning: Boolean=False): string;
+                                const ASeedFlag: Boolean = False;
+                                const ASeed: Integer = 0;
+                                const AImageFlag: Boolean = False;
+                                const AImage: TImage = nil;
+                                const AReasoning: Boolean = False;
+                                const AAssistFlag: Boolean = False;
+                                const AAssistContent: string = ''): string;
 
 function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const ARespStr: string): string;
 function Get_DisplayJson_LoadModel(const ARespStr: string): string;
-function Get_DisplayJson_Models(const ARespStr: string; var ACount: Integer; var AModelsList: TStringList): string;
-
+function Get_DisplayJson_Models(const ARespStr: string; var VCount: Integer; var VModelsList: TStringList): string;
+{ Local ... }
 function Get_Base64Endoeings(const AImage: TImage): string;
 
 implementation
@@ -63,12 +53,12 @@ uses
   System.JSON.Serializers,
   EasyJson;
 
-function FormatJSON(const JSONStr: string): string;
+function FormatJSON(const JSONStr: string; Indentation: Integer): string;
 begin
   var _JSONValue: TJSONValue := TJSONObject.ParseJSONValue(JSONStr);
   if Assigned(_JSONValue) then
     try
-      Result := _JSONValue.Format(2);
+      Result := _JSONValue.Format(Indentation);
     finally
       _JSONValue.Free;
     end
@@ -105,32 +95,38 @@ end;
 
 function Get_RequestParams_Generate(const AModel: string;
                                     const APrompt: string;
-                                    const ASeedFlag: Boolean;
-                                    const ASeed: Integer;
-                                    const AImageFlag: Boolean;
-                                    const AImage:TImage): string;
+                                    const ASeedFlag: Boolean = False;
+                                    const ASeed: Integer = 0;
+                                    const AImageFlag: Boolean = False;
+                                    const AImage:TImage = nil): string;
 begin
   var _ejson := TEasyJson.Create;
   try
     _ejson.Put('model', AModel)
           .Put('prompt', APrompt);
+
     if AImageFlag then
     begin
-      var _ImageData := Get_Base64Endoeings(AImage);
-      _ejson.AddArray('images')
-            .Put(0, _ImageData);
+      if AImage <> nil then
+      begin
+        var _ImageData := Get_Base64Endoeings(AImage);
+        _ejson.AddArray('images')
+              .Put(0, _ImageData);
+      end;
     end;
+
     if ASeedFlag then
       _ejson.Root.AddObject('options')
+                 .Put('num_ctx', 4096)
                  .Put('seed', ASeed)
                  .Put('temperature', 0) else
     if GV_ExperimentalSeedFlag then
       begin
         // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
         _ejson.Root.AddObject('options')
-                   .Put('seed', 0)            // -1 : Negative value(expected random seed) show error ?
-                   .Put('temperature', 1.0);  // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
-                                              // ? Put('num_ctx', 4096);    (default - 2048)
+                   .Put('num_ctx', 4096)       // for continuous request;    (default - 2048)
+                   .Put('seed', 0)             // -1 : Negative value(expected random seed) show error ?
+                   .Put('temperature', 1.0);   // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
       end;
 
     Result := _ejson.ToString;
@@ -141,26 +137,37 @@ end;
 
 function Get_RequestParams_Chat(const AModel: string;
                                 const AContent: string;
-                                const ASeedFlag: Boolean;
-                                const ASeed: Integer;
-                                const AImageFlag: Boolean;
-                                const AImage:TImage;
-                                const AReasoning: Boolean=False): string;
+                                const ASeedFlag: Boolean = False;
+                                const ASeed: Integer = 0;
+                                const AImageFlag: Boolean = False;
+                                const AImage: TImage = nil;
+                                const AReasoning: Boolean = False;
+                                const AAssistFlag: Boolean = False;
+                                const AAssistContent: string = ''): string;
 begin
-  var _ej_asmb :=  TEasyJson.Create;
-  var _ej_body :=  TEasyJson.Create;
-  var _ej_think := TEasyJson.Create;
+  var _ej_asmb :=   TEasyJson.Create;
+  var _ej_body :=   TEasyJson.Create;
+  var _ej_think :=  TEasyJson.Create;
+  var _ej_assist := TEasyJson.Create;
   var _isGranite: Boolean := Pos('granite', LowerCase(AModel)) > 0;
   try
     _ej_body.Put('role', 'user')
             .Put('content', AContent);
+
     if AImageFlag then
     begin
-      var _ImageData := 'Image Data';
       if AImage <> nil then
-        _ImageData := Get_Base64Endoeings(AImage);
-      _ej_body.AddArray('images')
-              .Put(0, _ImageData);
+      begin
+        var _ImageData := Get_Base64Endoeings(AImage);
+        _ej_body.AddArray('images')
+                .Put(0, _ImageData);
+      end;
+    end;
+
+    if AAssistFlag then
+    begin
+      _ej_assist.Put('role', 'assistant')
+                .Put('content', AAssistContent);
     end;
 
     if AReasoning then
@@ -172,30 +179,51 @@ begin
           _ej_think.Put('role', 'system')
                    .Put('content', 'Enable deep thinking subroutine.');
 
-        _ej_asmb.Put('model', AModel)
-                .AddArray('messages')
-                .Put(0, _ej_think)
-                .Put(1, _ej_body);
+        if AAssistFlag then
+          begin
+            _ej_asmb.Put('model', AModel)
+                    .AddArray('messages')
+                    .Put(0, _ej_think)
+                    .Put(1, _ej_assist)
+                    .Put(2, _ej_body);
+          end
+        else
+          begin
+            _ej_asmb.Put('model', AModel)
+                    .AddArray('messages')
+                    .Put(0, _ej_think)
+                    .Put(1, _ej_body);
+          end;
       end
     else
       begin
-        _ej_asmb.Put('model', AModel)
-                .AddArray('messages')
-                .Put(0, _ej_body);
+        if AAssistFlag then
+          begin
+            _ej_asmb.Put('model', AModel)
+                    .AddArray('messages')
+                    .Put(0, _ej_assist)
+                    .Put(1, _ej_body);
+          end
+        else
+          begin
+            _ej_asmb.Put('model', AModel)
+                    .AddArray('messages')
+                    .Put(0, _ej_body);
+          end;
       end;
 
     if ASeedFlag then
       _ej_asmb.Root.AddObject('options')
+                   .Put('num_ctx', 4096)
                    .Put('seed', ASeed)
                    .Put('temperature', 0.0) else
     if GV_ExperimentalSeedFlag then
       begin
         // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
-        // How to get consistency ?
         _ej_asmb.Root.AddObject('options')
-                     .Put('seed', 0)            // -1 : Negative value(expected random seed) show error ?
-                     .Put('temperature', 1.0);  // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
-                                                // ? Put('num_ctx', 4096);    (default - 2048)
+                     .Put('num_ctx', 4096)      // for chat history    (default - 2048)
+                     .Put('seed', 0)            // -1 : Negative value(expected random seed) show error ?  if seed = 0 then use a randomly generated seed each time ?
+                     .Put('temperature', 1.0);  // Regardless of temperature ?
       end;
 
     Result := _ej_asmb.ToString;
@@ -203,10 +231,30 @@ begin
     _ej_think.Free;
     _ej_body.Free;
     _ej_asmb.Free;
+    _ej_assist.Free;
   end;
 end;
 
-{ /EasyJson to Request ------------------------------------------------------ }
+{ Reference from https://medium.com/@flaviovitoriano/create-your-own-ai-assistant-with-ollama-a2416a287a83
+
+The Message model represents a chat message in Ollama (can be used on the OpenAI API as well), and it can be of three different roles:
+
+System role :
+   Usually, it is the first message, that indicates the command we want to make to LLM.
+   Some examples are: ¡°Act like someone¡±, ¡°Echo all my messages¡±, and ¡°Translate my messages to Portuguese¡±.
+User role :
+   Indicate the message that the user (us) sends to the LLM. Some examples are: ¡°Hi how are you doing¡± and ¡°Can you teach me about the universe?¡±
+Assistant role :
+   Indicate the message that the assistant (the LLM) sends to the User.
+   And the ChatRequest model represents the request we will do to the Ollama, where:
+
+   - We can ¡®trick¡¯ the LLM giving some examples of answers that we want, the assistant will remember these examples as if they were given by him.
+     This is a technique called ¡®multi-shot¡¯ (in this case, one-shot :)) that consists in giving previous examples to the assistant to reinforce the answer.
+     This technique is very powerful, so I recommend you to use it to reinforce a specific characteristic for your assistant.
+
+}
+
+{ / EasyJson to Request ------------------------------------------------------ }
 
 { Display JSon ... }
 
@@ -215,28 +263,30 @@ end;
 function TrimRight_Ex(const ASource: string): string;
 begin
   Result := ASource;
-  var _I := Length(ASource);
-  if _I < 1 then Exit;
+  var _len := Length(ASource);
+  if _len < 1 then Exit;
 
-  if (_I >= 1) and (ASource[_I] > #32) then
+  if (_len >= 1) and (ASource[_len] > #32) then
     Result := ASource
   else
     begin
-      while (_I >= 1) and (ASource[_I] <= #32) do Dec(_I);
-      Result := System.Copy(ASource, 1, _I);
+      while (_len >= 1) and (ASource[_len] <= #32) do Dec(_len);
+      Result := System.Copy(ASource, 1, _len);
     end;
 end;
 
 function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const ARespStr: string): string;
 const
   c_Display_Type: array [TDisplay_Type] of string = ('response', 'content', 'trans');
+  c_NLC_xndjson = '}'+GC_UTF8_LFH;      // Content-Type : 'application/x-ndjson';   // newline character \n.
+  c_ARRAY_json  = '},';                 // Content-Type : 'application/json';       // normal json array delimiter
 const
   _OldPatterns: array [0..2] of string =('<think>','</think>','<response>');
   _NewPatterns: array [0..2] of string =('<think>'+sLineBreak,sLineBreak+'</think>'+sLineBreak,sLineBreak+'<response>'+sLineBreak);
 begin
   Result := '';
-  var _parsingsrc_0 := StringReplace(ARespStr, GC_UTF8_LFH, ',', [rfIgnoreCase, rfReplaceAll]);
-  var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';
+  var _parsingsrc_0 := StringReplace(ARespStr, c_NLC_xndjson, c_ARRAY_json, [rfIgnoreCase, rfReplaceAll]);
+  var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';    // to Virtual Json Array Mode ...
   var _acceptflag: Boolean := False;
   var _firstflag: Boolean := True;
   var _key := c_Display_Type[ADisplay_Type];
@@ -266,7 +316,7 @@ begin
       end;
 
     // Worried about the overhead ? / skip replacing last "</response>" ...
-    var _checkings: string := Copy(Result, 1, 25);
+    var _checkings: string := Copy(Result, 1, 10);
     if Pos('<think>', _checkings) > 0 then
       for var _i := Low(_OldPatterns) to High(_OldPatterns) do
         Result := StringReplace(Result, _OldPatterns[_i], _NewPatterns[_i], [rfIgnoreCase]);
@@ -330,11 +380,11 @@ begin
   end;
 end;
 
-function Get_DisplayJson_Models(const ARespStr: string; var ACount: Integer; var AModelsList: TStringList): string;
+function Get_DisplayJson_Models(const ARespStr: string; var VCount: Integer; var VModelsList: TStringList): string;
 begin
   Result := 'Models List at '+FormatDateTime('yyyy-mm-dd HH:NN:SS', Now) +GC_CRLF+GC_CRLF;
-
-  var _StringReader := TStringReader.Create(ARespStr);
+  var _parsingsrc := StringReplace(ARespStr, GC_UTF8_LFH, ',',[rfReplaceAll]);
+  var _StringReader := TStringReader.Create(_parsingsrc);
   var _JsonReader := TJsonTextReader.Create(_StringReader);
   var _firstflag: Boolean := True;
   var _childflag: Boolean := False;
@@ -346,7 +396,7 @@ begin
   var _key: string := 'name';
   var _fstobject: string := 'models';
   var _newvalue: string := '';
-  AModelsList.Clear;
+  VModelsList.Clear;
   try
     while _JsonReader.Read do
       case _JsonReader.TokenType of
@@ -373,8 +423,8 @@ begin
             if SameText(_propname, _key) then
               begin
                 _modelflag := True;
-                Inc(ACount);
-                Result := Result + 'Models ['+ACount.ToString+'] : ';
+                Inc(VCount);
+                Result := Result + 'Models ['+VCount.ToString+'] : ';
                 Continue;
               end else
             if SameText(_propname, 'details') then
@@ -399,7 +449,7 @@ begin
           else
             begin
               if _modelflag then
-                AModelsList.Add(_JsonReader.Value.ToString);
+                VModelsList.Add(_JsonReader.Value.ToString);
               _modelflag := False;
               Result := Result + _JsonReader.Value.ToString+ GC_CRLF;
             end;

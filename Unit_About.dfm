@@ -79,7 +79,7 @@ object Form_About: TForm_About
       Height = 387
       Margins.Left = 10
       Margins.Right = 10
-      ActivePage = TabSheet_Style
+      ActivePage = TabSheet_Settings
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver
@@ -90,14 +90,14 @@ object Form_About: TForm_About
       Style = tsFlatButtons
       TabOrder = 0
       StyleElements = [seClient, seBorder]
-      object TabSheet1: TTabSheet
+      object TabSheet_About: TTabSheet
         Caption = 'About     '
         object Label_Development: TLabel
           AlignWithMargins = True
           Left = 10
           Top = 82
-          Width = 130
-          Height = 15
+          Width = 332
+          Height = 269
           Margins.Left = 10
           Margins.Right = 10
           Align = alClient
@@ -109,6 +109,8 @@ object Form_About: TForm_About
           Font.Style = []
           ParentFont = False
           StyleElements = [seClient, seBorder]
+          ExplicitWidth = 130
+          ExplicitHeight = 15
         end
         object Panel2: TPanel
           Left = 0
@@ -379,7 +381,7 @@ object Form_About: TForm_About
           end
         end
       end
-      object TabSheet3: TTabSheet
+      object TabSheet_SysInfo: TTabSheet
         Caption = 'System Info.     '
         ImageIndex = 2
         object Label_SystemInfo: TLabel
@@ -410,7 +412,7 @@ object Form_About: TForm_About
           ExplicitHeight = 15
         end
       end
-      object TabSheet2: TTabSheet
+      object TabSheet_Shortcuts: TTabSheet
         Caption = 'Shortcuts     '
         ImageIndex = 1
         object ListView_Shortcuts: TListView
@@ -462,8 +464,8 @@ object Form_About: TForm_About
           ViewStyle = vsReport
         end
       end
-      object TabSheet_Style: TTabSheet
-        Caption = 'Options'
+      object TabSheet_Settings: TTabSheet
+        Caption = 'Settings'
         ImageIndex = 3
         object Label2: TLabel
           Left = 8
@@ -748,7 +750,7 @@ object Form_About: TForm_About
             Top = 48
             Width = 132
             Height = 17
-            Caption = 'Save logs on close'
+            Caption = 'Save Logs on Close'
             TabOrder = 1
             StyleElements = [seClient, seBorder]
             OnClick = CheckBox_SaveOnCLoseClick
@@ -877,7 +879,7 @@ object Form_About: TForm_About
     end
   end
   object ColorDialog_Colors: TColorDialog
-    Left = 81
-    Top = 196
+    Left = 57
+    Top = 436
   end
 end

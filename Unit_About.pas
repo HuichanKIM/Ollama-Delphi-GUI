@@ -25,13 +25,13 @@ type
     Panel_Body: TPanel;
     Label_Title: TLabel;
     PageControl1: TPageControl;
-    TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
+    TabSheet_About: TTabSheet;
+    TabSheet_Shortcuts: TTabSheet;
     Label_Development: TLabel;
     ListView_Shortcuts: TListView;
-    TabSheet3: TTabSheet;
+    TabSheet_SysInfo: TTabSheet;
     Label_SystemInfo: TLabel;
-    TabSheet_Style: TTabSheet;
+    TabSheet_Settings: TTabSheet;
     Label2: TLabel;
     ComboBox_VclStyles: TComboBox;
     GroupBox_Colors: TGroupBox;
@@ -279,7 +279,7 @@ end;
 
 procedure TForm_About.FormShow(Sender: TObject);
 const
-  c_Caption: array [0..3] of string = ('About','System Info.','ShortCuts','Skin / Colors / Options');
+  c_Caption: array [0..3] of string = ('About','System Info.','ShortCuts','Settings');
   c_Heights: array [0..3] of Integer = (485,485,485,515);
 begin
   Self.Height := c_Heights[FShow_Flag];
@@ -308,7 +308,7 @@ begin
   CheckBox_Experimental.Checked :=     GV_ExperimentalSeedFlag;
   FUpdateLockFlag := False;
 
-  TabSheet_Style.TabVisible := FShow_Flag = GC_AboutSkinFlag;  // Cannot Focus Error - When Change Style Event / Bug ?
+  TabSheet_Settings.TabVisible := FShow_Flag = GC_AboutSkinFlag;  // Cannot Focus Error - When Change Style Event / Bug ?
   PageControl1.ActivePageIndex := FShow_Flag;   // 0 or 3
 end;
 

@@ -326,9 +326,6 @@ Coordinates=1944,551,232,36
 [SpeedButton_ClearChatBox]
 Coordinates=1944,606,176,36
 
-[Splitter1]
-Coordinates=1584,1205,62,36
-
 [Timer_System]
 Coordinates=1485,1205,97,36
 
@@ -565,4 +562,7 @@ Coordinates=1944,661,132,36
 
 [SpeedButton_ReqMultiline]
 Coordinates=1944,936,163,36
+
+[Splitter_Log]
+Coordinates=1584,1205,62,36
 

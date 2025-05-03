@@ -12,36 +12,16 @@ uses
   System.Classes,
   System.Types,
   System.UITypes,
-  Vcl.StdCtrls,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.ExtCtrls;
 
-{ TResourceStream_Ex - MultiLoad ... }
-type
-  TResourceStream_Ex = class(TCustomMemoryStream)
-  private
-    HResInfo: THandle;
-    HGlobal: THandle;
-    procedure Initialize(AInstance: THandle; AName, AResType: PChar);
-  public
-    constructor Create(AInstance: THandle; const AResName: string; AResType: PChar);
-    destructor Destroy; override;
-    //
-    procedure Re_Initialize(AInstance: THandle; AName, AResType: PChar);
-  end;
-{ /TResourceStream_Ex ... }
-
-type
-  IIF = class
-    class function CastBool<T>(AExpression: Boolean; const ATrue, AFalse: T): T; static;
-    class function CastInteger<T>(AExpression: Integer; const ATrue, AFalse: T): T; static;
-  end;
+{ Consts ... }
 
 const
   // Acivate Remote Broker/Server ---------------------------------------------  //
   DM_ACTIVATECODE = 1;                           { 0 - Deactivate  1- Activate }
-  // /Acivate Remote Broker/Server --------------------------------------------  //
+  // / Acivate Remote Broker/Server -------------------------------------------  //
 
   DM_SERVERPORT = 17233;
   WF_DM_MESSAGE  = DM_SERVERPORT + 1;
@@ -74,17 +54,9 @@ const
     WM_NETHTTP_MESSAGE_ALIVE = WM_NETHTTP_MESSAGE + 1;
     WM_NETHTTP_MESSAGE_ALIST = WM_NETHTTP_MESSAGE + 2;
 
-type
-  TRequest_Type  = (ort_Generate=0, ort_Chat);
-  TDisplay_Type  = (disp_Response=0, disp_Content, disp_Trans);
-
-type
-  TTranlateMode = (otm_MessageView = 0, otm_PromptView, otm_MessagePush, otm_PromptPush);
-  TTransCountryCode = (otcc_KO = 0, otcc_EN);
-
 const
-  GC_Version0     = 'ver. 1.0.8';
-  GC_Version1     = 'ver. 1.0.8 (2025.04.23)';
+  GC_Version0     = 'ver. 1.1.0';
+  GC_Version1     = 'ver. 1.1.0 (2025.05.03)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024-2025 JNJ Labs. Seoul, Korea.';
@@ -118,33 +90,6 @@ const
   GC_MRU_AddRoot   = 1;
   GC_MRU_AddChild  = 2;
 
-procedure InitializePaths();
-function Is_Hangul(const AText: string): Boolean;
-function Is_ExternalCmd(const AText: string): Boolean;
-
-function BytesToKMG(AValue: Int64): string;
-function Get_ReplaceSpecialChar4Trans(const AText: string): string;
-function Get_ReplaceSpecialChar4Json(const AText: string): string;
-function GetUsersWindowsLanguage: string;
-function Get_LocaleIDString(const AFlag: Integer = 0): string;
-function ReadAllText_Unicode(const AFilePath: string=''): string;
-function WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
-function IOUtils_ReadAllText(const AFilePath: string=''): string;
-function IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
-
-function Get_SystemInfo(): string;
-function MSecsToTime(const AMSec: Int64): string;
-function MSecsToSeconds(const AMSec: Int64): string;
-procedure Global_TrimAppMemorySizeEx(const AStrategy: Integer);
-function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
-procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
-function LoadFromFileBuffered_String(const AFileName: string): string;
-
-function  Can_Focus(Control: TWinControl): Boolean;
-procedure Set_Focus(Control: TWinControl);
-function Safety_DeleteFile(const AFile: string): Boolean;
-function InetIsOffline(AFlag: Integer): Boolean; stdcall; external 'URL.DLL';
-
 const
   C_Connection_Svg0 = '''
     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
@@ -171,6 +116,68 @@ const
     </svg>
     ''';
 
+{ Types ... }
+
+type
+  TRequest_Type  = (ort_Generate=0, ort_Chat);
+  TDisplay_Type  = (disp_Response=0, disp_Content, disp_Trans);
+
+type
+  TTranlateMode = (otm_MessageView = 0, otm_PromptView, otm_MessagePush, otm_PromptPush);
+  TTransCountryCode = (otcc_KO = 0, otcc_EN);
+
+{ TResourceStream_Ex - MultiLoad ... }
+type
+  TResourceStream_Ex = class(TCustomMemoryStream)
+  private
+    HResInfo: THandle;
+    HGlobal: THandle;
+    procedure Initialize(AInstance: THandle; AName, AResType: PChar);
+  public
+    constructor Create(AInstance: THandle; const AResName: string; AResType: PChar);
+    destructor Destroy; override;
+    //
+    procedure Re_Initialize(AInstance: THandle; AName, AResType: PChar);
+  end;
+{ / TResourceStream_Ex ... }
+
+type
+  IIF = class
+    class function CastBool<T>(AExpression: Boolean; const ATrue, AFalse: T): T; static;
+    class function CastInteger<T>(AExpression: Integer; const ATrue, AFalse: T): T; static;
+  end;
+
+{ Methods / Public ... }
+
+procedure Global_TrimAppMemorySizeEx(const AStrategy: Integer);
+procedure InitializePaths();
+function Is_Hangul(const AText: string): Boolean;
+function Is_ExternalCmd(const AText: string): Boolean;
+
+function Get_ReplaceSpecialChar4Trans(const AText: string): string;
+function Get_ReplaceSpecialChar4Json(const AText: string): string;
+
+function ReadAllText_Unicode(const AFilePath: string=''): string;
+function WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
+function IOUtils_ReadAllText(const AFilePath: string=''): string;
+function IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
+
+function BytesToKMG(AValue: Int64): string;
+function Get_SystemInfo(): string;
+function MSecsToTime(const AMSec: Int64): string;
+function MSecsToSeconds(const AMSec: Int64): string;
+procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
+function LoadFromFileBuffered_String(const AFileName: string): string;
+function  Can_Focus(Control: TWinControl): Boolean;
+procedure Set_Focus(Control: TWinControl);
+function Safety_DeleteFile(const AFile: string): Boolean;
+
+{ Methods / Private in Unit_Common ... }
+function Get_UsersWindowsLanguage: string;
+function Get_LocaleIDString(const AFlag: Integer = 0): string;
+function Get_GlobalMemoryUsed2GB(var VTotal, VAvail: string): DWORD;
+
+{ Variables ... }
 var
   CV_AppPath: string  = '';
   CV_TmpPath: string  = 'temp';
@@ -191,6 +198,7 @@ var
   GV_ReservedColor: array [0..3] of TColor;
   GV_AliveOllamaFlag: Boolean = False;
   GV_RemoteBanList: TStringList;
+  GV_DateTime: TDateTime;
   // experimental seed flag
   GV_ExperimentalSeedFlag: Boolean = False;
 
@@ -202,10 +210,7 @@ uses
   Winapi.PsAPI,
   Winapi.MMSystem,
   WinApi.UxTheme,
-  WinAPi.ShellAPI,
   System.Math,
-  System.StrUtils,
-  System.NetEncoding,
   System.RegularExpressions,
   System.Threading,
   Vcl.Styles,
@@ -535,7 +540,7 @@ begin
 
     var _totalmem: string := '';
     var _availmem: string := '';
-    var _usagepct: DWord := GetGlobalMemoryUsed2GB(_totalmem, _availmem);
+    var _usagepct: DWord := Get_GlobalMemoryUsed2GB(_totalmem, _availmem);
     with _Resultlist do
     begin
       Add('');
@@ -546,7 +551,7 @@ begin
       Add('');
     end;
     var _LocaleID := Get_LocaleIDString();
-    var _WinLangusage := GetUsersWindowsLanguage;
+    var _WinLangusage := Get_UsersWindowsLanguage;
     _Resultlist.Add('  OS Language: '+_WinLangusage + '  ISO Code ['+_LocaleID+']');
     _Resultlist.EndUpdate;
 
@@ -556,7 +561,7 @@ begin
   end;
 end;
 
-function GetGlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
+function Get_GlobalMemoryUsed2GB(var VTotal, VAvail: string): DWord;
 begin
   Result := 0;
   var _MemBuffer: _MEMORYSTATUS;
@@ -636,7 +641,7 @@ end;
 
 function GetUserDefaultUILanguage: LANGID; stdcall; external 'kernel32';
 
-function GetUsersWindowsLanguage: string;
+function Get_UsersWindowsLanguage: string;
 var
   _WinLanguage: array [0..50] of Char;
 begin
@@ -744,14 +749,11 @@ procedure Ollama_Wait(const AMilliseconds: Double);
 var
   LStartCount, LCurrentCount: Int64;
   LElapsedTime: Double;
-  // Modified by ichin 2025-04-23 수 오전 10:54:59
   LPerformanceFrequency: Int64;
 begin
   // Get the starting value of the performance counter
   QueryPerformanceCounter(LStartCount);
-  // Modified by ichin 2025-04-23 수 오전 10:54:11
   QueryPerformanceFrequency(LPerformanceFrequency);
-
   // Convert milliseconds to seconds for precision timing
   repeat
     QueryPerformanceCounter(LCurrentCount);
@@ -760,6 +762,7 @@ begin
 end;
 
 initialization
+  GV_DateTime := Now;
   CV_LocaleID := Get_LocaleIDString(1);
   GV_RemoteBanList := TStringList.Create;
   GV_RemoteBanList.Sorted := True;
