@@ -10,6 +10,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.SyncObjs,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
@@ -28,20 +29,24 @@ type
 type
   THistoryManager = class
   private
-    FHistoricFile: string;
-    FAttachedFile: string;
+    FHistoryFile: string;
+    FLinkedFile: string;
     FListBox: TListBox;
+    FLinkedFileList : TStringList;
+    FCriticalSection: TCriticalSection;
     procedure FreeListObjects(const AClearFlag: Boolean = False);
     procedure UpdateHistory(const AFlag: Integer = 0);
     procedure Clearance_HistoryFiles_All(const AFlag: Integer = 0);
     function Get_OverwriteFlag(const ASubject: string): Boolean;
     procedure Clearance_ListBox;
+    procedure Lock();
+    procedure Unlock();
   public
     constructor Create(AListBox: TListBox);
     destructor Destroy; override;
     //
     function AddToHistory(const AFlag: Integer; const ASubject, AFile: string): Integer;
-    procedure DeleteHistory(const AIndex: Integer);
+    function DeleteHistory(const AIndex: Integer): Boolean;
     procedure Load_HstoryList(const AListfile: string = '');
     procedure Clear_ViewAll(const AFlag: Integer = 0);
     procedure Clear_ListData(const AFlag: Integer = 0);
@@ -65,7 +70,7 @@ uses
 
 constructor THisObject.Create(const AFileName: string);
 begin
-  ho_Session := RandomRange(1000000, 9999999);
+  ho_Session :=  RandomRange(1000000, 9999999);
   ho_Filename := AFileName;
 end;
 
@@ -74,42 +79,42 @@ end;
 constructor THistoryManager.Create(AListBox: TListBox);
 begin
   Randomize;
-  FHistoricFile := CV_HisPath+'history.lst';
-  FAttachedFile := CV_HisPath+'attached.txt';   // in preparation for a very long string of history subject ...
+  FHistoryFile := CV_HisPath+'history.lst';
+  FLinkedFile :=  CV_HisPath+'attached.txt';   // in preparation for a very long string of history subject ...
   FListBox := AListBox;
+  FCriticalSection := TCriticalSection.Create;
+  FLinkedFileList := TStringList.Create;
   Load_HstoryList();
 end;
 
 procedure THistoryManager.Load_HstoryList(const AListfile: string='');
 begin
-  if FileExists(FHistoricFile) and
-     FileExists(FAttachedFile) then
+  if FileExists(FHistoryFile) and FileExists(FLinkedFile) then
   begin
     Screen.Cursor := crAppStart;
     var _HistoryList := TStringList.Create;
-      _HistoryList.LoadFromFile(FHistoricFile);
-    var _AttachedFiles:= TStringList.Create;
-      _AttachedFiles.LoadFromFile(FAttachedFile);
+      _HistoryList.LoadFromFile(FHistoryFile);
+    FLinkedFileList.Clear;
+    FLinkedFileList.LoadFromFile(FLinkedFile);
     try
-      if _HistoryList.Count <= _AttachedFiles.Count  then   // To cope with an error situation
+      if _HistoryList.Count <= FLinkedFileList.Count  then   // To cope with an error situation
       begin
         FListBox.Clear;
         FListBox.Items.BeginUpdate;
         var _hisObject: THisObject := nil;
         var _Subject: string := '';
-        var _AFile: string := '';
+        var _File: string := '';
         for var _i := 0 to _HistoryList.Count-1 do
           begin
-            _Subject := _HistoryList.Strings[_i];
-            _AFile :=   _AttachedFiles.Strings[_i];
-            _hisObject := THisObject.Create(_AFile);
+            _Subject :=   _HistoryList.Strings[_i];
+            _File :=      FLinkedFileList.Strings[_i];
+            _hisObject := THisObject.Create(_File);
             FListBox.AddItem(_Subject, TObject(_hisObject));
           end;
         FListBox.Items.EndUpdate;
       end;
     finally
       _HistoryList.Free;
-      _AttachedFiles.Free;
       Screen.Cursor := crDefault;
     end;
   end;
@@ -125,35 +130,48 @@ begin
   end;
 end;
 
+procedure THistoryManager.Lock;
+begin
+  FCriticalSection.Enter();
+end;
+
+procedure THistoryManager.Unlock;
+begin
+  FCriticalSection.Leave();
+end;
+
 procedure THistoryManager.UpdateHistory(const AFlag: Integer = 0);
 begin
-  var _AttachedFiles:= TStringList.Create;
+  if AFlag > 0 then Lock();
   try
-    var _afile: string := '';
+    FLinkedFileList.Clear;
+    var _file: string := '';
     with FListBox.Items do
     for var _idx := 0 to Count -1 do
       begin
-        _afile := THisObject(Objects[_idx]).ho_Filename;
-        _AttachedFiles.Add(_afile);
+        _file := THisObject(Objects[_idx]).ho_Filename;
+        FLinkedFileList.Add(_file);
       end;
-
-    FListBox.Items.SaveToFile(FHistoricFile);      // OverWrite ...
-    _AttachedFiles.SaveToFile(FAttachedFile);      // OverWrite ...
+    if AFlag = 0 then
+    begin
+      FListBox.Items.SaveToFile(FHistoryFile);      // OverWrite ...
+      FLinkedFileList.SaveToFile(FLinkedFile);      // OverWrite ...
+    end;
   finally
-    _AttachedFiles.Free;
+    if AFlag > 0 then UnLock();
   end;
 end;
 
 destructor THistoryManager.Destroy;
 begin
-  var _dummylist := TStringList.Create;
+  var _dlinkedlist := TStringList.Create;
   if FListBox.Items.Count > HIS_MAX_ITEMS then
   begin
     FListBox.Items.BeginUpdate;
     with FListBox.Items do
     for var _i := Count-1 downto HIS_MAX_ITEMS do
       try
-        _dummylist.Add(THisObject(Objects[_i]).ho_Filename);
+        _dlinkedlist.Add(THisObject(Objects[_i]).ho_Filename);
         THisObject(Objects[_i]).Free;
         Objects[_i] := nil;
       finally
@@ -163,20 +181,20 @@ begin
   end;
 
   try
-    if _dummylist.Count > 0 then
+    if _dlinkedlist.Count > 0 then
     begin
-      with _dummylist do
+      with _dlinkedlist do
       for var _i := 0 to Count-1 do
         Safety_DeleteFile(Strings[_i]);
     end;
   finally
-    _dummylist.Free;
+    _dlinkedlist.Free;
   end;
 
   if FListBox.Items.Count = 0 then
     begin
-      Safety_DeleteFile(FHistoricFile);
-      Safety_DeleteFile(FAttachedFile);
+      Safety_DeleteFile(FHistoryFile);
+      Safety_DeleteFile(FLinkedFile);
     end
   else
     begin
@@ -184,6 +202,8 @@ begin
       FreeListObjects();
     end;
 
+  FLinkedFileList.Free;
+  FCriticalSection.Free;
   inherited;
 end;
 
@@ -286,8 +306,9 @@ begin
   end;
 end;
 
-procedure THistoryManager.DeleteHistory(const AIndex: Integer);
+function THistoryManager.DeleteHistory(const AIndex: Integer): Boolean;
 begin
+  Result := False;
   if (FListBox.Count > 0) and
      ((AIndex >= 0) and (AIndex <= FListBox.Count-1)) then
   begin
@@ -303,6 +324,7 @@ begin
     end;
 
     Safety_DeleteFile(_hfile);
+    Result := not FileExists(_hfile);
     UpdateHistory(1);
   end;
 end;
@@ -336,36 +358,23 @@ begin
   Result := 0;
 
   Clearance_ListBox();
-  if not FileExists(FAttachedFile) then Exit;
+  if FLinkedFileList.Count < 1 then Exit;
 
   var _srec: TSearchRec;
   if FindFirst(CV_HisPath + '*.*', faAnyFile, _srec) = 0 then
   begin
-    var _AttachedFiles:= TStringList.Create;
-    with _AttachedFiles do
-    begin
-      CaseSensitive := False;
-      Duplicates := dupIgnore;
-      Sorted := True;
-      LoadFromFile(FAttachedFile);
-    end;
-
+    var _fname := '';
+    var _ext := '.dat';
     try
-      var _fname := '';
-      var _ext := '.dat';
-      try
-        repeat
-          _fname := CV_HisPath + _srec.Name;
-          _ext := ExtractFileExt(_srec.Name);
-          if SameText(_ext, '.dat') and (_AttachedFiles.IndexOf(_fname) < 0) then
-            if Safety_DeleteFile(_fname) then
-              Inc(Result);;
-        until FindNext(_srec) <> 0;
-      finally
-        FindClose(_srec);
-      end;
+      repeat
+        _fname := CV_HisPath + _srec.Name;
+        _ext := ExtractFileExt(_srec.Name);
+        if SameText(_ext, '.dat') and (FLinkedFileList.IndexOf(_fname) < 0) then
+          if Safety_DeleteFile(_fname) then
+            Inc(Result);;
+      until FindNext(_srec) <> 0;
     finally
-      _AttachedFiles.Free;
+      FindClose(_srec);
     end;
   end;
 end;
@@ -393,14 +402,14 @@ end;
 procedure THistoryManager.Clear_ListData(const AFlag: Integer = 0);
 begin
   FreeListObjects(True);
-  Safety_DeleteFile(FHistoricFile);
-  Safety_DeleteFile(FAttachedFile);
+  Safety_DeleteFile(FHistoryFile);
+  Safety_DeleteFile(FLinkedFile);
   Clearance_HistoryFiles_All(0);
 end;
 
 procedure THistoryManager.Clear_ViewAll(const AFlag: Integer = 0);
 begin
-  UpdateHistory(4);
+  UpdateHistory(0);
   FreeListObjects(True);
 end;
 
@@ -436,6 +445,7 @@ begin
     inherited;
   end;
 end;
-... }
+
+... THisListBox }
 
 end.

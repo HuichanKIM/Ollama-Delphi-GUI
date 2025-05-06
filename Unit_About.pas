@@ -164,7 +164,7 @@ const
      - FastMM4-AVX by Maxim Masiutin (*)
      - DOSCommand by TurboPack (*)
      - NetComp7 by DelphiBuilder (*)
-     - EasyJson by tinyBigGAMES (*)
+     - EasyJson by tinyBigGAMES LLC (*)
      - Embeded Lib. : SKIA 2D Graphics
      - SpeechLibrary by MS SAPI
 
@@ -300,12 +300,12 @@ begin
   ComboBox_MRUROOT_Max.ItemIndex :=    (MRU_MAX_ROOT  div 5) -2;
   ComboBox_MRUCHILD_Max.ItemIndex :=   (MRU_MAX_CHILD div 5) -2;
   ComboBox_MaxHistory.ItemIndex :=     (HIS_MAX_ITEMS div 5) -2;
-  ComboBox_ChatBoxHOffset.ItemIndex := (Form_RestOllama.Frame_ChattingBox.VST_NodeHeightOffSet div 5)-2;
   CheckBox_NoCheckAlive.Checked :=     not GV_CheckingAliveStart;
   CheckBox_SaveContents.Checked :=     GV_SaveContentsOnClose;
   CheckBox_BeepSound.Checked :=        Form_RestOllama.DoneSoundFlag;
   CheckBox_SaveOnCLose.Checked :=      GV_SaveLogsOnClose;
   CheckBox_Experimental.Checked :=     GV_ExperimentalSeedFlag;
+  ComboBox_ChatBoxHOffset.ItemIndex := (Form_RestOllama.Frame_ChattingBox.VST_NodeHeightOffSet div 5)-2;
   FUpdateLockFlag := False;
 
   TabSheet_Settings.TabVisible := FShow_Flag = GC_AboutSkinFlag;  // Cannot Focus Error - When Change Style Event / Bug ?

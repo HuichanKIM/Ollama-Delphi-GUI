@@ -24,7 +24,7 @@ uses
   Unit_Jsonworks in 'Unit_Jsonworks.pas',
   Unit_HistoryManager in 'Unit_HistoryManager.pas',
   Unit_Welcome in 'Unit_Welcome.pas' {Frame_Welcome: TFrame},
-  Unit_Main in 'Unit_Main.pas' {Form_RestOllama: TForm_RestOllama},
+  Unit_Main in 'Unit_Main.pas' {Form_RestOllama: TForm},
   Unit_AliveOllama in 'Unit_AliveOllama.pas' {TForm_AliveOllama},
   Unit_Translator in 'Unit_Translator.pas' {TForm_Translator},
   Unit_About in 'Unit_About.pas' {TForm_About},

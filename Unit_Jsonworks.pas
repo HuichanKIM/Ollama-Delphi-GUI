@@ -33,7 +33,7 @@ function Get_RequestParams_Chat(const AModel: string;
                                 const AImage: TImage = nil;
                                 const AReasoning: Boolean = False;
                                 const AAssistFlag: Boolean = False;
-                                const AAssistContent: string = ''): string;
+                                const AAssists: string = ''): string;
 
 function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const ARespStr: string): string;
 function Get_DisplayJson_LoadModel(const ARespStr: string): string;
@@ -122,11 +122,10 @@ begin
                  .Put('temperature', 0) else
     if GV_ExperimentalSeedFlag then
       begin
-        // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
         _ejson.Root.AddObject('options')
-                   .Put('num_ctx', 4096)       // for continuous request;    (default - 2048)
-                   .Put('seed', 0)             // -1 : Negative value(expected random seed) show error ?
-                   .Put('temperature', 1.0);   // Regardless of temperature ?  if seed = 0 then use a randomly generated seed each time ?
+                   .Put('num_ctx', 4096)
+                   .Put('seed', 0)
+                   .Put('temperature', 1.0);
       end;
 
     Result := _ejson.ToString;
@@ -143,15 +142,15 @@ function Get_RequestParams_Chat(const AModel: string;
                                 const AImage: TImage = nil;
                                 const AReasoning: Boolean = False;
                                 const AAssistFlag: Boolean = False;
-                                const AAssistContent: string = ''): string;
+                                const AAssists: string = ''): string;
 begin
-  var _ej_asmb :=   TEasyJson.Create;
-  var _ej_body :=   TEasyJson.Create;
-  var _ej_think :=  TEasyJson.Create;
-  var _ej_assist := TEasyJson.Create;
+  var _ej_assembly := TEasyJson.Create;
+  var _ej_user :=     TEasyJson.Create;
+  var _ej_system :=   TEasyJson.Create;
+  var _ej_assist :=   TEasyJson.Create;
   var _isGranite: Boolean := Pos('granite', LowerCase(AModel)) > 0;
   try
-    _ej_body.Put('role', 'user')
+    _ej_user.Put('role', 'user')
             .Put('content', AContent);
 
     if AImageFlag then
@@ -159,7 +158,7 @@ begin
       if AImage <> nil then
       begin
         var _ImageData := Get_Base64Endoeings(AImage);
-        _ej_body.AddArray('images')
+        _ej_user.AddArray('images')
                 .Put(0, _ImageData);
       end;
     end;
@@ -167,75 +166,75 @@ begin
     if AAssistFlag then
     begin
       _ej_assist.Put('role', 'assistant')
-                .Put('content', AAssistContent);
+                .Put('content', AAssists);
     end;
 
     if AReasoning then
       begin
         if _isGranite then
-          _ej_think.Put('role', 'control')
-                   .Put('content', 'thinking')
+          _ej_system.Put('role', 'control')
+                    .Put('content', 'thinking')
         else
-          _ej_think.Put('role', 'system')
-                   .Put('content', 'Enable deep thinking subroutine.');
+          _ej_system.Put('role', 'system')
+                    .Put('content', 'Enable deep thinking subroutine.');
 
         if AAssistFlag then
           begin
-            _ej_asmb.Put('model', AModel)
-                    .AddArray('messages')
-                    .Put(0, _ej_think)
-                    .Put(1, _ej_assist)
-                    .Put(2, _ej_body);
+            _ej_assembly.Put('model', AModel)
+                        .AddArray('messages')
+                        .Put(0, _ej_system)
+                        .Put(1, _ej_assist)
+                        .Put(2, _ej_user);
           end
         else
           begin
-            _ej_asmb.Put('model', AModel)
-                    .AddArray('messages')
-                    .Put(0, _ej_think)
-                    .Put(1, _ej_body);
+            _ej_assembly.Put('model', AModel)
+                        .AddArray('messages')
+                        .Put(0, _ej_system)
+                        .Put(1, _ej_user);
           end;
       end
     else
       begin
         if AAssistFlag then
           begin
-            _ej_asmb.Put('model', AModel)
-                    .AddArray('messages')
-                    .Put(0, _ej_assist)
-                    .Put(1, _ej_body);
+            _ej_assembly.Put('model', AModel)
+                        .AddArray('messages')
+                        .Put(0, _ej_assist)
+                        .Put(1, _ej_user);
           end
         else
           begin
-            _ej_asmb.Put('model', AModel)
-                    .AddArray('messages')
-                    .Put(0, _ej_body);
+            _ej_assembly.Put('model', AModel)
+                        .AddArray('messages')
+                        .Put(0, _ej_user);
           end;
       end;
 
     if ASeedFlag then
-      _ej_asmb.Root.AddObject('options')
-                   .Put('num_ctx', 4096)
-                   .Put('seed', ASeed)
-                   .Put('temperature', 0.0) else
+      _ej_assembly.Root.AddObject('options')
+                       .Put('num_ctx', 4096)        // 8192
+                       .Put('seed', ASeed)
+                       .Put('temperature', 0.0) else
     if GV_ExperimentalSeedFlag then
       begin
         // experimental - Recover from SeedFlag settings as before - Usefull, Effective ?
-        _ej_asmb.Root.AddObject('options')
-                     .Put('num_ctx', 4096)      // for chat history    (default - 2048)
-                     .Put('seed', 0)            // -1 : Negative value(expected random seed) show error ?  if seed = 0 then use a randomly generated seed each time ?
-                     .Put('temperature', 1.0);  // Regardless of temperature ?
+        _ej_assembly.Root.AddObject('options')
+                         .Put('num_ctx', 4096)      // increase for chat history ?  Sets the size of the context window used to generate the next token. (Default: 2048)
+                         .Put('seed', 0)            // if seed = 0 (default) then use a randomly generated seed each time ?
+                         .Put('temperature', 0.8);  // Max - Regardless of temperature ?
       end;
 
-    Result := _ej_asmb.ToString;
+    Result := _ej_assembly.ToString;
   finally
-    _ej_think.Free;
-    _ej_body.Free;
-    _ej_asmb.Free;
+    _ej_user.Free;
+    _ej_system.Free;
     _ej_assist.Free;
+    _ej_assembly.Free;
   end;
 end;
 
-{ Reference from https://medium.com/@flaviovitoriano/create-your-own-ai-assistant-with-ollama-a2416a287a83
+{ Reference from https://medium.com/@flaviovitoriano/create-your-own-ai-assistant-with-ollama-a2416a287a83  ...
 
 The Message model represents a chat message in Ollama (can be used on the OpenAI API as well), and it can be of three different roles:
 
@@ -252,7 +251,7 @@ Assistant role :
      This is a technique called ¡®multi-shot¡¯ (in this case, one-shot :)) that consists in giving previous examples to the assistant to reinforce the answer.
      This technique is very powerful, so I recommend you to use it to reinforce a specific characteristic for your assistant.
 
-}
+ ... Reference}
 
 { / EasyJson to Request ------------------------------------------------------ }
 

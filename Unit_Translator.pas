@@ -1,4 +1,4 @@
-unit Unit_Translator;
+﻿unit Unit_Translator;
 
 {$I OllmaClient_Defines.inc}
 
@@ -44,6 +44,10 @@ type
     property PushFlag: Boolean    read FPushFlag        write SetPushFlag;
   end;
 
+var
+  TV_AccessKey: string = '';
+
+function Get_DetectLanguageCode(const AText: string): string;
 function Get_GoogleTranslatorEx(const AUser, ACodeFrom, ACodeTo: Integer; const AText: string): string;
 
 implementation
@@ -51,6 +55,10 @@ implementation
 uses
   System.Net.HttpClient,
   System.Net.URLClient,
+  System.JSON,
+  System.JSON.Readers,
+  System.JSON.Writers,
+  System.JSON.Types,
   Vcl.Themes,
   Unit_Common,
   Unit_Jsonworks;
@@ -98,7 +106,7 @@ begin
   _HTTP.CustomHeaders['Authorization'] := '';
   try
     _getflag := _HTTP.Get(_URI.Encode, _Responses).StatusCode = 200;
-    _getflag := _getflag and (_Responses.Size > 10);
+    _getflag := _getflag and (_Responses.Size > 1);
     if not _getflag then
     begin
       _Responses.Free;
@@ -112,6 +120,48 @@ begin
     _Responses.Position := 0;
     var _rbs := TEncoding.UTF8.GetString(_Responses.Bytes, 0, _Responses.Size);
     Result := Get_DisplayJson(TDIsplay_Type.disp_Trans, _rbs);
+  finally
+    _Responses.Free;
+  end;
+end;
+
+// Reference - https://blogs.embarcadero.com/what-you-need-to-add-language-detection-to-your-apps/
+// Languagelayer - https://languagelayer.com/
+// access_key - Get private API Access Key from Languagelayer
+// save filename at app path as "languagelayer_accesskey.key"  (ex: accesskey=987654321)
+function Get_DetectLanguageCode(const AText: string): string;
+begin
+  Result := '';
+  var _Head := 'http://api.languagelayer.com/detect';
+  var _URI := TURI.Create(_Head);
+  _URI.AddParameter('access_key', TV_AccessKey);
+  _URI.AddParameter('query', AText);
+  var _Responses := TBytesStream.Create();
+  var _getflag: Boolean := False;
+
+  var _HTTP := THTTPClient.Create;
+  _HTTP.ProtocolVersion := THTTPProtocolVersion.HTTP_1_1;
+  _HTTP.Accept := 'application/json';
+  _HTTP.ContentType := 'application/json; charset=UTF-8';
+  _HTTP.CustomHeaders['Authorization'] := 'Bearer ' + TV_AccessKey;  // ?
+  try
+    _getflag := _HTTP.Get(_URI.Encode, _Responses).StatusCode = 200;
+    if not _getflag then
+    begin
+      Result := 'Failed ...';
+      _Responses.Free;
+    end;
+  finally
+    _HTTP.Free;
+  end;
+
+  if _getflag then
+  try
+    var _Resp := TEncoding.UTF8.GetString(_Responses.Bytes, 0, _Responses.Size);
+    var _JsonResp := TJSONObject.ParseJSONValue(_Resp) as TJSONObject;
+    var _DataArr := _JsonResp.GetValue<TJSONArray>('results');
+    Result := Format(' code - [ %s ]'+sLineBreak+' language - %s', [_DataArr.Items[0].GetValue<string>('language_code'),
+                                                                    _DataArr.Items[0].GetValue<string>('language_name')]);
   finally
     _Responses.Free;
   end;

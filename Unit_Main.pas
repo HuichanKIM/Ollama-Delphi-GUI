@@ -378,6 +378,7 @@ type
     procedure Action_CLearanceHistoryExecute(Sender: TObject);
     procedure Action_SaveToHistoryExecute(Sender: TObject);
     procedure CheckBox_AssistantClick(Sender: TObject);
+    procedure Label_TransDirClick(Sender: TObject);
   private
     FInitialized: Boolean;
     FFrameWelcome: TFrame_Welcome;
@@ -402,6 +403,7 @@ type
     FReasoningFlag: Boolean;
     FSelectionNode: TTreeNode;
     FImageSourceIndex: Integer;  // for Get M-Image Source Thumb
+    FLockFocusNode: Boolean;
     //
     FHistoryManager: THistoryManager;
     FHistorySession: Integer;
@@ -469,6 +471,11 @@ type
     procedure Restore_ChattingBox(const AFlag: Integer = 0);
     procedure ListBox_HistoryChange(Sender: TObject);
     procedure SetSavedToHistoryFlag(const Value: Boolean);
+    function Get_DetectLangForTrans(const ASource: string = ''): string;
+    procedure Update_StatusBar(const Aflag: Integer; const AText0: string = ''; const AText1: string = ''; const AText2: string = ''; const AText3: string = '');
+    //
+    function GetLockFocusNode: Boolean;
+    procedure SetLockFocusNode(const Value: Boolean);
   public
     procedure Do_ChangeStyleCustom(const AFlag: Integer = 0);
     procedure Do_TTS_Speak(const AFlag: Integer; const ASource: string);
@@ -488,6 +495,7 @@ type
     property SavedToHistoryFlag: Boolean    read FSavedToHistoryFlag    write SetSavedToHistoryFlag;
     property ProcessImageFlag: Boolean      read FProcessImageFlag      write SetProcessImageFlag;
     property ReasoningFlag: Boolean         read FReasoningFlag         write SetReasoningFlag;
+    property LockFocusNode: Boolean         read GetLockFocusNode       write SetLockFocusNode;
   end;
 
 var
@@ -579,7 +587,6 @@ var
   //
   V_BaseURLarray: array [TRequest_Type] of string = (Unit_Jsonworks.GC_BaseURL_Generate, Unit_Jsonworks.GC_BaseURL_Chat);
 
-
 { TListBox }
 
 procedure TListBox.Change;
@@ -600,7 +607,7 @@ end;
 
 procedure TListBox.DrawItem(Index: Integer; Rect: TRect; State: TOwnerDrawState);
 begin
-  // custom draw item  ------------------------------------------------------ //
+  // custom draw item color ------------------------------------------------- //
   if odSelected in State then
     Canvas.Brush.color := V_ReservedColor;
   // ------------------------------------------------------------------------ //
@@ -838,6 +845,7 @@ begin
   for var _i := 0 to ComboBox_TTSEngine.Items.Count - 1 do
     ISpeechObjectToken(Pointer(ComboBox_TTSEngine.Items.Objects[_i]))._Release;
   FreeAndNil(FSpVoice);
+  inherited;
 end;
 
 procedure TForm_RestOllama.Do_ChangeStyleCustom(const AFlag: Integer);
@@ -936,8 +944,7 @@ begin
       Topic_Seleced := TreeView_Topics.items.GetFirstNode.Text;
 
     FInitialized := True;
-    StatusBar1.Panels[1].Text := 'Elapsed time';
-    StatusBar1.Panels[2].Text := ' * Stand by ...';
+    Update_StatusBar(1, '', 'Elapsed time', '', ' * Stand by ...');
     if GV_CheckingAliveStart then
       begin
         StatusBar1.Panels[0].Text := 'Waiting response from Ollama';
@@ -960,7 +967,7 @@ end;
 
 procedure TForm_RestOllama.Load_ConfigIni(const AFlag: Integer);
 begin
-  var _indexid := ComboBox_TransTarget.Items.IndexOf(CV_LocaleID);
+  var _indexid := ComboBox_TransTarget.Items.IndexOf(CV_LocaleID);    // for at first time no config ...
   if _indexid >= 0 then
   ComboBox_TransTarget.ItemIndex := _indexid;
 
@@ -1008,6 +1015,19 @@ begin
   finally
     Free;
   end;
+
+  Label_TransDir.Enabled := False;
+  if FileExists('languagelayer_accesskey.key') then
+  begin
+    var _keys := TStringList.Create;
+    try
+      _keys.LoadFromFile('languagelayer_accesskey.key');
+      TV_AccessKey := _keys.Values['accesskey'];
+      Label_TransDir.Enabled := TV_AccessKey > ' ';
+    finally
+      _keys.Free;
+    end;
+  end;
 end;
 
 procedure TForm_RestOllama.Save_ConfigIni(const AFlag: Integer);
@@ -1035,8 +1055,8 @@ begin
     WriteInteger(C_SectionOptions,  'Mru_Root_Max',            MRU_MAX_ROOT);
     WriteInteger(C_SectionOptions,  'Mru_Child_Max',           MRU_MAX_CHILD);
     WriteInteger(C_SectionOptions,  'History_Max',             HIS_MAX_ITEMS);
-    WriteBool(C_SectionOptions,     'Process_Image',           FProcessImageFlag);
-    WriteBool(C_SectionOptions,     'ReasoningFalg',           FReasoningFlag);
+    WriteBool(C_SectionOptions,     'Process_Image',           CheckBox_ProcessImage.Checked);
+    WriteBool(C_SectionOptions,     'ReasoningFalg',           CheckBox_Reasoning.Checked);
     WriteBool(C_SectionOptions,     'ExperimentalSeedFlag',    GV_ExperimentalSeedFlag);
     //
     WriteInteger(C_SectionOptions,  'Node_Selected_Color',     Frame_ChattingBox.VST_NSelectionColor);
@@ -1117,7 +1137,8 @@ end;
 
 procedure TForm_RestOllama.FormResize(Sender: TObject);
 begin
-  FFrameWelcome.VisibleBounds := FFrameWelcome.Visible;
+  if not (csDestroying in ComponentState) then
+    FFrameWelcome.VisibleBounds := FFrameWelcome.Visible;
 end;
 
 procedure TForm_RestOllama.ActionList_OllmaUpdate(Action: TBasicAction; var Handled: Boolean);
@@ -1210,7 +1231,7 @@ begin
 
   Frame_ChattingBox.VST_ChattingBox.Clear;
   HistorySession := -1;
-
+  Update_StatusBar(9);
   Action_TTS.Enabled := False;
   SkAnimatedImage_Chat.Left := (PageControl_Chatting.Width -  SkAnimatedImage_Chat.Width)  div 2;
   SkAnimatedImage_Chat.Top :=  (PageControl_Chatting.Height - SkAnimatedImage_Chat.Height) div 2;
@@ -1241,6 +1262,17 @@ end;
 procedure TForm_RestOllama.DropDownLoadIndexEvent(Sender: TObject; const AIndex: Integer);
 begin
   ImageSourceIndex := AIndex+1;
+end;
+
+function TForm_RestOllama.GetLockFocusNode: Boolean;
+begin
+  Result := CheckBox_Assistant.Checked and CheckBox_HistoryNode.Checked;
+  Result := Result and Frame_ChattingBox.Get_IsResponseNode;
+end;
+
+procedure TForm_RestOllama.SetLockFocusNode(const Value: Boolean);
+begin
+  FLockFocusNode := Value;
 end;
 
 procedure TForm_RestOllama.GetResizedImage_SKIA(const ASource: string; const AStream: TMemoryStream);
@@ -1283,6 +1315,7 @@ begin
       var _Surface := TSkSurface.MakeRaster(C_DefImageWidth, C_DefImageHeight);
       _Surface.Canvas.Clear(TAlphaColors.Null);
       _Surface.Canvas.DrawImageRect(_Image, _Rect, TSkSamplingOptions.Medium);
+      // Add and Access Violation to ImageList at the same time ?  - Enough for Access time gap ...
       ImageSourceIndex := ImageList_Multimodel.Add(TBitmap.CreateFromSkImage(_Surface.MakeImageSnapshot), nil);
     end);
 end;
@@ -1361,7 +1394,7 @@ begin
       GV_CheckingAliveStart := not GV_AliveOllamaFlag;
       Form_RestOllama.Panel_ChatRequestBox.Enabled := GV_AliveOllamaFlag;
       Form_RestOllama.Action_StartRequest.Enabled :=  GV_AliveOllamaFlag;
-      Form_RestOllama.StatusBar1.Panels[2].Text :=    C_OllamaAlive[GV_AliveOllamaFlag];
+      Form_RestOllama.StatusBar1.Panels[3].Text :=    C_OllamaAlive[GV_AliveOllamaFlag];
     end;
   finally
     Free;
@@ -1411,12 +1444,12 @@ end;
 
 procedure TForm_RestOllama.Action_Pop_ScrollToBottomExecute(Sender: TObject);
 begin
-  Frame_ChattingBox.Do_ScrollToBottom();
+  Frame_ChattingBox.Do_ScrollToBottom(0, LockFocusNode);
 end;
 
 procedure TForm_RestOllama.Action_Pop_ScrollToTopExecute(Sender: TObject);
 begin
-  Frame_ChattingBox.Do_ScrollToTop();
+  Frame_ChattingBox.Do_ScrollToTop(0, LockFocusNode);
 end;
 
 procedure TForm_RestOllama.Action_SelectionColorExecute(Sender: TObject);
@@ -1543,7 +1576,7 @@ begin
   if AFlag < 5 then
   begin
     Common_RestSettings(0);
-    StatusBar1.Panels[2].Text := ' Abort ...';
+    StatusBar1.Panels[3].Text := ' Abort ...';
   end;
 
   Do_TTSSpeak_Stop();
@@ -1556,6 +1589,28 @@ end;
 function TForm_RestOllama.Get_ReadyRequest: Boolean;
 begin
   Result := (V_DummyFlag > 0) and (not RequestingFlag);
+end;
+
+procedure TForm_RestOllama.Update_StatusBar(const Aflag: Integer;
+                                            const AText0: string = '';
+                                            const AText1: string = '';
+                                            const AText2: string = '';
+                                            const AText3: string = '');
+begin
+  if Aflag = 9 then
+    begin
+      StatusBar1.Panels[0].Text := C_OllamaAlive[GV_AliveOllamaFlag];
+      StatusBar1.Panels[1].Text := 'Elapsed time';
+      StatusBar1.Panels[2].Text := '';
+      StatusBar1.Panels[3].Text := ' * Stand by ...';
+    end
+  else
+    begin
+      if Aflag = 0 then StatusBar1.Panels[0].Text := AText0;
+      StatusBar1.Panels[1].Text := AText1;
+      StatusBar1.Panels[2].Text := AText2;
+      StatusBar1.Panels[3].Text := AText3;
+    end;
 end;
 
 procedure TForm_RestOllama.Do_StartRequest(const Aflag: Integer; const APrompt: string='');
@@ -1576,6 +1631,7 @@ begin
     end;
   end;
 
+  StatusBar1.Panels[2].Text := '';
   V_MyContentPrompt := Trim(Edit_ReqContent.Text);
   if (Aflag = 1) and (APrompt <> '') then
     V_MyContentPrompt := APrompt;
@@ -1583,6 +1639,7 @@ begin
   V_MyModel := ComboBox_Models.Text;
   if (V_MyContentPrompt = '') or (V_MyModel = '') then
   begin
+    StatusBar1.Panels[2].Text := 'Empty "Content / Model" is not allowed.';
     MessageDlg('Empty "Content / Model" is not allowed.', mtWarning, [mbOk], 0);
     Exit;
   end;
@@ -1633,6 +1690,11 @@ begin
   Edit_ReqContent.TextHint := V_MyContentPrompt;
   Add_LogWin('Starting REST request for URL: ' + V_BaseURL);
   Add_LogWin('With prompt/message : "' + V_MyContentPrompt+'"');
+  if CheckBox_HistoryNode.Checked and (_Assistant = '') then
+    begin
+      Add_LogWin('Failed to add assistant cause of empty content. Maybe focused node is not response mode.');
+      StatusBar1.Panels[2].Text := 'Failed to add assistant cause of empty content.';
+    end;
   Push_LogWin();
 
   FSelectionNode := TreeView_Topics.Selected;
@@ -1644,9 +1706,7 @@ begin
   // -------------------------------------------------------------------------------- //
   Add_ChattingMessage(C_CHATUser_Model, C_CHATLOC_Left, _LvTag, V_MyContentPrompt);
   // -------------------------------------------------------------------------------- //
-  StatusBar1.Panels[1].Text := '';
-  StatusBar1.Panels[2].Text := ' Prepare ...';
-  // -------------------------------------------------------------------------------- //
+  Update_StatusBar(0, '', '', '', ' Prepare ...');
   Common_RestSettings(V_DummyFlag);
   with RESTRequest_Ollama do
   begin
@@ -1670,9 +1730,8 @@ begin
     TThread.Queue(nil,
       procedure
       begin
-        StatusBar1.Panels[0].Text := Format('* Response / Read Count : %s', [BytesToKMG(AReadCount)]);
-        StatusBar1.Panels[1].Text := '* '+ MSecsToSeconds(_elapsed);
-        StatusBar1.Panels[2].Text := ' Processing ...';
+        Update_StatusBar(0, Format('* Response / Read Count : %s', [BytesToKMG(AReadCount)]),
+                          '* '+ MSecsToSeconds(_elapsed), '', ' Processing ...');
       end);
   end;
 end;
@@ -1683,8 +1742,7 @@ begin
   TThread.Queue(nil,
     procedure
     begin
-      StatusBar1.Panels[0].Text := Format('* Request / Send Count : %s', [BytesToKMG(AWriteCount)]);
-      StatusBar1.Panels[2].Text := ' Sending ...';
+      Update_StatusBar(0, Format('* Request / Send Count : %s', [BytesToKMG(AWriteCount)]), '','', ' Sending ...');
     end);
 end;
 
@@ -1700,10 +1758,7 @@ begin
   Add_LogWin('Content Length : '+ BytesToKMG(RESTResponse_Ollama.ContentLength));
   Add_LogWin(_updown);
   Add_LogWin('Elapsed Time after request : '+_elapstr);
-  StatusBar1.Panels[0].Text := '* '+_updown;
-  StatusBar1.Panels[1].Text := 'et '+  _elapstr;
-  StatusBar1.Panels[2].Text := ' * Stand by ...';
-
+  Update_StatusBar(0, '* '+_updown, 'et '+  _elapstr, '', ' * Stand by ...');
   // ------------------------------------------------------------------------- //
     Do_DisplayJson(string(RESTResponse_Ollama.Content));
   // ------------------------------------------------------------------------- //
@@ -1738,7 +1793,7 @@ begin
     C_CHATOllama_System: _user := 'Ollama < System';                             // ollama
   end;
 
-  Frame_ChattingBox.Add_Chatting_Message(_user, ALocation, ALvTag, APrompt);
+  Frame_ChattingBox.Add_Chatting_Message(_user, ALocation, ALvTag, APrompt, LockFocusNode);
   SavedToHistoryFlag := False;
 
   if CheckBox_AutoTranslation.Checked and (ALocation = C_CHATLOC_Right) then
@@ -2117,6 +2172,8 @@ end;
 
 procedure TForm_RestOllama.PageControl_ChattingResize(Sender: TObject);
 begin
+  if (csDestroying in ComponentState) then Exit;
+
   SkAnimatedImage_ChatProcess.Left := (Tabsheet_Chatting.Width -  SkAnimatedImage_ChatProcess.Width) div 2;
   SkAnimatedImage_ChatProcess.Top  := (Tabsheet_Chatting.Height - SkAnimatedImage_ChatProcess.Height);
   if SkAnimatedImage_Chat.Visible then
@@ -2212,8 +2269,7 @@ begin
   var _Request := 'Request to list models ...';
   var _BaseURL := Unit_Jsonworks.GC_BaseURL_Models;
   Add_LogWin('Starting REST request for List Models: ' + _BaseURL);
-  StatusBar1.Panels[1].Text := '';
-  StatusBar1.Panels[2].Text := ' Processing ...';
+  Update_StatusBar(1, '','', '', ' Processing ...');
   // ------------------------------------------------------------------------ //
   Add_ChattingMessage(C_CHATUser_Ollama, C_CHATLOC_Left, -1,  _Request);
   // ------------------------------------------------------------------------ //
@@ -2227,8 +2283,7 @@ begin
   V_StopWatch.Stop;
   var _elapsed := V_StopWatch.ElapsedMilliseconds;
   var _elapstr := MSecsToSeconds(_elapsed);
-  StatusBar1.Panels[1].Text := 'et '+  _elapstr;
-  StatusBar1.Panels[2].Text := ' * Stand by ...';
+  Update_StatusBar(1, '', 'et '+  _elapstr, '', ' * Stand by ...');
   // ------------------------------------------------------------------------ //
   Do_DisplayJson_Models(_responses);
   // ------------------------------------------------------------------------ //
@@ -2238,6 +2293,25 @@ begin
 end;
 
 { Translation - by Google Tanslation Service ... }
+
+procedure TForm_RestOllama.Label_TransDirClick(Sender: TObject);
+begin
+  var _message := 'Detected Language : ' +sLineBreak+sLineBreak+ Get_DetectLangForTrans;
+  MessageDlg(_message, TMsgDlgType.mtInformation, [mbOK], 0);
+end;
+
+function TForm_RestOllama.Get_DetectLangForTrans(const ASource: string = ''): string;
+begin
+  Result := '';
+  var _nodectx := ASource;
+  if _nodectx = '' then
+    _nodectx := Frame_ChattingBox.Get_NodeText;
+  if _nodectx <> '' then
+  begin
+    _nodectx := Copy(_nodectx, 1, 100);
+    Result := Get_DetectLanguageCode(_nodectx);
+  end;
+end;
 
 procedure TForm_RestOllama.Action_TranslationCommon(Sender: TObject);
 begin
@@ -2808,8 +2882,7 @@ begin
       var _Command := 'Dos Command - "'+GV_DosCommand.Command+'"';
       Add_LogWin('Starting Request (Dos) : " ' + _Command +' "');
       Push_LogWin();
-      StatusBar1.Panels[1].Text := '';
-      StatusBar1.Panels[2].Text := ' Processing ...';
+      Update_StatusBar(1, '', '', '', ' Processing ...');
       // -------------------------------------------------------------------- //
       Add_ChattingMessage(C_CHATUser_Ollama, C_CHATLOC_Left, -1, _Command);
       // -------------------------------------------------------------------- //
@@ -2823,8 +2896,7 @@ begin
        V_StopWatch.Stop;
       var _elapsed := V_StopWatch.ElapsedMilliseconds;
       var _elapstr := MSecsToSeconds(_elapsed);
-      StatusBar1.Panels[1].Text := 'et '+  _elapstr;
-      StatusBar1.Panels[2].Text := ' * Stand by ...';
+      Update_StatusBar(1, '', 'et '+  _elapstr, '', ' * Stand by ...');
       // -------------------------------------------------------------------- //
       Add_ChattingMessage(C_CHATOllama_System, C_CHATLOC_Right, -1, _responses);
       // -------------------------------------------------------------------- //
@@ -3032,7 +3104,7 @@ begin
             var _username := V_Username + ' (history)';
             if InputQuery('Add Top Node', 'New Subject', _newsubject) then
             begin
-              Frame_ChattingBox.Add_DummyHistorySubject(0, _username, 0, _newsubject);
+              Frame_ChattingBox.Add_DummyHistorySubject(0, _username, 0, _newsubject, LockFocusNode);
               // Recursive Call - Return to save history ...
               Action_AddToHistoryExecute(Self);
             end;
@@ -3066,8 +3138,11 @@ end;
 
 procedure TForm_RestOllama.Action_DelToHistoryExecute(Sender: TObject);
 begin
+  var _index := ListBox_History.ItemIndex;
+  var _dfile := FHistoryManager.Get_HistoryFile(_index);
   HistorySession := -1;
-  FHistoryManager.DeleteHistory(ListBox_History.ItemIndex);
+  if not FHistoryManager.DeleteHistory(_index) then
+    MessageDlg('Failed to Delete - '+ _dfile, TMsgDlgType.mtInformation, [mbOk], 0);
 end;
 
 procedure TForm_RestOllama.Action_ClearHistoryExecute(Sender: TObject);

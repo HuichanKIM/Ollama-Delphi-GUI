@@ -124,7 +124,7 @@ object Form_RestOllama: TForm_RestOllama
           Top = 42
           Width = 190
           Height = 17
-          Hint = 'Llava, Gemma3 ...'
+          Hint = 'Llava, Gemma3, Granite-Vision ...'
           Caption = 'Analysis Image'
           TabOrder = 0
           StyleElements = [seClient, seBorder]
@@ -558,11 +558,11 @@ object Form_RestOllama: TForm_RestOllama
           Height = 19
           Align = alClient
           Alignment = taRightJustify
-          Caption = 'Options -'
+          Caption = 'Settings-'
           Layout = tlCenter
           StyleElements = [seClient, seBorder]
-          ExplicitLeft = 155
-          ExplicitWidth = 50
+          ExplicitLeft = 158
+          ExplicitWidth = 47
           ExplicitHeight = 15
         end
         object SpeedButton_Broker: TSpeedButton
@@ -701,10 +701,13 @@ object Form_RestOllama: TForm_RestOllama
         object Label_TransDir: TLabel
           Left = 115
           Top = 27
-          Width = 11
+          Width = 13
           Height = 15
-          Caption = 'to'
+          Cursor = crHandPoint
+          Hint = 'Detect Language of Slected Content'
+          Caption = 'To'
           StyleElements = [seClient, seBorder]
+          OnClick = Label_TransDirClick
         end
         object ComboBox_TransSource: TComboBox
           Left = 56
@@ -1624,7 +1627,11 @@ object Form_RestOllama: TForm_RestOllama
       end
       item
         Text = 'Elap. 0.000'
-        Width = 120
+        Width = 100
+      end
+      item
+        Text = '...'
+        Width = 300
       end
       item
         Alignment = taRightJustify
@@ -3565,6 +3572,10 @@ object Form_RestOllama: TForm_RestOllama
     DefaultExtension = 'dat'
     FavoriteLinks = <>
     FileTypes = <
+      item
+        DisplayName = 'History All (*.dat, *.lst)'
+        FileMask = '*.dat;*.lst'
+      end
       item
         DisplayName = 'History File(*.dat)'
         FileMask = '*.dat'

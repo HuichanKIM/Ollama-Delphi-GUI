@@ -27,14 +27,15 @@ uses
   Vcl.Menus;
 
 type
-  PMessageRec = ^TMessageRec;
   TMessageRec = packed record
     FUser: string;
     FCaption: string;
     FTime: TDateTime;
     FTag: Integer;
     FLvTag: Integer;
+    FSession: Integer;  { Reserved ... }
   end;
+  PMessageRec = ^TMessageRec;
 
 type
   TFrame_ChattingBoxClass = class(TFrame)
@@ -96,15 +97,16 @@ type
     procedure InitializeEx(const AHeaderColor, ABodyColor, AFooterColor: TColor);
     procedure FinalizeEx(const AFlag: Integer);
     //
-    procedure Add_Chatting_Message(const AUser: string; const ALocation, ALvTag: Integer; const APrompt: string);
+    procedure Add_Chatting_Message(const AUser: string; const ALocation, ALvTag: Integer; const APrompt: string; const ALockFocus: Boolean = False);
     procedure Insert_Chatting_Message(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
     //
     function Get_NodeText(): string;
     function Get_NodeTextLocation(var VIndex, VLocation: Integer): string;
+    function Get_IsResponseNode(const AFlag: Integer = 0): Boolean;
     function Get_NodeRequest(): string;
     function Get_SelectedColor(): TColor;
-    procedure Do_ScrollToTop(const AFlag: Integer = 0);
-    procedure Do_ScrollToBottom(const AFlag: Integer = 0);
+    procedure Do_ScrollToTop(const AFlag: Integer = 0; const ALockFocus: Boolean = False);
+    procedure Do_ScrollToBottom(const AFlag: Integer = 0; const ALockFocus: Boolean = False);
     function Do_SaveAllText(const AFile: string): Boolean;
     function Do_DeleteNode(): Boolean;
     procedure Do_RestoreDefaultColor(const AFontOnlyFlag: Integer = 0);
@@ -114,7 +116,7 @@ type
     procedure Set_FontEx(AFont: TFont);
     // History Manager
     procedure Do_LoadAllData(const ALFile: string);
-    procedure Add_DummyHistorySubject(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
+    procedure Add_DummyHistorySubject(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string; const ALockFocus: Boolean = False);
     function Do_SaveAllData(const ASFile: string): Boolean;
     function Get_HistorySubject(): string;
     function Get_ChatHistory(const ANodeOneFlag: Boolean = False): string;
@@ -161,14 +163,14 @@ begin
     Header.Options := Header.Options - [hoAutoResize];
     Header.Columns[0].Width := ClientWidth - FVST_ColumnOffset;
     TreeOptions.AnimationOptions := [];
-    TreeOptions.MiscOptions := TreeOptions.MiscOptions + [TVTMiscOption.toVariablenodeHeight];
-    TreeOptions.AutoOptions := TreeOptions.AutoOptions - [TVTAutoOption.toAutoSpanColumns];    // too much overhead ...
-    TreeOptions.StringOptions := TreeOptions.StringOptions - [TVTStringOption.toShowStaticText];
+    TreeOptions.MiscOptions :=      TreeOptions.MiscOptions +      [TVTMiscOption.toVariablenodeHeight];
+    TreeOptions.AutoOptions :=      TreeOptions.AutoOptions -      [TVTAutoOption.toAutoSpanColumns];    // too much overhead ...
+    TreeOptions.StringOptions :=    TreeOptions.StringOptions -    [TVTStringOption.toShowStaticText];
     TreeOptions.SelectionOptions := TreeOptions.SelectionOptions + [TVTSelectionOption.toSelectNextNodeOnRemoval]-[TVTSelectionOption.toMultiSelect];
     {  Custom ... }
-    OffsetWRMagin := 30;
-    NodeHeightOffSet := FVST_NodeHeightOffSet;
     Images := VirtualImageList1;
+    OffsetWRMagin := 30;
+    NodeHeightOffSet :=   FVST_NodeHeightOffSet;
     SelectedBrushColor := FVST_NSelectionColor;  // in TBaseVirtualTree.pas ...
     Node_HeaderColor :=   FVST_NHeaderColor;
     Node_BodyColor :=     FVST_NBodyColor;
@@ -186,27 +188,40 @@ begin
   end;
 end;
 
-procedure TFrame_ChattingBoxClass.Add_Chatting_Message(const AUser: string; const ALocation, ALvTag: Integer; const APrompt: string);
+procedure TFrame_ChattingBoxClass.Add_Chatting_Message(const AUser: string; const ALocation, ALvTag: Integer; const APrompt: string; const ALockFocus: Boolean = False);
 begin
+  var _FNode := VST_ChattingBox.FocusedNode;
   with VST_ChattingBox do
   begin
+    BeginUpdate;
     ClearSelection;
     var _Node := AddChild(nil);
-    var _Data: PMessageRec := GetNodeData(_Node);
-    with _Data^ do
-    begin
-      FUser :=    AUser;
-      FCaption := APrompt;
-      FTime :=    Now;
-      FTag :=     ALocation;
-      FLvTag :=   IIF.CastBool<Integer>(ALocation = 0, ALvTag, -1);
+    try
+      var _Data: PMessageRec := GetNodeData(_Node);
+      with _Data^ do
+      begin
+        FUser :=    AUser;
+        FCaption := APrompt;
+        FTime :=    Now;
+        FTag :=     ALocation;
+        FLvTag :=   IIF.CastBool<Integer>(ALocation = 0, ALvTag, -1);
+        FSession := 0;
+      end;
+    finally
+      EndUpdate;
     end;
 
     FocusedNode := _Node;
     Selected[_Node] := True;
     InvalidateToBottom(_Node);
-
     Perform(WM_VSCROLL, SB_BOTTOM, 0);
+
+    if ALockFocus and (_FNode <> nil) then
+    begin
+      FocusedNode := _FNode;
+      Selected[_FNode] := True;
+      Perform(WM_VSCROLL, SB_BOTTOM, 0);
+    end;
   end;
 end;
 
@@ -215,35 +230,41 @@ begin
   var _bottomflag: Boolean := False;
   with VST_ChattingBox do
   begin
+    BeginUpdate;
     var _Node := FocusedNode;
-    if (_Node <> nil) and (_Node.Index = AIndex) then
-      begin
-        var _next: PVirtualNode := _Node.NextSibling;
-        if _next <> nil then
-          begin
-            _Node := InsertNode(_next, amInsertBefore);
-          end
-        else
-          begin
-            _bottomflag := True;
-            _Node := AddChild(nil);
-          end;
-      end
-    else
-      begin
-        _bottomflag := True;
-        _Node := AddChild(nil);
-      end;
-
     ClearSelection;
-    var _Data: PMessageRec := GetNodeData(_Node);
-    with _Data^ do
-    begin
-      FUser :=    AUser;
-      FCaption := APrompt;
-      FTime :=    Now;
-      FTag :=     ALocation;
-      FLvTag :=   -1;
+    try
+      if (_Node <> nil) and (_Node.Index = AIndex) then
+        begin
+          var _next: PVirtualNode := _Node.NextSibling;
+          if _next <> nil then
+            begin
+              _Node := InsertNode(_next, amInsertBefore);
+            end
+          else
+            begin
+              _bottomflag := True;
+              _Node := AddChild(nil);
+            end;
+        end
+      else
+        begin
+          _bottomflag := True;
+          _Node := AddChild(nil);
+        end;
+
+      var _Data: PMessageRec := GetNodeData(_Node);
+      with _Data^ do
+      begin
+        FUser :=    AUser;
+        FCaption := APrompt;
+        FTime :=    Now;
+        FTag :=     ALocation;
+        FLvTag :=   -1;
+        FSession := 0;
+      end;
+    finally
+      EndUpdate;
     end;
 
     FocusedNode := _Node;
@@ -253,48 +274,117 @@ begin
   end;
 end;
 
-procedure TFrame_ChattingBoxClass.Add_DummyHistorySubject(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
+procedure TFrame_ChattingBoxClass.Add_DummyHistorySubject(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string; const ALockFocus: Boolean = False);
 begin
+  var _FNode := VST_ChattingBox.FocusedNode;
   with VST_ChattingBox do
   begin
-    var _Node := GetFirst;
-    if _Node <> nil then
-      begin
-        var _next := _Node.NextSibling;
-        if _next <> nil then
-          _Node := InsertNode(_Node, amInsertBefore)
-        else
-          _Node := AddChild(nil);
-      end
-    else
-      _Node := AddChild(nil);
-
+    BeginUpdate;
     ClearSelection;
-    var _Data: PMessageRec := GetNodeData(_Node);
-    with _Data^ do
-    begin
-      FUser :=    AUser;
-      FCaption := APrompt;
-      FTime :=    Now;
-      FTag :=     ALocation;
-      FLvTag :=   -1;
-    end;
+    var _Node := GetFirst;
+    try
+      if _Node <> nil then
+        begin
+          var _next := _Node.NextSibling;
+          if _next <> nil then
+            _Node := InsertNode(_Node, amInsertBefore)
+          else
+            _Node := AddChild(nil);
+        end
+      else
+        _Node := AddChild(nil);
 
-    var _second := _Node.NextSibling;
-    if _second <> nil then
-    begin
-      var _seconddata: PMessageRec := GetNodeData(_second);
-      if (_seconddata^.FTag = 0) and SameText(_seconddata^.FUser, AUser) then      // V_Username + ' (history)';
-        try
-          DeleteNode(_second);
-        except
-          Abort;
-        end;
+      var _Data: PMessageRec := GetNodeData(_Node);
+      with _Data^ do
+      begin
+        FUser :=    AUser;
+        FCaption := APrompt;
+        FTime :=    Now;
+        FTag :=     ALocation;
+        FLvTag :=   -1;
+        FSession := 0;
+      end;
+
+      var _second := _Node.NextSibling;
+      if _second <> nil then
+      begin
+        var _seconddata: PMessageRec := GetNodeData(_second);
+        if (_seconddata^.FTag = 0) and SameText(_seconddata^.FUser, AUser) then      // V_Username + ' (history)';
+          try
+            DeleteNode(_second);
+          except
+            Abort;
+          end;
+      end;
+    finally
+      EndUpdate;
     end;
 
     FocusedNode := _Node;
     Selected[_Node] := True;
     Perform(WM_VSCROLL, SB_TOP, 0);
+    if ALockFocus and (_FNode <> nil) then
+    begin
+      FocusedNode := _FNode;
+      Selected[_FNode] := True;
+      Perform(WM_VSCROLL, SB_TOP, 0);
+    end;
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.Do_ScrollToTop(const AFlag: Integer; const ALockFocus: Boolean);
+begin
+  if ALockFocus then
+  with VST_ChattingBox do
+  begin
+    UpdateScrollBars(True);
+    Invalidate;
+    Perform(WM_VSCROLL, SB_TOP, 0);
+    Exit;
+  end;
+
+  with VST_ChattingBox do
+  begin
+    var _node := GetFirst();
+    if Assigned(_node) then
+    begin
+      ClearSelection;
+      IsVisible[_node] := True;
+      Selected[_node] := True;
+      FocusedNode := _node;
+    end;
+    UpdateScrollBars(True);
+    Invalidate;
+
+    Perform(WM_VSCROLL, SB_TOP, 0);
+  end;
+end;
+
+procedure TFrame_ChattingBoxClass.Do_ScrollToBottom(const AFlag: Integer; const ALockFocus: Boolean);
+begin
+  if ALockFocus then
+  with VST_ChattingBox do
+  begin
+    UpdateScrollBars(True);
+    Invalidate;
+    Perform(WM_VSCROLL, SB_BOTTOM, 0);
+    Exit;
+  end;
+
+  with VST_ChattingBox do
+  begin
+    var _node := GetLast();
+    if Assigned(_node) then
+    begin
+      ClearSelection;
+      IsVisible[_node] := True;
+      Selected[_node] := True;
+      FocusedNode := _node;
+    end;
+    UpdateScrollBars(True);
+    Invalidate;
+
+    Perform(WM_VSCROLL, SB_BOTTOM, 0);
   end;
 end;
 
@@ -569,6 +659,20 @@ begin
   end;
 end;
 
+function TFrame_ChattingBoxClass.Get_IsResponseNode(const AFlag: Integer): Boolean;
+begin
+  Result := False;
+  with VST_ChattingBox do
+  begin
+    var _node := FocusedNode;
+    if Assigned(_node) then
+    begin
+      var _Data: PMessageRec := GetNodeData(_node);
+      Result := (_Data <> nil) and (_Data^.FTag = 1);
+    end;
+  end;
+end;
+
 function TFrame_ChattingBoxClass.Get_SelectedColor: TColor;
 begin
   Result := VST_ChattingBox.SelectedBrushColor;
@@ -615,10 +719,11 @@ begin
   begin
     FVST_NBodyFontSize := 10;
     with VST_ChattingBox do
-    begin
+    try
       BeginUpdate;
       Font.Name := Self.Font.Name;
       Font.Size := FVST_NBodyFontSize;
+    finally
       EndUpdate;
     end;
 
@@ -641,7 +746,7 @@ begin
   GV_ReservedColor[3] := FVST_NFooterColor;
 
   with VST_ChattingBox do
-  begin
+  try
     BeginUpdate;
     Node_HeaderColor :=   FVST_NHeaderColor;
     Node_BodyColor :=     FVST_NBodyColor;
@@ -649,6 +754,7 @@ begin
     Font.Name :=          FVST_FontName;
     Font.Size :=          FVST_NBodyFontSize;
     SelectedBrushColor := FVST_NSelectionColor;  { > Include Invalidation ... }
+  finally
     EndUpdate;
   end;
 end;
@@ -677,12 +783,13 @@ begin
   end;
 
   with VST_ChattingBox do
-  begin
+  try
     BeginUpdate;
     Node_HeaderColor :=   FVST_NHeaderColor;
     Node_BodyColor :=     FVST_NBodyColor;
     Node_FooterColor :=   FVST_NFooterColor;
     SelectedBrushColor := FVST_NSelectionColor;  { > Include Invalidation ... }
+  finally
     EndUpdate;
   end;
 end;
@@ -710,33 +817,36 @@ begin
   var _CellText: string := '';
   try
     _sourcelist.BeginUpdate;
-    var _Node  : PVirtualNode := VST_ChattingBox.GetFirst;
-    while Assigned(_Node) do
-    begin
-      _AddString := EmptyStr;
-      _Data := VST_ChattingBox.GetNodeData(_Node);
-      if _Data <> nil then
+    try
+      var _Node  : PVirtualNode := VST_ChattingBox.GetFirst;
+      while Assigned(_Node) do
       begin
-        _qtag := _Data^.FTag;
-          if _qtag = 0 then
-            begin
-              _prefixr := 'Q';
-              Inc(_index);
-            end
-          else
-            _prefixr := 'R';
-        _prefixn := Format('[%s.%.3d] ', [ _prefixr, _index]);
-        _CellText :=  _prefixn + _Data^.FUser;
-        _AddString := _AddString + _CellText +sLineBreak;
-        _CellText :=  _Data^.FCaption+ FormatDateTime('( hh:nn:ss )', _Data^.FTime);
-        _AddString := _AddString + _CellText +sLineBreak;
+        _AddString := EmptyStr;
+        _Data := VST_ChattingBox.GetNodeData(_Node);
+        if _Data <> nil then
+        begin
+          _qtag := _Data^.FTag;
+            if _qtag = 0 then
+              begin
+                _prefixr := 'Q';
+                Inc(_index);
+              end
+            else
+              _prefixr := 'R';
+          _prefixn := Format('[%s.%.3d] ', [ _prefixr, _index]);
+          _CellText :=  _prefixn + _Data^.FUser;
+          _AddString := _AddString + _CellText +sLineBreak;
+          _CellText :=  _Data^.FCaption+ FormatDateTime('( hh:nn:ss )', _Data^.FTime);
+          _AddString := _AddString + _CellText +sLineBreak;
 
-        _sourcelist.Add(_AddString);
+          _sourcelist.Add(_AddString);
+        end;
+
+        _Node := _Node.NextSibling;
       end;
-
-      _Node := _Node.NextSibling;
+    finally
+      _sourcelist.EndUpdate;
     end;
-    _sourcelist.EndUpdate;
     if _sourcelist.Count > 0 then
     _sourcelist.SaveToFile(AFile);
   finally
@@ -744,44 +854,6 @@ begin
   end;
 
   Result := FileExists(AFile);
-end;
-
-procedure TFrame_ChattingBoxClass.Do_ScrollToTop(const AFlag: Integer);
-begin
-  with VST_ChattingBox do
-  begin
-    var _node := GetFirst();
-    if Assigned(_node) then
-    begin
-      ClearSelection;
-      IsVisible[_node] := True;
-      Selected[_node] := True;
-      FocusedNode := _node;
-    end;
-    UpdateScrollBars(True);
-    Invalidate;
-
-    Perform(WM_VSCROLL, SB_TOP, 0);
-  end;
-end;
-
-procedure TFrame_ChattingBoxClass.Do_ScrollToBottom(const AFlag: Integer);
-begin
-  with VST_ChattingBox do
-  begin
-    var _node := GetLast();
-    if Assigned(_node) then
-    begin
-      ClearSelection;
-      IsVisible[_node] := True;
-      Selected[_node] := True;
-      FocusedNode := _node;
-    end;
-    UpdateScrollBars(True);
-    Invalidate;
-
-    Perform(WM_VSCROLL, SB_BOTTOM, 0);
-  end;
 end;
 
 { Save/Load Node Data for History Manager ------------------------------------ }
@@ -807,29 +879,40 @@ begin
     _len := SizeOf(_Data^.FLvTag);
     Write(_len, SizeOf(_len));
     Write(_Data^.FLvTag, _len);
+    _len := SizeOf(_Data^.FSession);
+    Write(_len, SizeOf(_len));
+    Write(_Data^.FSession, _len);
   end;
 end;
 
 procedure TFrame_ChattingBoxClass.VST_ChattingBoxLoadNode(Sender: TBaseVirtualTree; Node: PVirtualNode; Stream: TStream);
 begin
   var _Data: PMessageRec := Sender.GetNodeData(Node);
-  var _len: Integer := 0;
+  var _leno: Integer := 0;
+  var _lenn: Int64 := Stream.Size;                         { Cover for Version < 1.1.1 }
   var _imagetag: Integer := -1;
   with Stream do
   begin
-    Read(_len, SizeOf(_len));
-    SetLength(_Data^.FUser, _len);
-    Read(PChar(_Data^.FUser)^, _len * SizeOf(Char));
-    Read(_len, SizeOf(_len));
-    SetLength(_Data^.FCaption, _len);
-    Read(PChar(_Data^.FCaption)^, _len * SizeOf(Char));
+    Read(_leno, SizeOf(_leno));
+    SetLength(_Data^.FUser, _leno);
+    Read(PChar(_Data^.FUser)^, _leno * SizeOf(Char));        _lenn := _lenn - _leno* SizeOf(Char);
+    Read(_leno, SizeOf(_leno));
+    SetLength(_Data^.FCaption, _leno);
+    Read(PChar(_Data^.FCaption)^, _leno * SizeOf(Char));     _lenn := _lenn - _leno* SizeOf(Char);
 
-    Read(_len, SizeOf(_len));
-    Read(_Data^.FTime, _len);
-    Read(_len, SizeOf(_len));
-    Read(_Data^.FTag, _len);
-    Read(_len, SizeOf(_len));
-    Read(_imagetag, _len);
+    Read(_leno, SizeOf(_leno));                              _lenn := _lenn - _leno;
+    Read(_Data^.FTime, _leno);
+    Read(_leno, SizeOf(_leno));                              _lenn := _lenn - _leno;
+    Read(_Data^.FTag, _leno);
+    Read(_leno, SizeOf(_leno));                              _lenn := _lenn - _leno;
+    Read(_imagetag, _leno);
+    if _lenn > 0 then                                       { Cover for Version < 1.1.1 }
+      begin
+        Read(_leno, SizeOf(_leno));
+        Read(_Data^.FSession, _leno);
+      end
+    else
+      _Data^.FSession := 0;
   end;
   if (_imagetag > 0) and (_Data^.FTime < GV_DateTime) then
     _imagetag := 0; // Virtual Image Index ...
@@ -859,10 +942,13 @@ begin
     Clear;
     NodeDataSize := SizeOf(TMessageRec);
     BeginUpdate;
+    try
     // ------------------------------------------------------------------------ //
     LoadFromFile(ALFile);
     // ------------------------------------------------------------------------ //
-    EndUpdate;
+    finally
+      EndUpdate;
+    end;
     var _Node: PVirtualNode := GetFirst;
     FocusedNode := _Node;
     Selected[_Node] := True;
@@ -896,15 +982,14 @@ begin
       begin
         var _Data: PMessageRec := nil;
         _Data := VST_ChattingBox.GetNodeData(_Node);
-
-        if _Data^.FTag = 1 then
+        if (_Data <> nil) and (_Data^.FTag = 1) then
           Result := _Data^.FCaption;
       end;
     end
   else
     begin
       var _Data: PMessageRec := nil;
-      var _Node  : PVirtualNode := VST_ChattingBox.GetFirst;
+      var _Node: PVirtualNode := VST_ChattingBox.GetFirst;
       while Assigned(_Node) do
       try
         _Data := VST_ChattingBox.GetNodeData(_Node);

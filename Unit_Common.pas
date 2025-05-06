@@ -55,8 +55,8 @@ const
     WM_NETHTTP_MESSAGE_ALIST = WM_NETHTTP_MESSAGE + 2;
 
 const
-  GC_Version0     = 'ver. 1.1.0';
-  GC_Version1     = 'ver. 1.1.0 (2025.05.03)';
+  GC_Version0     = 'ver. 1.1.1';
+  GC_Version1     = 'ver. 1.1.1 (2025.05.06)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024-2025 JNJ Labs. Seoul, Korea.';
