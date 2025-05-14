@@ -98,7 +98,7 @@ type
     procedure FinalizeEx(const AFlag: Integer);
     //
     procedure Add_Chatting_Message(const AUser: string; const ALocation, ALvTag: Integer; const APrompt: string; const ALockFocus: Boolean = False);
-    procedure Insert_Chatting_Message(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
+    procedure Insert_Chatting_Translation(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
     //
     function Get_NodeText(): string;
     function Get_NodeTextLocation(var VIndex, VLocation: Integer): string;
@@ -196,6 +196,7 @@ begin
     BeginUpdate;
     ClearSelection;
     var _Node := AddChild(nil);
+    MultiLine[_Node] := True; // Modified by ichin 2025-05-06 화 오후 3:48:09
     try
       var _Data: PMessageRec := GetNodeData(_Node);
       with _Data^ do
@@ -225,7 +226,7 @@ begin
   end;
 end;
 
-procedure TFrame_ChattingBoxClass.Insert_Chatting_Message(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
+procedure TFrame_ChattingBoxClass.Insert_Chatting_Translation(const AIndex: Integer; const AUser: string; const ALocation: Integer; const APrompt: string);
 begin
   var _bottomflag: Boolean := False;
   with VST_ChattingBox do
@@ -253,13 +254,14 @@ begin
           _Node := AddChild(nil);
         end;
 
+      MultiLine[_Node] := True; // Modified by ichin 2025-05-06 화 오후 3:48:09
       var _Data: PMessageRec := GetNodeData(_Node);
       with _Data^ do
       begin
         FUser :=    AUser;
         FCaption := APrompt;
         FTime :=    Now;
-        FTag :=     ALocation;
+        FTag :=     ALocation; // = 2
         FLvTag :=   -1;
         FSession := 0;
       end;
@@ -269,6 +271,7 @@ begin
 
     FocusedNode := _Node;
     Selected[_Node] := True;
+    InvalidateNode(_Node);  // Modified by ichin 2025-05-06 화 오후 3:38:19
     if _bottomflag then
     Perform(WM_VSCROLL, SB_BOTTOM, 0);
   end;
@@ -294,6 +297,7 @@ begin
       else
         _Node := AddChild(nil);
 
+      MultiLine[_Node] := True; // Modified by ichin 2025-05-06 화 오후 3:48:09
       var _Data: PMessageRec := GetNodeData(_Node);
       with _Data^ do
       begin
@@ -322,11 +326,14 @@ begin
 
     FocusedNode := _Node;
     Selected[_Node] := True;
+    InvalidateNode(_Node); // Modified by ichin 2025-05-06 화 오후 3:38:28
     Perform(WM_VSCROLL, SB_TOP, 0);
+
     if ALockFocus and (_FNode <> nil) then
     begin
       FocusedNode := _FNode;
       Selected[_FNode] := True;
+      InvalidateNode(_FNode);     // Modified by ichin 2025-05-06 화 오후 3:38:45
       Perform(WM_VSCROLL, SB_TOP, 0);
     end;
   end;
@@ -879,6 +886,7 @@ begin
     _len := SizeOf(_Data^.FLvTag);
     Write(_len, SizeOf(_len));
     Write(_Data^.FLvTag, _len);
+    //
     _len := SizeOf(_Data^.FSession);
     Write(_len, SizeOf(_len));
     Write(_Data^.FSession, _len);
@@ -906,6 +914,7 @@ begin
     Read(_Data^.FTag, _leno);
     Read(_leno, SizeOf(_leno));                              _lenn := _lenn - _leno;
     Read(_imagetag, _leno);
+
     if _lenn > 0 then                                       { Cover for Version < 1.1.1 }
       begin
         Read(_leno, SizeOf(_leno));

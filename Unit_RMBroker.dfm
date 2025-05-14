@@ -34,12 +34,11 @@ object Form_RMBroker: TForm_RMBroker
       Left = 33
       Top = 3
       Width = 40
-      Height = 19
+      Height = 15
       Margins.Left = 5
       Align = alLeft
       Caption = 'Current'
       Layout = tlCenter
-      ExplicitHeight = 15
     end
     object Label_Connection: TLabel
       AlignWithMargins = True

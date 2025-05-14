@@ -129,6 +129,7 @@ end;
 // Languagelayer - https://languagelayer.com/
 // access_key - Get private API Access Key from Languagelayer
 // save filename at app path as "languagelayer_accesskey.key"  (ex: accesskey=987654321)
+// Accurate ?
 function Get_DetectLanguageCode(const AText: string): string;
 begin
   Result := '';
@@ -157,11 +158,15 @@ begin
 
   if _getflag then
   try
-    var _Resp := TEncoding.UTF8.GetString(_Responses.Bytes, 0, _Responses.Size);
-    var _JsonResp := TJSONObject.ParseJSONValue(_Resp) as TJSONObject;
+    var _RawResp :=  TEncoding.UTF8.GetString(_Responses.Bytes, 0, _Responses.Size);
+    var _JsonResp := TJSONObject.ParseJSONValue(_RawResp) as TJSONObject;
     var _DataArr := _JsonResp.GetValue<TJSONArray>('results');
-    Result := Format(' code - [ %s ]'+sLineBreak+' language - %s', [_DataArr.Items[0].GetValue<string>('language_code'),
-                                                                    _DataArr.Items[0].GetValue<string>('language_name')]);
+    try
+      Result := Format(' code - [ %s ]'+sLineBreak+' name - [ %s ]', [_DataArr.Items[0].GetValue<string>('language_code'),
+                                                                      _DataArr.Items[0].GetValue<string>('language_name')]);
+    finally
+      _JsonResp.Free;
+    end;
   finally
     _Responses.Free;
   end;

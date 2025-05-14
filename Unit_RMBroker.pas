@@ -286,7 +286,7 @@ begin
     Exit;
   end;
   // ------------------------------------------------------------------------------------------ //
-  FPrompt_Rm := Unit_Common.Get_ReplaceSpecialChar4Json(FPrompt_Rm); // Duplicated from User ?
+  FPrompt_Rm := Unit_Jsonworks.Escape_String2JSON(FPrompt_Rm);//Unit_Common.Get_ReplaceSpecialChar4Json(FPrompt_Rm); // Duplicated from User ?
   // ------------------------------------------------------------------------------------------ //
   var _RawParams: string := Unit_Jsonworks.Get_RequestParams_Chat(FMmodel_Rm, FPrompt_Rm, False, 0, False, nil);
   StatusBar_RM.SimpleText := '* Requesting ...';
@@ -359,7 +359,7 @@ begin
   // ----------------------------------------------------------------------------------- //
   var _Responses := Unit_Jsonworks.Get_DisplayJson(TDIsplay_Type.disp_Content, {False, }
                                                    string(RESTResponse_RM.Content));
-  _Responses := Unit_Common.Get_ReplaceSpecialChar4Json(_Responses);
+  _Responses := Unit_Jsonworks.Escape_String2JSON(_Responses);//Unit_Common.Get_ReplaceSpecialChar4Json(_Responses);
   // ----------------------------------------------------------------------------------- //
   DM_Server.Response_ToClient(FUser_Rm, FQueue_Rm, FMmodel_Rm, _Responses);
   // ----------------------------------------------------------------------------------- //

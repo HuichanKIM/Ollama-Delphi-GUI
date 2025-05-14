@@ -227,9 +227,6 @@ Coordinates=1672,1101,150,36
 [Frame_ChattingBox.N3]
 Coordinates=641,1131,149,36
 
-[Memo_Memo]
-Coordinates=1240,925,92,58
-
 [Panel_ChatRequestBox]
 Coordinates=1434,232,151,58
 
@@ -565,4 +562,7 @@ Coordinates=1944,936,163,36
 
 [Splitter_Log]
 Coordinates=1584,1205,62,36
+
+[Memo_ResponseLive]
+Coordinates=1240,925,92,58
 

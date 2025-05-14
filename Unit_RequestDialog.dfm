@@ -6,7 +6,7 @@ object Form_RequestDialog: TForm_RequestDialog
   BorderStyle = bsDialog
   Caption = 'Chatting Dialog'
   ClientHeight = 230
-  ClientWidth = 345
+  ClientWidth = 364
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,6 +19,9 @@ object Form_RequestDialog: TForm_RequestDialog
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
+  DesignSize = (
+    364
+    230)
   TextHeight = 15
   object Label1: TLabel
     Left = 8
@@ -28,11 +31,12 @@ object Form_RequestDialog: TForm_RequestDialog
     Caption = 'Prompt / Message'
   end
   object Label_Clear: TLabel
-    Left = 315
+    Left = 334
     Top = 9
     Width = 26
     Height = 13
     Cursor = crHandPoint
+    Anchors = [akTop, akRight]
     Caption = 'Clear'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clSilver
@@ -42,21 +46,24 @@ object Form_RequestDialog: TForm_RequestDialog
     ParentFont = False
     StyleElements = [seClient, seBorder]
     OnClick = Label_ClearClick
+    ExplicitLeft = 315
   end
   object SpeedButton_Trans: TSpeedButton
-    Left = 241
+    Left = 260
     Top = 6
     Width = 67
     Height = 17
+    Anchors = [akTop, akRight]
     Caption = 'Trans.'
     ImageIndex = 39
     ImageName = 'ic_format_size_48px'
     Images = Form_RestOllama.SVGIconVirtualImageList1
     OnClick = SpeedButton_TransClick
+    ExplicitLeft = 241
   end
   object Label2: TLabel
     Left = 8
-    Top = 184
+    Top = 196
     Width = 170
     Height = 15
     Caption = '* Invalid characters:  ",  {, },  [,  ]'
@@ -66,29 +73,34 @@ object Form_RequestDialog: TForm_RequestDialog
     Font.Name = 'Segoe UI'
     Font.Style = [fsBold]
     ParentFont = False
+    Visible = False
     StyleElements = [seClient, seBorder]
   end
   object Button_OK: TButton
-    Left = 256
+    Left = 275
     Top = 192
     Width = 82
     Height = 25
+    Anchors = [akRight, akBottom]
     Caption = 'Request'
     ImageIndex = 12
     ImageName = 'All\ic_send_48px'
     Images = Form_RestOllama.SVGIconVirtualImageList1
     ModalResult = 1
     TabOrder = 0
+    ExplicitLeft = 256
   end
   object Memo_Request: TMemo
     AlignWithMargins = True
     Left = 5
     Top = 29
-    Width = 335
-    Height = 144
+    Width = 354
+    Height = 149
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Lines.Strings = (
       'Memo_Request')
     ScrollBars = ssVertical
     TabOrder = 1
+    ExplicitWidth = 335
   end
 end

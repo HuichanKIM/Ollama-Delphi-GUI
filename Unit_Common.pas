@@ -55,8 +55,8 @@ const
     WM_NETHTTP_MESSAGE_ALIST = WM_NETHTTP_MESSAGE + 2;
 
 const
-  GC_Version0     = 'ver. 1.1.1';
-  GC_Version1     = 'ver. 1.1.1 (2025.05.06)';
+  GC_Version0     = 'ver. 1.1.2';
+  GC_Version1     = 'ver. 1.1.2 (2025.05.14)';
   GC_MainCaption0 = 'Ollama Client GUI  '+GC_Version0;
   GC_MainCaption1 = 'Ollama Client GUI  '+GC_Version1;
   GC_CopyRights   = 'Copyright ' + Char(169) + ' 2024-2025 JNJ Labs. Seoul, Korea.';
@@ -151,31 +151,31 @@ type
 
 procedure Global_TrimAppMemorySizeEx(const AStrategy: Integer);
 procedure InitializePaths();
-function Is_Hangul(const AText: string): Boolean;
-function Is_ExternalCmd(const AText: string): Boolean;
+function  Is_Hangul(const AText: string): Boolean;
+function  Is_ExternalCmd(const AText: string): Boolean;
 
-function Get_ReplaceSpecialChar4Trans(const AText: string): string;
-function Get_ReplaceSpecialChar4Json(const AText: string): string;
+function  Get_ReplaceSpecialChar4Trans(const AText: string): string;
 
-function ReadAllText_Unicode(const AFilePath: string=''): string;
-function WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
-function IOUtils_ReadAllText(const AFilePath: string=''): string;
-function IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
+function  ReadAllText_Unicode(const AFilePath: string=''): string;
+function  WriteAllText_Unicode(const AFilePath, AContents: string): Boolean;
+function  IOUtils_ReadAllText(const AFilePath: string=''): string;
+function  IOUtils_WriteAllText(const AFilePath, AContents: string): Boolean;
 
-function BytesToKMG(AValue: Int64): string;
-function Get_SystemInfo(): string;
-function MSecsToTime(const AMSec: Int64): string;
-function MSecsToSeconds(const AMSec: Int64): string;
+function  BytesToKMG(AValue: Int64): string;
+function  Get_SystemInfo(): string;
+function  MSecsToTime(const AMSec: Int64): string;
+function  MSecsToSeconds(const AMSec: Int64): string;
 procedure SimpleSound_Common(const AFlag: Boolean; const AIndex: Integer);
-function LoadFromFileBuffered_String(const AFileName: string): string;
+function  LoadFromFileBuffered_String(const AFileName: string): string;
 function  Can_Focus(Control: TWinControl): Boolean;
 procedure Set_Focus(Control: TWinControl);
-function Safety_DeleteFile(const AFile: string): Boolean;
+function  Safety_DeleteFile(const AFile: string): Boolean;
+function  Trim_Ex(const AString: string): string;
 
 { Methods / Private in Unit_Common ... }
-function Get_UsersWindowsLanguage: string;
-function Get_LocaleIDString(const AFlag: Integer = 0): string;
-function Get_GlobalMemoryUsed2GB(var VTotal, VAvail: string): DWORD;
+function  Get_UsersWindowsLanguage: string;
+function  Get_LocaleIDString(const AFlag: Integer = 0): string;
+function  Get_GlobalMemoryUsed2GB(var VTotal, VAvail: string): DWORD;
 
 { Variables ... }
 var
@@ -224,6 +224,11 @@ uses
 
 { The CanFocus VCL function is totally flawed and unreliable.}
 
+procedure Clear_Focus(const AForm: TForm);
+begin
+  AForm.ActiveControl := nil;
+end;
+
 function Can_Focus(Control: TWinControl): Boolean;
 begin
   Result := Control.CanFocus and Control.Enabled and Control.Visible;
@@ -254,17 +259,42 @@ end;
 { ... }
 procedure GetResizedImage_WIC(const ASource: string; ADest: TImage; const ANewWidth, ANewHeight: Integer);
 begin
-  var _WIC := TWICImage.Create;
-  _WIC.LoadFromFile(ASource);
-  var _WIC2 := _WIC.CreateScaledCopy(ANewWidth, ANewHeight);
+  var _WIC1 := TWICImage.Create;
+  _WIC1.LoadFromFile(ASource);
+  var _WIC2 := _WIC1.CreateScaledCopy(ANewWidth, ANewHeight);
   try
     ADest.Picture.Assign(_WIC2);
   finally
-    _WIC.Free;
+    _WIC1.Free;
     _WIC2.Free;
   end;
 end;
 
+{$ZEROBASEDSTRINGS ON}
+function Trim_Ex(const AString: string): string;
+begin
+  Result := AString;
+  var _len := AString.Length - 1;  // AString.Chars
+  var _pos := 0;
+
+  // Check if the string is already trimmed
+  if (_len > -1) and (AString.Chars[_pos] > ' ') and (Ord(AString.Chars[_pos]) <> 160) and
+    (AString.Chars[_len] > ' ') and (Ord(AString.Chars[_len]) <> 160) then
+    Exit(AString);
+
+  // Remove leading spaces including ASCII 32 and 160
+  while (_pos <= _len) and ((AString.Chars[_pos] <= ' ') or (Ord(AString.Chars[_pos]) = 160)) do
+    Inc(_pos);
+
+  if _pos > _len then Exit('');
+
+  // Remove trailing spaces including ASCII 32 and 160
+  while (AString.Chars[_len] <= ' ') or (Ord(AString.Chars[_len]) = 160) do
+    Dec(_len);
+
+  Result := AString.SubString(_pos, _len - _pos + 1);
+end;
+{$ZEROBASEDSTRINGS OFF}
 
 { TResourceStream_Ex - MultiLoad ... }
 

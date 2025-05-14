@@ -90,6 +90,11 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
       end
       item
         CollectionIndex = 2
+        CollectionName = 'ic_text_fields_white_24dp'
+        Name = 'ic_text_fields_white_24dp'
+      end
+      item
+        CollectionIndex = 3
         CollectionName = 'ic_content_copy_white_24dp'
         Name = 'ic_content_copy_white_24dp'
       end>
@@ -421,6 +426,17 @@ object Frame_ChattingBoxClass: TFrame_ChattingBoxClass
               EB4055552493490C0683397970E5D2C2F611E2CB68342A689AF6FCD61A689AF6
               3C1A8D0A42882FEBD8BF79E9037871E98BFFFBB3E51F8D506DC0E313565A0000
               000049454E44AE426082}
+          end>
+      end
+      item
+        Name = 'ic_text_fields_white_24dp'
+        SourceImages = <
+          item
+            Image.Data = {
+              89504E470D0A1A0A0000000D49484452000000180000001808040000004A7EF5
+              730000002B4944415438CB63601826E07FC37F5CA0618034606825A48C2A1AB0
+              38B361803510E9A7510DC4681819000028620E1AA0E2E9680000000049454E44
+              AE426082}
           end>
       end
       item

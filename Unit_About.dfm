@@ -79,7 +79,7 @@ object Form_About: TForm_About
       Height = 387
       Margins.Left = 10
       Margins.Right = 10
-      ActivePage = TabSheet_About
+      ActivePage = TabSheet_Settings
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clSilver

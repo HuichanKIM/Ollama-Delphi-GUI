@@ -98,9 +98,10 @@ begin
     FLinkedFileList.LoadFromFile(FLinkedFile);
     try
       if _HistoryList.Count <= FLinkedFileList.Count  then   // To cope with an error situation
-      begin
-        FListBox.Clear;
-        FListBox.Items.BeginUpdate;
+      FListBox.Clear;
+      FListBox.Items.BeginUpdate;
+      with FListBox do
+      try
         var _hisObject: THisObject := nil;
         var _Subject: string := '';
         var _File: string := '';
@@ -109,9 +110,10 @@ begin
             _Subject :=   _HistoryList.Strings[_i];
             _File :=      FLinkedFileList.Strings[_i];
             _hisObject := THisObject.Create(_File);
-            FListBox.AddItem(_Subject, TObject(_hisObject));
+            AddItem(_Subject, TObject(_hisObject));
           end;
-        FListBox.Items.EndUpdate;
+      finally
+        Items.EndUpdate;
       end;
     finally
       _HistoryList.Free;
@@ -198,7 +200,7 @@ begin
     end
   else
     begin
-      UpdateHistory(0);
+      UpdateHistory(0);     // SaveToFile ...
       FreeListObjects();
     end;
 
@@ -223,23 +225,24 @@ begin
   var _index := FListBox.Items.IndexOf(ASubject);
 
   FListBox.Items.BeginUpdate;
+  with FListBox do
   try
     if _index < 0 then
       begin
         var _hisObject: THisObject := THisObject.Create(AFile);
-        if FListBox.Items.Count = 0 then
-          FListBox.AddItem(ASubject, TObject(_hisObject))
+        if Items.Count = 0 then
+          AddItem(ASubject, TObject(_hisObject))
         else
-          FListBox.Items.InsertObject(0, ASubject, TObject(_hisObject));
+          Items.InsertObject(0, ASubject, TObject(_hisObject));
         Result := 0;
       end
     else
       begin
         Result := _index;
-        THisObject(FListBox.Items.Objects[_index]).ho_Filename := AFile;
+        THisObject(Items.Objects[_index]).ho_Filename := AFile;
       end;
   finally
-    FListBox.Items.EndUpdate;
+    Items.EndUpdate;
   end;
 
   UpdateHistory(2);
@@ -413,39 +416,11 @@ begin
   FreeListObjects(True);
 end;
 
-// referance
+{ Referance ...
 
-{ THisListBox ...
+  TFileStream.WriteComponent(ListBox_History);
+  TFileStream.ReadComponent(ListBox_History);
 
-procedure THisListBox.WndProc(var Message: TMessage);
-begin
-  case Message.Msg of
-    LB_ADDSTRING, LB_INSERTSTRING, LB_DELETESTRING:
-    begin
-      // for LB_(ADD|INSERT)STRING, Message.Result is the 0-based
-      // index of the added string, or a LB_ERR... error code.
-      //
-      // for LB_DELETESTRING, Message.Result is the number of items
-      // remaining in the list, or a LB_ERR... error code.
-      //
-      inherited;
-      if (Message.Result >= 0) and Assigned(FOnItemCountChange) then
-        FOnItemCountChange(Self);
-    end;
-    LB_RESETCONTENT:
-    begin
-      // the Message.Result is not used in this message.
-      //
-      var OldCount := Items.Count;
-      inherited;
-      if (OldCount <> Items.Count) and Assigned(FOnItemCountChange) then
-        FOnItemCountChange(Self);
-    end;
-  else
-    inherited;
-  end;
-end;
-
-... THisListBox }
+ ... Referance }
 
 end.

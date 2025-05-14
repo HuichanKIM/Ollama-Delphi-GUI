@@ -474,7 +474,7 @@ object Form_RestOllama: TForm_RestOllama
         object Edit_Nickname: TEdit
           Left = 17
           Top = 24
-          Width = 192
+          Width = 204
           Height = 21
           TabOrder = 0
           Text = 'User'
@@ -892,7 +892,7 @@ object Form_RestOllama: TForm_RestOllama
         Margins.Left = 5
         Margins.Right = 5
         Align = alClient
-        Caption = 'History'
+        Caption = 'History / Session'
         TabOrder = 7
         StyleElements = [seClient, seBorder]
         object Panel_HistoryButtons: TPanel
@@ -1024,10 +1024,10 @@ object Form_RestOllama: TForm_RestOllama
         Width = 235
         Height = 85
         Align = alBottom
-        Caption = 'Memo'
+        Caption = 'Response - Live'
         TabOrder = 9
         StyleElements = [seClient, seBorder]
-        object Memo_Memo: TMemo
+        object Memo_ResponseLive: TMemo
           AlignWithMargins = True
           Left = 4
           Top = 19
@@ -1241,6 +1241,7 @@ object Form_RestOllama: TForm_RestOllama
               Width = 714
               Height = 710
               DragOperations = [doCopy, doMove]
+              ExplicitTop = -1
               ExplicitWidth = 714
               ExplicitHeight = 710
               Columns = <
@@ -1630,6 +1631,7 @@ object Form_RestOllama: TForm_RestOllama
         Width = 100
       end
       item
+        Alignment = taRightJustify
         Text = '...'
         Width = 300
       end
@@ -3517,7 +3519,7 @@ object Form_RestOllama: TForm_RestOllama
     BindSource.AutoEdit = False
     BindSource.AutoPost = False
     OnSendData = RESTClient_OllamaSendData
-    OnReceiveData = RESTClient_OllamaReceiveData
+    OnReceiveDataEx = RESTClient_OllamaReceiveDataEx
     Left = 448
     Top = 440
   end

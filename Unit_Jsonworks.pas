@@ -38,6 +38,8 @@ function Get_RequestParams_Chat(const AModel: string;
 function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const ARespStr: string): string;
 function Get_DisplayJson_LoadModel(const ARespStr: string): string;
 function Get_DisplayJson_Models(const ARespStr: string; var VCount: Integer; var VModelsList: TStringList): string;
+function Escape_String2JSON(const AString: string): string;
+
 { Local ... }
 function Get_Base64Endoeings(const AImage: TImage): string;
 
@@ -73,6 +75,35 @@ begin
     Result := _JSONStr.ToJSON;
   finally
     _JSONStr.Free;
+  end;
+end;
+
+function Escape_String2JSON(const AString: string): string;
+begin
+  Result := '';
+  var _Char: Char := AString[1];
+  for var _i := 1 to Length(AString) do
+  begin
+    _Char := AString[_i];
+    case _Char of
+      #8:   Result := Result + '\b';   // Backspace
+      #9:   Result := Result + '\t';   // Tab
+      #10:  Result := Result + '\n';   // Newline
+      #12:  Result := Result + '\f';   // Form feed
+      #13:  Result := Result + '\r';   // Carriage return
+      '"':  Result := Result + '\"';   // Double quote     Char(34)
+      '/':  Result := Result + '\/';   // Forward slash    Char(47)   (optional)
+      '[':  Result := Result + ' ';    // square bracket   Char(91)
+      '\':  Result := Result + '\\';   // Backslash        Char(92)
+      ']':  Result := Result + ' ';    // square bracket   Char(93)
+      '{':  Result := Result + ' ';    // curly brackets   Char(123)
+      '}':  Result := Result + ' ';    // curly brackets   Char(125)
+    else
+      if _Char < #32 then
+        Result := Result + '\u' + IntToHex(Ord(_Char), 4)  // Unicode escape for control characters below space
+      else
+        Result := Result + _Char;
+    end;
   end;
 end;
 
@@ -277,15 +308,17 @@ end;
 function Get_DisplayJson(const ADisplay_Type: TDisplay_Type; const ARespStr: string): string;
 const
   c_Display_Type: array [TDisplay_Type] of string = ('response', 'content', 'trans');
-  c_NLC_xndjson = '}'+GC_UTF8_LFH;      // Content-Type : 'application/x-ndjson';   // newline character \n.
+  c_NLC_xndjson = '}'+GC_UTF8_LFH;      // Content-Type : 'application/x-ndjson';   // newline character \n.  (linefeed)
   c_ARRAY_json  = '},';                 // Content-Type : 'application/json';       // normal json array delimiter
 const
   _OldPatterns: array [0..2] of string =('<think>','</think>','<response>');
   _NewPatterns: array [0..2] of string =('<think>'+sLineBreak,sLineBreak+'</think>'+sLineBreak,sLineBreak+'<response>'+sLineBreak);
 begin
   Result := '';
-  var _parsingsrc_0 := StringReplace(ARespStr, c_NLC_xndjson, c_ARRAY_json, [rfIgnoreCase, rfReplaceAll]);
-  var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';    // to Virtual Json Array Mode ...
+  var _parsingsrc_0 := StringReplace(ARespStr, c_NLC_xndjson, c_ARRAY_json, [rfReplaceAll]);
+    var _len := Length(_parsingsrc_0);
+    if _parsingsrc_0[_len] = ',' then _parsingsrc_0[_len] := ' ';
+  var _parsingsrc_1 := '{"Ollama":['+_parsingsrc_0+']}';    // convert to Virtual Json Object-Array Mode ...
   var _acceptflag: Boolean := False;
   var _firstflag: Boolean := True;
   var _key := c_Display_Type[ADisplay_Type];
@@ -319,9 +352,9 @@ begin
     if Pos('<think>', _checkings) > 0 then
       for var _i := Low(_OldPatterns) to High(_OldPatterns) do
         Result := StringReplace(Result, _OldPatterns[_i], _NewPatterns[_i], [rfIgnoreCase]);
-
+    // ---------------------------------------------------------------------- //
     Result := TrimRight_Ex(Result);
-
+    // ---------------------------------------------------------------------- //
     // replacing last "</response>" ...
     var _rlength: Integer := Length(Result);
     if Pos('</response>', Result, _rlength-13) > 0 then
